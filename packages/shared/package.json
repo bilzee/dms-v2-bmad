@@ -1,0 +1,25 @@
+{
+  "name": "@dms/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for DMS v2",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "zod": "^3.23.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.0.0"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./types": "./types/index.js",
+    "./utils": "./utils/index.js"
+  }
+}

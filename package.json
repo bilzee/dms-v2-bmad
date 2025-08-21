@@ -1,0 +1,24 @@
+{
+  "name": "dms-v2-bmad",
+  "version": "1.0.0",
+  "description": "Disaster Management System v2 - BMad Implementation",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter @dms/frontend dev",
+    "build": "pnpm --filter @dms/shared build && pnpm --filter @dms/frontend build",
+    "test": "pnpm --recursive test",
+    "lint": "pnpm --recursive lint",
+    "clean": "pnpm --recursive clean"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

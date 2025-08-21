@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(md-tree:*)",
+      "Bash(npm install:*)",
+      "mcp__playwright__browser_snapshot",
+      "mcp__puppeteer-mcp-claude__puppeteer_launch",
+      "mcp__playwright__browser_navigate",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "mcp__sequential-thinking__process_thought",
+      "mcp__sequential-thinking__generate_summary",
+      "Bash(mkdir:*)",
+      "Bash(cd:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run test:*)"
+    ],
+    "deny": []
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "playwright",
+    "puppeteer-mcp-claude",
+    "sequential-thinking"
+  ]
+}

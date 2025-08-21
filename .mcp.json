@@ -1,0 +1,24 @@
+{
+    "mcpServers": {
+        "context7": {
+          "type": "http",
+          "url": "https://mcp.context7.com/mcp"
+        },
+        "playwright": {
+            "command": "npx",
+            "args": [
+                "@playwright/mcp@latest"
+            ]
+        },
+        "sequential-thinking": {
+            "command": "uvx",
+            "args": [
+                "--from",
+                "git+https://github.com/arben-adm/mcp-sequential-thinking",
+                "--with",
+                "portalocker",
+                "mcp-sequential-thinking"
+            ]
+        }
+    }
+}
