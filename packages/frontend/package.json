@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -21,9 +22,8 @@
     "zustand": "^4.5.0",
     "dexie": "^4.0.0",
     "leaflet": "^1.9.0",
-    "@radix-ui/react-button": "^0.1.0",
-    "@radix-ui/react-form": "^0.0.3",
-    "@radix-ui/react-input": "^0.1.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-toast": "^1.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
@@ -43,7 +43,9 @@
     "postcss": "^8.0.0",
     "@testing-library/react": "^15.0.0",
     "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/user-event": "^14.0.0",
     "jest": "^29.0.0",
-    "jest-environment-jsdom": "^29.0.0"
+    "jest-environment-jsdom": "^29.0.0",
+    "@types/jest": "^29.0.0"
   }
 }

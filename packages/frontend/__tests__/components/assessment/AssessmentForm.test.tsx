@@ -5,20 +5,20 @@ import { AssessmentForm } from '@/components/features/assessment/AssessmentForm'
 
 // Mock the stores and hooks
 jest.mock('@/hooks/useGPS', () => ({
-  useGPS: () => ({
+  useGPS: jest.fn(() => ({
     coordinates: null,
     captureLocation: jest.fn(),
     isLoading: false,
     error: null,
-  }),
+  })),
 }));
 
 jest.mock('@/stores/offline.store', () => ({
-  useOfflineStore: () => ({
+  useOfflineStore: jest.fn(() => ({
     isOnline: true,
     addToQueue: jest.fn(),
     addPendingAssessment: jest.fn(),
-  }),
+  })),
 }));
 
 jest.mock('@/lib/offline/db', () => ({
@@ -31,7 +31,7 @@ jest.mock('@/lib/offline/db', () => ({
 describe('AssessmentForm', () => {
   const defaultProps = {
     assessmentType: AssessmentType.HEALTH,
-    affectedEntityId: 'test-entity-id',
+    affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
     assessorName: 'Test Assessor',
     assessorId: 'test-assessor-id',
   };
@@ -44,7 +44,7 @@ describe('AssessmentForm', () => {
     render(<AssessmentForm {...defaultProps} />);
     
     expect(screen.getByText('HEALTH Assessment')).toBeInTheDocument();
-    expect(screen.getByText('Test Assessor')).toBeInTheDocument();
+    expect(screen.getByText(/Test Assessor/)).toBeInTheDocument();
     expect(screen.getByText('Capture GPS')).toBeInTheDocument();
   });
 
@@ -160,6 +160,9 @@ describe('AssessmentForm', () => {
 
   test('calls onSubmit when form is submitted successfully', async () => {
     const mockOnSubmit = jest.fn();
+    const mockSaveAssessment = jest.fn().mockResolvedValue('saved-id');
+    require('@/lib/offline/db').db.saveAssessment = mockSaveAssessment;
+    
     render(<AssessmentForm {...defaultProps} onSubmit={mockOnSubmit} />);
     
     // Fill out required fields
@@ -168,6 +171,14 @@ describe('AssessmentForm', () => {
     
     const submitButton = screen.getByRole('button', { name: /Submit Assessment/ });
     fireEvent.click(submitButton);
+    
+    await waitFor(() => {
+      expect(mockSaveAssessment).toHaveBeenCalledTimes(1);
+    });
+    
+    const firstCallId = mockSaveAssessment.mock.calls[0][0].id;
+    expect(typeof firstCallId).toBe('string');
+    expect(firstCallId.length).toBeGreaterThan(0);
     
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledTimes(1);
@@ -191,20 +202,21 @@ describe('AssessmentForm - P0 Offline Functionality', () => {
 
   test('should work completely offline - displays offline indicator', () => {
     // Mock offline state
-    require('@/stores/offline.store').useOfflineStore.mockReturnValue({
+    const { useOfflineStore } = require('@/stores/offline.store');
+    useOfflineStore.mockImplementation(() => ({
       isOnline: false,
       addToQueue: jest.fn(),
       addPendingAssessment: jest.fn(),
-    });
+    }));
 
     render(<AssessmentForm {...{
       assessmentType: AssessmentType.HEALTH,
-      affectedEntityId: 'test-entity-id',
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
       assessorName: 'Test Assessor',
       assessorId: 'test-assessor-id',
     }} />);
     
-    expect(screen.getByText(/Offline/)).toBeInTheDocument();
+    expect(screen.getByText(/Offline • Test Assessor/)).toBeInTheDocument();
     expect(screen.getByText(/Will sync when online/)).toBeInTheDocument();
   });
 
@@ -221,7 +233,7 @@ describe('AssessmentForm - P0 Offline Functionality', () => {
 
     render(<AssessmentForm {...{
       assessmentType: AssessmentType.HEALTH,
-      affectedEntityId: 'test-entity-id',
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
       assessorName: 'Test Assessor',
       assessorId: 'test-assessor-id',
     }} />);
@@ -247,7 +259,7 @@ describe('AssessmentForm - P0 Offline Functionality', () => {
 
     render(<AssessmentForm {...{
       assessmentType: AssessmentType.HEALTH,
-      affectedEntityId: 'test-entity-id',
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
       assessorName: 'Test Assessor',
       assessorId: 'test-assessor-id',
     }} />);
@@ -272,7 +284,7 @@ describe('AssessmentForm - P0 Offline Functionality', () => {
 
     render(<AssessmentForm {...{
       assessmentType: AssessmentType.POPULATION,
-      affectedEntityId: 'test-entity-id',
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
       assessorName: 'Test Assessor',
       assessorId: 'test-assessor-id',
     }} />);
@@ -328,7 +340,7 @@ describe('AssessmentForm - P0 GPS Validation', () => {
 
     render(<AssessmentForm {...{
       assessmentType: AssessmentType.HEALTH,
-      affectedEntityId: 'test-entity-id',
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
       assessorName: 'Test Assessor',
       assessorId: 'test-assessor-id',
     }} />);
@@ -347,7 +359,7 @@ describe('AssessmentForm - P0 GPS Validation', () => {
 
     render(<AssessmentForm {...{
       assessmentType: AssessmentType.HEALTH,
-      affectedEntityId: 'test-entity-id',
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
       assessorName: 'Test Assessor',
       assessorId: 'test-assessor-id',
     }} />);
@@ -369,7 +381,7 @@ describe('AssessmentForm - P0 GPS Validation', () => {
 
     render(<AssessmentForm {...{
       assessmentType: AssessmentType.HEALTH,
-      affectedEntityId: 'test-entity-id',
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
       assessorName: 'Test Assessor',
       assessorId: 'test-assessor-id',
     }} />);
@@ -408,7 +420,7 @@ describe('AssessmentForm - P0 Data Integrity', () => {
 
       const { unmount } = render(<AssessmentForm {...{
         assessmentType: testCase.type,
-        affectedEntityId: 'test-entity-id',
+        affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
         assessorName: 'Test Assessor',
         assessorId: 'test-assessor-id',
       }} />);
@@ -438,7 +450,7 @@ describe('AssessmentForm - P0 Data Integrity', () => {
 
     const { unmount, rerender } = render(<AssessmentForm {...{
       assessmentType: AssessmentType.HEALTH,
-      affectedEntityId: 'test-entity-id',
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
       assessorName: 'Test Assessor',
       assessorId: 'test-assessor-id',
     }} />);

@@ -11,6 +11,7 @@ import {
   type RapidAssessment,
   type AssessmentData,
   type GPSCoordinates,
+  type MediaAttachment,
 } from '@dms/shared';
 import {
   AssessmentFormSchema,
@@ -28,7 +29,8 @@ import { useOfflineStore } from '@/stores/offline.store';
 import { db } from '@/lib/offline/db';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormField, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormField, FormLabel, FormMessage } from '@/components/ui/form';
+import { MediaUpload } from '@/components/shared/MediaUpload';
 
 interface AssessmentFormProps {
   assessmentType: AssessmentType;
@@ -53,6 +55,7 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [mediaAttachments, setMediaAttachments] = useState<MediaAttachment[]>([]);
   
   const { coordinates, captureLocation, isLoading: gpsLoading, error: gpsError } = useGPS();
   const { isOnline, addToQueue, addPendingAssessment } = useOfflineStore();
@@ -147,7 +150,7 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
         syncStatus: isOnline ? SyncStatus.PENDING : SyncStatus.PENDING,
         offlineId: generateOfflineId(),
         data: data.data,
-        mediaAttachments: data.mediaAttachments || [],
+        mediaAttachments: mediaAttachments,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -189,10 +192,10 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
           {assessmentType} Assessment
         </h2>
         <p className="text-sm text-gray-600 mt-2">
-          {isOnline ? 'Online' : 'Offline'} • 
-          {autoSaveStatus === 'saved' && ' Draft saved'}
-          {autoSaveStatus === 'saving' && ' Saving...'}
-          {autoSaveStatus === 'error' && ' Save failed'}
+          {isOnline ? 'Online' : 'Offline'} • {assessorName}
+          {autoSaveStatus === 'saved' && ' • Draft saved'}
+          {autoSaveStatus === 'saving' && ' • Saving...'}
+          {autoSaveStatus === 'error' && ' • Save failed'}
         </p>
       </div>
 
@@ -225,32 +228,45 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
         </div>
       </div>
 
-      <Form>
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          {renderAssessmentFields(assessmentType, form)}
-          
-          <div className="flex justify-between pt-6 border-t">
-            <div className="text-sm text-gray-500">
-              {isOnline ? 'Will sync immediately' : 'Will sync when online'}
-            </div>
-            <div className="space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => form.reset()}
-              >
-                Reset
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || gpsLoading}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Assessment'}
-              </Button>
-            </div>
+      {/* Media Attachments Section */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h3 className="font-medium mb-4">Media Attachments</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Add photos, audio recordings, or videos to provide visual evidence for this assessment.
+          Location and timestamp will be automatically captured.
+        </p>
+        <MediaUpload
+          onMediaChange={setMediaAttachments}
+          maxFiles={10}
+          maxFileSize={5 * 1024 * 1024} // 5MB
+          acceptedTypes={['image/*', 'audio/*', 'video/*']}
+        />
+      </div>
+
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+        {renderAssessmentFields(assessmentType, form)}
+        
+        <div className="flex justify-between pt-6 border-t">
+          <div className="text-sm text-gray-500">
+            {isOnline ? 'Will sync immediately' : 'Will sync when online'}
           </div>
-        </form>
-      </Form>
+          <div className="space-x-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => form.reset()}
+            >
+              Reset
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting || gpsLoading}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Assessment'}
+            </Button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 };
