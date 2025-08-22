@@ -8,6 +8,8 @@ import {
   AssessmentType,
   SyncStatus,
   VerificationStatus,
+  IncidentType,
+  IncidentSeverity,
   type RapidAssessment,
   type AssessmentData,
   type GPSCoordinates,
@@ -21,6 +23,7 @@ import {
   FoodAssessmentDataSchema,
   SecurityAssessmentDataSchema,
   PopulationAssessmentDataSchema,
+  PreliminaryAssessmentDataSchema,
   generateUUID,
   generateOfflineId,
 } from '@dms/shared';
@@ -31,14 +34,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField, FormLabel, FormMessage } from '@/components/ui/form';
 import { MediaUpload } from '@/components/shared/MediaUpload';
+import { EntitySelector } from '@/components/features/entity/EntitySelector';
 
 interface AssessmentFormProps {
   assessmentType: AssessmentType;
-  affectedEntityId: string;
+  affectedEntityId?: string; // Made optional to support entity selection
   assessorName: string;
   assessorId: string;
   onSubmit?: (assessment: RapidAssessment) => void;
   onSaveDraft?: (draftData: any) => void;
+  onCreateEntity?: () => void; // Callback to create new entity
   initialData?: Partial<AssessmentData>;
 }
 
@@ -46,16 +51,18 @@ type AssessmentFormData = z.infer<typeof AssessmentFormSchema>;
 
 export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   assessmentType,
-  affectedEntityId,
+  affectedEntityId: initialEntityId = '',
   assessorName,
   assessorId,
   onSubmit,
   onSaveDraft,
+  onCreateEntity,
   initialData,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [mediaAttachments, setMediaAttachments] = useState<MediaAttachment[]>([]);
+  const [selectedEntityId, setSelectedEntityId] = useState<string>(initialEntityId || '');
   
   const { coordinates, captureLocation, isLoading: gpsLoading, error: gpsError } = useGPS();
   const { isOnline, addToQueue, addPendingAssessment } = useOfflineStore();
@@ -89,6 +96,8 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
         return z.object({ ...baseSchema, data: SecurityAssessmentDataSchema });
       case AssessmentType.POPULATION:
         return z.object({ ...baseSchema, data: PopulationAssessmentDataSchema });
+      case AssessmentType.PRELIMINARY:
+        return z.object({ ...baseSchema, data: PreliminaryAssessmentDataSchema });
       default:
         throw new Error(`Unsupported assessment type: ${assessmentType}`);
     }
@@ -98,12 +107,19 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
     resolver: zodResolver(getValidationSchema()),
     defaultValues: {
       type: assessmentType,
-      affectedEntityId,
+      affectedEntityId: selectedEntityId,
       assessorName,
       data: getDefaultFormData(assessmentType, initialData),
       mediaAttachments: [],
     },
   });
+
+  // Update form when entity selection changes
+  useEffect(() => {
+    if (selectedEntityId) {
+      form.setValue('affectedEntityId', selectedEntityId);
+    }
+  }, [selectedEntityId, form]);
 
   const { handleSubmit, watch, formState: { errors, isDirty } } = form;
 
@@ -116,7 +132,7 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
         setAutoSaveStatus('saving');
         const formData = form.getValues();
         
-        const draftId = `draft_${assessmentType}_${affectedEntityId}_${Date.now()}`;
+        const draftId = `draft_${assessmentType}_${selectedEntityId}_${Date.now()}`;
         await db.saveDraft({
           id: draftId,
           type: assessmentType,
@@ -133,23 +149,29 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
     }, 30000); // Auto-save every 30 seconds
 
     return () => clearTimeout(autoSaveTimer);
-  }, [watch(), isDirty, assessmentType, affectedEntityId, form, onSaveDraft]);
+  }, [watch(), isDirty, assessmentType, selectedEntityId, form, onSaveDraft]);
 
   const handleFormSubmit = async (data: AssessmentFormData) => {
     try {
       setIsSubmitting(true);
 
+      // Validate that an entity is selected
+      if (!selectedEntityId) {
+        alert('Please select an affected entity before submitting the assessment.');
+        return;
+      }
+
       const assessment: RapidAssessment = {
         id: generateUUID(),
         type: assessmentType,
         date: new Date(),
-        affectedEntityId,
+        affectedEntityId: selectedEntityId,
         assessorName,
         assessorId,
         verificationStatus: VerificationStatus.PENDING,
         syncStatus: isOnline ? SyncStatus.PENDING : SyncStatus.PENDING,
         offlineId: generateOfflineId(),
-        data: data.data,
+        data: data.data as AssessmentData,
         mediaAttachments: mediaAttachments,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -197,6 +219,31 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
           {autoSaveStatus === 'saving' && ' • Saving...'}
           {autoSaveStatus === 'error' && ' • Save failed'}
         </p>
+      </div>
+
+      {/* Entity Selection Section */}
+      <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+        <h3 className="font-medium mb-4 text-blue-800">Affected Entity Selection</h3>
+        <div className="space-y-4">
+          <EntitySelector
+            selectedEntityId={selectedEntityId}
+            onSelect={(entity) => {
+              setSelectedEntityId(entity.id);
+            }}
+            onCreateNew={onCreateEntity}
+            className="w-full"
+          />
+          {!selectedEntityId && (
+            <p className="text-sm text-red-600">
+              ⚠️ Please select an affected entity to continue with the assessment.
+            </p>
+          )}
+          {selectedEntityId && (
+            <p className="text-sm text-green-600">
+              ✓ Entity selected. You can now complete the assessment.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* GPS Capture Section */}
@@ -332,6 +379,15 @@ function getDefaultFormData(type: AssessmentType, initialData?: Partial<Assessme
       separatedChildren: 0,
       numberLivesLost: 0,
       numberInjured: 0,
+    },
+    [AssessmentType.PRELIMINARY]: {
+      incidentType: IncidentType.OTHER,
+      severity: IncidentSeverity.MODERATE,
+      affectedPopulationEstimate: 0,
+      affectedHouseholdsEstimate: 0,
+      immediateNeedsDescription: '',
+      accessibilityStatus: 'ACCESSIBLE' as const,
+      priorityLevel: 'NORMAL' as const,
     },
   };
 
@@ -636,6 +692,16 @@ function renderAssessmentFields(type: AssessmentType, form: any) {
               className="h-4 w-4 text-blue-600 rounded"
             />
           </FormField>
+        </div>
+      );
+
+    case AssessmentType.PRELIMINARY:
+      return (
+        <div className="text-center py-8 text-blue-600">
+          <p className="mb-4">Use the dedicated Preliminary Assessment Form for initial incident reporting.</p>
+          <p className="text-sm text-gray-600">
+            Preliminary assessments trigger automatic incident creation and coordinator notifications.
+          </p>
         </div>
       );
 
