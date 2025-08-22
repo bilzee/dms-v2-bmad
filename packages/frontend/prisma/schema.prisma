@@ -1,0 +1,127 @@
+// Prisma schema for DMS v2 Backend
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core Models
+model Incident {
+  id                        String               @id @default(cuid())
+  name                      String
+  type                      String
+  subType                   String?
+  source                    String
+  severity                  String
+  status                    String
+  date                      DateTime
+  preliminaryAssessmentIds  String[]
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+
+  @@map("incidents")
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String?
+  roles       Role[]
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model Notification {
+  id          String                 @id @default(cuid())
+  type        String
+  title       String
+  message     String
+  targetRoles String[]
+  entityId    String
+  priority    String
+  metadata    Json                   @default("{}")
+  status      String                 @default("PENDING")
+  createdAt   DateTime               @default(now())
+  sentAt      DateTime?
+  updatedAt   DateTime               @updatedAt
+
+  @@map("notifications")
+}
+
+model AffectedEntity {
+  id                String          @id @default(cuid())
+  type              String          // 'CAMP' or 'COMMUNITY'
+  name              String
+  lga               String
+  ward              String
+  longitude         Float
+  latitude          Float
+
+  // Camp-specific fields (nullable for communities)
+  campName                  String?
+  campStatus               String?     // 'OPEN' or 'CLOSED'
+  campCoordinatorName      String?
+  campCoordinatorPhone     String?
+  superviserName           String?
+  superviserOrganization   String?
+  estimatedPopulation      Int?
+
+  // Community-specific fields (nullable for camps)
+  communityName            String?
+  contactPersonName        String?
+  contactPersonPhone       String?
+  contactPersonRole        String?
+  estimatedHouseholds      Int?
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  // Relationships
+  assessments       PreliminaryAssessment[]
+
+  @@map("affected_entities")
+}
+
+model PreliminaryAssessment {
+  id                      String    @id @default(cuid())
+  assessmentType          String
+  affectedEntityId        String
+  incidentType            String
+  incidentSubType         String?
+  severity                String
+  affectedPopulationEstimate Int    @default(0)
+  affectedHouseholdsEstimate Int    @default(0)
+  immediateNeedsDescription String
+  accessibilityStatus     String
+  priorityLevel           String
+  additionalDetails       String?
+  gpsCoordinates          Json?
+  status                  String    @default("DRAFT")
+  assessorId              String
+  assessorName            String
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  // Relationships
+  affectedEntity      AffectedEntity? @relation(fields: [affectedEntityId], references: [id])
+
+  @@map("preliminary_assessments")
+}

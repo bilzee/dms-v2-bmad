@@ -193,3 +193,84 @@ export type SecurityAssessmentFormData = z.infer<typeof SecurityAssessmentDataSc
 export type PopulationAssessmentFormData = z.infer<typeof PopulationAssessmentDataSchema>;
 export type PreliminaryAssessmentFormData = z.infer<typeof PreliminaryAssessmentDataSchema>;
 export type PreliminaryAssessmentForm = z.infer<typeof PreliminaryAssessmentFormSchema>;
+
+// Entity validation schemas
+export const EntityTypeSchema = z.enum(['CAMP', 'COMMUNITY']);
+
+export const CampDetailsSchema = z.object({
+  campName: z.string().min(1, 'Camp name is required'),
+  campStatus: z.enum(['OPEN', 'CLOSED']),
+  campCoordinatorName: z.string().min(1, 'Camp coordinator name is required'),
+  campCoordinatorPhone: phoneSchema,
+  superviserName: z.string().optional(),
+  superviserOrganization: z.string().optional(),
+  estimatedPopulation: z.number().int().min(0).optional(),
+});
+
+export const CommunityDetailsSchema = z.object({
+  communityName: z.string().min(1, 'Community name is required'),
+  contactPersonName: z.string().min(1, 'Contact person name is required'),
+  contactPersonPhone: phoneSchema,
+  contactPersonRole: z.string().min(1, 'Contact person role is required'),
+  estimatedHouseholds: z.number().int().min(0).optional(),
+});
+
+// Discriminated union for entity details based on type
+export const AffectedEntitySchema = z.discriminatedUnion('type', [
+  z.object({
+    id: uuidSchema,
+    type: z.literal('CAMP'),
+    name: z.string().min(1, 'Entity name is required'),
+    lga: z.string().min(1, 'LGA is required'),
+    ward: z.string().min(1, 'Ward is required'),
+    longitude: z.number().min(-180).max(180),
+    latitude: z.number().min(-90).max(90),
+    campDetails: CampDetailsSchema,
+    communityDetails: z.undefined().optional(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+  }),
+  z.object({
+    id: uuidSchema,
+    type: z.literal('COMMUNITY'),
+    name: z.string().min(1, 'Entity name is required'),
+    lga: z.string().min(1, 'LGA is required'),
+    ward: z.string().min(1, 'Ward is required'),
+    longitude: z.number().min(-180).max(180),
+    latitude: z.number().min(-90).max(90),
+    campDetails: z.undefined().optional(),
+    communityDetails: CommunityDetailsSchema,
+    createdAt: z.date(),
+    updatedAt: z.date(),
+  }),
+]);
+
+// Form validation schema for entity creation/editing
+export const EntityManagementFormSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('CAMP'),
+    name: z.string().min(1, 'Entity name is required'),
+    lga: z.string().min(1, 'LGA is required'),
+    ward: z.string().min(1, 'Ward is required'),
+    longitude: z.number().min(-180).max(180),
+    latitude: z.number().min(-90).max(90),
+    gpsCoordinates: GPSCoordinatesSchema.optional(),
+    campDetails: CampDetailsSchema,
+  }),
+  z.object({
+    type: z.literal('COMMUNITY'),
+    name: z.string().min(1, 'Entity name is required'),
+    lga: z.string().min(1, 'LGA is required'),
+    ward: z.string().min(1, 'Ward is required'),
+    longitude: z.number().min(-180).max(180),
+    latitude: z.number().min(-90).max(90),
+    gpsCoordinates: GPSCoordinatesSchema.optional(),
+    communityDetails: CommunityDetailsSchema,
+  }),
+]);
+
+// Type exports for entity management
+export type EntityFormData = z.infer<typeof EntityManagementFormSchema>;
+export type CampFormData = z.infer<typeof CampDetailsSchema>;
+export type CommunityFormData = z.infer<typeof CommunityDetailsSchema>;
+export type AffectedEntityData = z.infer<typeof AffectedEntitySchema>;

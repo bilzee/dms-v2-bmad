@@ -327,7 +327,7 @@ export interface Permission {
 // Offline Queue Management
 export interface OfflineQueueItem {
   id: string; // Local UUID
-  type: 'ASSESSMENT' | 'RESPONSE' | 'MEDIA' | 'INCIDENT';
+  type: 'ASSESSMENT' | 'RESPONSE' | 'MEDIA' | 'INCIDENT' | 'ENTITY';
   action: 'CREATE' | 'UPDATE' | 'DELETE';
   entityId?: string; // Server ID if updating
   data: any; // The actual data to sync

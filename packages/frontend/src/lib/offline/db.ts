@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import type { RapidAssessment, OfflineQueueItem, MediaAttachment } from '@dms/shared';
+import type { RapidAssessment, OfflineQueueItem, MediaAttachment, AffectedEntity } from '@dms/shared';
 
 // Define the database schema
 export interface AssessmentRecord extends RapidAssessment {
@@ -29,20 +29,39 @@ export interface DraftAssessment {
   formData: any;
 }
 
+export interface EntityRecord extends AffectedEntity {
+  // Additional fields for offline storage
+  encryptedData?: string;
+  isDraft?: boolean;
+  lastModified: Date;
+}
+
+export interface DraftEntity {
+  id: string;
+  type: 'CAMP' | 'COMMUNITY';
+  data: any;
+  lastSaved: Date;
+  formData: any;
+}
+
 class OfflineDatabase extends Dexie {
   assessments!: Table<AssessmentRecord>;
+  entities!: Table<EntityRecord>;
   queue!: Table<QueueRecord>;
   media!: Table<MediaRecord>;
   drafts!: Table<DraftAssessment>;
+  entityDrafts!: Table<DraftEntity>;
 
   constructor() {
     super('DMSOfflineDB');
     
-    this.version(1).stores({
+    this.version(2).stores({
       assessments: '++id, type, date, affectedEntityId, assessorId, syncStatus, verificationStatus, offlineId, lastModified',
+      entities: '++id, type, name, lga, ward, latitude, longitude, isDraft, lastModified',
       queue: '++id, type, action, entityId, priority, createdAt, lastAttempt, retryCount, lastModified',
       media: '++id, assessmentId, mimeType, size, isUploaded, lastModified',
       drafts: '++id, type, lastSaved',
+      entityDrafts: '++id, type, lastSaved',
     });
 
     // Add hooks for automatic timestamp updates
@@ -68,6 +87,14 @@ class OfflineDatabase extends Dexie {
 
     this.media.hook('updating', (modifications, primKey, obj, trans) => {
       (modifications as Partial<MediaRecord>).lastModified = new Date();
+    });
+
+    this.entities.hook('creating', (primKey, obj, trans) => {
+      (obj as EntityRecord).lastModified = new Date();
+    });
+
+    this.entities.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as Partial<EntityRecord>).lastModified = new Date();
     });
   }
 
@@ -111,6 +138,74 @@ class OfflineDatabase extends Dexie {
 
   async deleteAssessment(id: string): Promise<void> {
     await this.assessments.delete(id);
+  }
+
+  // Entity operations
+  async saveEntity(entity: AffectedEntity, isDraft = false): Promise<string> {
+    const record: EntityRecord = {
+      ...entity,
+      isDraft,
+      lastModified: new Date(),
+    };
+
+    // Encrypt sensitive data (for entities with personal information)
+    if (this.shouldEncryptEntityData(entity)) {
+      record.encryptedData = await this.encryptData(entity);
+    }
+
+    return await this.entities.put(record);
+  }
+
+  async getEntities(filters?: {
+    type?: 'CAMP' | 'COMMUNITY';
+    lga?: string;
+    ward?: string;
+    isDraft?: boolean;
+  }): Promise<EntityRecord[]> {
+    let query = this.entities.orderBy('lastModified').reverse();
+
+    if (filters) {
+      if (filters.type) {
+        query = query.filter(e => e.type === filters.type);
+      }
+      if (filters.lga) {
+        query = query.filter(e => e.lga === filters.lga);
+      }
+      if (filters.ward) {
+        query = query.filter(e => e.ward === filters.ward);
+      }
+      if (filters.isDraft !== undefined) {
+        query = query.filter(e => e.isDraft === filters.isDraft);
+      }
+    }
+
+    return await query.toArray();
+  }
+
+  async getEntityById(id: string): Promise<EntityRecord | undefined> {
+    const entity = await this.entities.get(id);
+    
+    // Decrypt sensitive data if needed
+    if (entity && entity.encryptedData) {
+      const decryptedData = await this.decryptData(entity.encryptedData);
+      return { ...entity, ...decryptedData };
+    }
+    
+    return entity;
+  }
+
+  async searchEntities(searchTerm: string): Promise<EntityRecord[]> {
+    return await this.entities
+      .filter(entity => 
+        entity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entity.lga.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entity.ward.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .toArray();
+  }
+
+  async deleteEntity(id: string): Promise<void> {
+    await this.entities.delete(id);
   }
 
   // Queue operations
@@ -307,10 +402,35 @@ class OfflineDatabase extends Dexie {
     await this.drafts.delete(id);
   }
 
+  // Entity draft operations
+  async saveEntityDraft(draft: Omit<DraftEntity, 'lastSaved'>): Promise<string> {
+    return await this.entityDrafts.put({
+      ...draft,
+      lastSaved: new Date(),
+    });
+  }
+
+  async getEntityDraft(id: string): Promise<DraftEntity | undefined> {
+    return await this.entityDrafts.get(id);
+  }
+
+  async getEntityDraftsByType(type: 'CAMP' | 'COMMUNITY'): Promise<DraftEntity[]> {
+    return await this.entityDrafts.where('type').equals(type).toArray();
+  }
+
+  async deleteEntityDraft(id: string): Promise<void> {
+    await this.entityDrafts.delete(id);
+  }
+
   // Utility methods
   private shouldEncryptData(assessment: RapidAssessment): boolean {
     // Encrypt assessments with sensitive personal data
-    return assessment.type === 'POPULATION' || assessment.type === 'HEALTH';
+    return assessment.type === 'POPULATION' || assessment.type === 'HEALTH' || assessment.type === 'PRELIMINARY';
+  }
+
+  private shouldEncryptEntityData(entity: AffectedEntity): boolean {
+    // Encrypt entity data containing personal information (coordinators, contacts)
+    return true; // Always encrypt entity data as it contains personal contact information
   }
 
   private async encryptData(data: any): Promise<string> {
@@ -431,6 +551,14 @@ class OfflineDatabase extends Dexie {
       .and(assessment => assessment.syncStatus === 'SYNCED')
       .delete();
 
+    // Remove entities older than 30 days that are not drafts (entities typically persist longer)
+    const veryOld = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // 90 days for entities
+    await this.entities
+      .where('lastModified')
+      .below(veryOld)
+      .and(entity => !entity.isDraft)
+      .delete();
+
     // Remove old queue items
     await this.queue
       .where('lastModified')
@@ -446,6 +574,12 @@ class OfflineDatabase extends Dexie {
 
     // Remove old drafts
     await this.drafts
+      .where('lastSaved')
+      .below(olderThan)
+      .delete();
+
+    // Remove old entity drafts
+    await this.entityDrafts
       .where('lastSaved')
       .below(olderThan)
       .delete();
