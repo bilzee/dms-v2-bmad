@@ -6,9 +6,11 @@ export const emailSchema = z.string().email();
 export const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number');
 
 // Enum schemas
-export const AssessmentTypeSchema = z.enum(['HEALTH', 'WASH', 'SHELTER', 'FOOD', 'SECURITY', 'POPULATION']);
+export const AssessmentTypeSchema = z.enum(['HEALTH', 'WASH', 'SHELTER', 'FOOD', 'SECURITY', 'POPULATION', 'PRELIMINARY']);
 export const VerificationStatusSchema = z.enum(['PENDING', 'VERIFIED', 'AUTO_VERIFIED', 'REJECTED']);
 export const SyncStatusSchema = z.enum(['PENDING', 'SYNCING', 'SYNCED', 'CONFLICT', 'FAILED']);
+export const IncidentTypeSchema = z.enum(['FLOOD', 'FIRE', 'LANDSLIDE', 'CYCLONE', 'CONFLICT', 'EPIDEMIC', 'EARTHQUAKE', 'WILDFIRE', 'OTHER']);
+export const IncidentSeveritySchema = z.enum(['MINOR', 'MODERATE', 'SEVERE', 'CATASTROPHIC']);
 
 // GPS Coordinates schema
 export const GPSCoordinatesSchema = z.object({
@@ -105,6 +107,18 @@ export const PopulationAssessmentDataSchema = z.object({
   additionalDetails: z.string().optional(),
 });
 
+export const PreliminaryAssessmentDataSchema = z.object({
+  incidentType: IncidentTypeSchema,
+  incidentSubType: z.string().optional(),
+  severity: IncidentSeveritySchema,
+  affectedPopulationEstimate: z.number().int().min(0),
+  affectedHouseholdsEstimate: z.number().int().min(0),
+  immediateNeedsDescription: z.string().min(1, 'Immediate needs description is required'),
+  accessibilityStatus: z.enum(['ACCESSIBLE', 'PARTIALLY_ACCESSIBLE', 'INACCESSIBLE']),
+  priorityLevel: z.enum(['HIGH', 'NORMAL', 'LOW']),
+  additionalDetails: z.string().optional(),
+});
+
 // Union schema for assessment data
 export const AssessmentDataSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('HEALTH'), data: HealthAssessmentDataSchema }),
@@ -113,6 +127,7 @@ export const AssessmentDataSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('FOOD'), data: FoodAssessmentDataSchema }),
   z.object({ type: z.literal('SECURITY'), data: SecurityAssessmentDataSchema }),
   z.object({ type: z.literal('POPULATION'), data: PopulationAssessmentDataSchema }),
+  z.object({ type: z.literal('PRELIMINARY'), data: PreliminaryAssessmentDataSchema }),
 ]);
 
 // Main RapidAssessment schema
@@ -133,6 +148,7 @@ export const RapidAssessmentSchema = z.object({
     FoodAssessmentDataSchema,
     SecurityAssessmentDataSchema,
     PopulationAssessmentDataSchema,
+    PreliminaryAssessmentDataSchema,
   ]),
   mediaAttachments: z.array(MediaAttachmentSchema),
   createdAt: z.date(),
@@ -152,7 +168,18 @@ export const AssessmentFormSchema = z.object({
     FoodAssessmentDataSchema,
     SecurityAssessmentDataSchema,
     PopulationAssessmentDataSchema,
+    PreliminaryAssessmentDataSchema,
   ]),
+  mediaAttachments: z.array(MediaAttachmentSchema).default([]),
+});
+
+// Preliminary assessment form schema
+export const PreliminaryAssessmentFormSchema = z.object({
+  type: z.literal('PRELIMINARY'),
+  affectedEntityId: uuidSchema,
+  assessorName: z.string().min(1, 'Assessor name is required'),
+  gpsCoordinates: GPSCoordinatesSchema.optional(),
+  data: PreliminaryAssessmentDataSchema,
   mediaAttachments: z.array(MediaAttachmentSchema).default([]),
 });
 
@@ -164,3 +191,5 @@ export type ShelterAssessmentFormData = z.infer<typeof ShelterAssessmentDataSche
 export type FoodAssessmentFormData = z.infer<typeof FoodAssessmentDataSchema>;
 export type SecurityAssessmentFormData = z.infer<typeof SecurityAssessmentDataSchema>;
 export type PopulationAssessmentFormData = z.infer<typeof PopulationAssessmentDataSchema>;
+export type PreliminaryAssessmentFormData = z.infer<typeof PreliminaryAssessmentDataSchema>;
+export type PreliminaryAssessmentForm = z.infer<typeof PreliminaryAssessmentFormSchema>;

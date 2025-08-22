@@ -74,6 +74,8 @@ export enum IncidentType {
   CYCLONE = 'CYCLONE',
   CONFLICT = 'CONFLICT',
   EPIDEMIC = 'EPIDEMIC',
+  EARTHQUAKE = 'EARTHQUAKE',
+  WILDFIRE = 'WILDFIRE',
   OTHER = 'OTHER'
 }
 
@@ -108,7 +110,8 @@ export enum AssessmentType {
   SHELTER = 'SHELTER',
   FOOD = 'FOOD',
   SECURITY = 'SECURITY',
-  POPULATION = 'POPULATION'
+  POPULATION = 'POPULATION',
+  PRELIMINARY = 'PRELIMINARY'
 }
 
 export enum VerificationStatus {
@@ -149,7 +152,8 @@ export type AssessmentData =
   | ShelterAssessmentData
   | FoodAssessmentData
   | SecurityAssessmentData
-  | PopulationAssessmentData;
+  | PopulationAssessmentData
+  | PreliminaryAssessmentData;
 
 export interface HealthAssessmentData {
   hasFunctionalClinic: boolean;
@@ -219,6 +223,18 @@ export interface PopulationAssessmentData {
   separatedChildren: number;
   numberLivesLost: number;
   numberInjured: number;
+  additionalDetails?: string;
+}
+
+export interface PreliminaryAssessmentData {
+  incidentType: IncidentType;
+  incidentSubType?: string;
+  severity: IncidentSeverity;
+  affectedPopulationEstimate: number;
+  affectedHouseholdsEstimate: number;
+  immediateNeedsDescription: string;
+  accessibilityStatus: 'ACCESSIBLE' | 'PARTIALLY_ACCESSIBLE' | 'INACCESSIBLE';
+  priorityLevel: 'HIGH' | 'NORMAL' | 'LOW';
   additionalDetails?: string;
 }
 
@@ -311,7 +327,7 @@ export interface Permission {
 // Offline Queue Management
 export interface OfflineQueueItem {
   id: string; // Local UUID
-  type: 'ASSESSMENT' | 'RESPONSE' | 'MEDIA';
+  type: 'ASSESSMENT' | 'RESPONSE' | 'MEDIA' | 'INCIDENT';
   action: 'CREATE' | 'UPDATE' | 'DELETE';
   entityId?: string; // Server ID if updating
   data: any; // The actual data to sync
