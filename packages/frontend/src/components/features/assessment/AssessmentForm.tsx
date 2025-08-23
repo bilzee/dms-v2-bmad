@@ -35,6 +35,7 @@ import { Input } from '@/components/ui/input';
 import { FormField, FormLabel, FormMessage } from '@/components/ui/form';
 import { MediaUpload } from '@/components/shared/MediaUpload';
 import { EntitySelector } from '@/components/features/entity/EntitySelector';
+import { AssessmentSyncStatus } from '@/components/features/sync/AssessmentSyncStatus';
 
 interface AssessmentFormProps {
   assessmentType: AssessmentType;
@@ -210,15 +211,31 @@ export const AssessmentForm: React.FC<AssessmentFormProps> = ({
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-sm">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
-          {assessmentType} Assessment
-        </h2>
-        <p className="text-sm text-gray-600 mt-2">
-          {isOnline ? 'Online' : 'Offline'} • {assessorName}
-          {autoSaveStatus === 'saved' && ' • Draft saved'}
-          {autoSaveStatus === 'saving' && ' • Saving...'}
-          {autoSaveStatus === 'error' && ' • Save failed'}
-        </p>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {assessmentType} Assessment
+            </h2>
+            <p className="text-sm text-gray-600 mt-2">
+              {assessorName}
+              {autoSaveStatus === 'saved' && ' • Draft saved'}
+              {autoSaveStatus === 'saving' && ' • Saving...'}
+              {autoSaveStatus === 'error' && ' • Save failed'}
+            </p>
+          </div>
+          
+          <div className="flex-shrink-0">
+            <AssessmentSyncStatus
+              assessmentType={assessmentType}
+              affectedEntityId={selectedEntityId}
+              className="w-80"
+              onViewQueue={() => {
+                // Navigate to queue page - in a real app this would use router
+                window.open('/queue', '_blank');
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Entity Selection Section */}
@@ -381,13 +398,15 @@ function getDefaultFormData(type: AssessmentType, initialData?: Partial<Assessme
       numberInjured: 0,
     },
     [AssessmentType.PRELIMINARY]: {
-      incidentType: IncidentType.OTHER,
-      severity: IncidentSeverity.MODERATE,
+      incidentType: '' as any, // Force user selection
+      incidentSubType: '',
+      severity: '' as any, // Force user selection
       affectedPopulationEstimate: 0,
       affectedHouseholdsEstimate: 0,
       immediateNeedsDescription: '',
-      accessibilityStatus: 'ACCESSIBLE' as const,
-      priorityLevel: 'NORMAL' as const,
+      accessibilityStatus: '' as any, // Force user selection
+      priorityLevel: '' as any, // Force user selection
+      additionalDetails: '',
     },
   };
 
@@ -697,11 +716,181 @@ function renderAssessmentFields(type: AssessmentType, form: any) {
 
     case AssessmentType.PRELIMINARY:
       return (
-        <div className="text-center py-8 text-blue-600">
-          <p className="mb-4">Use the dedicated Preliminary Assessment Form for initial incident reporting.</p>
-          <p className="text-sm text-gray-600">
-            Preliminary assessments trigger automatic incident creation and coordinator notifications.
-          </p>
+        <div className="space-y-6">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <h3 className="text-lg font-semibold text-red-800 mb-4">🚨 Emergency Incident Report</h3>
+            
+            {/* Incident Type Field */}
+            <div className="mb-4">
+              <FormLabel htmlFor="incidentType" className="block text-sm font-medium text-red-700 mb-2">
+                Incident Type *
+              </FormLabel>
+              <select 
+                id="incidentType"
+                {...register('data.incidentType')} 
+                className="w-full p-2 border border-red-200 rounded-md focus:border-red-500 focus:ring-red-500"
+              >
+                <option value="">Select incident type...</option>
+                <option value="FLOOD">Flood</option>
+                <option value="FIRE">Fire</option>
+                <option value="LANDSLIDE">Landslide</option>
+                <option value="CYCLONE">Cyclone</option>
+                <option value="CONFLICT">Conflict</option>
+                <option value="EPIDEMIC">Epidemic</option>
+                <option value="EARTHQUAKE">Earthquake</option>
+                <option value="WILDFIRE">Wildfire</option>
+                <option value="OTHER">Other</option>
+              </select>
+              {errors.data?.incidentType && (
+                <FormMessage className="text-red-600">{errors.data.incidentType.message}</FormMessage>
+              )}
+            </div>
+
+            {/* Incident Sub Type */}
+            <div className="mb-4">
+              <FormLabel htmlFor="incidentSubType" className="block text-sm font-medium text-red-700 mb-2">
+                Incident Sub Type
+              </FormLabel>
+              <Input
+                type="text"
+                id="incidentSubType"
+                {...register('data.incidentSubType')}
+                className="w-full p-2 border border-red-200 rounded-md focus:border-red-500 focus:ring-red-500"
+                placeholder="e.g., Flash flood, Wildfire, etc."
+              />
+            </div>
+
+            {/* Severity Field */}
+            <div className="mb-4">
+              <FormLabel htmlFor="severity" className="block text-sm font-medium text-red-700 mb-2">
+                Severity Level *
+              </FormLabel>
+              <select 
+                id="severity"
+                {...register('data.severity')} 
+                className="w-full p-2 border border-red-200 rounded-md focus:border-red-500 focus:ring-red-500"
+              >
+                <option value="">Select severity...</option>
+                <option value="MINOR">Minor</option>
+                <option value="MODERATE">Moderate</option>
+                <option value="SEVERE">Severe</option>
+                <option value="CATASTROPHIC">Catastrophic</option>
+              </select>
+              {errors.data?.severity && (
+                <FormMessage className="text-red-600">{errors.data.severity.message}</FormMessage>
+              )}
+            </div>
+
+            {/* Population Estimates */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <FormLabel htmlFor="affectedPopulationEstimate" className="block text-sm font-medium text-red-700 mb-2">
+                  Affected Population *
+                </FormLabel>
+                <Input 
+                  type="number" 
+                  id="affectedPopulationEstimate"
+                  {...register('data.affectedPopulationEstimate', { valueAsNumber: true })}
+                  className="w-full p-2 border border-red-200 rounded-md focus:border-red-500 focus:ring-red-500"
+                  min="0"
+                  placeholder="0"
+                />
+                {errors.data?.affectedPopulationEstimate && (
+                  <FormMessage className="text-red-600">{errors.data.affectedPopulationEstimate.message}</FormMessage>
+                )}
+              </div>
+              <div>
+                <FormLabel htmlFor="affectedHouseholdsEstimate" className="block text-sm font-medium text-red-700 mb-2">
+                  Affected Households *
+                </FormLabel>
+                <Input 
+                  type="number" 
+                  id="affectedHouseholdsEstimate"
+                  {...register('data.affectedHouseholdsEstimate', { valueAsNumber: true })}
+                  className="w-full p-2 border border-red-200 rounded-md focus:border-red-500 focus:ring-red-500"
+                  min="0"
+                  placeholder="0"
+                />
+                {errors.data?.affectedHouseholdsEstimate && (
+                  <FormMessage className="text-red-600">{errors.data.affectedHouseholdsEstimate.message}</FormMessage>
+                )}
+              </div>
+            </div>
+
+            {/* Immediate Needs */}
+            <div className="mb-4">
+              <FormLabel htmlFor="immediateNeedsDescription" className="block text-sm font-medium text-red-700 mb-2">
+                Immediate Needs Description *
+              </FormLabel>
+              <textarea 
+                id="immediateNeedsDescription"
+                {...register('data.immediateNeedsDescription')}
+                className="w-full p-2 border border-red-200 rounded-md h-24 focus:border-red-500 focus:ring-red-500"
+                placeholder="Describe urgent needs and required assistance..."
+              />
+              {errors.data?.immediateNeedsDescription && (
+                <FormMessage className="text-red-600">{errors.data.immediateNeedsDescription.message}</FormMessage>
+              )}
+            </div>
+
+            {/* Accessibility Status */}
+            <div className="mb-4">
+              <FormLabel htmlFor="accessibilityStatus" className="block text-sm font-medium text-red-700 mb-2">
+                Site Accessibility *
+              </FormLabel>
+              <select 
+                id="accessibilityStatus"
+                {...register('data.accessibilityStatus')} 
+                className="w-full p-2 border border-red-200 rounded-md focus:border-red-500 focus:ring-red-500"
+              >
+                <option value="">Select accessibility...</option>
+                <option value="ACCESSIBLE">Accessible</option>
+                <option value="PARTIALLY_ACCESSIBLE">Partially Accessible</option>
+                <option value="INACCESSIBLE">Inaccessible</option>
+              </select>
+              {errors.data?.accessibilityStatus && (
+                <FormMessage className="text-red-600">{errors.data.accessibilityStatus.message}</FormMessage>
+              )}
+            </div>
+
+            {/* Priority Level */}
+            <div className="mb-4">
+              <FormLabel className="block text-sm font-medium text-red-700 mb-2">
+                Response Priority *
+              </FormLabel>
+              <div className="grid grid-cols-3 gap-2">
+                {['LOW', 'NORMAL', 'HIGH'].map(priority => (
+                  <label key={priority} className="flex items-center p-2 border border-red-200 rounded-md cursor-pointer hover:bg-red-50">
+                    <input 
+                      type="radio" 
+                      {...register('data.priorityLevel')}
+                      value={priority}
+                      className="mr-2"
+                    />
+                    <span className={`text-sm ${priority === 'HIGH' ? 'text-red-600 font-semibold' : 'text-gray-700'}`}>
+                      {priority}
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {errors.data?.priorityLevel && (
+                <FormMessage className="text-red-600">{errors.data.priorityLevel.message}</FormMessage>
+              )}
+            </div>
+
+            {/* Additional Details */}
+            <div className="mb-4">
+              <FormLabel htmlFor="additionalDetails" className="block text-sm font-medium text-red-700 mb-2">
+                Additional Details
+              </FormLabel>
+              <textarea 
+                id="additionalDetails"
+                {...register('data.additionalDetails')}
+                className="w-full p-2 border border-red-200 rounded-md h-20 focus:border-red-500 focus:ring-red-500"
+                placeholder="Any additional information about the situation..."
+              />
+            </div>
+          </div>
         </div>
       );
 

@@ -377,3 +377,68 @@ export interface CommunityDetails {
   contactPersonRole: string;
   estimatedHouseholds?: number;
 }
+
+export interface CoordinatorFeedback {
+  id: string;
+  assessmentId: string;
+  coordinatorId: string;
+  coordinatorName: string;
+  reason: 'DATA_QUALITY' | 'MISSING_INFO' | 'VALIDATION_ERROR' | 'OTHER';
+  comments: string;
+  createdAt: Date;
+  isRead: boolean;
+}
+
+// Response Planning Types
+export interface ResponsePlanDraft {
+  id: string; // Local UUID for draft
+  responseType: ResponseType;
+  affectedEntityId: string;
+  assessmentId?: string;
+  plannedDate: Date;
+  estimatedDeliveryTime?: number; // minutes
+  travelTimeToLocation?: number; // minutes
+  data: Partial<ResponseData>; // Will be typed based on response type
+  otherItemsDelivered: { item: string; quantity: number; unit: string }[];
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ItemTemplate {
+  id: string;
+  responseType: ResponseType;
+  name: string;
+  category: string;
+  defaultUnit: string;
+  suggestedQuantities?: number[];
+}
+
+export interface DeliveryTimeline {
+  plannedDate: Date;
+  estimatedTravelTime?: number; // minutes
+  estimatedDeliveryDuration?: number; // minutes
+  contingencyBuffer?: number; // minutes
+  dependencies?: string[]; // IDs of other responses this depends on
+  notes?: string;
+}
+
+export interface ResponsePlanRequest {
+  responseType: ResponseType;
+  affectedEntityId: string;
+  assessmentId?: string;
+  plannedDate: Date;
+  data: ResponseData;
+  otherItemsDelivered: { item: string; quantity: number; unit: string }[];
+  notes?: string;
+}
+
+export interface ResponsePlansResponse {
+  data: RapidResponse[];
+  meta: {
+    totalCount: number;
+    plannedCount: number;
+    inProgressCount: number;
+    deliveredCount: number;
+  };
+}

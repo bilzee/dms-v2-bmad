@@ -274,3 +274,141 @@ export type EntityFormData = z.infer<typeof EntityManagementFormSchema>;
 export type CampFormData = z.infer<typeof CampDetailsSchema>;
 export type CommunityFormData = z.infer<typeof CommunityDetailsSchema>;
 export type AffectedEntityData = z.infer<typeof AffectedEntitySchema>;
+
+// Response planning validation schemas
+export const ResponseTypeSchema = z.enum(['HEALTH', 'WASH', 'SHELTER', 'FOOD', 'SECURITY', 'POPULATION']);
+export const ResponseStatusSchema = z.enum(['PLANNED', 'IN_PROGRESS', 'DELIVERED', 'CANCELLED']);
+
+// Item schemas for response planning
+export const ItemDeliverySchema = z.object({
+  item: z.string().min(1, 'Item name is required'),
+  quantity: z.number().int().min(1, 'Quantity must be at least 1'),
+  unit: z.string().min(1, 'Unit is required'),
+});
+
+export const ItemTemplateSchema = z.object({
+  id: z.string(),
+  responseType: ResponseTypeSchema,
+  name: z.string().min(1, 'Template name is required'),
+  category: z.string().min(1, 'Category is required'),
+  defaultUnit: z.string().min(1, 'Default unit is required'),
+  suggestedQuantities: z.array(z.number().int().positive()).optional(),
+});
+
+// Response data schemas for planning
+export const HealthResponseDataSchema = z.object({
+  medicinesDelivered: z.array(ItemDeliverySchema),
+  medicalSuppliesDelivered: z.array(z.object({
+    name: z.string().min(1, 'Supply name is required'),
+    quantity: z.number().int().min(1, 'Quantity must be at least 1'),
+  })),
+  healthWorkersDeployed: z.number().int().min(0),
+  patientsTreated: z.number().int().min(0),
+  additionalDetails: z.string().optional(),
+});
+
+export const WashResponseDataSchema = z.object({
+  waterDeliveredLiters: z.number().min(0),
+  waterContainersDistributed: z.number().int().min(0),
+  toiletsConstructed: z.number().int().min(0),
+  hygieneKitsDistributed: z.number().int().min(0),
+  additionalDetails: z.string().optional(),
+});
+
+export const ShelterResponseDataSchema = z.object({
+  sheltersProvided: z.number().int().min(0),
+  tarpaulinsDistributed: z.number().int().min(0),
+  beddingKitsDistributed: z.number().int().min(0),
+  repairsCompleted: z.number().int().min(0),
+  additionalDetails: z.string().optional(),
+});
+
+export const FoodResponseDataSchema = z.object({
+  foodItemsDelivered: z.array(ItemDeliverySchema),
+  householdsServed: z.number().int().min(0),
+  personsServed: z.number().int().min(0),
+  nutritionSupplementsProvided: z.number().int().min(0),
+  additionalDetails: z.string().optional(),
+});
+
+export const SecurityResponseDataSchema = z.object({
+  securityPersonnelDeployed: z.number().int().min(0),
+  checkpointsEstablished: z.number().int().min(0),
+  patrolsCompleted: z.number().int().min(0),
+  incidentsResolved: z.number().int().min(0),
+  additionalDetails: z.string().optional(),
+});
+
+export const PopulationResponseDataSchema = z.object({
+  evacuationsCompleted: z.number().int().min(0),
+  familiesReunited: z.number().int().min(0),
+  documentationProvided: z.number().int().min(0),
+  referralsMade: z.number().int().min(0),
+  additionalDetails: z.string().optional(),
+});
+
+// Response planning form schema
+export const ResponsePlanFormSchema = z.object({
+  responseType: ResponseTypeSchema,
+  affectedEntityId: uuidSchema,
+  assessmentId: uuidSchema.optional(),
+  plannedDate: z.date().min(new Date(), 'Planned date cannot be in the past'),
+  estimatedDeliveryTime: z.number().int().min(1).optional(),
+  travelTimeToLocation: z.number().int().min(0).optional(),
+  data: z.union([
+    HealthResponseDataSchema,
+    WashResponseDataSchema,
+    ShelterResponseDataSchema,
+    FoodResponseDataSchema,
+    SecurityResponseDataSchema,
+    PopulationResponseDataSchema,
+  ]),
+  otherItemsDelivered: z.array(ItemDeliverySchema).default([]),
+  notes: z.string().max(1000, 'Notes cannot exceed 1000 characters').optional(),
+});
+
+// Timeline planning schema
+export const DeliveryTimelineSchema = z.object({
+  plannedDate: z.date().min(new Date(), 'Planned date cannot be in the past'),
+  estimatedTravelTime: z.number().int().min(0).optional(),
+  estimatedDeliveryDuration: z.number().int().min(1).optional(),
+  contingencyBuffer: z.number().int().min(0).optional(),
+  dependencies: z.array(z.string()).optional(),
+  notes: z.string().max(500, 'Notes cannot exceed 500 characters').optional(),
+});
+
+// Response draft schema (for offline storage)
+export const ResponsePlanDraftSchema = z.object({
+  id: z.string(),
+  responseType: ResponseTypeSchema,
+  affectedEntityId: uuidSchema,
+  assessmentId: uuidSchema.optional(),
+  plannedDate: z.date(),
+  estimatedDeliveryTime: z.number().int().min(1).optional(),
+  travelTimeToLocation: z.number().int().min(0).optional(),
+  data: z.union([
+    HealthResponseDataSchema.partial(),
+    WashResponseDataSchema.partial(),
+    ShelterResponseDataSchema.partial(),
+    FoodResponseDataSchema.partial(),
+    SecurityResponseDataSchema.partial(),
+    PopulationResponseDataSchema.partial(),
+  ]).optional(),
+  otherItemsDelivered: z.array(ItemDeliverySchema).default([]),
+  notes: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+// Type exports for response planning
+export type ResponsePlanFormData = z.infer<typeof ResponsePlanFormSchema>;
+export type HealthResponseFormData = z.infer<typeof HealthResponseDataSchema>;
+export type WashResponseFormData = z.infer<typeof WashResponseDataSchema>;
+export type ShelterResponseFormData = z.infer<typeof ShelterResponseDataSchema>;
+export type FoodResponseFormData = z.infer<typeof FoodResponseDataSchema>;
+export type SecurityResponseFormData = z.infer<typeof SecurityResponseDataSchema>;
+export type PopulationResponseFormData = z.infer<typeof PopulationResponseDataSchema>;
+export type DeliveryTimelineData = z.infer<typeof DeliveryTimelineSchema>;
+export type ResponsePlanDraftData = z.infer<typeof ResponsePlanDraftSchema>;
+export type ItemDeliveryData = z.infer<typeof ItemDeliverySchema>;
+export type ItemTemplateData = z.infer<typeof ItemTemplateSchema>;

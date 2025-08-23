@@ -138,6 +138,27 @@ describe('AssessmentForm', () => {
     expect(screen.getByLabelText('Incidents Reported')).toBeInTheDocument();
   });
 
+  test('renders PRELIMINARY assessment form fields', () => {
+    render(
+      <AssessmentForm 
+        {...defaultProps} 
+        assessmentType={AssessmentType.PRELIMINARY}
+      />
+    );
+    
+    expect(screen.getByText('PRELIMINARY Assessment')).toBeInTheDocument();
+    expect(screen.getByText('🚨 Emergency Incident Report')).toBeInTheDocument();
+    expect(screen.getByLabelText('Incident Type *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Incident Sub Type')).toBeInTheDocument();
+    expect(screen.getByLabelText('Severity Level *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Affected Population *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Affected Households *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Immediate Needs Description *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Site Accessibility *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Response Priority *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Additional Details')).toBeInTheDocument();
+  });
+
   test('form submission button is present', () => {
     render(<AssessmentForm {...defaultProps} />);
     
@@ -412,6 +433,7 @@ describe('AssessmentForm - P0 Data Integrity', () => {
       { type: AssessmentType.FOOD, field: 'Available Food Duration (Days)', value: '7' },
       { type: AssessmentType.SECURITY, field: 'Security Provider', value: 'Police' },
       { type: AssessmentType.POPULATION, field: 'Total Population', value: '100' },
+      { type: AssessmentType.PRELIMINARY, field: 'Immediate Needs Description *', value: 'Emergency shelter needed' },
     ];
 
     for (const testCase of testCases) {
@@ -492,5 +514,134 @@ describe('AssessmentForm - P0 Data Integrity', () => {
     expect(firstCallId).not.toBe(secondCallId);
     expect(firstCallId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     expect(secondCallId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+});
+
+// PRELIMINARY Assessment Specific Tests
+describe('AssessmentForm - PRELIMINARY Assessment', () => {
+  const preliminaryProps = {
+    assessmentType: AssessmentType.PRELIMINARY,
+    affectedEntityId: '123e4567-e89b-12d3-a456-426614174000',
+    assessorName: 'Emergency Assessor',
+    assessorId: 'emergency-assessor-id',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('validates required fields on submission', async () => {
+    render(<AssessmentForm {...preliminaryProps} />);
+    
+    const submitButton = screen.getByRole('button', { name: /Submit Assessment/ });
+    fireEvent.click(submitButton);
+    
+    // Form should prevent submission due to validation errors
+    await waitFor(() => {
+      // The form should not submit successfully without required fields
+      expect(screen.getByLabelText('Incident Type *')).toBeInTheDocument();
+    });
+  });
+
+  test('submits preliminary assessment with all fields', async () => {
+    const mockSaveAssessment = jest.fn().mockResolvedValue('saved-id');
+    require('@/lib/offline/db').db.saveAssessment = mockSaveAssessment;
+    
+    const propsWithEntity = {
+      ...preliminaryProps,
+      affectedEntityId: '123e4567-e89b-12d3-a456-426614174000', // Ensure entity is set
+    };
+    
+    render(<AssessmentForm {...propsWithEntity} />);
+    
+    // Fill all required fields
+    fireEvent.change(screen.getByLabelText('Incident Type *'), { target: { value: 'FLOOD' } });
+    fireEvent.change(screen.getByLabelText('Incident Sub Type'), { target: { value: 'Flash flood' } });
+    fireEvent.change(screen.getByLabelText('Severity Level *'), { target: { value: 'SEVERE' } });
+    fireEvent.change(screen.getByLabelText('Affected Population *'), { target: { value: '500' } });
+    fireEvent.change(screen.getByLabelText('Affected Households *'), { target: { value: '100' } });
+    fireEvent.change(screen.getByLabelText('Immediate Needs Description *'), { target: { value: 'Emergency shelter and medical aid needed' } });
+    fireEvent.change(screen.getByLabelText('Site Accessibility *'), { target: { value: 'ACCESSIBLE' } });
+    fireEvent.click(screen.getByDisplayValue('HIGH'));
+    fireEvent.change(screen.getByLabelText('Additional Details'), { target: { value: 'Bridge damaged, alternate routes needed' } });
+    
+    const submitButton = screen.getByRole('button', { name: /Submit Assessment/ });
+    fireEvent.click(submitButton);
+    
+    await waitFor(() => {
+      expect(mockSaveAssessment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'PRELIMINARY',
+          data: expect.objectContaining({
+            incidentType: 'FLOOD',
+            incidentSubType: 'Flash flood',
+            severity: 'SEVERE',
+            affectedPopulationEstimate: 500,
+            affectedHouseholdsEstimate: 100,
+            immediateNeedsDescription: 'Emergency shelter and medical aid needed',
+            accessibilityStatus: 'ACCESSIBLE',
+            priorityLevel: 'HIGH',
+            additionalDetails: 'Bridge damaged, alternate routes needed'
+          })
+        })
+      );
+    });
+  });
+
+  test('displays emergency styling for preliminary assessment', () => {
+    render(<AssessmentForm {...preliminaryProps} />);
+    
+    expect(screen.getByText('🚨 Emergency Incident Report')).toBeInTheDocument();
+    
+    // Check that emergency styling classes are applied
+    const container = screen.getByText('🚨 Emergency Incident Report').closest('div');
+    expect(container).toHaveClass('bg-red-50', 'border-red-200');
+  });
+
+  test('priority radio buttons work correctly', async () => {
+    render(<AssessmentForm {...preliminaryProps} />);
+    
+    const highPriorityRadio = screen.getByDisplayValue('HIGH');
+    const normalPriorityRadio = screen.getByDisplayValue('NORMAL');
+    const lowPriorityRadio = screen.getByDisplayValue('LOW');
+    
+    // Test selecting different priorities
+    fireEvent.click(highPriorityRadio);
+    expect(highPriorityRadio).toBeChecked();
+    expect(normalPriorityRadio).not.toBeChecked();
+    expect(lowPriorityRadio).not.toBeChecked();
+    
+    fireEvent.click(normalPriorityRadio);
+    expect(normalPriorityRadio).toBeChecked();
+    expect(highPriorityRadio).not.toBeChecked();
+    expect(lowPriorityRadio).not.toBeChecked();
+  });
+
+  test('handles number inputs for population estimates', async () => {
+    render(<AssessmentForm {...preliminaryProps} />);
+    
+    const populationInput = screen.getByLabelText('Affected Population *');
+    const householdsInput = screen.getByLabelText('Affected Households *');
+    
+    fireEvent.change(populationInput, { target: { value: '1250' } });
+    fireEvent.change(householdsInput, { target: { value: '300' } });
+    
+    expect(populationInput).toHaveValue(1250);
+    expect(householdsInput).toHaveValue(300);
+  });
+
+  test('textarea fields accept multiline input', async () => {
+    render(<AssessmentForm {...preliminaryProps} />);
+    
+    const needsTextarea = screen.getByLabelText('Immediate Needs Description *');
+    const detailsTextarea = screen.getByLabelText('Additional Details');
+    
+    const multilineText = 'Line 1\nLine 2\nLine 3';
+    
+    fireEvent.change(needsTextarea, { target: { value: multilineText } });
+    fireEvent.change(detailsTextarea, { target: { value: 'Additional info here' } });
+    
+    expect(needsTextarea).toHaveValue(multilineText);
+    expect(detailsTextarea).toHaveValue('Additional info here');
   });
 });

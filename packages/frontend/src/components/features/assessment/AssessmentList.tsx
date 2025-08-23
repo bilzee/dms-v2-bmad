@@ -120,6 +120,7 @@ export const AssessmentList: React.FC<AssessmentListProps> = ({
                 defaultValue=""
               >
                 <option value="" disabled>New Assessment</option>
+                <option value={AssessmentType.PRELIMINARY}>Preliminary (Emergency)</option>
                 <option value={AssessmentType.HEALTH}>Health</option>
                 <option value={AssessmentType.WASH}>WASH</option>
                 <option value={AssessmentType.SHELTER}>Shelter</option>
@@ -145,6 +146,7 @@ export const AssessmentList: React.FC<AssessmentListProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="ALL">All Types</option>
+              <option value={AssessmentType.PRELIMINARY}>Preliminary</option>
               <option value={AssessmentType.HEALTH}>Health</option>
               <option value={AssessmentType.WASH}>WASH</option>
               <option value={AssessmentType.SHELTER}>Shelter</option>

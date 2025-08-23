@@ -17,4 +17,3 @@ BMad agents should utilise available MCPs tools in their tasks. Below are list o
 
  ## Common Error Fixes
  - When you get a workspace error when using "npm", try using "pnmp" instead. 
- - Infinite loop is caused by a common React Hook Form anti-pattern: using watch() with useEffect and setValue (e.g. const currentValues = watch()) creates a circular dependency; the solution in this case would be "const currentValues = getValues(); // Doesn't subscribe to changes"

@@ -19,6 +19,13 @@
                 "portalocker",
                 "mcp-sequential-thinking"
             ]
+        }, 
+        "brave-search-dev": {
+            "command": "node",
+            "args": ["/home/bilnigma/mcp-repos/brave-search-mcp-server/dist/index.js"], // Verify your path
+            "env": {
+                "BRAVE_API_KEY": "BSA5KmHQZo9jghyGOzJHvkv9XetPrrm"
+            }
         }
     }
 }
