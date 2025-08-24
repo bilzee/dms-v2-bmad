@@ -400,6 +400,66 @@ export const ResponsePlanDraftSchema = z.object({
   updatedAt: z.date(),
 });
 
+// Response conversion validation schemas
+export const ActualVsPlannedItemSchema = z.object({
+  item: z.string().min(1, 'Item name is required'),
+  plannedQuantity: z.number().min(0),
+  actualQuantity: z.number().min(0),
+  unit: z.string().min(1, 'Unit is required'),
+  variationReason: z.string().optional(),
+  variationPercentage: z.number(),
+});
+
+export const DeliveryConversionSchema = z.object({
+  originalPlanId: z.string(),
+  conversionTimestamp: z.date(),
+  deliveryTimestamp: z.date(),
+  deliveryLocation: GPSCoordinatesSchema,
+  actualItemsDelivered: z.array(ActualVsPlannedItemSchema),
+  beneficiariesServed: z.number().int().min(0),
+  deliveryNotes: z.string().max(1000).optional(),
+  challenges: z.string().max(1000).optional(),
+  completionPercentage: z.number().min(0).max(100),
+  deliveryEvidence: z.array(MediaAttachmentSchema).default([]),
+});
+
+export const ResponseConversionFormSchema = z.object({
+  responseId: z.string(),
+  deliveryTimestamp: z.date(),
+  deliveryLocation: GPSCoordinatesSchema,
+  actualData: z.union([
+    HealthResponseDataSchema,
+    WashResponseDataSchema,
+    ShelterResponseDataSchema,
+    FoodResponseDataSchema,
+    SecurityResponseDataSchema,
+    PopulationResponseDataSchema,
+  ]),
+  actualItemsDelivered: z.array(ItemDeliverySchema).default([]),
+  beneficiariesServed: z.number().int().min(0),
+  deliveryNotes: z.string().max(1000).optional(),
+  challenges: z.string().max(1000).optional(),
+  deliveryEvidence: z.array(MediaAttachmentSchema).default([]),
+});
+
+export const ResponseConversionRequestSchema = z.object({
+  deliveryTimestamp: z.date(),
+  deliveryLocation: GPSCoordinatesSchema,
+  actualData: z.union([
+    HealthResponseDataSchema,
+    WashResponseDataSchema,
+    ShelterResponseDataSchema,
+    FoodResponseDataSchema,
+    SecurityResponseDataSchema,
+    PopulationResponseDataSchema,
+  ]),
+  actualItemsDelivered: z.array(ItemDeliverySchema),
+  deliveryEvidence: z.array(MediaAttachmentSchema),
+  beneficiariesServed: z.number().int().min(0),
+  deliveryNotes: z.string().optional(),
+  challenges: z.string().optional(),
+});
+
 // Type exports for response planning
 export type ResponsePlanFormData = z.infer<typeof ResponsePlanFormSchema>;
 export type HealthResponseFormData = z.infer<typeof HealthResponseDataSchema>;
@@ -412,3 +472,9 @@ export type DeliveryTimelineData = z.infer<typeof DeliveryTimelineSchema>;
 export type ResponsePlanDraftData = z.infer<typeof ResponsePlanDraftSchema>;
 export type ItemDeliveryData = z.infer<typeof ItemDeliverySchema>;
 export type ItemTemplateData = z.infer<typeof ItemTemplateSchema>;
+
+// Type exports for response conversion
+export type ResponseConversionFormData = z.infer<typeof ResponseConversionFormSchema>;
+export type DeliveryConversionData = z.infer<typeof DeliveryConversionSchema>;
+export type ActualVsPlannedItemData = z.infer<typeof ActualVsPlannedItemSchema>;
+export type ResponseConversionRequestData = z.infer<typeof ResponseConversionRequestSchema>;

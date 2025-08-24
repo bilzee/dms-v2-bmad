@@ -62,6 +62,7 @@ export interface RapidResponse {
   data: ResponseData; // Polymorphic based on type
   otherItemsDelivered: { item: string; quantity: number; unit: string }[]; // Generic items for all response types
   deliveryEvidence: MediaAttachment[];
+  partialDeliveryData?: PartialDeliveryData; // New field for partial delivery tracking
   createdAt: Date;
   updatedAt: Date;
 }
@@ -423,6 +424,51 @@ export interface DeliveryTimeline {
   notes?: string;
 }
 
+// Delivery Conversion Types
+export interface DeliveryConversion {
+  originalPlanId: string;
+  conversionTimestamp: Date;
+  deliveryTimestamp: Date;
+  deliveryLocation: GPSCoordinates;
+  actualItemsDelivered: ActualVsPlannedItem[];
+  beneficiariesServed: number;
+  deliveryNotes?: string;
+  challenges?: string;
+  completionPercentage: number;
+  deliveryEvidence: MediaAttachment[];
+}
+
+export interface ActualVsPlannedItem {
+  item: string;
+  plannedQuantity: number;
+  actualQuantity: number;
+  unit: string;
+  variationReason?: string;
+  variationPercentage: number;
+}
+
+export interface ResponseConversionRequest {
+  deliveryTimestamp: Date;
+  deliveryLocation: GPSCoordinates;
+  actualData: ResponseData;
+  actualItemsDelivered: { item: string; quantity: number; unit: string }[];
+  deliveryEvidence: MediaAttachment[];
+  beneficiariesServed: number;
+  deliveryNotes?: string;
+  challenges?: string;
+}
+
+export interface ResponseConversionResponse {
+  data: RapidResponse;
+  conversionLog: {
+    convertedAt: Date;
+    convertedBy: string;
+    originalStatus: ResponseStatus;
+    newStatus: ResponseStatus;
+    dataChanges: string[];
+  };
+}
+
 export interface ResponsePlanRequest {
   responseType: ResponseType;
   affectedEntityId: string;
@@ -440,5 +486,65 @@ export interface ResponsePlansResponse {
     plannedCount: number;
     inProgressCount: number;
     deliveredCount: number;
+  };
+}
+
+// Partial Delivery Tracking Types
+export interface PartialDeliveryData {
+  deliveryId: string;
+  totalPercentageComplete: number;
+  itemCompletionTracking: ItemCompletionData[];
+  reasonCodes: DeliveryReasonCode[];
+  followUpRequired: boolean;
+  followUpTasks: FollowUpTask[];
+  partialDeliveryTimestamp: Date;
+  estimatedCompletionDate?: Date;
+}
+
+export interface ItemCompletionData {
+  item: string;
+  plannedQuantity: number;
+  deliveredQuantity: number;
+  remainingQuantity: number;
+  percentageComplete: number;
+  unit: string;
+  reasonCodes: string[];
+  followUpRequired: boolean;
+}
+
+export interface DeliveryReasonCode {
+  code: string;
+  category: 'SUPPLY_SHORTAGE' | 'ACCESS_LIMITATION' | 'SECURITY_ISSUE' | 'WEATHER_DELAY' | 'LOGISTICS_CHALLENGE' | 'BENEFICIARY_UNAVAILABLE' | 'OTHER';
+  description: string;
+  appliesTo: string[]; // Item names this reason applies to
+}
+
+export interface FollowUpTask {
+  id: string;
+  type: 'COMPLETE_DELIVERY' | 'SUPPLY_PROCUREMENT' | 'ACCESS_NEGOTIATION' | 'SECURITY_CLEARANCE';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  estimatedDate: Date;
+  assignedTo?: string;
+  description: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+}
+
+// Partial Delivery API Request/Response Types
+export interface PartialDeliveryUpdateRequest {
+  itemCompletionTracking: ItemCompletionData[];
+  reasonCodes: DeliveryReasonCode[];
+  partialDeliveryTimestamp: Date;
+  estimatedCompletionDate?: Date;
+  followUpTasks: Omit<FollowUpTask, 'id' | 'status'>[];
+}
+
+export interface PartialDeliveryResponse {
+  data: RapidResponse;
+  trackingMetrics: {
+    totalPercentageComplete: number;
+    itemsFullyDelivered: number;
+    itemsPartiallyDelivered: number;
+    itemsPending: number;
+    followUpTasksGenerated: number;
   };
 }

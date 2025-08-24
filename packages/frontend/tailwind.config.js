@@ -33,6 +33,28 @@ module.exports = {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        // Humanitarian Design System Colors
+        emergency: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          500: '#DC2626', // Primary emergency red
+          600: '#dc2626',
+          900: '#7f1d1d',
+        },
+        humanitarian: {
+          blue: '#0066CC', // UN Blue for coordinator actions
+          green: '#059669', // Relief Green for completed items
+          orange: '#D97706', // Warning Orange for pending items
+          slate: '#64748B', // Neutral slate for general UI
+        },
+        // Status-specific colors
+        status: {
+          verified: '#059669',
+          pending: '#D97706',
+          failed: '#DC2626',
+          offline: '#D97706',
+          syncing: '#0066CC',
+        }
       },
     },
   },

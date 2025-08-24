@@ -19,6 +19,11 @@ import { useGPS } from '@/hooks/useGPS';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField, FormLabel, FormMessage } from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ConnectionStatusHeader } from '@/components/shared/ConnectionStatusHeader';
+import { AutoSaveIndicator } from '@/components/shared/AutoSaveIndicator';
 import { ItemQuantityPlanner } from './ItemQuantityPlanner';
 import { DeliveryTimelinePlanner } from './DeliveryTimelinePlanner';
 import { EntityAssessmentLinker } from './EntityAssessmentLinker';
@@ -264,41 +269,29 @@ export function ResponsePlanningForm({
 
   return (
     <div className={`space-y-6 ${className}`}>
+      <ConnectionStatusHeader />
+      
       {/* Header with response type tabs */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Response Planning</h2>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            {isAutoSaving && (
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                Auto-saving...
-              </span>
-            )}
-            {lastAutoSave && !isAutoSaving && (
-              <span>Last saved: {lastAutoSave.toLocaleTimeString()}</span>
-            )}
-          </div>
+          <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave} />
         </div>
 
         {/* Response Type Tabs */}
-        <div className="flex gap-1 p-1 bg-gray-100 rounded-lg overflow-x-auto">
-          {RESPONSE_TYPES.map(({ type, label, icon, color }) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => handleResponseTypeChange(type)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
-                activeResponseType === type
-                  ? `${color} ring-1 ring-inset`
-                  : 'text-gray-600 hover:bg-white hover:text-gray-900'
-              }`}
-            >
-              <span className="text-base">{icon}</span>
-              {label}
-            </button>
-          ))}
-        </div>
+        <Tabs value={activeResponseType} onValueChange={handleResponseTypeChange}>
+          <TabsList className="grid w-full grid-cols-6">
+            {RESPONSE_TYPES.map(({ type, label, icon }) => (
+              <TabsTrigger key={type} value={type} className="text-xs">
+                <span className="mr-1">{icon}</span>
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <TabsContent value={activeResponseType}>
+            {/* Content will be rendered below in the main form */}
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Error Display */}
@@ -407,6 +400,9 @@ export function ResponsePlanningForm({
               Submit Response Plan
             </Button>
           </div>
+          
+          {/* Auto-save indicator at bottom */}
+          <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave} />
         </form>
       </FormProvider>
     </div>

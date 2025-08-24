@@ -67,7 +67,13 @@
       "Bash(pnpm --filter @dms/frontend test ResponsePlanningForm.test.tsx)",
       "Bash(pnpm --filter @dms/frontend test ResponsePlanningForm.runtime.test.tsx)",
       "Bash(pnpm --filter @dms/frontend test ResponsePlanningForm.test.tsx -t \"switches response type correctly\")",
-      "Bash(pnmp run typecheck)"
+      "Bash(pnmp run typecheck)",
+      "Bash(npx playwright:*)",
+      "Bash(cd:*)",
+      "Bash(pnpm playwright test:*)",
+      "Bash(pnmp:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)"
     ],
     "deny": []
   },
