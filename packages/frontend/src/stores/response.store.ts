@@ -6,7 +6,12 @@ import {
   ResponseStatus,
   RapidAssessment,
   AffectedEntity,
-  OfflineQueueItem 
+  OfflineQueueItem,
+  DeliveryConversion,
+  ActualVsPlannedItem,
+  ResponseConversionRequest,
+  GPSCoordinates,
+  MediaAttachment
 } from '@dms/shared';
 
 // Response Planning Draft - for offline creation
@@ -51,6 +56,11 @@ interface ResponseState {
   drafts: ResponsePlanDraft[];
   currentDraft: ResponsePlanDraft | null;
   
+  // Conversion state
+  conversionInProgress: boolean;
+  conversionDraft: DeliveryConversion | null;
+  currentConversion: string | null; // ID of response being converted
+  
   // Planning helpers
   availableAssessments: RapidAssessment[];
   availableEntities: AffectedEntity[];
@@ -59,6 +69,7 @@ interface ResponseState {
   // UI state
   isLoading: boolean;
   isCreating: boolean;
+  isConverting: boolean;
   error: string | null;
   
   // Filters and search
@@ -75,6 +86,7 @@ interface ResponseState {
   saveDraftToQueue: (id: string) => Promise<void>;
   deleteDraft: (id: string) => void;
   loadResponses: (filters?: ResponseState['filters']) => Promise<void>;
+  loadSeedData: () => void;
   loadPlanningData: () => Promise<void>;
   setCurrentDraft: (draft: ResponsePlanDraft | null) => void;
   clearError: () => void;
@@ -85,6 +97,14 @@ interface ResponseState {
   updateItemTemplate: (id: string, updates: Partial<ItemTemplate>) => void;
   deleteItemTemplate: (id: string) => void;
   getTemplatesForResponseType: (responseType: ResponseType) => ItemTemplate[];
+  
+  // Conversion actions
+  startConversion: (responseId: string) => Promise<void>;
+  updateConversionData: (updates: Partial<DeliveryConversion>) => void;
+  completeConversion: (responseId: string) => Promise<void>;
+  cancelConversion: () => void;
+  calculateActualVsPlanned: (responseId: string, actualItems: { item: string; quantity: number; unit: string }[]) => ActualVsPlannedItem[];
+  getResponseForConversion: (responseId: string) => RapidResponse | null;
 }
 
 // Helper function to generate offline ID
@@ -127,9 +147,14 @@ export const useResponseStore = create<ResponseState>()(
   persist(
     (set, get) => ({
       // Initial state
-      responses: [],
+      responses: process.env.NODE_ENV === 'development' ? [] : [], // Will be populated by loadSeedData if needed
       drafts: [],
       currentDraft: null,
+      
+      // Conversion initial state
+      conversionInProgress: false,
+      conversionDraft: null,
+      currentConversion: null,
       
       availableAssessments: [],
       availableEntities: [],
@@ -137,6 +162,7 @@ export const useResponseStore = create<ResponseState>()(
       
       isLoading: false,
       isCreating: false,
+      isConverting: false,
       error: null,
       
       filters: {},
@@ -238,6 +264,14 @@ export const useResponseStore = create<ResponseState>()(
         set({ isLoading: true, error: null });
         
         try {
+          // In development, load seed data if no responses exist
+          if (process.env.NODE_ENV === 'development') {
+            const { responses } = get();
+            if (responses.length === 0) {
+              get().loadSeedData();
+            }
+          }
+          
           // TODO: Implement actual API call
           // const response = await fetch('/api/v1/responses/plans', {
           //   method: 'GET',
@@ -246,12 +280,23 @@ export const useResponseStore = create<ResponseState>()(
           // });
           // const data = await response.json();
           
-          // For now, return empty array
-          set({ responses: [], isLoading: false });
+          set({ isLoading: false });
           
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to load responses';
           set({ error: errorMessage, isLoading: false });
+        }
+      },
+      
+      // Load seed data for development
+      loadSeedData: () => {
+        if (process.env.NODE_ENV === 'development') {
+          try {
+            const { seedResponses } = require('../lib/dev-data/seed-responses');
+            set({ responses: [...seedResponses] });
+          } catch (error) {
+            console.warn('Failed to load seed data:', error);
+          }
         }
       },
       
@@ -317,6 +362,181 @@ export const useResponseStore = create<ResponseState>()(
         const { itemTemplates } = get();
         return itemTemplates.filter(template => template.responseType === responseType);
       },
+      
+      // Conversion functionality
+      startConversion: async (responseId: string) => {
+        const { responses } = get();
+        const response = responses.find(r => r.id === responseId);
+
+        if (!response) {
+          set({ error: 'Response not found for conversion' });
+          return;
+        }
+
+        if (response.status !== ResponseStatus.PLANNED) {
+          set({ error: 'Only planned responses can be converted to delivery' });
+          return;
+        }
+
+        // CRITICAL: Ensure state is set before any async operations
+        set({
+          conversionInProgress: true,
+          currentConversion: responseId,
+          error: null, // Clear any previous errors
+          conversionDraft: {
+            originalPlanId: responseId,
+            conversionTimestamp: new Date(),
+            deliveryTimestamp: new Date(),
+            deliveryLocation: {
+              latitude: 0,
+              longitude: 0,
+              timestamp: new Date(),
+              captureMethod: 'GPS' as const,
+            },
+            actualItemsDelivered: [],
+            beneficiariesServed: 0,
+            completionPercentage: 0,
+            deliveryEvidence: [],
+          }
+        });
+      },
+      
+      updateConversionData: (updates: Partial<DeliveryConversion>) => {
+        const { conversionDraft } = get();
+        if (!conversionDraft) return;
+        
+        set({
+          conversionDraft: { ...conversionDraft, ...updates }
+        });
+      },
+      
+      completeConversion: async (responseId: string) => {
+        const { conversionDraft, responses } = get();
+        
+        if (!conversionDraft) {
+          set({ error: 'No conversion in progress' });
+          return;
+        }
+        
+        set({ isConverting: true, error: null });
+        
+        try {
+          // Create conversion request
+          const conversionRequest: ResponseConversionRequest = {
+            deliveryTimestamp: conversionDraft.deliveryTimestamp,
+            deliveryLocation: conversionDraft.deliveryLocation,
+            actualData: responses.find(r => r.id === responseId)?.data || {} as any,
+            actualItemsDelivered: conversionDraft.actualItemsDelivered.map(item => ({
+              item: item.item,
+              quantity: item.actualQuantity,
+              unit: item.unit,
+            })),
+            deliveryEvidence: conversionDraft.deliveryEvidence,
+            beneficiariesServed: conversionDraft.beneficiariesServed,
+            deliveryNotes: conversionDraft.deliveryNotes,
+            challenges: conversionDraft.challenges,
+          };
+          
+          // Add to offline queue for sync
+          const queueItem: Omit<OfflineQueueItem, 'id' | 'createdAt' | 'retryCount'> = {
+            type: 'RESPONSE',
+            action: 'UPDATE',
+            entityId: responseId,
+            data: conversionRequest,
+            priority: 'NORMAL',
+          };
+          
+          const { useOfflineStore } = await import('./offline.store');
+          useOfflineStore.getState().addToQueue(queueItem);
+          
+          // Update response status locally
+          set(state => ({
+            responses: state.responses.map(response =>
+              response.id === responseId 
+                ? { 
+                    ...response, 
+                    status: ResponseStatus.DELIVERED,
+                    deliveredDate: conversionDraft.deliveryTimestamp,
+                    deliveryEvidence: conversionDraft.deliveryEvidence,
+                  }
+                : response
+            ),
+            conversionInProgress: false,
+            conversionDraft: null,
+            currentConversion: null,
+            isConverting: false,
+          }));
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to complete conversion';
+          set({ error: errorMessage, isConverting: false });
+          console.error('Conversion completion error:', error);
+        }
+      },
+      
+      cancelConversion: () => {
+        set({
+          conversionInProgress: false,
+          conversionDraft: null,
+          currentConversion: null,
+        });
+      },
+      
+      calculateActualVsPlanned: (responseId: string, actualItems: { item: string; quantity: number; unit: string }[]): ActualVsPlannedItem[] => {
+        const { responses } = get();
+        const response = responses.find(r => r.id === responseId);
+
+        if (!response) return [];
+
+        const plannedItems = response.otherItemsDelivered;
+        const comparison: ActualVsPlannedItem[] = [];
+
+        // Process each planned item
+        plannedItems.forEach(planned => {
+          const actual = actualItems.find(a => a.item === planned.item && a.unit === planned.unit);
+          const actualQuantity = actual?.quantity || 0;
+          const variationPercentage = planned.quantity > 0
+            ? ((actualQuantity - planned.quantity) / planned.quantity) * 100
+            : 0;
+
+          // CONSISTENT variation reason logic
+          let variationReason: string | undefined;
+          if (Math.abs(variationPercentage) >= 10) {
+            variationReason = 'Significant variation';
+          }
+
+          comparison.push({
+            item: planned.item,
+            plannedQuantity: planned.quantity,
+            actualQuantity,
+            unit: planned.unit,
+            variationPercentage,
+            variationReason,
+          });
+        });
+
+        // Add any additional actual items not in planned
+        actualItems.forEach(actual => {
+          const existsInPlanned = plannedItems.some(p => p.item === actual.item && p.unit === actual.unit);
+          if (!existsInPlanned) {
+            comparison.push({
+              item: actual.item,
+              plannedQuantity: 0,
+              actualQuantity: actual.quantity,
+              unit: actual.unit,
+              variationPercentage: 100,
+              variationReason: 'Additional item not in plan',
+            });
+          }
+        });
+
+        return comparison;
+      },
+      
+      getResponseForConversion: (responseId: string): RapidResponse | null => {
+        const { responses } = get();
+        return responses.find(r => r.id === responseId) || null;
+      },
     }),
     {
       name: 'response-storage',
@@ -324,6 +544,8 @@ export const useResponseStore = create<ResponseState>()(
         drafts: state.drafts,
         itemTemplates: state.itemTemplates,
         filters: state.filters,
+        conversionDraft: state.conversionDraft,
+        currentConversion: state.currentConversion,
       }),
     }
   )
