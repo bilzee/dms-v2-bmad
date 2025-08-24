@@ -63,6 +63,7 @@ export interface RapidResponse {
   otherItemsDelivered: { item: string; quantity: number; unit: string }[]; // Generic items for all response types
   deliveryEvidence: MediaAttachment[];
   partialDeliveryData?: PartialDeliveryData; // New field for partial delivery tracking
+  deliveryDocumentation?: DeliveryDocumentation; // New field for completion docs
   createdAt: Date;
   updatedAt: Date;
 }
@@ -546,5 +547,72 @@ export interface PartialDeliveryResponse {
     itemsPartiallyDelivered: number;
     itemsPending: number;
     followUpTasksGenerated: number;
+  };
+}
+
+// Delivery Documentation Types (Story 2.4)
+export interface DeliveryDocumentation {
+  documentationId: string;
+  completionTimestamp: Date;
+  deliveryLocation: GPSCoordinates;
+  beneficiaryVerification: BeneficiaryVerificationData;
+  deliveryNotes: string;
+  deliveryConditions: DeliveryCondition[];
+  witnessDetails?: WitnessInformation;
+  deliveryCompletionStatus: 'FULL' | 'PARTIAL' | 'CANCELLED';
+  followUpRequired: boolean;
+}
+
+export interface BeneficiaryVerificationData {
+  verificationMethod: 'SIGNATURE' | 'THUMBPRINT' | 'PHOTO' | 'VERBAL_CONFIRMATION';
+  totalBeneficiariesServed: number;
+  householdsServed: number;
+  individualsServed: number;
+  demographicBreakdown: {
+    male: number;
+    female: number;
+    children: number;
+    elderly: number;
+    pwD: number; // Persons with Disabilities
+  };
+  verificationEvidence?: MediaAttachment[];
+  verificationTimestamp: Date;
+  verificationLocation: GPSCoordinates;
+}
+
+export interface DeliveryCondition {
+  conditionType: 'WEATHER' | 'SECURITY' | 'ACCESS' | 'INFRASTRUCTURE' | 'OTHER';
+  description: string;
+  severity: 'MINOR' | 'MODERATE' | 'SEVERE';
+  impactOnDelivery: boolean;
+}
+
+export interface WitnessInformation {
+  witnessName: string;
+  witnessRole: string;
+  witnessOrganization?: string;
+  witnessContact?: string;
+  witnessSignature?: MediaAttachment;
+}
+
+// Delivery Documentation API Types
+export interface DeliveryDocumentationRequest {
+  deliveryLocation: GPSCoordinates;
+  beneficiaryVerification: BeneficiaryVerificationData;
+  deliveryNotes: string;
+  deliveryConditions: DeliveryCondition[];
+  witnessDetails?: WitnessInformation;
+  deliveryEvidence: MediaAttachment[];
+  completionTimestamp: Date;
+}
+
+export interface DeliveryDocumentationResponse {
+  data: RapidResponse;
+  documentationMetrics: {
+    totalBeneficiariesReached: number;
+    documentationCompleteness: number; // Percentage
+    evidencePhotoCount: number;
+    verificationMethodUsed: string;
+    deliveryCompletionTime: Date;
   };
 }

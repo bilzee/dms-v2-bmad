@@ -478,3 +478,79 @@ export type ResponseConversionFormData = z.infer<typeof ResponseConversionFormSc
 export type DeliveryConversionData = z.infer<typeof DeliveryConversionSchema>;
 export type ActualVsPlannedItemData = z.infer<typeof ActualVsPlannedItemSchema>;
 export type ResponseConversionRequestData = z.infer<typeof ResponseConversionRequestSchema>;
+
+// Delivery Documentation Validation Schemas (Story 2.4)
+export const BeneficiaryVerificationDataSchema = z.object({
+  verificationMethod: z.enum(['SIGNATURE', 'THUMBPRINT', 'PHOTO', 'VERBAL_CONFIRMATION']),
+  totalBeneficiariesServed: z.number().int().min(0),
+  householdsServed: z.number().int().min(0),
+  individualsServed: z.number().int().min(0),
+  demographicBreakdown: z.object({
+    male: z.number().int().min(0),
+    female: z.number().int().min(0),
+    children: z.number().int().min(0),
+    elderly: z.number().int().min(0),
+    pwD: z.number().int().min(0), // Persons with Disabilities
+  }),
+  verificationEvidence: z.array(MediaAttachmentSchema).optional(),
+  verificationTimestamp: z.date(),
+  verificationLocation: GPSCoordinatesSchema,
+});
+
+export const DeliveryConditionSchema = z.object({
+  conditionType: z.enum(['WEATHER', 'SECURITY', 'ACCESS', 'INFRASTRUCTURE', 'OTHER']),
+  description: z.string().min(1, 'Condition description is required'),
+  severity: z.enum(['MINOR', 'MODERATE', 'SEVERE']),
+  impactOnDelivery: z.boolean(),
+});
+
+export const WitnessInformationSchema = z.object({
+  witnessName: z.string().min(1, 'Witness name is required'),
+  witnessRole: z.string().min(1, 'Witness role is required'),
+  witnessOrganization: z.string().optional(),
+  witnessContact: z.string().optional(),
+  witnessSignature: MediaAttachmentSchema.optional(),
+});
+
+export const DeliveryDocumentationSchema = z.object({
+  documentationId: uuidSchema,
+  completionTimestamp: z.date(),
+  deliveryLocation: GPSCoordinatesSchema,
+  beneficiaryVerification: BeneficiaryVerificationDataSchema,
+  deliveryNotes: z.string().min(1, 'Delivery notes are required'),
+  deliveryConditions: z.array(DeliveryConditionSchema),
+  witnessDetails: WitnessInformationSchema.optional(),
+  deliveryCompletionStatus: z.enum(['FULL', 'PARTIAL', 'CANCELLED']),
+  followUpRequired: z.boolean(),
+});
+
+export const DeliveryDocumentationRequestSchema = z.object({
+  deliveryLocation: GPSCoordinatesSchema,
+  beneficiaryVerification: BeneficiaryVerificationDataSchema,
+  deliveryNotes: z.string().min(1, 'Delivery notes are required'),
+  deliveryConditions: z.array(DeliveryConditionSchema),
+  witnessDetails: WitnessInformationSchema.optional(),
+  deliveryEvidence: z.array(MediaAttachmentSchema),
+  completionTimestamp: z.date(),
+});
+
+export const DeliveryDocumentationFormSchema = z.object({
+  responseId: uuidSchema,
+  deliveryLocation: GPSCoordinatesSchema,
+  beneficiaryVerification: BeneficiaryVerificationDataSchema,
+  deliveryNotes: z.string().min(1, 'Delivery notes are required').max(1000),
+  deliveryConditions: z.array(DeliveryConditionSchema),
+  witnessDetails: WitnessInformationSchema.optional(),
+  deliveryEvidence: z.array(MediaAttachmentSchema),
+  completionTimestamp: z.date(),
+  deliveryCompletionStatus: z.enum(['FULL', 'PARTIAL', 'CANCELLED']),
+  followUpRequired: z.boolean(),
+});
+
+// Type exports for delivery documentation
+export type BeneficiaryVerificationFormData = z.infer<typeof BeneficiaryVerificationDataSchema>;
+export type DeliveryConditionData = z.infer<typeof DeliveryConditionSchema>;
+export type WitnessInformationData = z.infer<typeof WitnessInformationSchema>;
+export type DeliveryDocumentationData = z.infer<typeof DeliveryDocumentationSchema>;
+export type DeliveryDocumentationRequestData = z.infer<typeof DeliveryDocumentationRequestSchema>;
+export type DeliveryDocumentationFormData = z.infer<typeof DeliveryDocumentationFormSchema>;
