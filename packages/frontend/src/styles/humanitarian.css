@@ -1,0 +1,24 @@
+/* Emergency-themed styling for critical workflows */
+.emergency-form {
+  @apply border-l-4 border-l-emergency-500 bg-emergency-50;
+}
+
+.emergency-button {
+  @apply bg-emergency-500 hover:bg-emergency-600 text-white;
+}
+
+.emergency-alert {
+  @apply border-emergency-500 bg-emergency-50 text-emergency-900;
+}
+
+.priority-high {
+  @apply border-l-4 border-l-emergency-500;
+}
+
+.priority-medium {
+  @apply border-l-4 border-l-status-pending;
+}
+
+.priority-low {
+  @apply border-l-4 border-l-humanitarian-slate;
+}

@@ -2,10 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '../styles/humanitarian.css';
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  
+  /* shadcn/ui CSS Variables */
+  --background: 0 0% 100%;
+  --foreground: 224 71.4% 4.1%;
+  --muted: 220 14.3% 95.9%;
+  --muted-foreground: 224 71.4% 4.1%; /* Dark text for better contrast */
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --primary: 224 71.4% 4.1%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 220 14.3% 95.9%;
+  --secondary-foreground: 220 8.9% 46.1%;
+  --accent: 220 14.3% 95.9%;
+  --accent-foreground: 220 8.9% 46.1%;
+  --ring: 224 71.4% 4.1%;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,12 +35,8 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: #F8FAFC; /* Light Gray sections background from UX spec */
+  min-height: 100vh;
 }
 
 @layer utilities {
