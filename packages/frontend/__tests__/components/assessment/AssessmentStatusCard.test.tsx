@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AssessmentStatusCard } from '@/components/features/assessment/AssessmentStatusCard';
-import { VerificationStatus, SyncStatus, type RapidAssessment } from '@dms/shared';
+import { AssessmentType, VerificationStatus, SyncStatus, type RapidAssessment } from '@dms/shared';
 
 // Mock the FeedbackViewer component
 jest.mock('@/components/features/assessment/FeedbackViewer', () => ({
@@ -21,7 +21,7 @@ jest.mock('@/components/features/assessment/FeedbackViewer', () => ({
 
 const createMockAssessment = (overrides: Partial<RapidAssessment> = {}): RapidAssessment => ({
   id: 'assessment-1',
-  type: 'HEALTH',
+  type: AssessmentType.HEALTH,
   date: new Date('2024-01-15'),
   affectedEntityId: 'entity-1',
   assessorName: 'Dr. Jane Smith',
@@ -250,15 +250,15 @@ describe('AssessmentStatusCard', () => {
   });
 
   it('displays correct assessment type icon', () => {
-    const healthAssessment = createMockAssessment({ type: 'HEALTH' });
+    const healthAssessment = createMockAssessment({ type: AssessmentType.HEALTH });
     const { rerender } = render(<AssessmentStatusCard assessment={healthAssessment} />);
     expect(screen.getByText('🏥')).toBeInTheDocument();
     
-    const washAssessment = createMockAssessment({ type: 'WASH' });
+    const washAssessment = createMockAssessment({ type: AssessmentType.WASH });
     rerender(<AssessmentStatusCard assessment={washAssessment} />);
     expect(screen.getByText('💧')).toBeInTheDocument();
     
-    const shelterAssessment = createMockAssessment({ type: 'SHELTER' });
+    const shelterAssessment = createMockAssessment({ type: AssessmentType.SHELTER });
     rerender(<AssessmentStatusCard assessment={shelterAssessment} />);
     expect(screen.getByText('🏠')).toBeInTheDocument();
   });

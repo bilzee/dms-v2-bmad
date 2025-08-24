@@ -30,7 +30,10 @@ export async function PUT(
     if (!existingResponse && process.env.NODE_ENV === 'development') {
       // Use seed data for development
       const { seedResponses } = await import('../../../../../../lib/dev-data/seed-responses');
-      existingResponse = seedResponses.find(r => r.id === responseId);
+      const foundResponse = seedResponses.find(r => r.id === responseId);
+      if (foundResponse) {
+        existingResponse = foundResponse;
+      }
       if (existingResponse) {
         mockResponses[responseId] = existingResponse;
       }
@@ -77,7 +80,7 @@ export async function PUT(
       ...response,
       status: ResponseStatus.DELIVERED,
       deliveredDate: validatedData.deliveryTimestamp,
-      data: validatedData.actualData,
+      data: validatedData.actualData as any,
       otherItemsDelivered: validatedData.actualItemsDelivered,
       deliveryEvidence: validatedData.deliveryEvidence,
       updatedAt: new Date(),
@@ -131,7 +134,7 @@ export async function GET(
     if (!response && process.env.NODE_ENV === 'development') {
       // Use seed data for development
       const { seedResponses } = await import('../../../../../../lib/dev-data/seed-responses');
-      response = seedResponses.find(r => r.id === responseId);
+      response = seedResponses.find(r => r.id === responseId) || null;
       if (response) {
         mockResponses[responseId] = response;
       }

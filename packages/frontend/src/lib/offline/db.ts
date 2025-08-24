@@ -140,6 +140,29 @@ class OfflineDatabase extends Dexie {
     return await query.toArray();
   }
 
+  async getAssessment(id: string): Promise<AssessmentRecord | undefined> {
+    const assessment = await this.assessments.get(id);
+    
+    // Decrypt sensitive data if needed
+    if (assessment && assessment.encryptedData) {
+      const decryptedData = await this.decryptData(assessment.encryptedData);
+      return { ...assessment, data: decryptedData };
+    }
+    
+    return assessment;
+  }
+
+  async updateAssessmentSyncStatus(id: string, syncStatus: string): Promise<void> {
+    const assessment = await this.assessments.get(id);
+    if (assessment) {
+      await this.assessments.put({
+        ...assessment,
+        syncStatus: syncStatus as any,
+        lastModified: new Date(),
+      });
+    }
+  }
+
   async deleteAssessment(id: string): Promise<void> {
     await this.assessments.delete(id);
   }

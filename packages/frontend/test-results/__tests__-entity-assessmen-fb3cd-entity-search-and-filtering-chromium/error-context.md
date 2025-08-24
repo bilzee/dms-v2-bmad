@@ -98,11 +98,41 @@
               - img [ref=e115] [cursor=pointer]
               - generic [ref=e118] [cursor=pointer]: Field Worker
       - main [ref=e119]:
-        - generic [ref=e124]:
-          - heading "Response Not Found" [level=3] [ref=e125]
-          - paragraph [ref=e126]: The response you're trying to convert could not be found.
-          - button "Go Back" [ref=e127] [cursor=pointer]
+        - generic [ref=e121]:
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - heading "Affected Entities" [level=1] [ref=e125]
+              - paragraph [ref=e126]: Manage camps and communities for disaster response assessment
+            - button "Create New Entity" [ref=e127] [cursor=pointer]
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - textbox "Search entities..." [ref=e131]
+              - combobox [ref=e133]:
+                - option "All Types" [selected]
+                - option "IDP Camps"
+                - option "Communities"
+              - button "Refresh" [ref=e134] [cursor=pointer]
+            - generic [ref=e137]:
+              - generic [ref=e138]:
+                - generic [ref=e140]: IDP Camp
+                - heading "Maiduguri Camp" [level=3] [ref=e141]
+                - paragraph [ref=e142]: Central Ward, Maiduguri
+                - paragraph [ref=e143]: 11.846900, 13.151100
+                - paragraph [ref=e144]:
+                  - strong [ref=e145]: "Contact:"
+                  - text: Coordinator 1 (+2348011111111)
+                - generic [ref=e146]:
+                  - text: "Created: 8/24/2025"
+                  - generic [ref=e147]: "• Updated: 8/24/2025"
+              - generic [ref=e148]:
+                - button "Edit" [ref=e149] [cursor=pointer]
+                - button "Delete" [ref=e150] [cursor=pointer]
   - region "Notifications (F8)":
     - list
-  - alert [ref=e128]
+  - alert [ref=e151]
+  - generic [ref=e154] [cursor=pointer]:
+    - img [ref=e155] [cursor=pointer]
+    - generic [ref=e157] [cursor=pointer]: 1 error
+    - button "Hide Errors" [ref=e158] [cursor=pointer]:
+      - img [ref=e159] [cursor=pointer]
 ```

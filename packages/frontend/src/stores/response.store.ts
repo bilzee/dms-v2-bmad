@@ -11,7 +11,9 @@ import {
   ActualVsPlannedItem,
   ResponseConversionRequest,
   GPSCoordinates,
-  MediaAttachment
+  MediaAttachment,
+  type DeliveryDocumentationFormData,
+  type DeliveryDocumentationRequest,
 } from '@dms/shared';
 
 // Response Planning Draft - for offline creation
@@ -61,6 +63,11 @@ interface ResponseState {
   conversionDraft: DeliveryConversion | null;
   currentConversion: string | null; // ID of response being converted
   
+  // Delivery documentation state
+  documentationInProgress: boolean;
+  documentationDraft: DeliveryDocumentationFormData | null;
+  currentDocumentation: string | null; // ID of response being documented
+  
   // Planning helpers
   availableAssessments: RapidAssessment[];
   availableEntities: AffectedEntity[];
@@ -70,6 +77,7 @@ interface ResponseState {
   isLoading: boolean;
   isCreating: boolean;
   isConverting: boolean;
+  isDocumenting: boolean;
   error: string | null;
   
   // Filters and search
@@ -105,6 +113,13 @@ interface ResponseState {
   cancelConversion: () => void;
   calculateActualVsPlanned: (responseId: string, actualItems: { item: string; quantity: number; unit: string }[]) => ActualVsPlannedItem[];
   getResponseForConversion: (responseId: string) => RapidResponse | null;
+  
+  // Delivery documentation actions
+  startDocumentation: (responseId: string) => Promise<void>;
+  updateDocumentationData: (updates: Partial<DeliveryDocumentationFormData>) => void;
+  completeDocumentation: (responseId: string) => Promise<void>;
+  cancelDocumentation: () => void;
+  getResponseForDocumentation: (responseId: string) => RapidResponse | null;
 }
 
 // Helper function to generate offline ID
@@ -156,6 +171,11 @@ export const useResponseStore = create<ResponseState>()(
       conversionDraft: null,
       currentConversion: null,
       
+      // Delivery documentation initial state
+      documentationInProgress: false,
+      documentationDraft: null,
+      currentDocumentation: null,
+      
       availableAssessments: [],
       availableEntities: [],
       itemTemplates: createDefaultItemTemplates(),
@@ -163,6 +183,7 @@ export const useResponseStore = create<ResponseState>()(
       isLoading: false,
       isCreating: false,
       isConverting: false,
+      isDocumenting: false,
       error: null,
       
       filters: {},
@@ -537,6 +558,159 @@ export const useResponseStore = create<ResponseState>()(
         const { responses } = get();
         return responses.find(r => r.id === responseId) || null;
       },
+      
+      // Delivery documentation functionality
+      startDocumentation: async (responseId: string) => {
+        const { responses } = get();
+        const response = responses.find(r => r.id === responseId);
+
+        if (!response) {
+          set({ error: 'Response not found for documentation' });
+          return;
+        }
+
+        if (response.status !== ResponseStatus.IN_PROGRESS) {
+          set({ error: 'Only in-progress responses can be documented' });
+          return;
+        }
+
+        // Initialize documentation draft
+        set({
+          documentationInProgress: true,
+          currentDocumentation: responseId,
+          error: null,
+          documentationDraft: {
+            responseId,
+            deliveryLocation: {
+              latitude: 0,
+              longitude: 0,
+              timestamp: new Date(),
+              captureMethod: 'GPS' as const,
+            },
+            beneficiaryVerification: {
+              verificationMethod: 'VERBAL_CONFIRMATION',
+              totalBeneficiariesServed: 0,
+              householdsServed: 0,
+              individualsServed: 0,
+              demographicBreakdown: {
+                male: 0,
+                female: 0,
+                children: 0,
+                elderly: 0,
+                pwD: 0,
+              },
+              verificationTimestamp: new Date(),
+              verificationLocation: {
+                latitude: 0,
+                longitude: 0,
+                timestamp: new Date(),
+                captureMethod: 'GPS' as const,
+              },
+            },
+            deliveryNotes: '',
+            deliveryConditions: [],
+            deliveryEvidence: [],
+            completionTimestamp: new Date(),
+            deliveryCompletionStatus: 'FULL',
+            followUpRequired: false,
+          },
+        });
+      },
+      
+      updateDocumentationData: (updates: Partial<DeliveryDocumentationFormData>) => {
+        const { documentationDraft } = get();
+        if (!documentationDraft) return;
+        
+        set({
+          documentationDraft: { ...documentationDraft, ...updates }
+        });
+      },
+      
+      completeDocumentation: async (responseId: string) => {
+        const { documentationDraft, responses } = get();
+        
+        if (!documentationDraft) {
+          set({ error: 'No documentation in progress' });
+          return;
+        }
+        
+        set({ isDocumenting: true, error: null });
+        
+        try {
+          // Create delivery documentation request
+          const deliveryDocumentationRequest: DeliveryDocumentationRequest = {
+            deliveryLocation: documentationDraft.deliveryLocation,
+            beneficiaryVerification: documentationDraft.beneficiaryVerification,
+            deliveryNotes: documentationDraft.deliveryNotes,
+            deliveryConditions: documentationDraft.deliveryConditions,
+            witnessDetails: documentationDraft.witnessDetails,
+            deliveryEvidence: documentationDraft.deliveryEvidence,
+            completionTimestamp: documentationDraft.completionTimestamp,
+          };
+          
+          // Add to offline queue for sync
+          const queueItem: Omit<OfflineQueueItem, 'id' | 'createdAt' | 'retryCount'> = {
+            type: 'RESPONSE',
+            action: 'UPDATE',
+            entityId: responseId,
+            data: deliveryDocumentationRequest,
+            priority: 'HIGH',
+          };
+          
+          const { useOfflineStore } = await import('./offline.store');
+          useOfflineStore.getState().addToQueue(queueItem);
+          
+          // Update response status locally
+          set(state => ({
+            responses: state.responses.map(response =>
+              response.id === responseId 
+                ? { 
+                    ...response, 
+                    status: ResponseStatus.DELIVERED,
+                    deliveredDate: documentationDraft.completionTimestamp,
+                    deliveryEvidence: [
+                      ...(response.deliveryEvidence || []),
+                      ...documentationDraft.deliveryEvidence,
+                    ],
+                    deliveryDocumentation: {
+                      documentationId: generateOfflineId(),
+                      completionTimestamp: documentationDraft.completionTimestamp,
+                      deliveryLocation: documentationDraft.deliveryLocation,
+                      beneficiaryVerification: documentationDraft.beneficiaryVerification,
+                      deliveryNotes: documentationDraft.deliveryNotes,
+                      deliveryConditions: documentationDraft.deliveryConditions,
+                      witnessDetails: documentationDraft.witnessDetails,
+                      deliveryCompletionStatus: documentationDraft.deliveryCompletionStatus,
+                      followUpRequired: documentationDraft.followUpRequired,
+                    },
+                  }
+                : response
+            ),
+            documentationInProgress: false,
+            documentationDraft: null,
+            currentDocumentation: null,
+            isDocumenting: false,
+          }));
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to complete documentation';
+          set({ error: errorMessage, isDocumenting: false });
+          console.error('Documentation completion error:', error);
+        }
+      },
+      
+      cancelDocumentation: () => {
+        set({
+          documentationInProgress: false,
+          documentationDraft: null,
+          currentDocumentation: null,
+        });
+      },
+      
+      getResponseForDocumentation: (responseId: string): RapidResponse | null => {
+        const { responses } = get();
+        return responses.find(r => r.id === responseId) || null;
+      },
     }),
     {
       name: 'response-storage',
@@ -546,6 +720,8 @@ export const useResponseStore = create<ResponseState>()(
         filters: state.filters,
         conversionDraft: state.conversionDraft,
         currentConversion: state.currentConversion,
+        documentationDraft: state.documentationDraft,
+        currentDocumentation: state.currentDocumentation,
       }),
     }
   )

@@ -11,11 +11,37 @@ Form.displayName = 'Form';
 
 const FormField = React.forwardRef<
   HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    name?: string;
+    control?: any;
+    render?: any;
+  }
+>(({ className, name, control, render, ...props }, ref) => {
+  if (render && control && name) {
+    // React Hook Form integration
+    return render({ field: { name, onChange: () => {}, onBlur: () => {}, value: undefined } });
+  }
+  return (
+    <div ref={ref} className={cn('space-y-2', className)} {...props} />
+  );
+});
+FormField.displayName = 'FormField';
+
+const FormItem = React.forwardRef<
+  HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn('space-y-2', className)} {...props} />
 ));
-FormField.displayName = 'FormField';
+FormItem.displayName = 'FormItem';
+
+const FormControl = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn('', className)} {...props} />
+));
+FormControl.displayName = 'FormControl';
 
 const FormLabel = React.forwardRef<
   HTMLLabelElement,
@@ -59,7 +85,9 @@ FormMessage.displayName = 'FormMessage';
 export {
   Form,
   FormField,
+  FormItem,
   FormLabel,
+  FormControl,
   FormDescription,
   FormMessage,
 };

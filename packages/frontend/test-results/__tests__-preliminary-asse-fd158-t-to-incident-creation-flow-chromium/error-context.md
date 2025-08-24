@@ -1,0 +1,163 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e9]
+          - generic [ref=e12]:
+            - heading "DMS" [level=2] [ref=e13]
+            - paragraph [ref=e14]: Field Operations
+        - button [ref=e15] [cursor=pointer]:
+          - img [ref=e16] [cursor=pointer]
+      - generic [ref=e18]:
+        - generic [ref=e19]: Role
+        - combobox [ref=e20]:
+          - option "Field Assessor" [selected]
+          - option "Crisis Coordinator"
+          - option "Field Responder"
+          - option "Donor Organization"
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Assessment Types" [level=3] [ref=e23]
+          - generic [ref=e24]:
+            - link "Health 3" [ref=e25] [cursor=pointer]:
+              - /url: /assessments/new?type=HEALTH
+              - generic [ref=e26] [cursor=pointer]:
+                - img [ref=e27] [cursor=pointer]
+                - generic [ref=e29] [cursor=pointer]: Health
+                - generic [ref=e30] [cursor=pointer]: "3"
+            - link "WASH 1" [ref=e31] [cursor=pointer]:
+              - /url: /assessments/new?type=WASH
+              - generic [ref=e32] [cursor=pointer]:
+                - img [ref=e33] [cursor=pointer]
+                - generic [ref=e35] [cursor=pointer]: WASH
+                - generic [ref=e36] [cursor=pointer]: "1"
+            - link "Shelter 2" [ref=e37] [cursor=pointer]:
+              - /url: /assessments/new?type=SHELTER
+              - generic [ref=e38] [cursor=pointer]:
+                - img [ref=e39] [cursor=pointer]
+                - generic [ref=e42] [cursor=pointer]: Shelter
+                - generic [ref=e43] [cursor=pointer]: "2"
+            - link "Food" [ref=e44] [cursor=pointer]:
+              - /url: /assessments/new?type=FOOD
+              - generic [ref=e45] [cursor=pointer]:
+                - img [ref=e46] [cursor=pointer]
+                - generic [ref=e49] [cursor=pointer]: Food
+            - link "Security 1" [ref=e50] [cursor=pointer]:
+              - /url: /assessments/new?type=SECURITY
+              - generic [ref=e51] [cursor=pointer]:
+                - img [ref=e52] [cursor=pointer]
+                - generic [ref=e54] [cursor=pointer]: Security
+                - generic [ref=e55] [cursor=pointer]: "1"
+            - link "Population 4" [ref=e56] [cursor=pointer]:
+              - /url: /assessments/new?type=POPULATION
+              - generic [ref=e57] [cursor=pointer]:
+                - img [ref=e58] [cursor=pointer]
+                - generic [ref=e63] [cursor=pointer]: Population
+                - generic [ref=e64] [cursor=pointer]: "4"
+        - generic [ref=e65]:
+          - heading "Management" [level=3] [ref=e66]
+          - generic [ref=e67]:
+            - link "All Assessments" [ref=e68] [cursor=pointer]:
+              - /url: /assessments
+              - generic [ref=e69] [cursor=pointer]:
+                - img [ref=e70] [cursor=pointer]
+                - generic [ref=e73] [cursor=pointer]: All Assessments
+            - link "Entities" [ref=e74] [cursor=pointer]:
+              - /url: /entities
+              - generic [ref=e75] [cursor=pointer]:
+                - img [ref=e76] [cursor=pointer]
+                - generic [ref=e79] [cursor=pointer]: Entities
+            - link "Queue" [ref=e80] [cursor=pointer]:
+              - /url: /queue
+              - generic [ref=e81] [cursor=pointer]:
+                - img [ref=e82] [cursor=pointer]
+                - generic [ref=e85] [cursor=pointer]: Queue
+      - link "Help & Support" [ref=e87] [cursor=pointer]:
+        - /url: /help
+        - generic [ref=e88] [cursor=pointer]:
+          - img [ref=e89] [cursor=pointer]
+          - generic [ref=e92] [cursor=pointer]: Help & Support
+    - generic [ref=e93]:
+      - banner [ref=e94]:
+        - generic [ref=e95]:
+          - generic [ref=e97]:
+            - heading "Disaster Management" [level=1] [ref=e98]
+            - paragraph [ref=e99]: Field Operations Dashboard
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - img [ref=e103]
+              - generic [ref=e107]: Online
+            - generic [ref=e108]: 0 queued
+            - button [ref=e109] [cursor=pointer]:
+              - img [ref=e110] [cursor=pointer]
+            - button "Field Worker" [ref=e114] [cursor=pointer]:
+              - img [ref=e115] [cursor=pointer]
+              - generic [ref=e118] [cursor=pointer]: Field Worker
+      - main [ref=e119]:
+        - generic [ref=e121]:
+          - button "← Back to Assessments" [ref=e123] [cursor=pointer]
+          - generic [ref=e124]:
+            - generic [ref=e126]:
+              - generic [ref=e127]:
+                - heading "HEALTH Assessment" [level=2] [ref=e128]
+                - paragraph [ref=e129]: Current User
+              - generic [ref=e133]:
+                - generic [ref=e134]:
+                  - img [ref=e135]
+                  - img [ref=e138]
+                - generic [ref=e144]: All changes synced
+            - generic [ref=e145]:
+              - heading "Affected Entity Selection" [level=3] [ref=e146]
+              - generic [ref=e147]:
+                - textbox "Search for entities..." [ref=e150]
+                - paragraph [ref=e151]: ✓ Entity selected. You can now complete the assessment.
+            - generic [ref=e153]:
+              - generic [ref=e154]:
+                - heading "Location Capture" [level=3] [ref=e155]
+                - paragraph [ref=e156]: No location captured
+              - button "Capture GPS" [ref=e157] [cursor=pointer]
+            - generic [ref=e158]:
+              - heading "Media Attachments" [level=3] [ref=e159]
+              - paragraph [ref=e160]: Add photos, audio recordings, or videos to provide visual evidence for this assessment. Location and timestamp will be automatically captured.
+              - generic [ref=e161]:
+                - generic [ref=e162]:
+                  - button "Take Photo" [ref=e163] [cursor=pointer]:
+                    - img [ref=e164] [cursor=pointer]
+                    - text: Take Photo
+                  - button "Select Files" [ref=e167] [cursor=pointer]:
+                    - img [ref=e168] [cursor=pointer]
+                    - text: Select Files
+                - generic [ref=e171]:
+                  - paragraph [ref=e172]: Maximum 10 files, 5 MB per file
+                  - paragraph [ref=e173]: "Accepted types: image/*, audio/*, video/*"
+                  - generic [ref=e174]:
+                    - generic [ref=e175]: Synced
+                    - generic [ref=e177]: Pending
+                    - generic [ref=e179]: Offline
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - generic [ref=e184]: Has Functional Clinic
+                  - checkbox "Has Functional Clinic" [ref=e185]
+                - generic [ref=e186]:
+                  - generic [ref=e187]: Number of Health Facilities
+                  - spinbutton "Number of Health Facilities" [ref=e188]: "0"
+                - generic [ref=e189]:
+                  - generic [ref=e190]: Health Facility Type
+                  - textbox "Health Facility Type" [ref=e191]
+                - generic [ref=e192]:
+                  - generic [ref=e193]: Qualified Health Workers
+                  - spinbutton "Qualified Health Workers" [ref=e194]: "0"
+              - generic [ref=e195]:
+                - generic [ref=e196]: Will sync immediately
+                - generic [ref=e197]:
+                  - button "Reset" [ref=e198] [cursor=pointer]
+                  - button "Submit Assessment" [ref=e199] [cursor=pointer]
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e200]
+```

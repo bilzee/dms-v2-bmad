@@ -153,8 +153,8 @@ export const EntityManagementForm: React.FC<EntityManagementFormProps> = ({
   }, [setValue]);
 
   const validateManualCoordinates = useCallback(() => {
-    const lat = parseFloat(manualCoordinates.latitude);
-    const lng = parseFloat(manualCoordinates.longitude);
+    const lat = parseFloat(String(manualCoordinates.latitude));
+    const lng = parseFloat(String(manualCoordinates.longitude));
     
     if (isNaN(lat) || isNaN(lng)) {
       return 'Please enter valid coordinates';

@@ -472,11 +472,10 @@ function getAssessmentRecommendations(assessment: RapidAssessment, responseType:
   }
   
   // Add type-specific recommendations
-  if (assessment.type === responseType) {
-    const data = assessment.data as any;
-    
-    switch (responseType) {
-      case ResponseType.HEALTH:
+  const data = assessment.data as any;
+  
+  switch (assessment.type) {
+    case AssessmentType.HEALTH:
         if (data.hasFunctionalClinic === false) recommendations.push('Medical Setup Needed');
         if (data.qualifiedHealthWorkers < 2) recommendations.push('Staff Support');
         if (data.hasMedicineSupply === false) recommendations.push('Medicine Supply');

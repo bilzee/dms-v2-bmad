@@ -5,6 +5,10 @@ import {
   RapidResponse,
   MediaAttachmentSchema,
   GPSCoordinatesSchema,
+  DeliveryDocumentationRequestSchema,
+  type DeliveryDocumentationRequest,
+  type DeliveryDocumentationResponse,
+  generateOfflineId,
 } from '@dms/shared';
 
 // Mock database - in production, this would be replaced with actual database calls
@@ -21,6 +25,114 @@ const DeliveryUpdateSchema = z.object({
 });
 
 type DeliveryUpdateData = z.infer<typeof DeliveryUpdateSchema>;
+
+// POST /api/v1/responses/:id/delivery - Create comprehensive delivery documentation
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse<DeliveryDocumentationResponse | { error: string }>> {
+  try {
+    const responseId = params.id;
+    const body = await request.json();
+
+    // Validate request body
+    const validationResult = DeliveryDocumentationRequestSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid delivery documentation data', details: validationResult.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const deliveryData: DeliveryDocumentationRequest = validationResult.data;
+
+    // Get existing response (in production, query from database)
+    const existingResponse = mockResponses[responseId];
+    if (!existingResponse) {
+      return NextResponse.json(
+        { error: 'Response not found' },
+        { status: 404 }
+      );
+    }
+
+    // Validate that response can be documented
+    if (![ResponseStatus.PLANNED, ResponseStatus.IN_PROGRESS].includes(existingResponse.status)) {
+      return NextResponse.json(
+        {
+          error: 'Response cannot be documented',
+          message: `Response status ${existingResponse.status} does not allow delivery documentation`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Create delivery documentation
+    const documentationId = generateOfflineId();
+    const deliveryDocumentation = {
+      documentationId,
+      completionTimestamp: deliveryData.completionTimestamp,
+      deliveryLocation: deliveryData.deliveryLocation,
+      beneficiaryVerification: deliveryData.beneficiaryVerification,
+      deliveryNotes: deliveryData.deliveryNotes,
+      deliveryConditions: deliveryData.deliveryConditions,
+      witnessDetails: deliveryData.witnessDetails,
+      deliveryCompletionStatus: 'FULL' as const,
+      followUpRequired: false,
+    };
+
+    // Update response with delivery documentation
+    const updatedResponse: RapidResponse = {
+      ...existingResponse,
+      status: ResponseStatus.DELIVERED,
+      deliveredDate: deliveryData.completionTimestamp,
+      deliveryEvidence: [
+        ...(existingResponse.deliveryEvidence || []),
+        ...deliveryData.deliveryEvidence,
+      ],
+      deliveryDocumentation,
+      updatedAt: new Date(),
+    };
+
+    // Save updated response
+    mockResponses[responseId] = updatedResponse;
+
+    // Calculate documentation metrics
+    const documentationMetrics = {
+      totalBeneficiariesReached: deliveryData.beneficiaryVerification.totalBeneficiariesServed,
+      documentationCompleteness: calculateCompleteness(deliveryData),
+      evidencePhotoCount: deliveryData.deliveryEvidence.length,
+      verificationMethodUsed: deliveryData.beneficiaryVerification.verificationMethod,
+      deliveryCompletionTime: deliveryData.completionTimestamp,
+    };
+
+    const response: DeliveryDocumentationResponse = {
+      data: updatedResponse,
+      documentationMetrics,
+    };
+
+    return NextResponse.json(response, { status: 201 });
+
+  } catch (error) {
+    console.error('Delivery documentation creation error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create delivery documentation' },
+      { status: 500 }
+    );
+  }
+}
+
+// Calculate documentation completeness percentage
+function calculateCompleteness(deliveryData: DeliveryDocumentationRequest): number {
+  const requirements = [
+    deliveryData.deliveryLocation.latitude !== 0, // GPS location captured
+    deliveryData.beneficiaryVerification.totalBeneficiariesServed > 0, // Beneficiaries verified
+    deliveryData.deliveryNotes.length > 0, // Delivery notes provided
+    deliveryData.deliveryEvidence.length > 0, // Photo evidence captured
+  ];
+
+  const completedRequirements = requirements.filter(Boolean).length;
+  return (completedRequirements / requirements.length) * 100;
+}
 
 // Update delivery details - PATCH /api/v1/responses/[id]/delivery
 export async function PATCH(

@@ -1,0 +1,295 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e9]
+          - generic [ref=e12]:
+            - heading "DMS" [level=2] [ref=e13]
+            - paragraph [ref=e14]: Field Operations
+        - button [ref=e15] [cursor=pointer]:
+          - img [ref=e16] [cursor=pointer]
+      - generic [ref=e18]:
+        - generic [ref=e19]: Role
+        - combobox [ref=e20]:
+          - option "Field Assessor" [selected]
+          - option "Crisis Coordinator"
+          - option "Field Responder"
+          - option "Donor Organization"
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Assessment Types" [level=3] [ref=e23]
+          - generic [ref=e24]:
+            - link "Health 3" [ref=e25] [cursor=pointer]:
+              - /url: /assessments/new?type=HEALTH
+              - generic [ref=e26] [cursor=pointer]:
+                - img [ref=e27] [cursor=pointer]
+                - generic [ref=e29] [cursor=pointer]: Health
+                - generic [ref=e30] [cursor=pointer]: "3"
+            - link "WASH 1" [ref=e31] [cursor=pointer]:
+              - /url: /assessments/new?type=WASH
+              - generic [ref=e32] [cursor=pointer]:
+                - img [ref=e33] [cursor=pointer]
+                - generic [ref=e35] [cursor=pointer]: WASH
+                - generic [ref=e36] [cursor=pointer]: "1"
+            - link "Shelter 2" [ref=e37] [cursor=pointer]:
+              - /url: /assessments/new?type=SHELTER
+              - generic [ref=e38] [cursor=pointer]:
+                - img [ref=e39] [cursor=pointer]
+                - generic [ref=e42] [cursor=pointer]: Shelter
+                - generic [ref=e43] [cursor=pointer]: "2"
+            - link "Food" [ref=e44] [cursor=pointer]:
+              - /url: /assessments/new?type=FOOD
+              - generic [ref=e45] [cursor=pointer]:
+                - img [ref=e46] [cursor=pointer]
+                - generic [ref=e49] [cursor=pointer]: Food
+            - link "Security 1" [ref=e50] [cursor=pointer]:
+              - /url: /assessments/new?type=SECURITY
+              - generic [ref=e51] [cursor=pointer]:
+                - img [ref=e52] [cursor=pointer]
+                - generic [ref=e54] [cursor=pointer]: Security
+                - generic [ref=e55] [cursor=pointer]: "1"
+            - link "Population 4" [ref=e56] [cursor=pointer]:
+              - /url: /assessments/new?type=POPULATION
+              - generic [ref=e57] [cursor=pointer]:
+                - img [ref=e58] [cursor=pointer]
+                - generic [ref=e63] [cursor=pointer]: Population
+                - generic [ref=e64] [cursor=pointer]: "4"
+        - generic [ref=e65]:
+          - heading "Management" [level=3] [ref=e66]
+          - generic [ref=e67]:
+            - link "All Assessments" [ref=e68] [cursor=pointer]:
+              - /url: /assessments
+              - generic [ref=e69] [cursor=pointer]:
+                - img [ref=e70] [cursor=pointer]
+                - generic [ref=e73] [cursor=pointer]: All Assessments
+            - link "Entities" [ref=e74] [cursor=pointer]:
+              - /url: /entities
+              - generic [ref=e75] [cursor=pointer]:
+                - img [ref=e76] [cursor=pointer]
+                - generic [ref=e79] [cursor=pointer]: Entities
+            - link "Queue" [ref=e80] [cursor=pointer]:
+              - /url: /queue
+              - generic [ref=e81] [cursor=pointer]:
+                - img [ref=e82] [cursor=pointer]
+                - generic [ref=e85] [cursor=pointer]: Queue
+      - link "Help & Support" [ref=e87] [cursor=pointer]:
+        - /url: /help
+        - generic [ref=e88] [cursor=pointer]:
+          - img [ref=e89] [cursor=pointer]
+          - generic [ref=e92] [cursor=pointer]: Help & Support
+    - generic [ref=e93]:
+      - banner [ref=e94]:
+        - generic [ref=e95]:
+          - generic [ref=e97]:
+            - heading "Disaster Management" [level=1] [ref=e98]
+            - paragraph [ref=e99]: Field Operations Dashboard
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - img [ref=e103]
+              - generic [ref=e107]: Online
+            - generic [ref=e108]: 0 queued
+            - button [ref=e109] [cursor=pointer]:
+              - img [ref=e110] [cursor=pointer]
+            - button "Field Worker" [ref=e114] [cursor=pointer]:
+              - img [ref=e115] [cursor=pointer]
+              - generic [ref=e118] [cursor=pointer]: Field Worker
+      - main [ref=e119]:
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - heading "Welcome back, Field Worker" [level=2] [ref=e122]
+            - paragraph [ref=e123]: Here's your current operational overview
+          - generic [ref=e124]:
+            - generic [ref=e127]:
+              - img [ref=e129]
+              - generic [ref=e132]:
+                - paragraph [ref=e133]: "12"
+                - paragraph [ref=e134]: Active Assessments
+                - generic [ref=e135]: ↗ 15% from yesterday
+            - generic [ref=e138]:
+              - img [ref=e140]
+              - generic [ref=e143]:
+                - paragraph [ref=e144]: "8"
+                - paragraph [ref=e145]: Completed Today
+                - generic [ref=e146]: ↗ 25% above target
+            - generic [ref=e149]:
+              - img [ref=e151]
+              - generic [ref=e154]:
+                - paragraph [ref=e155]: "3"
+                - paragraph [ref=e156]: Pending Sync
+            - generic [ref=e159]:
+              - img [ref=e161]
+              - generic [ref=e163]:
+                - paragraph [ref=e164]: "1"
+                - paragraph [ref=e165]: Critical Issues
+          - generic [ref=e166]:
+            - heading "Main Features" [level=3] [ref=e167]
+            - generic [ref=e168]:
+              - generic [ref=e169]:
+                - generic [ref=e171]:
+                  - img [ref=e175]
+                  - generic [ref=e179]:
+                    - generic [ref=e180]: Assessments
+                    - paragraph [ref=e182]: Create and manage rapid assessments for disaster situations
+                    - generic [ref=e184]: 12 active
+                  - img [ref=e185]
+                - generic [ref=e188]:
+                  - link "View All Assessments" [ref=e189] [cursor=pointer]:
+                    - /url: /assessments
+                    - button "View All Assessments" [ref=e190] [cursor=pointer]
+                  - link "Create New Assessment" [ref=e191] [cursor=pointer]:
+                    - /url: /assessments/new
+                    - button "Create New Assessment" [ref=e192] [cursor=pointer]
+                  - link "View Status Dashboard" [ref=e193] [cursor=pointer]:
+                    - /url: /assessments/status
+                    - button "View Status Dashboard" [ref=e194] [cursor=pointer]
+              - generic [ref=e195]:
+                - generic [ref=e197]:
+                  - img [ref=e201]
+                  - generic [ref=e204]:
+                    - generic [ref=e205]: Response Planning
+                    - paragraph [ref=e207]: Plan and coordinate humanitarian response activities
+                    - generic [ref=e209]: 3 planned
+                  - img [ref=e210]
+                - link "Plan New Response" [ref=e214] [cursor=pointer]:
+                  - /url: /responses/plan
+                  - button "Plan New Response" [ref=e215] [cursor=pointer]
+              - generic [ref=e216]:
+                - generic [ref=e218]:
+                  - img [ref=e222]
+                  - generic [ref=e226]:
+                    - generic [ref=e227]: Entity Management
+                    - paragraph [ref=e229]: Manage affected entities, camps, and communities
+                    - generic [ref=e231]: 28 locations
+                  - img [ref=e232]
+                - link "View All Entities" [ref=e236] [cursor=pointer]:
+                  - /url: /entities
+                  - button "View All Entities" [ref=e237] [cursor=pointer]
+              - generic [ref=e238]:
+                - generic [ref=e240]:
+                  - img [ref=e244]
+                  - generic [ref=e248]:
+                    - generic [ref=e249]: Sync Queue
+                    - paragraph [ref=e251]: Monitor offline synchronization operations
+                    - generic [ref=e253]: 0 pending
+                  - img [ref=e254]
+                - link "View Sync Queue" [ref=e258] [cursor=pointer]:
+                  - /url: /queue
+                  - button "View Sync Queue" [ref=e259] [cursor=pointer]
+          - generic [ref=e260]:
+            - heading "Quick Assessment Creation" [level=3] [ref=e261]
+            - generic [ref=e262]:
+              - link "Health 3 pending" [ref=e263] [cursor=pointer]:
+                - /url: /assessments/new?type=HEALTH
+                - generic [ref=e265] [cursor=pointer]:
+                  - img [ref=e268] [cursor=pointer]
+                  - heading "Health" [level=3] [ref=e270] [cursor=pointer]
+                  - generic [ref=e271] [cursor=pointer]: 3 pending
+              - link "WASH 1 pending" [ref=e272] [cursor=pointer]:
+                - /url: /assessments/new?type=WASH
+                - generic [ref=e274] [cursor=pointer]:
+                  - img [ref=e277] [cursor=pointer]
+                  - heading "WASH" [level=3] [ref=e279] [cursor=pointer]
+                  - generic [ref=e280] [cursor=pointer]: 1 pending
+              - link "Shelter 2 pending" [ref=e281] [cursor=pointer]:
+                - /url: /assessments/new?type=SHELTER
+                - generic [ref=e283] [cursor=pointer]:
+                  - img [ref=e286] [cursor=pointer]
+                  - heading "Shelter" [level=3] [ref=e289] [cursor=pointer]
+                  - generic [ref=e290] [cursor=pointer]: 2 pending
+              - link "Food 0 pending" [ref=e291] [cursor=pointer]:
+                - /url: /assessments/new?type=FOOD
+                - generic [ref=e293] [cursor=pointer]:
+                  - img [ref=e296] [cursor=pointer]
+                  - heading "Food" [level=3] [ref=e299] [cursor=pointer]
+                  - generic [ref=e300] [cursor=pointer]: 0 pending
+              - link "Security 1 pending" [ref=e301] [cursor=pointer]:
+                - /url: /assessments/new?type=SECURITY
+                - generic [ref=e303] [cursor=pointer]:
+                  - img [ref=e306] [cursor=pointer]
+                  - heading "Security" [level=3] [ref=e308] [cursor=pointer]
+                  - generic [ref=e309] [cursor=pointer]: 1 pending
+              - link "Population 4 pending" [ref=e310] [cursor=pointer]:
+                - /url: /assessments/new?type=POPULATION
+                - generic [ref=e312] [cursor=pointer]:
+                  - img [ref=e315] [cursor=pointer]
+                  - heading "Population" [level=3] [ref=e320] [cursor=pointer]
+                  - generic [ref=e321] [cursor=pointer]: 4 pending
+          - generic [ref=e322]:
+            - generic [ref=e323]:
+              - generic [ref=e325]:
+                - img [ref=e326]
+                - text: Emergency Report
+              - generic [ref=e328]:
+                - alert [ref=e329]:
+                  - img [ref=e330]
+                  - heading "Immediate Action Required" [level=5] [ref=e332]
+                  - generic [ref=e333]: Report new disaster situations immediately for incident creation
+                - link "Create Emergency Report" [ref=e334] [cursor=pointer]:
+                  - /url: /assessments/new?type=PRELIMINARY
+                  - button "Create Emergency Report" [ref=e335] [cursor=pointer]
+            - generic [ref=e336]:
+              - generic [ref=e338]:
+                - img [ref=e339]
+                - text: Incidents
+              - generic [ref=e341]:
+                - paragraph [ref=e342]: Monitor and manage active disaster incidents
+                - link "View Incidents" [ref=e343] [cursor=pointer]:
+                  - /url: /incidents
+                  - button "View Incidents" [ref=e344] [cursor=pointer]
+            - generic [ref=e345]:
+              - generic [ref=e347]:
+                - img [ref=e348]
+                - text: System Status
+              - generic [ref=e351]:
+                - generic [ref=e352]:
+                  - generic [ref=e354]: Online
+                  - generic [ref=e355]: Connected
+                - paragraph [ref=e356]: All features available including real-time sync
+            - generic [ref=e357]:
+              - generic [ref=e359]:
+                - img [ref=e360]
+                - text: Quick Actions
+              - generic [ref=e363]:
+                - generic [ref=e364]:
+                  - generic [ref=e365]:
+                    - img [ref=e366]
+                    - link "View Drafts" [ref=e370] [cursor=pointer]:
+                      - /url: /assessments/drafts
+                  - generic [ref=e371]: "2"
+                - generic [ref=e372]:
+                  - generic [ref=e373]:
+                    - img [ref=e374]
+                    - link "Pending Sync" [ref=e377] [cursor=pointer]:
+                      - /url: /assessments?filter=pending
+                  - generic [ref=e378]: "0"
+                - generic [ref=e379]:
+                  - generic [ref=e380]:
+                    - img [ref=e381]
+                    - link "Failed Sync" [ref=e385] [cursor=pointer]:
+                      - /url: /assessments?filter=failed
+                  - generic [ref=e386]: "0"
+            - generic [ref=e387]:
+              - generic [ref=e389]:
+                - img [ref=e390]
+                - text: Help & Documentation
+              - generic [ref=e394]:
+                - link "Assessment Guide" [ref=e395] [cursor=pointer]:
+                  - /url: /help/assessment-guide
+                  - img [ref=e396] [cursor=pointer]
+                  - text: Assessment Guide
+                - link "Offline Mode Help" [ref=e399] [cursor=pointer]:
+                  - /url: /help/offline-mode
+                  - img [ref=e400] [cursor=pointer]
+                  - text: Offline Mode Help
+                - link "Emergency Procedures" [ref=e404] [cursor=pointer]:
+                  - /url: /help/emergency-procedures
+                  - img [ref=e405] [cursor=pointer]
+                  - text: Emergency Procedures
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e407]
+```

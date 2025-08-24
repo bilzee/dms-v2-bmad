@@ -176,7 +176,10 @@ export async function GET(request: NextRequest) {
     // Calculate status counts
     const statusCounts = filteredPlans.reduce(
       (acc, plan) => {
-        acc[`${plan.status.toLowerCase()}Count`] = (acc[`${plan.status.toLowerCase()}Count`] || 0) + 1;
+        const statusKey = `${plan.status.toLowerCase()}Count` as keyof typeof acc;
+        if (statusKey in acc) {
+          (acc as any)[statusKey] = ((acc as any)[statusKey] || 0) + 1;
+        }
         return acc;
       },
       {

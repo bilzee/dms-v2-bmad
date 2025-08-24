@@ -1,0 +1,165 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e9]
+          - generic [ref=e12]:
+            - heading "DMS" [level=2] [ref=e13]
+            - paragraph [ref=e14]: Field Operations
+        - button [ref=e15] [cursor=pointer]:
+          - img [ref=e16] [cursor=pointer]
+      - generic [ref=e18]:
+        - generic [ref=e19]: Role
+        - combobox [ref=e20]:
+          - option "Field Assessor" [selected]
+          - option "Crisis Coordinator"
+          - option "Field Responder"
+          - option "Donor Organization"
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Assessment Types" [level=3] [ref=e23]
+          - generic [ref=e24]:
+            - link "Health 3" [ref=e25] [cursor=pointer]:
+              - /url: /assessments/new?type=HEALTH
+              - generic [ref=e26] [cursor=pointer]:
+                - img [ref=e27] [cursor=pointer]
+                - generic [ref=e29] [cursor=pointer]: Health
+                - generic [ref=e30] [cursor=pointer]: "3"
+            - link "WASH 1" [ref=e31] [cursor=pointer]:
+              - /url: /assessments/new?type=WASH
+              - generic [ref=e32] [cursor=pointer]:
+                - img [ref=e33] [cursor=pointer]
+                - generic [ref=e35] [cursor=pointer]: WASH
+                - generic [ref=e36] [cursor=pointer]: "1"
+            - link "Shelter 2" [ref=e37] [cursor=pointer]:
+              - /url: /assessments/new?type=SHELTER
+              - generic [ref=e38] [cursor=pointer]:
+                - img [ref=e39] [cursor=pointer]
+                - generic [ref=e42] [cursor=pointer]: Shelter
+                - generic [ref=e43] [cursor=pointer]: "2"
+            - link "Food" [ref=e44] [cursor=pointer]:
+              - /url: /assessments/new?type=FOOD
+              - generic [ref=e45] [cursor=pointer]:
+                - img [ref=e46] [cursor=pointer]
+                - generic [ref=e49] [cursor=pointer]: Food
+            - link "Security 1" [ref=e50] [cursor=pointer]:
+              - /url: /assessments/new?type=SECURITY
+              - generic [ref=e51] [cursor=pointer]:
+                - img [ref=e52] [cursor=pointer]
+                - generic [ref=e54] [cursor=pointer]: Security
+                - generic [ref=e55] [cursor=pointer]: "1"
+            - link "Population 4" [ref=e56] [cursor=pointer]:
+              - /url: /assessments/new?type=POPULATION
+              - generic [ref=e57] [cursor=pointer]:
+                - img [ref=e58] [cursor=pointer]
+                - generic [ref=e63] [cursor=pointer]: Population
+                - generic [ref=e64] [cursor=pointer]: "4"
+        - generic [ref=e65]:
+          - heading "Management" [level=3] [ref=e66]
+          - generic [ref=e67]:
+            - link "All Assessments" [ref=e68] [cursor=pointer]:
+              - /url: /assessments
+              - generic [ref=e69] [cursor=pointer]:
+                - img [ref=e70] [cursor=pointer]
+                - generic [ref=e73] [cursor=pointer]: All Assessments
+            - link "Entities" [ref=e74] [cursor=pointer]:
+              - /url: /entities
+              - generic [ref=e75] [cursor=pointer]:
+                - img [ref=e76] [cursor=pointer]
+                - generic [ref=e79] [cursor=pointer]: Entities
+            - link "Queue" [ref=e80] [cursor=pointer]:
+              - /url: /queue
+              - generic [ref=e81] [cursor=pointer]:
+                - img [ref=e82] [cursor=pointer]
+                - generic [ref=e85] [cursor=pointer]: Queue
+      - link "Help & Support" [ref=e87] [cursor=pointer]:
+        - /url: /help
+        - generic [ref=e88] [cursor=pointer]:
+          - img [ref=e89] [cursor=pointer]
+          - generic [ref=e92] [cursor=pointer]: Help & Support
+    - generic [ref=e93]:
+      - banner [ref=e94]:
+        - generic [ref=e95]:
+          - generic [ref=e97]:
+            - heading "Disaster Management" [level=1] [ref=e98]
+            - paragraph [ref=e99]: Field Operations Dashboard
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - img [ref=e103]
+              - generic [ref=e107]: Online
+            - generic [ref=e108]: 0 queued
+            - button [ref=e109] [cursor=pointer]:
+              - img [ref=e110] [cursor=pointer]
+            - button "Field Worker" [ref=e114] [cursor=pointer]:
+              - img [ref=e115] [cursor=pointer]
+              - generic [ref=e118] [cursor=pointer]: Field Worker
+      - main [ref=e119]:
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - generic [ref=e123]:
+              - heading "Sync Queue Management" [level=1] [ref=e124]
+              - paragraph [ref=e125]: Monitor and manage offline assessment queue items
+            - button "← Back to Dashboard" [ref=e127] [cursor=pointer]
+          - generic [ref=e129]:
+            - generic [ref=e130]:
+              - heading "Development Mode" [level=3] [ref=e131]
+              - paragraph [ref=e132]: Add sample data to test queue functionality
+            - generic [ref=e133]:
+              - button "Add Sample Data" [ref=e134] [cursor=pointer]:
+                - img [ref=e135] [cursor=pointer]
+                - text: Add Sample Data
+              - button "Simulate Processing" [ref=e139] [cursor=pointer]:
+                - img [ref=e140] [cursor=pointer]
+                - text: Simulate Processing
+              - button "Clear Data" [ref=e145] [cursor=pointer]:
+                - img [ref=e146] [cursor=pointer]
+                - text: Clear Data
+              - button "×" [ref=e149] [cursor=pointer]
+          - generic [ref=e151]:
+            - generic [ref=e153]:
+              - heading "Sync Queue" [level=3] [ref=e154]
+              - paragraph [ref=e155]: "Last updated: 8:44:11 PM"
+            - generic [ref=e156]:
+              - img [ref=e157]
+              - generic [ref=e162]:
+                - paragraph [ref=e163]: All items synced
+                - paragraph [ref=e164]: 0 total items in queue
+            - generic [ref=e165]:
+              - img [ref=e166]
+              - paragraph [ref=e171]: All caught up!
+              - paragraph [ref=e172]: No items in the sync queue.
+          - generic [ref=e174]:
+            - generic [ref=e176]:
+              - generic [ref=e177]:
+                - heading "Assessment Queue" [level=2] [ref=e178]
+                - paragraph [ref=e179]: 0 items • 0 health emergencies
+              - generic [ref=e180]:
+                - button "Filters" [ref=e181] [cursor=pointer]:
+                  - img [ref=e182] [cursor=pointer]
+                  - text: Filters
+                - button "Notifications" [ref=e184] [cursor=pointer]:
+                  - img [ref=e185] [cursor=pointer]
+                  - generic [ref=e188] [cursor=pointer]: Notifications
+                - button "Refresh" [ref=e189] [cursor=pointer]:
+                  - img [ref=e190] [cursor=pointer]
+                  - text: Refresh
+            - generic [ref=e196]:
+              - img [ref=e197]
+              - heading "Queue is empty" [level=3] [ref=e200]
+              - paragraph [ref=e201]: All assessments are up to date.
+          - button "Refresh Queue" [ref=e203] [cursor=pointer]:
+            - img [ref=e204] [cursor=pointer]
+            - text: Refresh Queue
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e209]
+  - generic [ref=e212] [cursor=pointer]:
+    - img [ref=e213] [cursor=pointer]
+    - generic [ref=e215] [cursor=pointer]: 1 error
+    - button "Hide Errors" [ref=e216] [cursor=pointer]:
+      - img [ref=e217] [cursor=pointer]
+```

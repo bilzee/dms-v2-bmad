@@ -425,7 +425,7 @@ export function FollowUpRequirements({
                                 <Calendar
                                   mode="single"
                                   selected={newTask.estimatedDate}
-                                  onSelect={(date) => date && setNewTask(prev => ({ ...prev, estimatedDate: date }))}
+                                  onSelect={(date: Date | undefined) => date && setNewTask(prev => ({ ...prev, estimatedDate: date }))}
                                   initialFocus
                                 />
                               </PopoverContent>

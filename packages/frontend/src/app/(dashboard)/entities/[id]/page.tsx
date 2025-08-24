@@ -11,7 +11,8 @@ interface EntityDetailsPageParams {
 }
 
 export default function EntityDetailsPage() {
-  const params = useParams() as EntityDetailsPageParams;
+  const params = useParams();
+  const entityId = Array.isArray(params.id) ? params.id[0] : params.id;
   const router = useRouter();
   const [entity, setEntity] = useState<AffectedEntity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,14 +20,14 @@ export default function EntityDetailsPage() {
 
   useEffect(() => {
     loadEntity();
-  }, [params.id]);
+  }, [entityId]);
 
   const loadEntity = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const entityRecord = await db.getEntityById(params.id);
+      const entityRecord = await db.getEntityById(entityId!);
       
       if (!entityRecord) {
         setError('Entity not found');
@@ -58,7 +59,7 @@ export default function EntityDetailsPage() {
   };
 
   const handleEdit = () => {
-    router.push(`/entities?edit=${params.id}`);
+    router.push(`/entities?edit=${entityId}`);
   };
 
   const handleDelete = async () => {

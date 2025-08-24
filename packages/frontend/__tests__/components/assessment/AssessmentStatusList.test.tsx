@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AssessmentStatusList } from '@/components/features/assessment/AssessmentStatusList';
-import { VerificationStatus, SyncStatus, type RapidAssessment } from '@dms/shared';
+import { AssessmentType, VerificationStatus, SyncStatus, type RapidAssessment } from '@dms/shared';
 import { useOfflineStore } from '@/stores/offline.store';
 
 // Mock the offline store
@@ -33,7 +33,7 @@ jest.mock('@/components/features/assessment/AssessmentStatusCard', () => ({
 const mockAssessments: RapidAssessment[] = [
   {
     id: 'assessment-1',
-    type: 'HEALTH',
+    type: AssessmentType.HEALTH,
     date: new Date('2024-01-15'),
     affectedEntityId: 'entity-1',
     assessorName: 'Dr. Jane Smith',
@@ -41,49 +41,49 @@ const mockAssessments: RapidAssessment[] = [
     verificationStatus: VerificationStatus.REJECTED,
     syncStatus: SyncStatus.SYNCED,
     offlineId: 'offline-1',
-    data: {},
+    data: {} as any,
     mediaAttachments: [],
     createdAt: new Date('2024-01-15T10:00:00Z'),
     updatedAt: new Date('2024-01-16T10:00:00Z'),
   },
   {
     id: 'assessment-2',
-    type: 'WASH',
+    type: AssessmentType.WASH,
     date: new Date('2024-01-16'),
     affectedEntityId: 'entity-2',
     assessorName: 'John Doe',
     assessorId: 'assessor-2',
     verificationStatus: VerificationStatus.PENDING,
     syncStatus: SyncStatus.SYNCED,
-    data: {},
+    data: {} as any,
     mediaAttachments: [],
     createdAt: new Date('2024-01-16T10:00:00Z'),
     updatedAt: new Date('2024-01-16T10:00:00Z'),
   },
   {
     id: 'assessment-3',
-    type: 'SHELTER',
+    type: AssessmentType.SHELTER,
     date: new Date('2024-01-17'),
     affectedEntityId: 'entity-3',
     assessorName: 'Sarah Johnson',
     assessorId: 'assessor-3',
     verificationStatus: VerificationStatus.VERIFIED,
     syncStatus: SyncStatus.SYNCED,
-    data: {},
+    data: {} as any,
     mediaAttachments: [],
     createdAt: new Date('2024-01-17T10:00:00Z'),
     updatedAt: new Date('2024-01-17T10:00:00Z'),
   },
   {
     id: 'assessment-4',
-    type: 'PRELIMINARY',
+    type: AssessmentType.PRELIMINARY,
     date: new Date('2024-01-18'),
     affectedEntityId: 'entity-4',
     assessorName: 'Michael Chen',
     assessorId: 'assessor-4',
     verificationStatus: VerificationStatus.AUTO_VERIFIED,
     syncStatus: SyncStatus.SYNCED,
-    data: {},
+    data: {} as any,
     mediaAttachments: [],
     createdAt: new Date('2024-01-18T10:00:00Z'),
     updatedAt: new Date('2024-01-18T10:00:00Z'),

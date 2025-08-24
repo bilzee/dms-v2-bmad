@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { VerificationStatus, SyncStatus, type RapidAssessment } from '@dms/shared';
+import { AssessmentType, IncidentType, IncidentSeverity, VerificationStatus, SyncStatus, type RapidAssessment } from '@dms/shared';
 
 // Mock data for demonstration - replace with actual database queries
 const generateMockAssessments = (userId?: string): RapidAssessment[] => {
@@ -7,7 +7,7 @@ const generateMockAssessments = (userId?: string): RapidAssessment[] => {
   const mockAssessments: RapidAssessment[] = [
     {
       id: 'assessment-1',
-      type: 'HEALTH',
+      type: AssessmentType.HEALTH,
       date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
       affectedEntityId: 'entity-1',
       assessorName: 'Dr. Jane Smith',
@@ -47,7 +47,7 @@ const generateMockAssessments = (userId?: string): RapidAssessment[] => {
     },
     {
       id: 'assessment-2',
-      type: 'WASH',
+      type: AssessmentType.WASH,
       date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
       affectedEntityId: 'entity-2',
       assessorName: 'John Doe',
@@ -71,7 +71,7 @@ const generateMockAssessments = (userId?: string): RapidAssessment[] => {
     },
     {
       id: 'assessment-3',
-      type: 'SHELTER',
+      type: AssessmentType.SHELTER,
       date: new Date(now.getTime() - 3 * 60 * 60 * 1000), // 3 hours ago
       affectedEntityId: 'entity-3',
       assessorName: 'Sarah Johnson',
@@ -118,7 +118,7 @@ const generateMockAssessments = (userId?: string): RapidAssessment[] => {
     },
     {
       id: 'assessment-4',
-      type: 'PRELIMINARY',
+      type: AssessmentType.PRELIMINARY,
       date: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
       affectedEntityId: 'entity-4',
       assessorName: 'Michael Chen',
@@ -126,9 +126,9 @@ const generateMockAssessments = (userId?: string): RapidAssessment[] => {
       verificationStatus: VerificationStatus.AUTO_VERIFIED,
       syncStatus: SyncStatus.SYNCED,
       data: {
-        incidentType: 'FLOOD',
+        incidentType: IncidentType.FLOOD,
         incidentSubType: 'Flash Flood',
-        severity: 'SEVERE',
+        severity: IncidentSeverity.SEVERE,
         affectedPopulationEstimate: 2500,
         affectedHouseholdsEstimate: 500,
         immediateNeedsDescription: 'Emergency shelter, clean water, and medical supplies',

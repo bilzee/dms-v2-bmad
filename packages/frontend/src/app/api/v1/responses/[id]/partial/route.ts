@@ -6,7 +6,10 @@ import {
   PartialDeliveryData,
   ItemCompletionData,
   FollowUpTask,
-  ResponseStatus
+  ResponseStatus,
+  ResponseType,
+  VerificationStatus,
+  SyncStatus
 } from '@dms/shared';
 import { z } from 'zod';
 
@@ -77,15 +80,15 @@ async function getResponseById(id: string): Promise<RapidResponse | null> {
   // In production, this would query the actual database
   const mockResponse: RapidResponse = {
     id,
-    responseType: 'FOOD' as const,
-    status: 'IN_PROGRESS' as const,
+    responseType: ResponseType.FOOD,
+    status: ResponseStatus.IN_PROGRESS,
     plannedDate: new Date('2024-08-20'),
     affectedEntityId: 'entity-1',
     assessmentId: 'assessment-1',
     responderId: 'responder-1',
     responderName: 'John Doe',
-    verificationStatus: 'PENDING' as const,
-    syncStatus: 'SYNCED' as const,
+    verificationStatus: VerificationStatus.PENDING,
+    syncStatus: SyncStatus.SYNCED,
     data: {
       foodItemsDelivered: [
         { item: 'Rice', quantity: 100, unit: 'kg' },
