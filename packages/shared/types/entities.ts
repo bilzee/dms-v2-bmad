@@ -729,3 +729,47 @@ export interface BatchVerificationResponse {
   };
   error?: string;
 }
+
+// Story 3.2: Assessment Approval/Rejection Types
+
+// Assessment Approval Request
+export interface AssessmentApprovalRequest {
+  assessmentId: string;
+  coordinatorId: string;
+  coordinatorName: string;
+  approvalNote?: string;
+  approvalTimestamp: Date;
+  notifyAssessor: boolean;
+}
+
+// Assessment Rejection Request
+export interface AssessmentRejectionRequest {
+  assessmentId: string;
+  coordinatorId: string;
+  coordinatorName: string;
+  rejectionReason: 'DATA_QUALITY' | 'MISSING_INFO' | 'VALIDATION_ERROR' | 'INSUFFICIENT_EVIDENCE' | 'OTHER';
+  rejectionComments: string;
+  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  requiresResubmission: boolean;
+  notifyAssessor: boolean;
+  rejectionTimestamp: Date;
+}
+
+// Batch Approval/Rejection Operations
+export interface BatchApprovalRequest {
+  assessmentIds: string[];
+  coordinatorId: string;
+  coordinatorName: string;
+  batchNote?: string;
+  notifyAssessors: boolean;
+}
+
+export interface BatchRejectionRequest {
+  assessmentIds: string[];
+  coordinatorId: string;
+  coordinatorName: string;
+  rejectionReason: 'DATA_QUALITY' | 'MISSING_INFO' | 'VALIDATION_ERROR' | 'INSUFFICIENT_EVIDENCE' | 'OTHER';
+  rejectionComments: string;
+  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  notifyAssessors: boolean;
+}

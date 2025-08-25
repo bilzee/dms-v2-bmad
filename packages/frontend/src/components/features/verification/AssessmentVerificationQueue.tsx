@@ -18,6 +18,10 @@ import {
   StatusBadge,
   AssessmentTypeIndicator 
 } from './VerificationStatusIndicators';
+import AssessmentApproval from './AssessmentApproval';
+import AssessmentRejection from './AssessmentRejection';
+import BatchApprovalRejection from './BatchApprovalRejection';
+import FeedbackNotification from './FeedbackNotification';
 import { AssessmentType, VerificationStatus } from '@dms/shared';
 import { format } from 'date-fns';
 
@@ -79,13 +83,7 @@ export const AssessmentVerificationQueue: React.FC<AssessmentVerificationQueuePr
     }
   };
 
-  const handleBatchApprove = () => {
-    onBatchAction?.('APPROVE', selectedAssessmentIds);
-  };
-
-  const handleBatchReject = () => {
-    onBatchAction?.('REJECT', selectedAssessmentIds);
-  };
+  // Batch actions are now handled by BatchApprovalRejection component
 
   const getSortIcon = (column: string) => {
     if (sortBy !== column) return '↕️';
@@ -238,29 +236,14 @@ export const AssessmentVerificationQueue: React.FC<AssessmentVerificationQueuePr
 
       {/* Batch Actions */}
       {getSelectedCount() > 0 && (
-        <Card className="border-primary">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4" />
-                <span className="text-sm font-medium">
-                  {getSelectedCount()} assessment{getSelectedCount() > 1 ? 's' : ''} selected
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={clearSelection}>
-                  Clear Selection
-                </Button>
-                <Button variant="default" onClick={handleBatchApprove}>
-                  Approve Selected
-                </Button>
-                <Button variant="destructive" onClick={handleBatchReject}>
-                  Reject Selected
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <BatchApprovalRejection
+          selectedAssessmentIds={selectedAssessmentIds}
+          onBatchComplete={() => {
+            // Refresh queue after batch operation
+            fetchQueue();
+          }}
+          onClearSelection={clearSelection}
+        />
       )}
 
       {/* Queue Table */}
@@ -403,13 +386,42 @@ export const AssessmentVerificationQueue: React.FC<AssessmentVerificationQueuePr
                         />
                       </td>
                       <td className="p-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handlePreview(item.assessment.id)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Assessment Actions */}
+                          {item.assessment.verificationStatus === 'PENDING' && (
+                            <>
+                              <AssessmentApproval
+                                assessment={item.assessment}
+                                onApprovalComplete={(assessmentId) => {
+                                  fetchQueue();
+                                  clearSelection();
+                                }}
+                              />
+                              <AssessmentRejection
+                                assessment={item.assessment}
+                                onRejectionComplete={(assessmentId) => {
+                                  fetchQueue();
+                                  clearSelection();
+                                }}
+                              />
+                            </>
+                          )}
+                          
+                          {/* Feedback Notifications */}
+                          <FeedbackNotification 
+                            feedback={[]} // This would be populated from API call
+                            assessmentId={item.assessment.id}
+                          />
+                          
+                          {/* Preview Button */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePreview(item.assessment.id)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

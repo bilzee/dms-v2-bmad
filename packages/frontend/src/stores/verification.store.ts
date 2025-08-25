@@ -63,6 +63,12 @@ interface VerificationState {
   verifyAssessment: (assessmentId: string, action: 'APPROVE' | 'REJECT', feedback?: any) => Promise<void>;
   batchVerify: (request: BatchVerificationRequest) => Promise<void>;
   
+  // Story 3.2: Approval/Rejection Actions
+  approveAssessment: (assessmentId: string, approvalData: any) => Promise<void>;
+  rejectAssessment: (assessmentId: string, rejectionData: any) => Promise<void>;
+  batchApprove: (assessmentIds: string[], approvalData: any) => Promise<void>;
+  batchReject: (assessmentIds: string[], rejectionData: any) => Promise<void>;
+  
   // Utility
   reset: () => void;
   getSelectedCount: () => number;
@@ -289,6 +295,177 @@ export const useVerificationStore = create<VerificationState>()(
     getSelectedCount: () => get().selectedAssessmentIds.length,
 
     getHighPriorityCount: () => get().queueStats.highPriority,
+
+    // Story 3.2: Approval/Rejection Actions
+    approveAssessment: async (assessmentId, approvalData) => {
+      try {
+        const response = await fetch(`/api/v1/verification/assessments/${assessmentId}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(approvalData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to approve assessment');
+        }
+
+        // Refresh queue and remove from selection
+        await get().fetchQueue();
+        set((state) => ({
+          selectedAssessmentIds: state.selectedAssessmentIds.filter(id => id !== assessmentId),
+        }));
+
+      } catch (error) {
+        console.error('Failed to approve assessment:', error);
+        throw error;
+      }
+    },
+
+    rejectAssessment: async (assessmentId, rejectionData) => {
+      try {
+        const response = await fetch(`/api/v1/verification/assessments/${assessmentId}/reject`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(rejectionData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to reject assessment');
+        }
+
+        // Refresh queue and remove from selection
+        await get().fetchQueue();
+        set((state) => ({
+          selectedAssessmentIds: state.selectedAssessmentIds.filter(id => id !== assessmentId),
+        }));
+
+      } catch (error) {
+        console.error('Failed to reject assessment:', error);
+        throw error;
+      }
+    },
+
+    batchApprove: async (assessmentIds, approvalData) => {
+      set({ 
+        isBatchProcessing: true, 
+        batchProgress: { processed: 0, total: assessmentIds.length, currentOperation: 'Starting batch approval...' } 
+      });
+
+      try {
+        const response = await fetch('/api/v1/verification/assessments/batch-approve', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            assessmentIds,
+            ...approvalData,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Batch approval failed');
+        }
+
+        // Update progress
+        set({
+          batchProgress: {
+            processed: result.data.approved,
+            total: assessmentIds.length,
+            currentOperation: `Approved: ${result.data.approved}/${assessmentIds.length}`,
+          },
+        });
+
+        // Refresh queue and clear selection
+        await get().fetchQueue();
+        get().clearSelection();
+
+        if (result.data.failed > 0) {
+          console.warn('Some assessments failed to approve:', result.data.results);
+        }
+
+      } catch (error) {
+        console.error('Batch approval failed:', error);
+        throw error;
+      } finally {
+        set({ isBatchProcessing: false });
+      }
+    },
+
+    batchReject: async (assessmentIds, rejectionData) => {
+      set({ 
+        isBatchProcessing: true, 
+        batchProgress: { processed: 0, total: assessmentIds.length, currentOperation: 'Starting batch rejection...' } 
+      });
+
+      try {
+        const response = await fetch('/api/v1/verification/assessments/batch-reject', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            assessmentIds,
+            ...rejectionData,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Batch rejection failed');
+        }
+
+        // Update progress
+        set({
+          batchProgress: {
+            processed: result.data.rejected,
+            total: assessmentIds.length,
+            currentOperation: `Rejected: ${result.data.rejected}/${assessmentIds.length}`,
+          },
+        });
+
+        // Refresh queue and clear selection
+        await get().fetchQueue();
+        get().clearSelection();
+
+        if (result.data.failed > 0) {
+          console.warn('Some assessments failed to reject:', result.data.results);
+        }
+
+      } catch (error) {
+        console.error('Batch rejection failed:', error);
+        throw error;
+      } finally {
+        set({ isBatchProcessing: false });
+      }
+    },
 
     reset: () => set(initialState),
   }))
