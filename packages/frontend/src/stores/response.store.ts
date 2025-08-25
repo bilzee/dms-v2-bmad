@@ -120,6 +120,11 @@ interface ResponseState {
   completeDocumentation: (responseId: string) => Promise<void>;
   cancelDocumentation: () => void;
   getResponseForDocumentation: (responseId: string) => RapidResponse | null;
+  
+  // Status review actions (Story 2.5)
+  loadStatusReview: (filters?: any) => Promise<void>;
+  loadFeedback: (responseId: string) => Promise<any>;
+  submitResubmission: (responseId: string, resubmissionData: any) => Promise<void>;
 }
 
 // Helper function to generate offline ID
@@ -710,6 +715,114 @@ export const useResponseStore = create<ResponseState>()(
       getResponseForDocumentation: (responseId: string): RapidResponse | null => {
         const { responses } = get();
         return responses.find(r => r.id === responseId) || null;
+      },
+      
+      // Status review functionality (Story 2.5)
+      loadStatusReview: async (filters = {}) => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          // Build query parameters
+          const queryParams = new URLSearchParams();
+          
+          if (filters.verificationStatus?.length) {
+            queryParams.set('verificationStatus', filters.verificationStatus.join(','));
+          }
+          if (filters.responseType?.length) {
+            queryParams.set('responseType', filters.responseType.join(','));
+          }
+          if (filters.requiresAttention !== undefined) {
+            queryParams.set('requiresAttention', String(filters.requiresAttention));
+          }
+          if (filters.dateRange?.start) {
+            queryParams.set('startDate', filters.dateRange.start.toISOString());
+          }
+          if (filters.dateRange?.end) {
+            queryParams.set('endDate', filters.dateRange.end.toISOString());
+          }
+
+          const response = await fetch(`/api/v1/responses/status-review?${queryParams.toString()}`);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.status === 'success') {
+            set({ 
+              responses: data.data.responses,
+              isLoading: false 
+            });
+          } else {
+            throw new Error(data.message || 'Failed to load status review data');
+          }
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to load status review data';
+          set({ error: errorMessage, isLoading: false });
+          console.error('Status review load error:', error);
+        }
+      },
+      
+      loadFeedback: async (responseId: string) => {
+        try {
+          const response = await fetch(`/api/v1/responses/${responseId}/feedback`);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.status === 'success') {
+            return data.data; // Returns { feedback: Feedback[], resubmissionHistory: ResubmissionLog[] }
+          } else {
+            throw new Error(data.message || 'Failed to load feedback data');
+          }
+          
+        } catch (error) {
+          console.error('Feedback load error:', error);
+          throw error;
+        }
+      },
+      
+      submitResubmission: async (responseId: string, resubmissionData: any) => {
+        set({ isLoading: true, error: null });
+        
+        try {
+          const response = await fetch(`/api/v1/responses/${responseId}/resubmit`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(resubmissionData),
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.status === 'success') {
+            // Update the local response with the updated data
+            set(state => ({
+              responses: state.responses.map(r => 
+                r.id === responseId ? data.data.response : r
+              ),
+              isLoading: false,
+            }));
+          } else {
+            throw new Error(data.message || 'Failed to submit resubmission');
+          }
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to submit resubmission';
+          set({ error: errorMessage, isLoading: false });
+          console.error('Resubmission error:', error);
+          throw error;
+        }
       },
     }),
     {

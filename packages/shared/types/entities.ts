@@ -64,6 +64,10 @@ export interface RapidResponse {
   deliveryEvidence: MediaAttachment[];
   partialDeliveryData?: PartialDeliveryData; // New field for partial delivery tracking
   deliveryDocumentation?: DeliveryDocumentation; // New field for completion docs
+  // Story 2.5: Status Review Extensions
+  feedbackCount?: number; // Computed field for UI efficiency
+  lastFeedbackAt?: Date;  // Quick access for sorting/filtering
+  requiresAttention: boolean; // Computed from feedback + verification status
   createdAt: Date;
   updatedAt: Date;
 }
@@ -615,4 +619,113 @@ export interface DeliveryDocumentationResponse {
     verificationMethodUsed: string;
     deliveryCompletionTime: Date;
   };
+}
+
+// Story 2.5: Response Status Review Types
+
+// Generic Feedback Interface (replaces CoordinatorFeedback)
+export interface Feedback {
+  id: string;
+  targetType: 'ASSESSMENT' | 'RESPONSE';
+  targetId: string; // assessmentId or responseId
+  coordinatorId: string;
+  coordinatorName: string;
+  feedbackType: 'REJECTION' | 'CLARIFICATION_REQUEST' | 'APPROVAL_NOTE';
+  reason: 'DATA_QUALITY' | 'MISSING_INFO' | 'VALIDATION_ERROR' | 'INSUFFICIENT_EVIDENCE' | 'OTHER';
+  comments: string;
+  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  requiresResponse: boolean;
+  createdAt: Date;
+  isRead: boolean;
+  isResolved: boolean;
+  resolvedAt?: Date;
+}
+
+// Resubmission Tracking System
+export interface ResubmissionLog {
+  id: string;
+  responseId: string;
+  version: number; // 1, 2, 3...
+  previousVersion: number;
+  resubmittedBy: string;
+  resubmittedAt: Date;
+  changesDescription: string;
+  addressedFeedbackIds: string[];
+  dataChanges: {
+    field: string;
+    oldValue: any;
+    newValue: any;
+  }[];
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+// Story 3.1: Assessment Verification Dashboard Types
+
+// Assessment Verification Queue Data Structure
+export interface AssessmentVerificationQueueItem {
+  assessment: RapidAssessment;
+  affectedEntity: AffectedEntity;
+  assessorName: string;
+  feedbackCount: number;
+  lastFeedbackAt?: Date;
+  requiresAttention: boolean;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+}
+
+export interface BatchVerificationRequest {
+  assessmentIds: string[];
+  action: 'APPROVE' | 'REJECT';
+  feedback?: {
+    reason: 'DATA_QUALITY' | 'MISSING_INFO' | 'VALIDATION_ERROR' | 'INSUFFICIENT_EVIDENCE' | 'OTHER';
+    comments: string;
+    priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  };
+}
+
+export interface VerificationQueueFilters {
+  assessmentTypes?: AssessmentType[];
+  verificationStatus?: VerificationStatus[];
+  dateRange?: { start: Date; end: Date };
+  priority?: ('HIGH' | 'MEDIUM' | 'LOW')[];
+  assessorIds?: string[];
+}
+
+// Verification Queue Request/Response Types
+export interface VerificationQueueRequest {
+  page?: number;
+  pageSize?: number;
+  sortBy?: 'priority' | 'date' | 'type' | 'assessor';
+  sortOrder?: 'asc' | 'desc';
+  filters?: VerificationQueueFilters;
+}
+
+export interface VerificationQueueResponse {
+  success: boolean;
+  data: {
+    queue: AssessmentVerificationQueueItem[];
+    queueStats: {
+      totalPending: number;
+      highPriority: number;
+      requiresAttention: number;
+      byAssessmentType: Record<AssessmentType, number>;
+    };
+    pagination: {
+      page: number;
+      pageSize: number;
+      totalPages: number;
+      totalCount: number;
+    };
+  };
+  error?: string;
+}
+
+export interface BatchVerificationResponse {
+  success: boolean;
+  data: {
+    processed: number;
+    successful: number;
+    failed: number;
+    errors: { assessmentId: string; error: string }[];
+  };
+  error?: string;
 }

@@ -73,6 +73,10 @@
       "Bash(pnpm playwright test:*)",
       "Bash(pnmp:*)",
       "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(/BMad:agents:architect)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
       "Bash(cd:*)"
     ],
     "deny": []
