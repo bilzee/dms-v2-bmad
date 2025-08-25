@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useBatchOperations, useQueueSelection } from '@/stores/verification.store';
-import { BatchVerificationRequest } from '@shared/types/entities';
+import { BatchVerificationRequest } from '@dms/shared';
 
 interface BatchVerificationProps {
   isOpen: boolean;

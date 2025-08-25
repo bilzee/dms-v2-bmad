@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BatchVerificationRequest, BatchVerificationResponse } from '@shared/types/entities';
+import { BatchVerificationRequest, BatchVerificationResponse } from '@dms/shared';
 
 export async function POST(request: NextRequest) {
   try {

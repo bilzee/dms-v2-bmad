@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AssessmentVerificationQueue } from '@/components/features/verification/AssessmentVerificationQueue';
 import { useVerificationStore } from '@/stores/verification.store';
-import { AssessmentType, VerificationStatus } from '@shared/types/entities';
+import { AssessmentType, VerificationStatus } from '@dms/shared';
 
 // Mock the verification store
 jest.mock('@/stores/verification.store', () => ({

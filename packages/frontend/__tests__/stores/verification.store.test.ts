@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useVerificationStore } from '@/stores/verification.store';
-import { AssessmentType, VerificationStatus } from '@shared/types/entities';
+import { AssessmentType, VerificationStatus } from '@dms/shared';
 
 // Mock fetch
 global.fetch = jest.fn();

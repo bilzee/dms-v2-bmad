@@ -5,7 +5,7 @@ import {
   AssessmentVerificationQueueItem,
   AssessmentType,
   VerificationStatus
-} from '@shared/types/entities';
+} from '@dms/shared';
 
 // Mock data for development
 const mockQueueItems: AssessmentVerificationQueueItem[] = [

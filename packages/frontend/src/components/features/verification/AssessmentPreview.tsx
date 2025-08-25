@@ -40,7 +40,7 @@ import {
   SecurityAssessmentData,
   PopulationAssessmentData,
   PreliminaryAssessmentData
-} from '@shared/types/entities';
+} from '@dms/shared';
 import { format } from 'date-fns';
 
 interface AssessmentPreviewProps {

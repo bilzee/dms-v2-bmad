@@ -3,7 +3,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils/cn';
-import { VerificationStatus, AssessmentType } from '@shared/types/entities';
+import { VerificationStatus, AssessmentType } from '@dms/shared';
 
 interface StatusBadgeProps {
   status: VerificationStatus;

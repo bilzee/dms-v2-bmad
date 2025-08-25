@@ -18,7 +18,7 @@ import {
   StatusBadge,
   AssessmentTypeIndicator 
 } from './VerificationStatusIndicators';
-import { AssessmentType, VerificationStatus } from '@shared/types/entities';
+import { AssessmentType, VerificationStatus } from '@dms/shared';
 import { format } from 'date-fns';
 
 interface AssessmentVerificationQueueProps {

@@ -8,7 +8,7 @@ import {
   AttentionIndicator,
   AssessmentStatusDisplay,
 } from '@/components/features/verification/VerificationStatusIndicators';
-import { VerificationStatus, AssessmentType } from '@shared/types/entities';
+import { VerificationStatus, AssessmentType } from '@dms/shared';
 
 describe('StatusBadge', () => {
   it('renders pending status correctly', () => {

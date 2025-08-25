@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { RapidAssessment, AssessmentType, VerificationStatus } from '@shared/types/entities';
+import { RapidAssessment, AssessmentType, VerificationStatus } from '@dms/shared';
 
 // Mock assessment data for development
 const mockAssessments: Record<string, RapidAssessment> = {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { VerificationStatus } from '@shared/types/entities';
+import { VerificationStatus } from '@dms/shared';
 
 interface VerifyAssessmentRequest {
   action: 'APPROVE' | 'REJECT';

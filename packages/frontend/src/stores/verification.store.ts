@@ -6,7 +6,7 @@ import {
   VerificationQueueRequest,
   BatchVerificationRequest,
   RapidAssessment 
-} from '@shared/types/entities';
+} from '@dms/shared';
 
 interface VerificationState {
   // Queue Data

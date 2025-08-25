@@ -5,7 +5,7 @@ import { AssessmentVerificationQueue } from '@/components/features/verification/
 import { AssessmentPreview } from '@/components/features/verification/AssessmentPreview';
 import { BatchVerification } from '@/components/features/verification/BatchVerification';
 import { useQueueSelection, useVerificationStore } from '@/stores/verification.store';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export default function VerificationQueuePage() {
   const [batchAction, setBatchAction] = React.useState<'APPROVE' | 'REJECT' | null>(null);
