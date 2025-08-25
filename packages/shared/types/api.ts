@@ -69,3 +69,51 @@ export interface BatchRejectionResponse extends ApiResponse<{
   feedbackIds: string[];
   notificationsSent: number;
 }> {}
+
+// Story 3.3: Response Approval/Rejection API Response Types
+
+// Response Approval Response  
+export interface ResponseApprovalResponse extends ApiResponse<{
+  responseId: string;
+  verificationStatus: 'VERIFIED';
+  approvedBy: string;
+  approvedAt: Date;
+  notificationSent: boolean;
+}> {}
+
+// Response Rejection Response
+export interface ResponseRejectionResponse extends ApiResponse<{
+  responseId: string;
+  verificationStatus: 'REJECTED';
+  rejectedBy: string;
+  rejectedAt: Date;
+  feedbackId: string;
+  notificationSent: boolean;
+}> {}
+
+// Batch Response Approval Response
+export interface BatchResponseApprovalResponse extends ApiResponse<{
+  processed: number;
+  approved: number;
+  failed: number;
+  results: {
+    responseId: string;
+    status: 'SUCCESS' | 'FAILED';
+    error?: string;
+  }[];
+  notificationsSent: number;
+}> {}
+
+// Batch Response Rejection Response
+export interface BatchResponseRejectionResponse extends ApiResponse<{
+  processed: number;
+  rejected: number;
+  failed: number;
+  results: {
+    responseId: string;
+    status: 'SUCCESS' | 'FAILED';
+    error?: string;
+  }[];
+  feedbackIds: string[];
+  notificationsSent: number;
+}> {}

@@ -1,0 +1,149 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { 
+  ResponseApprovalRequest, 
+  ResponseApprovalResponse,
+  RapidResponse,
+  Feedback 
+} from '@dms/shared';
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse<ResponseApprovalResponse>> {
+  try {
+    const responseId = params.id;
+    
+    if (!responseId) {
+      return NextResponse.json({
+        success: false,
+        message: 'Response ID is required',
+        data: null,
+        errors: ['Response ID parameter is missing'],
+      } as ResponseApprovalResponse, { status: 400 });
+    }
+
+    const body: ResponseApprovalRequest = await request.json();
+    
+    // Validate request body
+    if (!body.coordinatorId || !body.coordinatorName) {
+      return NextResponse.json({
+        success: false,
+        message: 'Coordinator information is required',
+        data: null,
+        errors: ['coordinatorId and coordinatorName are required'],
+      } as ResponseApprovalResponse, { status: 400 });
+    }
+
+    // TODO: Add authentication middleware to verify coordinator role
+    // For now, we'll mock the database operations
+
+    // Mock: Check if response exists and is in PENDING status
+    const mockResponse: Partial<RapidResponse> = {
+      id: responseId,
+      verificationStatus: 'PENDING',
+      responderId: 'mock-responder-id',
+      responderName: 'Mock Responder',
+      responseType: 'HEALTH',
+    };
+
+    if (!mockResponse || mockResponse.verificationStatus !== 'PENDING') {
+      return NextResponse.json({
+        success: false,
+        message: 'Response not found or not in pending status',
+        data: null,
+        errors: ['Response must be in PENDING status to be approved'],
+      } as ResponseApprovalResponse, { status: 404 });
+    }
+
+    // Mock: Update response verification status to VERIFIED
+    const approvalTimestamp = new Date();
+    
+    // Mock: Create approval feedback if note provided
+    let feedbackCreated = false;
+    if (body.approvalNote?.trim()) {
+      const approvalFeedback: Partial<Feedback> = {
+        id: `feedback-${Date.now()}`,
+        targetType: 'RESPONSE',
+        targetId: responseId,
+        coordinatorId: body.coordinatorId,
+        coordinatorName: body.coordinatorName,
+        feedbackType: 'APPROVAL_NOTE',
+        reason: 'OTHER',
+        comments: body.approvalNote.trim(),
+        priority: 'NORMAL',
+        requiresResponse: false,
+        createdAt: approvalTimestamp,
+        isRead: false,
+        isResolved: true, // Approval notes are automatically resolved
+        resolvedAt: approvalTimestamp,
+      };
+      
+      // TODO: Save feedback to database
+      feedbackCreated = true;
+    }
+
+    // Mock: Send notification to responder if requested
+    let notificationSent = false;
+    if (body.notifyResponder) {
+      // TODO: Implement notification service
+      // await sendNotificationToResponder(responseId, approvalFeedback);
+      notificationSent = true;
+    }
+
+    // Mock: Update response in database
+    // TODO: Implement database update
+    // await updateResponseVerificationStatus(responseId, 'VERIFIED', body.coordinatorId);
+
+    // Mock: Log approval action for audit trail
+    // TODO: Implement audit logging
+    console.log(`Response ${responseId} approved by ${body.coordinatorName} at ${approvalTimestamp.toISOString()}`);
+
+    const response: ResponseApprovalResponse = {
+      success: true,
+      message: 'Response approved successfully',
+      data: {
+        responseId,
+        verificationStatus: 'VERIFIED',
+        approvedBy: body.coordinatorName,
+        approvedAt: approvalTimestamp,
+        notificationSent,
+      },
+    };
+
+    return NextResponse.json(response, { status: 200 });
+
+  } catch (error) {
+    console.error('Error approving response:', error);
+    
+    const errorResponse: ResponseApprovalResponse = {
+      success: false,
+      message: 'Internal server error occurred while approving response',
+      data: null,
+      errors: ['An unexpected error occurred. Please try again later.'],
+    };
+
+    return NextResponse.json(errorResponse, { status: 500 });
+  }
+}
+
+// Handle unsupported methods
+export async function GET() {
+  return NextResponse.json(
+    { error: 'Method not allowed. Use POST to approve responses.' },
+    { status: 405 }
+  );
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    { error: 'Method not allowed. Use POST to approve responses.' },
+    { status: 405 }
+  );
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    { error: 'Method not allowed. Use POST to approve responses.' },
+    { status: 405 }
+  );
+}

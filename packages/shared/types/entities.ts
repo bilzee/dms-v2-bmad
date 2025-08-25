@@ -672,6 +672,17 @@ export interface AssessmentVerificationQueueItem {
   priority: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
+// Response Verification Queue Data Structure
+export interface ResponseVerificationQueueItem {
+  response: RapidResponse;
+  affectedEntity: AffectedEntity;
+  responderName: string;
+  feedbackCount: number;
+  lastFeedbackAt?: Date;
+  requiresAttention: boolean;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+}
+
 export interface BatchVerificationRequest {
   assessmentIds: string[];
   action: 'APPROVE' | 'REJECT';
@@ -690,6 +701,16 @@ export interface VerificationQueueFilters {
   assessorIds?: string[];
 }
 
+// Response Verification Queue Filters
+export interface ResponseVerificationQueueFilters {
+  responseTypes?: ResponseType[];
+  verificationStatus?: VerificationStatus[];
+  deliveryStatus?: ResponseStatus[];
+  dateRange?: { start: Date; end: Date };
+  priority?: ('HIGH' | 'MEDIUM' | 'LOW')[];
+  responderIds?: string[];
+}
+
 // Verification Queue Request/Response Types
 export interface VerificationQueueRequest {
   page?: number;
@@ -697,6 +718,15 @@ export interface VerificationQueueRequest {
   sortBy?: 'priority' | 'date' | 'type' | 'assessor';
   sortOrder?: 'asc' | 'desc';
   filters?: VerificationQueueFilters;
+}
+
+// Response Verification Queue Request/Response Types
+export interface ResponseVerificationQueueRequest {
+  page?: number;
+  pageSize?: number;
+  sortBy?: 'priority' | 'date' | 'type' | 'responder';
+  sortOrder?: 'asc' | 'desc';
+  filters?: ResponseVerificationQueueFilters;
 }
 
 export interface VerificationQueueResponse {
@@ -708,6 +738,26 @@ export interface VerificationQueueResponse {
       highPriority: number;
       requiresAttention: number;
       byAssessmentType: Record<AssessmentType, number>;
+    };
+    pagination: {
+      page: number;
+      pageSize: number;
+      totalPages: number;
+      totalCount: number;
+    };
+  };
+  error?: string;
+}
+
+export interface ResponseVerificationQueueResponse {
+  success: boolean;
+  data: {
+    queue: ResponseVerificationQueueItem[];
+    queueStats: {
+      totalPending: number;
+      highPriority: number;
+      requiresAttention: number;
+      byResponseType: Record<ResponseType, number>;
     };
     pagination: {
       page: number;
@@ -772,4 +822,45 @@ export interface BatchRejectionRequest {
   rejectionComments: string;
   priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
   notifyAssessors: boolean;
+}
+
+// Response Approval/Rejection Requests
+export interface ResponseApprovalRequest {
+  responseId: string;
+  coordinatorId: string;
+  coordinatorName: string;
+  approvalNote?: string;
+  approvalTimestamp: Date;
+  notifyResponder: boolean;
+}
+
+export interface ResponseRejectionRequest {
+  responseId: string;
+  coordinatorId: string;
+  coordinatorName: string;
+  rejectionReason: 'DATA_QUALITY' | 'MISSING_INFO' | 'VALIDATION_ERROR' | 'INSUFFICIENT_EVIDENCE' | 'OTHER';
+  rejectionComments: string;
+  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  requiresResubmission: boolean;
+  notifyResponder: boolean;
+  rejectionTimestamp: Date;
+}
+
+// Batch Response Approval/Rejection Operations
+export interface BatchResponseApprovalRequest {
+  responseIds: string[];
+  coordinatorId: string;
+  coordinatorName: string;
+  batchNote?: string;
+  notifyResponders: boolean;
+}
+
+export interface BatchResponseRejectionRequest {
+  responseIds: string[];
+  coordinatorId: string;
+  coordinatorName: string;
+  rejectionReason: 'DATA_QUALITY' | 'MISSING_INFO' | 'VALIDATION_ERROR' | 'INSUFFICIENT_EVIDENCE' | 'OTHER';
+  rejectionComments: string;
+  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  notifyResponders: boolean;
 }

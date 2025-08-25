@@ -2,20 +2,33 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { 
   AssessmentVerificationQueueItem, 
+  ResponseVerificationQueueItem,
   VerificationQueueFilters,
+  ResponseVerificationQueueFilters,
   VerificationQueueRequest,
+  ResponseVerificationQueueRequest,
   BatchVerificationRequest,
-  RapidAssessment 
+  RapidAssessment,
+  RapidResponse 
 } from '@dms/shared';
 
 interface VerificationState {
-  // Queue Data
+  // Assessment Queue Data
   queue: AssessmentVerificationQueueItem[];
   queueStats: {
     totalPending: number;
     highPriority: number;
     requiresAttention: number;
     byAssessmentType: Record<string, number>;
+  };
+  
+  // Response Queue Data
+  responseQueue: ResponseVerificationQueueItem[];
+  responseQueueStats: {
+    totalPending: number;
+    highPriority: number;
+    requiresAttention: number;
+    byResponseType: Record<string, number>;
   };
   pagination: {
     page: number;
@@ -28,13 +41,18 @@ interface VerificationState {
   isLoading: boolean;
   error: string | null;
   selectedAssessmentIds: string[];
+  selectedResponseIds: string[];
   isPreviewOpen: boolean;
   previewAssessment: RapidAssessment | null;
+  previewResponse: RapidResponse | null;
   
   // Filters and Sorting
   filters: VerificationQueueFilters;
+  responseFilters: ResponseVerificationQueueFilters;
   sortBy: 'priority' | 'date' | 'type' | 'assessor';
+  responseSortBy: 'priority' | 'date' | 'type' | 'responder';
   sortOrder: 'asc' | 'desc';
+  responseSortOrder: 'asc' | 'desc';
 
   // Batch Operations
   isBatchProcessing: boolean;
@@ -44,35 +62,53 @@ interface VerificationState {
     currentOperation: string;
   };
 
-  // Actions
+  // Assessment Queue Actions
   fetchQueue: (request?: Partial<VerificationQueueRequest>) => Promise<void>;
   setFilters: (filters: Partial<VerificationQueueFilters>) => void;
   setSorting: (sortBy: 'priority' | 'date' | 'type' | 'assessor', sortOrder: 'asc' | 'desc') => void;
   setPage: (page: number) => void;
   
+  // Response Queue Actions
+  fetchResponseQueue: (request?: Partial<ResponseVerificationQueueRequest>) => Promise<void>;
+  setResponseFilters: (filters: Partial<ResponseVerificationQueueFilters>) => void;
+  setResponseSorting: (sortBy: 'priority' | 'date' | 'type' | 'responder', sortOrder: 'asc' | 'desc') => void;
+  setResponsePage: (page: number) => void;
+  
   // Selection
   toggleAssessmentSelection: (assessmentId: string) => void;
+  toggleResponseSelection: (responseId: string) => void;
   selectAllVisible: () => void;
+  selectAllResponsesVisible: () => void;
   clearSelection: () => void;
+  clearResponseSelection: () => void;
   
   // Preview
   openPreview: (assessment: RapidAssessment) => void;
+  openResponsePreview: (response: RapidResponse) => void;
   closePreview: () => void;
   
   // Verification Actions
   verifyAssessment: (assessmentId: string, action: 'APPROVE' | 'REJECT', feedback?: any) => Promise<void>;
   batchVerify: (request: BatchVerificationRequest) => Promise<void>;
   
-  // Story 3.2: Approval/Rejection Actions
+  // Story 3.2: Assessment Approval/Rejection Actions
   approveAssessment: (assessmentId: string, approvalData: any) => Promise<void>;
   rejectAssessment: (assessmentId: string, rejectionData: any) => Promise<void>;
   batchApprove: (assessmentIds: string[], approvalData: any) => Promise<void>;
   batchReject: (assessmentIds: string[], rejectionData: any) => Promise<void>;
   
+  // Story 3.3: Response Approval/Rejection Actions
+  approveResponse: (responseId: string, approvalData: any) => Promise<void>;
+  rejectResponse: (responseId: string, rejectionData: any) => Promise<void>;
+  batchApproveResponses: (responseIds: string[], approvalData: any) => Promise<void>;
+  batchRejectResponses: (responseIds: string[], rejectionData: any) => Promise<void>;
+  
   // Utility
   reset: () => void;
   getSelectedCount: () => number;
+  getSelectedResponseCount: () => number;
   getHighPriorityCount: () => number;
+  getResponseHighPriorityCount: () => number;
 }
 
 const initialState = {
@@ -83,6 +119,13 @@ const initialState = {
     requiresAttention: 0,
     byAssessmentType: {},
   },
+  responseQueue: [],
+  responseQueueStats: {
+    totalPending: 0,
+    highPriority: 0,
+    requiresAttention: 0,
+    byResponseType: {},
+  },
   pagination: {
     page: 1,
     pageSize: 20,
@@ -92,11 +135,16 @@ const initialState = {
   isLoading: false,
   error: null,
   selectedAssessmentIds: [],
+  selectedResponseIds: [],
   isPreviewOpen: false,
   previewAssessment: null,
+  previewResponse: null,
   filters: {},
+  responseFilters: {},
   sortBy: 'priority' as const,
+  responseSortBy: 'priority' as const,
   sortOrder: 'desc' as const,
+  responseSortOrder: 'desc' as const,
   isBatchProcessing: false,
   batchProgress: {
     processed: 0,
@@ -467,6 +515,285 @@ export const useVerificationStore = create<VerificationState>()(
       }
     },
 
+    // Response Queue Actions
+    fetchResponseQueue: async (request?: Partial<ResponseVerificationQueueRequest>) => {
+      const state = get();
+      set({ isLoading: true, error: null });
+
+      try {
+        const params = new URLSearchParams();
+        
+        const finalRequest: ResponseVerificationQueueRequest = {
+          page: state.pagination.page,
+          pageSize: state.pagination.pageSize,
+          sortBy: state.responseSortBy,
+          sortOrder: state.responseSortOrder,
+          filters: state.responseFilters,
+          ...request,
+        };
+
+        Object.entries(finalRequest).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (key === 'filters' && typeof value === 'object') {
+              params.append(key, JSON.stringify(value));
+            } else {
+              params.append(key, String(value));
+            }
+          }
+        });
+
+        const response = await fetch(`/api/v1/verification/responses/queue?${params}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to fetch response verification queue');
+        }
+
+        set({
+          responseQueue: data.data.queue,
+          responseQueueStats: data.data.queueStats,
+          pagination: data.data.pagination,
+          isLoading: false,
+          error: null,
+        });
+
+      } catch (error) {
+        console.error('Failed to fetch response verification queue:', error);
+        set({ 
+          isLoading: false, 
+          error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+      }
+    },
+
+    setResponseFilters: (newFilters) => {
+      set((state) => ({
+        responseFilters: { ...state.responseFilters, ...newFilters },
+        pagination: { ...state.pagination, page: 1 },
+      }));
+      
+      // Auto-refresh queue with new filters
+      get().fetchResponseQueue();
+    },
+
+    setResponseSorting: (sortBy, sortOrder) => {
+      set({ responseSortBy: sortBy, responseSortOrder: sortOrder });
+      get().fetchResponseQueue();
+    },
+
+    setResponsePage: (page) => {
+      set((state) => ({
+        pagination: { ...state.pagination, page },
+      }));
+      get().fetchResponseQueue();
+    },
+
+    // Response Selection
+    toggleResponseSelection: (responseId) => {
+      set((state) => {
+        const isSelected = state.selectedResponseIds.includes(responseId);
+        return {
+          selectedResponseIds: isSelected
+            ? state.selectedResponseIds.filter(id => id !== responseId)
+            : [...state.selectedResponseIds, responseId],
+        };
+      });
+    },
+
+    selectAllResponsesVisible: () => {
+      const { responseQueue } = get();
+      set({ selectedResponseIds: responseQueue.map(item => item.response.id) });
+    },
+
+    clearResponseSelection: () => {
+      set({ selectedResponseIds: [] });
+    },
+
+    // Response Preview
+    openResponsePreview: (response) => {
+      set({ previewResponse: response, isPreviewOpen: true });
+    },
+
+    // Response Approval/Rejection Actions
+    approveResponse: async (responseId, approvalData) => {
+      try {
+        const response = await fetch(`/api/v1/verification/responses/${responseId}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(approvalData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to approve response');
+        }
+
+        // Refresh queue and remove from selection
+        await get().fetchResponseQueue();
+        set((state) => ({
+          selectedResponseIds: state.selectedResponseIds.filter(id => id !== responseId),
+        }));
+
+      } catch (error) {
+        console.error('Failed to approve response:', error);
+        throw error;
+      }
+    },
+
+    rejectResponse: async (responseId, rejectionData) => {
+      try {
+        const response = await fetch(`/api/v1/verification/responses/${responseId}/reject`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(rejectionData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to reject response');
+        }
+
+        // Refresh queue and remove from selection
+        await get().fetchResponseQueue();
+        set((state) => ({
+          selectedResponseIds: state.selectedResponseIds.filter(id => id !== responseId),
+        }));
+
+      } catch (error) {
+        console.error('Failed to reject response:', error);
+        throw error;
+      }
+    },
+
+    batchApproveResponses: async (responseIds, approvalData) => {
+      set({ 
+        isBatchProcessing: true, 
+        batchProgress: { processed: 0, total: responseIds.length, currentOperation: 'Starting batch approval...' } 
+      });
+
+      try {
+        const response = await fetch('/api/v1/verification/responses/batch-approve', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            responseIds,
+            ...approvalData,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Batch approval failed');
+        }
+
+        // Update progress
+        set({
+          batchProgress: {
+            processed: result.data.approved,
+            total: responseIds.length,
+            currentOperation: `Approved: ${result.data.approved}/${responseIds.length}`,
+          },
+        });
+
+        // Refresh queue and clear selection
+        await get().fetchResponseQueue();
+        get().clearResponseSelection();
+
+        if (result.data.failed > 0) {
+          console.warn('Some responses failed to approve:', result.data.results);
+        }
+
+      } catch (error) {
+        console.error('Batch approval failed:', error);
+        throw error;
+      } finally {
+        set({ isBatchProcessing: false });
+      }
+    },
+
+    batchRejectResponses: async (responseIds, rejectionData) => {
+      set({ 
+        isBatchProcessing: true, 
+        batchProgress: { processed: 0, total: responseIds.length, currentOperation: 'Starting batch rejection...' } 
+      });
+
+      try {
+        const response = await fetch('/api/v1/verification/responses/batch-reject', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            responseIds,
+            ...rejectionData,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Batch rejection failed');
+        }
+
+        // Update progress
+        set({
+          batchProgress: {
+            processed: result.data.rejected,
+            total: responseIds.length,
+            currentOperation: `Rejected: ${result.data.rejected}/${responseIds.length}`,
+          },
+        });
+
+        // Refresh queue and clear selection
+        await get().fetchResponseQueue();
+        get().clearResponseSelection();
+
+        if (result.data.failed > 0) {
+          console.warn('Some responses failed to reject:', result.data.results);
+        }
+
+      } catch (error) {
+        console.error('Batch rejection failed:', error);
+        throw error;
+      } finally {
+        set({ isBatchProcessing: false });
+      }
+    },
+
+    // Utility functions
+    getSelectedResponseCount: () => get().selectedResponseIds.length,
+    getResponseHighPriorityCount: () => get().responseQueueStats.highPriority,
+
     reset: () => set(initialState),
   }))
 );
@@ -507,4 +834,43 @@ export const useBatchOperations = () => useVerificationStore((state) => ({
   isBatchProcessing: state.isBatchProcessing,
   batchProgress: state.batchProgress,
   batchVerify: state.batchVerify,
+}));
+
+// Response verification selector hooks
+export const useResponseQueueData = () => useVerificationStore((state) => ({
+  responseQueue: state.responseQueue,
+  responseQueueStats: state.responseQueueStats,
+  pagination: state.pagination,
+  isLoading: state.isLoading,
+  error: state.error,
+}));
+
+export const useResponseQueueFilters = () => useVerificationStore((state) => ({
+  filters: state.responseFilters,
+  sortBy: state.responseSortBy,
+  sortOrder: state.responseSortOrder,
+  setFilters: state.setResponseFilters,
+  setSorting: state.setResponseSorting,
+}));
+
+export const useResponseQueueSelection = () => useVerificationStore((state) => ({
+  selectedResponseIds: state.selectedResponseIds,
+  toggleResponseSelection: state.toggleResponseSelection,
+  selectAllVisible: state.selectAllResponsesVisible,
+  clearSelection: state.clearResponseSelection,
+  getSelectedCount: state.getSelectedResponseCount,
+}));
+
+export const useResponsePreview = () => useVerificationStore((state) => ({
+  isPreviewOpen: state.isPreviewOpen,
+  previewResponse: state.previewResponse,
+  openPreview: state.openResponsePreview,
+  closePreview: state.closePreview,
+}));
+
+export const useResponseBatchOperations = () => useVerificationStore((state) => ({
+  isBatchProcessing: state.isBatchProcessing,
+  batchProgress: state.batchProgress,
+  batchApproveResponses: state.batchApproveResponses,
+  batchRejectResponses: state.batchRejectResponses,
 }));
