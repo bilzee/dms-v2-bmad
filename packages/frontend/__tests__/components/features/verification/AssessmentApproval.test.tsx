@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssessmentApproval } from '@/components/features/verification/AssessmentApproval';
-import { RapidAssessment } from '@dms/shared';
+import { RapidAssessment, AssessmentType, VerificationStatus, SyncStatus } from '@dms/shared';
 
 // Mock dependencies
 jest.mock('@/hooks/useAuth', () => ({
@@ -24,13 +24,13 @@ global.fetch = jest.fn();
 
 const mockAssessment: RapidAssessment = {
   id: 'test-assessment-id',
-  type: 'HEALTH',
+  type: AssessmentType.HEALTH,
   date: new Date('2023-08-25'),
   affectedEntityId: 'entity-1',
   assessorName: 'John Assessor',
   assessorId: 'assessor-1',
-  verificationStatus: 'PENDING',
-  syncStatus: 'SYNCED',
+  verificationStatus: VerificationStatus.PENDING,
+  syncStatus: SyncStatus.SYNCED,
   data: {
     hasFunctionalClinic: true,
     numberHealthFacilities: 2,
@@ -59,7 +59,7 @@ describe('AssessmentApproval', () => {
   });
 
   it('shows already approved state for verified assessments', () => {
-    const verifiedAssessment = { ...mockAssessment, verificationStatus: 'VERIFIED' as const };
+    const verifiedAssessment = { ...mockAssessment, verificationStatus: VerificationStatus.VERIFIED };
     
     render(<AssessmentApproval assessment={verifiedAssessment} />);
     
@@ -77,7 +77,7 @@ describe('AssessmentApproval', () => {
         success: true,
         data: {
           assessmentId: 'test-assessment-id',
-          verificationStatus: 'VERIFIED',
+          verificationStatus: VerificationStatus.VERIFIED,
           approvedBy: 'Test Coordinator',
           approvedAt: new Date(),
           notificationSent: true,
@@ -138,7 +138,7 @@ describe('AssessmentApproval', () => {
         success: true,
         data: {
           assessmentId: 'test-assessment-id',
-          verificationStatus: 'VERIFIED',
+          verificationStatus: VerificationStatus.VERIFIED,
           approvedBy: 'Test Coordinator',
           approvedAt: new Date(),
           notificationSent: true,

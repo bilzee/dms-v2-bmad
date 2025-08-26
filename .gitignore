@@ -145,3 +145,6 @@ Dockerfile*
 
 # Testing
 /coverage
+
+# MCP Servers
+mcp-servers/

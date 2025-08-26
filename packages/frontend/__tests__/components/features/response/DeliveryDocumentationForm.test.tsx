@@ -58,6 +58,7 @@ const mockResponse: RapidResponse = {
     personsServed: 0,
     nutritionSupplementsProvided: 0,
   },
+  requiresAttention: false,
   otherItemsDelivered: [],
   deliveryEvidence: [],
   createdAt: new Date('2024-01-14'),

@@ -153,6 +153,13 @@ export enum ResponseStatus {
   CANCELLED = 'CANCELLED'
 }
 
+export enum UserRoleType {
+  FIELD_ASSESSOR = 'FIELD_ASSESSOR',
+  COORDINATOR = 'COORDINATOR',
+  FIELD_RESPONDER = 'FIELD_RESPONDER',
+  DONOR_ORGANIZATION = 'DONOR_ORGANIZATION'
+}
+
 // Polymorphic assessment data types
 export type AssessmentData = 
   | HealthAssessmentData
@@ -324,6 +331,8 @@ export interface UserRole {
   permissions: Permission[];
   isActive: boolean;
 }
+
+export type UserRoleName = 'FIELD_ASSESSOR' | 'COORDINATOR' | 'FIELD_RESPONDER' | 'DONOR_ORGANIZATION';
 
 export interface Permission {
   id: string;
@@ -961,3 +970,78 @@ export interface AutoApprovalStatsResponse extends ApiResponse<{
   overridesCount: number;
   timeRange: string;
 }> {}
+
+// Story 3.5: Response Verification Data Structures
+
+// Photo verification with GPS and quality scoring
+export interface PhotoVerificationData {
+  photoId: string;
+  gpsAccuracy: number; // meters
+  timestampAccuracy: boolean;
+  qualityScore: number; // 1-10
+  relevanceScore: number; // 1-10
+  verifierNotes: string;
+  verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
+}
+
+// Delivery metrics for planned vs actual comparison  
+export interface ResponseVerificationMetrics {
+  responseId: string;
+  plannedItems: DeliveryItem[];
+  actualItems: DeliveryItem[];
+  plannedBeneficiaries: number;
+  actualBeneficiaries: number;
+  deliveryCompleteness: number; // Percentage
+  varianceFlags: VarianceFlag[];
+  verificationNotes: string;
+  photosVerified: boolean;
+  locationVerified: boolean;
+  timestampVerified: boolean;
+}
+
+export interface DeliveryItem {
+  itemType: ResponseType;
+  plannedQuantity: number;
+  actualQuantity: number;
+  unit: string;
+  variance: number; // Percentage difference
+  verified: boolean;
+}
+
+export interface VarianceFlag {
+  type: 'QUANTITY' | 'BENEFICIARY' | 'TIMING' | 'LOCATION';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH';
+  description: string;
+  threshold: number;
+  actual: number;
+}
+
+// Timeline and accountability tracking
+export interface TimelineEvent {
+  id: string;
+  type: 'ASSESSMENT' | 'PLANNING' | 'APPROVAL' | 'DELIVERY' | 'VERIFICATION' | 'FEEDBACK';
+  title: string;
+  description: string;
+  timestamp: Date;
+  status: 'COMPLETED' | 'IN_PROGRESS' | 'DELAYED' | 'MISSED';
+  actor: string;
+  metadata?: any;
+}
+
+export interface PerformanceMetric {
+  metric: string;
+  value: number;
+  unit: string;
+  benchmark?: number;
+  status: 'EXCELLENT' | 'GOOD' | 'NEEDS_IMPROVEMENT' | 'POOR';
+  description: string;
+}
+
+export interface ResponderPerformance {
+  responseTime: number; // hours from assessment to planned delivery
+  deliveryAccuracy: number; // percentage
+  beneficiaryServed: number;
+  completenessScore: number; // percentage
+  qualityScore: number; // 1-10
+  overallRating: number; // 1-5 stars
+}

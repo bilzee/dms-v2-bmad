@@ -1,15 +1,6 @@
 {
     "mcpServers": {
-        "context7": {
-          "type": "http",
-          "url": "https://mcp.context7.com/mcp"
-        },
-        "playwright": {
-            "command": "npx",
-            "args": [
-                "@playwright/mcp@latest"
-            ]
-        },
+
         "sequential-thinking": {
             "command": "uvx",
             "args": [
@@ -19,13 +10,8 @@
                 "portalocker",
                 "mcp-sequential-thinking"
             ]
-        }, 
-        "brave-search-dev": {
-            "command": "node",
-            "args": ["/home/bilnigma/mcp-repos/brave-search-mcp-server/dist/index.js"], // Verify your path
-            "env": {
-                "BRAVE_API_KEY": "BSA5KmHQZo9jghyGOzJHvkv9XetPrrm"
-            }
         }
     }
 }
+
+

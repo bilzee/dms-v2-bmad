@@ -481,24 +481,23 @@ function getAssessmentRecommendations(assessment: RapidAssessment, responseType:
         if (data.hasMedicineSupply === false) recommendations.push('Medicine Supply');
         break;
       
-      case ResponseType.WASH:
+      case AssessmentType.WASH:
         if (data.isWaterSufficient === false) recommendations.push('Water Supply');
         if (data.hasToilets === false) recommendations.push('Sanitation Facilities');
         if (data.waterQuality === 'Contaminated') recommendations.push('Water Treatment');
         break;
       
-      case ResponseType.SHELTER:
+      case AssessmentType.SHELTER:
         if (data.areSheltersSufficient === false) recommendations.push('Additional Shelters');
         if (data.needsTarpaulin) recommendations.push('Tarpaulins');
         if (data.needsBedding) recommendations.push('Bedding Kits');
         break;
       
-      case ResponseType.FOOD:
+      case AssessmentType.FOOD:
         if (data.availableFoodDurationDays < 7) recommendations.push('Food Supply');
         if (data.malnutritionCases > 0) recommendations.push('Nutrition Support');
         break;
     }
-  }
   
   return recommendations;
 }

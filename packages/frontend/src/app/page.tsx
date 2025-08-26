@@ -29,12 +29,14 @@ export default function HomePage() {
       stats: { count: 12, label: 'active' }
     },
     {
-      title: 'Response Planning',
-      description: 'Plan and coordinate humanitarian response activities',
+      title: 'Response Management',
+      description: 'Plan responses and track delivery progress',
       icon: <BarChart3 className="w-6 h-6" />,
       ...featureColors.responses,
       actions: [
-        { label: 'Plan New Response', href: '/responses/plan' }
+        { label: 'Plan New Response', href: '/responses/plan' },
+        { label: 'Track Deliveries', href: '/responses/tracking', variant: 'outline' as const },
+        { label: 'Planned to Actual', href: '/responses/conversion', variant: 'ghost' as const }
       ],
       stats: { count: 3, label: 'planned' }
     },
@@ -49,14 +51,16 @@ export default function HomePage() {
       stats: { count: 28, label: 'locations' }
     },
     {
-      title: 'Sync Queue',
-      description: 'Monitor offline synchronization operations',
-      icon: <Archive className="w-6 h-6" />,
+      title: 'Coordinator Tools',
+      description: 'Verification dashboard and approval management',
+      icon: <UserCheck className="w-6 h-6" />,
       ...featureColors.queue,
       actions: [
-        { label: 'View Sync Queue', href: '/queue' }
+        { label: 'Verification Dashboard', href: '/coordinator/dashboard' },
+        { label: 'Assessment Approvals', href: '/coordinator/assessments/review', variant: 'outline' as const },
+        { label: 'Response Approvals', href: '/coordinator/responses/review', variant: 'ghost' as const }
       ],
-      stats: { count: 0, label: 'pending' }
+      stats: { count: 8, label: 'pending review' }
     }
   ]
 
@@ -188,21 +192,26 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          {/* Incidents Card */}
+          {/* Response Tracking Card */}
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-orange-600" />
-                Incidents
+                <Archive className="w-5 h-5 text-blue-600" />
+                Response Tracking
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Monitor and manage active disaster incidents
+                Track delivery progress and partial deliveries
               </p>
-              <Link href="/incidents" className="w-full">
-                <Button className="w-full">View Incidents</Button>
-              </Link>
+              <div className="space-y-2">
+                <Link href="/responses/status-review" className="w-full">
+                  <Button className="w-full" size="sm">Status Review</Button>
+                </Link>
+                <Link href="/verification/responses" className="w-full">
+                  <Button className="w-full" variant="outline" size="sm">Response Queue</Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
 
@@ -252,22 +261,22 @@ export default function HomePage() {
 
                 <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-yellow-600" />
-                    <Link href="/assessments?filter=pending" className="text-sm font-medium">
-                      Pending Sync
+                    <UserCheck className="w-4 h-4 text-green-600" />
+                    <Link href="/verification/queue" className="text-sm font-medium">
+                      Review Queue
                     </Link>
                   </div>
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">0</Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">5</Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50">
                   <div className="flex items-center gap-2">
-                    <XCircle className="w-4 h-4 text-red-600" />
-                    <Link href="/assessments?filter=failed" className="text-sm font-medium">
-                      Failed Sync
+                    <Archive className="w-4 h-4 text-orange-600" />
+                    <Link href="/queue" className="text-sm font-medium">
+                      Sync Queue
                     </Link>
                   </div>
-                  <Badge variant="destructive">0</Badge>
+                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">0</Badge>
                 </div>
               </div>
             </CardContent>

@@ -9,7 +9,14 @@ import {
   ResponseVerificationQueueRequest,
   BatchVerificationRequest,
   RapidAssessment,
-  RapidResponse 
+  RapidResponse,
+  AutoApprovalConfig,
+  AutoApprovalRule,
+  AutoApprovalOverrideRequest,
+  AutoApprovalStatsResponse,
+  PhotoVerificationData,
+  ResponseVerificationMetrics,
+  MediaAttachment
 } from '@dms/shared';
 
 interface VerificationState {
@@ -102,6 +109,49 @@ interface VerificationState {
   rejectResponse: (responseId: string, rejectionData: any) => Promise<void>;
   batchApproveResponses: (responseIds: string[], approvalData: any) => Promise<void>;
   batchRejectResponses: (responseIds: string[], rejectionData: any) => Promise<void>;
+
+  // Story 3.4: Auto-Approval Configuration
+  autoApprovalConfig: AutoApprovalConfig | null;
+  autoApprovalStats: AutoApprovalStatsResponse['data'] | null;
+  isLoadingAutoApproval: boolean;
+  autoApprovalError: string | null;
+  
+  // Auto-Approval Actions
+  fetchAutoApprovalConfig: () => Promise<void>;
+  saveAutoApprovalConfig: (config: AutoApprovalConfig) => Promise<void>;
+  fetchAutoApprovalStats: (timeRange?: string) => Promise<void>;
+  testAutoApprovalRules: (rules: AutoApprovalRule[]) => Promise<any>;
+  overrideAutoApprovals: (request: AutoApprovalOverrideRequest) => Promise<void>;
+
+  // Story 3.5: Response Verification State
+  currentResponseVerification: RapidResponse | null;
+  photoVerifications: Record<string, PhotoVerificationData>;
+  responseMetrics: ResponseVerificationMetrics | null;
+  deliveryComparison: any | null; // Planned vs actual comparison data
+  isLoadingResponseVerification: boolean;
+  responseVerificationError: string | null;
+  
+  // Extended Response Verification State
+  responseVerifications: {
+    [responseId: string]: {
+      photoVerifications: PhotoVerificationData[];
+      metricsValidation: ResponseVerificationMetrics | null;
+      verifierNotes: string;
+      isComplete: boolean;
+    }
+  };
+
+  // Story 3.5: Response Verification Actions
+  loadResponsePhotos: (responseId: string) => Promise<MediaAttachment[]>;
+  annotatePhoto: (photoId: string, annotation: Partial<PhotoVerificationData>) => Promise<void>;
+  validatePhotoMetadata: (photoId: string) => Promise<PhotoVerificationData>;
+  compareDeliveryMetrics: (responseId: string) => Promise<ResponseVerificationMetrics>;
+  completeResponseVerification: (responseId: string, verificationData: any) => Promise<void>;
+  
+  // Enhanced Response Verification Actions
+  setResponsePhotoVerification: (responseId: string, photoId: string, verification: PhotoVerificationData) => void;
+  setResponseMetricsValidation: (responseId: string, metrics: ResponseVerificationMetrics) => void;
+  setResponseVerifierNotes: (responseId: string, notes: string) => void;
   
   // Utility
   reset: () => void;
@@ -151,6 +201,22 @@ const initialState = {
     total: 0,
     currentOperation: '',
   },
+  // Auto-Approval State
+  autoApprovalConfig: null,
+  autoApprovalStats: null,
+  isLoadingAutoApproval: false,
+  autoApprovalError: null,
+  
+  // Story 3.5: Response Verification State
+  currentResponseVerification: null,
+  photoVerifications: {},
+  responseMetrics: null,
+  deliveryComparison: null,
+  isLoadingResponseVerification: false,
+  responseVerificationError: null,
+  
+  // Extended Response Verification State
+  responseVerifications: {},
 };
 
 export const useVerificationStore = create<VerificationState>()(
@@ -790,6 +856,441 @@ export const useVerificationStore = create<VerificationState>()(
       }
     },
 
+    // Story 3.4: Auto-Approval Configuration Actions
+    fetchAutoApprovalConfig: async () => {
+      set({ isLoadingAutoApproval: true, autoApprovalError: null });
+
+      try {
+        const response = await fetch('/api/v1/config/auto-approval/rules');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to fetch auto-approval configuration');
+        }
+
+        set({
+          autoApprovalConfig: data.data.config,
+          isLoadingAutoApproval: false,
+          autoApprovalError: null,
+        });
+
+      } catch (error) {
+        console.error('Failed to fetch auto-approval configuration:', error);
+        set({ 
+          isLoadingAutoApproval: false, 
+          autoApprovalError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+      }
+    },
+
+    saveAutoApprovalConfig: async (config: AutoApprovalConfig) => {
+      set({ isLoadingAutoApproval: true, autoApprovalError: null });
+
+      try {
+        const response = await fetch('/api/v1/config/auto-approval/rules', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            rules: config.rules,
+            globalSettings: config.globalSettings,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to save auto-approval configuration');
+        }
+
+        // Update local state with saved configuration
+        set({
+          autoApprovalConfig: {
+            ...config,
+            lastUpdated: new Date(),
+          },
+          isLoadingAutoApproval: false,
+          autoApprovalError: null,
+        });
+
+      } catch (error) {
+        console.error('Failed to save auto-approval configuration:', error);
+        set({ 
+          isLoadingAutoApproval: false, 
+          autoApprovalError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+        throw error;
+      }
+    },
+
+    fetchAutoApprovalStats: async (timeRange = '24h') => {
+      set({ isLoadingAutoApproval: true, autoApprovalError: null });
+
+      try {
+        const params = new URLSearchParams({ timeRange });
+        const response = await fetch(`/api/v1/verification/auto-approval/stats?${params}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to fetch auto-approval statistics');
+        }
+
+        set({
+          autoApprovalStats: data.data,
+          isLoadingAutoApproval: false,
+          autoApprovalError: null,
+        });
+
+      } catch (error) {
+        console.error('Failed to fetch auto-approval statistics:', error);
+        set({ 
+          isLoadingAutoApproval: false, 
+          autoApprovalError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+      }
+    },
+
+    testAutoApprovalRules: async (rules: AutoApprovalRule[]) => {
+      set({ isLoadingAutoApproval: true, autoApprovalError: null });
+
+      try {
+        const response = await fetch('/api/v1/verification/auto-approval/test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            rules,
+            sampleSize: 50,
+            targetType: 'BOTH',
+            useHistoricalData: true,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to test auto-approval rules');
+        }
+
+        set({ 
+          isLoadingAutoApproval: false, 
+          autoApprovalError: null 
+        });
+
+        return result.data;
+
+      } catch (error) {
+        console.error('Failed to test auto-approval rules:', error);
+        set({ 
+          isLoadingAutoApproval: false, 
+          autoApprovalError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+        throw error;
+      }
+    },
+
+    overrideAutoApprovals: async (request: AutoApprovalOverrideRequest) => {
+      set({ isLoadingAutoApproval: true, autoApprovalError: null });
+
+      try {
+        const response = await fetch('/api/v1/verification/auto-approval/override', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(request),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to override auto-approvals');
+        }
+
+        // Refresh verification queues to reflect changes
+        await get().fetchQueue();
+        await get().fetchResponseQueue();
+
+        set({ 
+          isLoadingAutoApproval: false, 
+          autoApprovalError: null 
+        });
+
+        return result.data;
+
+      } catch (error) {
+        console.error('Failed to override auto-approvals:', error);
+        set({ 
+          isLoadingAutoApproval: false, 
+          autoApprovalError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+        throw error;
+      }
+    },
+
+    // Story 3.5: Response Verification Actions
+    loadResponsePhotos: async (responseId: string) => {
+      set({ isLoadingResponseVerification: true, responseVerificationError: null });
+
+      try {
+        const response = await fetch(`/api/v1/verification/responses/${responseId}/photos`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to load response photos');
+        }
+
+        set({
+          isLoadingResponseVerification: false,
+          responseVerificationError: null,
+        });
+
+        return data.data.photos;
+
+      } catch (error) {
+        console.error('Failed to load response photos:', error);
+        set({ 
+          isLoadingResponseVerification: false, 
+          responseVerificationError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+        throw error;
+      }
+    },
+
+    annotatePhoto: async (photoId: string, annotation: Partial<PhotoVerificationData>) => {
+      set((state) => ({
+        photoVerifications: {
+          ...state.photoVerifications,
+          [photoId]: {
+            ...state.photoVerifications[photoId],
+            ...annotation,
+          },
+        },
+      }));
+
+      // In a real implementation, this would also sync to the backend
+      try {
+        const response = await fetch(`/api/v1/verification/photos/${photoId}/annotate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(annotation),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Failed to sync photo annotation:', error);
+        // Could implement retry logic or show warning to user
+      }
+    },
+
+    validatePhotoMetadata: async (photoId: string) => {
+      set({ isLoadingResponseVerification: true, responseVerificationError: null });
+
+      try {
+        const response = await fetch(`/api/v1/verification/photos/${photoId}/validate`, {
+          method: 'POST',
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to validate photo metadata');
+        }
+
+        const verification = data.data.verification;
+        
+        set((state) => ({
+          photoVerifications: {
+            ...state.photoVerifications,
+            [photoId]: verification,
+          },
+          isLoadingResponseVerification: false,
+          responseVerificationError: null,
+        }));
+
+        return verification;
+
+      } catch (error) {
+        console.error('Failed to validate photo metadata:', error);
+        set({ 
+          isLoadingResponseVerification: false, 
+          responseVerificationError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+        throw error;
+      }
+    },
+
+    compareDeliveryMetrics: async (responseId: string) => {
+      set({ isLoadingResponseVerification: true, responseVerificationError: null });
+
+      try {
+        const response = await fetch(`/api/v1/verification/responses/${responseId}/delivery-comparison`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to compare delivery metrics');
+        }
+
+        const metrics = data.data;
+        
+        set({
+          responseMetrics: metrics,
+          deliveryComparison: data.data.comparison,
+          isLoadingResponseVerification: false,
+          responseVerificationError: null,
+        });
+
+        return metrics;
+
+      } catch (error) {
+        console.error('Failed to compare delivery metrics:', error);
+        set({ 
+          isLoadingResponseVerification: false, 
+          responseVerificationError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+        throw error;
+      }
+    },
+
+    completeResponseVerification: async (responseId: string, verificationData: any) => {
+      set({ isLoadingResponseVerification: true, responseVerificationError: null });
+
+      try {
+        const response = await fetch(`/api/v1/verification/responses/${responseId}/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...verificationData,
+            photoVerifications: get().photoVerifications,
+            responseMetrics: get().responseMetrics,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to complete response verification');
+        }
+
+        // Clear verification state
+        set({
+          currentResponseVerification: null,
+          photoVerifications: {},
+          responseMetrics: null,
+          deliveryComparison: null,
+          isLoadingResponseVerification: false,
+          responseVerificationError: null,
+        });
+
+        // Refresh response queue
+        await get().fetchResponseQueue();
+
+        return result.data;
+
+      } catch (error) {
+        console.error('Failed to complete response verification:', error);
+        set({ 
+          isLoadingResponseVerification: false, 
+          responseVerificationError: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+        throw error;
+      }
+    },
+
+    // Enhanced Response Verification Actions
+    setResponsePhotoVerification: (responseId: string, photoId: string, verification: PhotoVerificationData) => {
+      set((state) => ({
+        responseVerifications: {
+          ...state.responseVerifications,
+          [responseId]: {
+            photoVerifications: [
+              ...(state.responseVerifications[responseId]?.photoVerifications || []).filter(p => p.photoId !== photoId),
+              verification
+            ],
+            metricsValidation: state.responseVerifications[responseId]?.metricsValidation || null,
+            verifierNotes: state.responseVerifications[responseId]?.verifierNotes || '',
+            isComplete: state.responseVerifications[responseId]?.isComplete || false,
+          }
+        }
+      }));
+    },
+
+    setResponseMetricsValidation: (responseId: string, metrics: ResponseVerificationMetrics) => {
+      set((state) => ({
+        responseVerifications: {
+          ...state.responseVerifications,
+          [responseId]: {
+            photoVerifications: state.responseVerifications[responseId]?.photoVerifications || [],
+            metricsValidation: metrics,
+            verifierNotes: state.responseVerifications[responseId]?.verifierNotes || '',
+            isComplete: state.responseVerifications[responseId]?.isComplete || false,
+          }
+        }
+      }));
+    },
+
+    setResponseVerifierNotes: (responseId: string, notes: string) => {
+      set((state) => ({
+        responseVerifications: {
+          ...state.responseVerifications,
+          [responseId]: {
+            photoVerifications: state.responseVerifications[responseId]?.photoVerifications || [],
+            metricsValidation: state.responseVerifications[responseId]?.metricsValidation || null,
+            verifierNotes: notes,
+            isComplete: state.responseVerifications[responseId]?.isComplete || false,
+          }
+        }
+      }));
+    },
+
     // Utility functions
     getSelectedResponseCount: () => get().selectedResponseIds.length,
     getResponseHighPriorityCount: () => get().responseQueueStats.highPriority,
@@ -873,4 +1374,27 @@ export const useResponseBatchOperations = () => useVerificationStore((state) => 
   batchProgress: state.batchProgress,
   batchApproveResponses: state.batchApproveResponses,
   batchRejectResponses: state.batchRejectResponses,
+}));
+
+// Auto-approval selector hooks
+export const useAutoApprovalConfig = () => useVerificationStore((state) => ({
+  config: state.autoApprovalConfig,
+  isLoading: state.isLoadingAutoApproval,
+  error: state.autoApprovalError,
+  fetchConfig: state.fetchAutoApprovalConfig,
+  saveConfig: state.saveAutoApprovalConfig,
+}));
+
+export const useAutoApprovalStats = () => useVerificationStore((state) => ({
+  stats: state.autoApprovalStats,
+  isLoading: state.isLoadingAutoApproval,
+  error: state.autoApprovalError,
+  fetchStats: state.fetchAutoApprovalStats,
+}));
+
+export const useAutoApprovalActions = () => useVerificationStore((state) => ({
+  testRules: state.testAutoApprovalRules,
+  overrideApprovals: state.overrideAutoApprovals,
+  isLoading: state.isLoadingAutoApproval,
+  error: state.autoApprovalError,
 }));

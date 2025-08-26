@@ -1,29 +1,93 @@
 import React from 'react';
 
-export const Select = ({ children, value, onValueChange, ...props }: any) => (
-  <div data-testid="select" data-value={value} {...props}>
-    {children}
-  </div>
-);
+interface SelectContextType {
+  value: string;
+  onValueChange: (value: string) => void;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
 
-export const SelectContent = ({ children, ...props }: any) => (
-  <div data-testid="select-content" {...props}>
-    {children}
-  </div>
-);
+const SelectContext = React.createContext<SelectContextType | null>(null);
 
-export const SelectItem = ({ children, value, ...props }: any) => (
-  <div data-testid="select-item" data-value={value} {...props}>
-    {children}
-  </div>
-);
+export const Select = ({ children, value, onValueChange, ...props }: any) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  
+  return (
+    <SelectContext.Provider value={{ value, onValueChange, isOpen, setIsOpen }}>
+      <div data-testid="select" data-value={value} {...props}>
+        {children}
+      </div>
+    </SelectContext.Provider>
+  );
+};
 
-export const SelectTrigger = ({ children, className, ...props }: any) => (
-  <div data-testid="select-trigger" className={className} {...props}>
-    {children}
-  </div>
-);
+export const SelectContent = ({ children, ...props }: any) => {
+  const context = React.useContext(SelectContext);
+  
+  if (!context?.isOpen) {
+    return null;
+  }
+  
+  return (
+    <div data-testid="select-content" {...props}>
+      {children}
+    </div>
+  );
+};
 
-export const SelectValue = ({ placeholder, ...props }: any) => (
-  <span data-testid="select-value" data-placeholder={placeholder} {...props} />
-);
+export const SelectItem = ({ children, value, ...props }: any) => {
+  const context = React.useContext(SelectContext);
+  
+  const handleClick = () => {
+    context?.onValueChange(value);
+    context?.setIsOpen(false);
+  };
+  
+  return (
+    <div 
+      data-testid="select-item" 
+      data-value={value} 
+      role="option"
+      onClick={handleClick}
+      style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+
+export const SelectTrigger = ({ children, className, id, ...props }: any) => {
+  const context = React.useContext(SelectContext);
+  
+  const handleClick = () => {
+    context?.setIsOpen(!context?.isOpen);
+  };
+  
+  return (
+    <button 
+      data-testid="select-trigger" 
+      className={className}
+      id={id}
+      role="combobox"
+      aria-expanded={context?.isOpen}
+      aria-haspopup="listbox"
+      onClick={handleClick}
+      type="button"
+      style={{ pointerEvents: 'auto' }}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+export const SelectValue = ({ placeholder, ...props }: any) => {
+  const context = React.useContext(SelectContext);
+  
+  return (
+    <span data-testid="select-value" data-placeholder={placeholder} {...props}>
+      {context?.value || placeholder}
+    </span>
+  );
+};

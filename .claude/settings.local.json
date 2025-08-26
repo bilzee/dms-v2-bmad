@@ -77,7 +77,20 @@
       "Bash(/BMad:agents:architect)",
       "Bash(cd:*)",
       "Bash(cd:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm --filter @dms/frontend typecheck)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm --filter @dms/frontend test ResponseRejection.test.tsx)",
+      "Bash(env)",
+      "Bash(npx @playwright/mcp@latest:*)",
+      "Bash(uvx:*)"
     ],
     "deny": []
   },

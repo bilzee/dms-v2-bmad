@@ -15,6 +15,7 @@
     "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
     "@dms/shared": "workspace:*",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^3.0.0",
@@ -33,6 +34,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.15",
+    "@tanstack/react-query": "^5.85.5",
     "@types/lodash.debounce": "^4.0.9",
     "@types/react-dropzone": "^5.1.0",
     "@types/uuid": "^9.0.8",
@@ -46,6 +48,7 @@
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.400.0",
     "next": "14.2.5",
+    "next-auth": "5.0.0-beta.29",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-dropzone": "^14.3.8",

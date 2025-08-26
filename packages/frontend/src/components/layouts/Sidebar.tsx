@@ -32,27 +32,31 @@ const navigationSections = {
       ]
     },
     {
-      title: 'Management',
+      title: 'Assessment Management',
       items: [
         { icon: ClipboardList, label: 'All Assessments', href: '/assessments', badge: 0 },
-        { icon: Building, label: 'Entities', href: '/entities', badge: 0 },
-        { icon: Archive, label: 'Queue', href: '/queue', badge: 0 }
+        { icon: AlertTriangle, label: 'Emergency Reports', href: '/assessments/new?type=PRELIMINARY', badge: 0 },
+        { icon: Archive, label: 'Assessment Status', href: '/assessments/status', badge: 0 },
+        { icon: Building, label: 'Affected Entities', href: '/entities', badge: 0 },
+        { icon: Archive, label: 'Sync Queue', href: '/queue', badge: 0 }
       ]
     }
   ],
   coordinator: [
     {
-      title: 'Verification',
+      title: 'Verification Dashboard',
       items: [
-        { icon: ClipboardList, label: 'Assessment Queue', href: '/coordinator/assessments', badge: 5 },
-        { icon: BarChart3, label: 'Response Queue', href: '/coordinator/responses', badge: 3 }
+        { icon: ClipboardList, label: 'Assessment Queue', href: '/verification/queue', badge: 5 },
+        { icon: BarChart3, label: 'Response Queue', href: '/verification/responses/queue', badge: 3 },
+        { icon: AlertTriangle, label: 'Verification Dashboard', href: '/verification/queue', badge: 0 }
       ]
     },
     {
-      title: 'Management',
+      title: 'Review Management',
       items: [
-        { icon: AlertTriangle, label: 'Crisis Dashboard', href: '/coordinator/crisis', badge: 0 },
-        { icon: Building, label: 'Resource Overview', href: '/coordinator/resources', badge: 0 }
+        { icon: ClipboardList, label: 'Assessment Reviews', href: '/verification/queue', badge: 2 },
+        { icon: BarChart3, label: 'Response Reviews', href: '/responses/status-review', badge: 1 },
+        { icon: AlertTriangle, label: 'All Responses', href: '/verification/responses', badge: 0 }
       ]
     }
   ],
@@ -61,8 +65,14 @@ const navigationSections = {
       title: 'Response Planning',
       items: [
         { icon: BarChart3, label: 'Plan Response', href: '/responses/plan', badge: 0 },
-        { icon: ClipboardList, label: 'Active Responses', href: '/responses/active', badge: 2 },
-        { icon: Archive, label: 'Delivery Tracking', href: '/responses/tracking', badge: 1 }
+        { icon: ClipboardList, label: 'Status Review', href: '/responses/status-review', badge: 2 }
+      ]
+    },
+    {
+      title: 'Delivery Management',
+      items: [
+        { icon: Archive, label: 'All Responses', href: '/responses', badge: 1 },
+        { icon: ClipboardList, label: 'Response Tracking', href: '/responses/status-review', badge: 0 }
       ]
     }
   ],
