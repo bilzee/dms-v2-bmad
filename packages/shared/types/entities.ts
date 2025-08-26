@@ -1,5 +1,7 @@
 // shared/types/entities.ts
 
+import { ApiResponse } from './api';
+
 export interface Incident {
   id: string; // UUID
   name: string;
@@ -864,3 +866,98 @@ export interface BatchResponseRejectionRequest {
   priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
   notifyResponders: boolean;
 }
+
+// Story 3.4: Auto-Approval Configuration Data Structures
+
+export interface AutoApprovalRule {
+  id: string;
+  type: 'ASSESSMENT' | 'RESPONSE';
+  assessmentType?: AssessmentType;
+  responseType?: ResponseType;
+  enabled: boolean;
+  qualityThresholds: QualityThreshold;
+  conditions: AutoApprovalCondition[];
+  priority: number;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface QualityThreshold {
+  dataCompletenessPercentage: number;
+  requiredFieldsComplete: boolean;
+  hasMediaAttachments?: boolean;
+  gpsAccuracyMeters?: number;
+  assessorReputationScore?: number;
+  timeSinceSubmission?: number;
+  maxBatchSize?: number;
+}
+
+export interface AutoApprovalCondition {
+  field: string;
+  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'exists';
+  value: any;
+  weight: number;
+}
+
+export interface AutoApprovalConfig {
+  enabled: boolean;
+  rules: AutoApprovalRule[];
+  globalSettings: {
+    maxAutoApprovalsPerHour: number;
+    requireCoordinatorOnline: boolean;
+    emergencyOverrideEnabled: boolean;
+    auditLogRetentionDays: number;
+  };
+  coordinatorId: string;
+  lastUpdated: Date;
+}
+
+export interface AutoApprovalOverride {
+  id: string;
+  targetType: 'ASSESSMENT' | 'RESPONSE';
+  targetId: string;
+  originalStatus: VerificationStatus;
+  newStatus: VerificationStatus;
+  reason: 'EMERGENCY_OVERRIDE' | 'QUALITY_CONCERN' | 'POLICY_CHANGE' | 'OTHER';
+  reasonDetails: string;
+  coordinatorId: string;
+  coordinatorName: string;
+  overriddenAt: Date;
+  ruleId?: string;
+}
+
+export interface AutoApprovalRulesRequest {
+  rules: AutoApprovalRule[];
+  globalSettings: AutoApprovalConfig['globalSettings'];
+}
+
+export interface AutoApprovalRulesResponse extends ApiResponse<{
+  rulesCreated: number;
+  rulesUpdated: number;
+  configId: string;
+  config?: AutoApprovalConfig;
+  validationErrors?: string[];
+}> {}
+
+export interface AutoApprovalOverrideRequest {
+  targetType: 'ASSESSMENT' | 'RESPONSE';
+  targetIds: string[];
+  newStatus: 'PENDING' | 'REJECTED';
+  reason: string;
+  reasonDetails: string;
+  coordinatorId: string;
+}
+
+export interface AutoApprovalStatsResponse extends ApiResponse<{
+  totalAutoApproved: number;
+  autoApprovalRate: number;
+  averageProcessingTime: number;
+  rulePerformance: {
+    ruleId: string;
+    applicationsCount: number;
+    successRate: number;
+  }[];
+  overridesCount: number;
+  timeRange: string;
+}> {}
