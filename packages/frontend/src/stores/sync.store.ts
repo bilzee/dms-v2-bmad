@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { OfflineQueueItem, SyncStatus } from '@dms/shared';
+import type { OfflineQueueItem, SyncStatus, PriorityQueueItem, PriorityRule, PriorityQueueStats } from '@dms/shared';
 import { OfflineQueueService } from '@/lib/services/OfflineQueueService';
 
 interface QueueFilters {
   status?: 'PENDING' | 'SYNCING' | 'FAILED' | 'SYNCED';
   priority?: 'HIGH' | 'NORMAL' | 'LOW';
   type?: 'ASSESSMENT' | 'RESPONSE' | 'MEDIA' | 'INCIDENT' | 'ENTITY';
+  priorityScoreRange?: { min: number; max: number };
 }
 
 interface QueueSummary {
@@ -26,10 +27,15 @@ interface QueueSummary {
 
 interface SyncState {
   // Queue management
-  queue: OfflineQueueItem[];
-  filteredQueue: OfflineQueueItem[];
+  queue: PriorityQueueItem[];
+  filteredQueue: PriorityQueueItem[];
   currentFilters: QueueFilters;
   queueSummary: QueueSummary | null;
+  priorityStats: PriorityQueueStats | null;
+  
+  // Priority rule management
+  priorityRules: PriorityRule[];
+  isLoadingRules: boolean;
   
   // UI state
   isLoading: boolean;
@@ -51,10 +57,19 @@ interface SyncState {
   setAutoRefresh: (enabled: boolean) => void;
   setRefreshInterval: (interval: number) => void;
   clearError: () => void;
+  
+  // Priority management actions
+  loadPriorityRules: () => Promise<void>;
+  createPriorityRule: (rule: Omit<PriorityRule, 'id' | 'createdAt'>) => Promise<void>;
+  updatePriorityRule: (id: string, rule: Partial<PriorityRule>) => Promise<void>;
+  deletePriorityRule: (id: string) => Promise<void>;
+  overridePriority: (itemId: string, newPriority: number, justification: string) => Promise<void>;
+  recalculatePriorities: () => Promise<void>;
+  loadPriorityStats: () => Promise<void>;
 }
 
 // Helper function to determine queue item status based on error and retry count
-const getQueueItemStatus = (item: OfflineQueueItem): 'PENDING' | 'SYNCING' | 'FAILED' | 'SYNCED' => {
+const getQueueItemStatus = (item: PriorityQueueItem): 'PENDING' | 'SYNCING' | 'FAILED' | 'SYNCED' => {
   if (item.error && item.retryCount > 0) return 'FAILED';
   if (item.retryCount > 0 && !item.error) return 'SYNCING';
   if (item.retryCount === 0 && !item.error) return 'PENDING';
@@ -62,7 +77,7 @@ const getQueueItemStatus = (item: OfflineQueueItem): 'PENDING' | 'SYNCING' | 'FA
 };
 
 // Helper function to filter queue items
-const filterQueueItems = (items: OfflineQueueItem[], filters: QueueFilters): OfflineQueueItem[] => {
+const filterQueueItems = (items: PriorityQueueItem[], filters: QueueFilters): PriorityQueueItem[] => {
   return items.filter(item => {
     if (filters.status) {
       const itemStatus = getQueueItemStatus(item);
@@ -72,16 +87,26 @@ const filterQueueItems = (items: OfflineQueueItem[], filters: QueueFilters): Off
     if (filters.priority && item.priority !== filters.priority) return false;
     if (filters.type && item.type !== filters.type) return false;
     
+    // New priority score range filtering
+    if (filters.priorityScoreRange) {
+      const score = item.priorityScore || 0;
+      if (score < filters.priorityScoreRange.min || score > filters.priorityScoreRange.max) {
+        return false;
+      }
+    }
+    
     return true;
   });
 };
 
-// Helper function to sort queue items by priority and creation date
-const sortQueueItems = (items: OfflineQueueItem[]): OfflineQueueItem[] => {
-  const priorityOrder = { HIGH: 3, NORMAL: 2, LOW: 1 };
+// Helper function to sort queue items by priority score and creation date
+const sortQueueItems = (items: PriorityQueueItem[]): PriorityQueueItem[] => {
   return [...items].sort((a, b) => {
-    const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
-    if (priorityDiff !== 0) return priorityDiff;
+    // First sort by priority score (higher scores first)
+    const scoreDiff = (b.priorityScore || 0) - (a.priorityScore || 0);
+    if (scoreDiff !== 0) return scoreDiff;
+    
+    // Then by creation date (newer first for same score)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 };
@@ -97,6 +122,11 @@ export const useSyncStore = create<SyncState>()(
       filteredQueue: [],
       currentFilters: {},
       queueSummary: null,
+      priorityStats: null,
+      
+      // Priority rule management
+      priorityRules: [],
+      isLoadingRules: false,
       
       isLoading: false,
       isRefreshing: false,
@@ -243,6 +273,178 @@ export const useSyncStore = create<SyncState>()(
       // Clear error state
       clearError: () => {
         set({ error: null });
+      },
+
+      // Priority management actions
+      loadPriorityRules: async () => {
+        set({ isLoadingRules: true, error: null });
+        
+        try {
+          const response = await fetch('/api/v1/sync/priority/rules');
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to load priority rules');
+          }
+          
+          set({
+            priorityRules: result.data,
+            isLoadingRules: false,
+          });
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to load priority rules';
+          set({ error: errorMessage, isLoadingRules: false });
+          console.error('Priority rules load error:', error);
+        }
+      },
+
+      createPriorityRule: async (rule: Omit<PriorityRule, 'id' | 'createdAt'>) => {
+        set({ error: null });
+        
+        try {
+          const response = await fetch('/api/v1/sync/priority/rules', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(rule),
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to create priority rule');
+          }
+          
+          // Reload rules to get the updated list
+          await get().loadPriorityRules();
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to create priority rule';
+          set({ error: errorMessage });
+          console.error('Priority rule creation error:', error);
+        }
+      },
+
+      updatePriorityRule: async (id: string, rule: Partial<PriorityRule>) => {
+        set({ error: null });
+        
+        try {
+          const response = await fetch(`/api/v1/sync/priority/rules/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(rule),
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to update priority rule');
+          }
+          
+          // Reload rules to get the updated list
+          await get().loadPriorityRules();
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to update priority rule';
+          set({ error: errorMessage });
+          console.error('Priority rule update error:', error);
+        }
+      },
+
+      deletePriorityRule: async (id: string) => {
+        set({ error: null });
+        
+        try {
+          const response = await fetch(`/api/v1/sync/priority/rules/${id}`, {
+            method: 'DELETE',
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to delete priority rule');
+          }
+          
+          // Reload rules to get the updated list
+          await get().loadPriorityRules();
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete priority rule';
+          set({ error: errorMessage });
+          console.error('Priority rule deletion error:', error);
+        }
+      },
+
+      overridePriority: async (itemId: string, newPriority: number, justification: string) => {
+        set({ error: null });
+        
+        try {
+          const response = await fetch('/api/v1/sync/priority/override', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              itemId,
+              newPriority,
+              justification,
+              coordinatorId: 'current-user-id', // TODO: Get from auth context
+            }),
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to override priority');
+          }
+          
+          // Refresh queue to show updated priorities
+          await get().refreshQueue();
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to override priority';
+          set({ error: errorMessage });
+          console.error('Priority override error:', error);
+        }
+      },
+
+      recalculatePriorities: async () => {
+        set({ error: null });
+        
+        try {
+          const response = await fetch('/api/v1/sync/priority/recalculate', {
+            method: 'PUT',
+          });
+          
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to recalculate priorities');
+          }
+          
+          // Refresh queue to show updated priorities
+          await get().refreshQueue();
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to recalculate priorities';
+          set({ error: errorMessage });
+          console.error('Priority recalculation error:', error);
+        }
+      },
+
+      loadPriorityStats: async () => {
+        try {
+          const response = await fetch('/api/v1/sync/priority/queue');
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to load priority stats');
+          }
+          
+          set({ priorityStats: result.data.stats });
+          
+        } catch (error) {
+          console.error('Priority stats load error:', error);
+          // Don't set error for stats failures as it's not critical
+        }
       },
     }),
     {

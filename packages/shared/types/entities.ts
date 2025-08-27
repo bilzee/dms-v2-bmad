@@ -1046,6 +1046,83 @@ export interface ResponderPerformance {
   overallRating: number; // 1-5 stars
 }
 
+// Story 4.1: Priority-Based Sync Types
+
+// Enhanced priority queue management
+export interface PriorityQueueItem extends OfflineQueueItem {
+  priorityScore: number; // 0-100 calculated priority score
+  priorityReason: string; // Why this priority was assigned
+  manualOverride?: {
+    coordinatorId: string;
+    coordinatorName: string;
+    originalPriority: number;
+    overridePriority: number;
+    justification: string;
+    timestamp: Date;
+  };
+  estimatedSyncTime?: Date; // When this item will likely sync
+}
+
+// Priority rule configuration
+export interface PriorityRule {
+  id: string;
+  name: string;
+  entityType: 'ASSESSMENT' | 'RESPONSE' | 'MEDIA';
+  conditions: PriorityCondition[];
+  priorityModifier: number; // +/- points to base priority
+  isActive: boolean;
+  createdBy: string;
+  createdAt: Date;
+}
+
+export interface PriorityCondition {
+  field: string; // e.g., 'data.assessmentType', 'data.beneficiariesAffected'
+  operator: 'EQUALS' | 'GREATER_THAN' | 'CONTAINS' | 'IN_ARRAY';
+  value: any;
+  modifier: number; // Priority points for this condition
+}
+
+// Priority analytics and monitoring
+export interface PriorityQueueStats {
+  totalItems: number;
+  highPriorityItems: number;
+  normalPriorityItems: number;
+  lowPriorityItems: number;
+  averageWaitTime: number;
+  longestWaitingItem: {
+    id: string;
+    waitTime: number;
+    priority: number;
+  };
+  syncThroughput: {
+    itemsPerMinute: number;
+    successRate: number;
+  };
+}
+
+// Priority Management API Request/Response Types
+export interface PriorityRuleCreationRequest {
+  name: string;
+  entityType: 'ASSESSMENT' | 'RESPONSE' | 'MEDIA';
+  conditions: PriorityCondition[];
+  priorityModifier: number;
+}
+
+export interface PriorityQueueResponse extends ApiResponse<{
+  queue: PriorityQueueItem[];
+  stats: PriorityQueueStats;
+  estimatedSyncTimes: {
+    [itemId: string]: Date;
+  };
+}> {}
+
+export interface PriorityOverrideRequest {
+  itemId: string;
+  newPriority: number;
+  justification: string;
+  coordinatorId: string;
+}
+
 // Story 3.6: Incident Management Types
 
 export interface IncidentCreationData {

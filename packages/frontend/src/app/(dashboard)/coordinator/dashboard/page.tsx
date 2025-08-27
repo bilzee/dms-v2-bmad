@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, Eye, Plus } from 'lucide-react'
+import { AlertTriangle, Eye, Plus, Settings, Zap } from 'lucide-react'
 import Link from 'next/link'
 
 // Dashboard metrics interface
@@ -104,7 +104,7 @@ export default async function CoordinatorDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle>Assessment Queue</CardTitle>
@@ -189,6 +189,31 @@ export default async function CoordinatorDashboard() {
                 </Button>
               </Link>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <Zap className="h-8 w-8 text-blue-500" />
+              <div>
+                <CardTitle>Auto-Approval Configuration</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Configure automated approval rules for assessments and responses
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-sm text-muted-foreground">
+              Set up intelligent automation to streamline verification workflows while maintaining quality controls.
+            </div>
+            <Link href="/coordinator/auto-approval" className="block">
+              <Button className="w-full">
+                <Settings className="h-4 w-4 mr-2" />
+                Configure Auto-Approval
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

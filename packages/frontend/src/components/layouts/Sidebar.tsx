@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import {
   ClipboardList, BarChart3, Building, Archive, AlertTriangle,
   HelpCircle, Settings, ChevronLeft, ChevronRight, User,
-  Heart, Droplet, Home, Utensils, Shield, Users
+  Heart, Droplet, Home, Utensils, Shield, Users, Zap
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -63,6 +63,12 @@ const navigationSections = {
       title: 'Incident Management',
       items: [
         { icon: AlertTriangle, label: 'Incident Management', href: '/coordinator/incidents', badge: 4, badgeVariant: 'destructive' }
+      ]
+    },
+    {
+      title: 'System Configuration',
+      items: [
+        { icon: Zap, label: 'Auto-Approval Config', href: '/coordinator/auto-approval', badge: 0 }
       ]
     }
   ],
