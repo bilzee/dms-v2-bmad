@@ -90,9 +90,21 @@
       "Bash(pnpm --filter @dms/frontend test ResponseRejection.test.tsx)",
       "Bash(env)",
       "Bash(npx @playwright/mcp@latest:*)",
-      "Bash(uvx:*)"
+      "Bash(uvx:*)",
+      "mcp__Context7__resolve-library-id",
+      "mcp__Context7__get-library-docs",
+      "Bash(pnpm --filter @dms/frontend run tsc --noEmit src/components/features/incident/*.tsx src/stores/incident.store.ts)",
+      "Bash(pnpm --filter @dms/frontend run tsc --noEmit src/app/(dashboard)/coordinator/incidents/page.tsx)",
+      "Bash(pnpm --filter @dms/frontend run lint)",
+      "Bash(pnpm --filter @dms/frontend build)",
+      "Bash(npx next lint:*)",
+      "Bash(timeout 30s npx next build --no-lint)",
+      "WebSearch"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "/mnt/b/dev/claude"
+    ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [

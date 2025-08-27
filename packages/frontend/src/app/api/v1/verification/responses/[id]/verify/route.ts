@@ -113,7 +113,7 @@ export async function POST(
     }
 
     // Check if response exists and is in PENDING status
-    const response = await prisma.rapidResponse.findUnique({
+    const existingResponse = await prisma.rapidResponse.findUnique({
       where: { id: responseId },
       select: {
         id: true,
@@ -125,7 +125,7 @@ export async function POST(
       }
     });
 
-    if (!response) {
+    if (!existingResponse) {
       return NextResponse.json({
         success: false,
         message: 'Response not found',
@@ -134,7 +134,7 @@ export async function POST(
       } as ResponseVerificationResponse, { status: 404 });
     }
 
-    if (response.verificationStatus !== VerificationStatus.PENDING) {
+    if (existingResponse.verificationStatus !== VerificationStatus.PENDING) {
       return NextResponse.json({
         success: false,
         message: 'Response not in pending status',

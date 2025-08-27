@@ -1045,3 +1045,174 @@ export interface ResponderPerformance {
   qualityScore: number; // 1-10
   overallRating: number; // 1-5 stars
 }
+
+// Story 3.6: Incident Management Types
+
+export interface IncidentCreationData {
+  name: string;
+  type: IncidentType;
+  subType?: string;
+  source?: string;
+  severity: IncidentSeverity;
+  status: IncidentStatus;
+  date: Date;
+  affectedEntityIds: string[];
+  preliminaryAssessmentId?: string;
+  description?: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+export interface IncidentStatusUpdate {
+  incidentId: string;
+  newStatus: IncidentStatus;
+  coordinatorId: string;
+  notes?: string;
+  milestone?: string;
+  actionItems?: IncidentActionItem[];
+}
+
+export interface IncidentActionItem {
+  id: string;
+  description: string;
+  assignedTo?: string;
+  dueDate?: Date;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+}
+
+export interface IncidentTimeline {
+  incidentId: string;
+  events: IncidentTimelineEvent[];
+}
+
+export interface IncidentTimelineEvent {
+  id: string;
+  type: 'STATUS_CHANGE' | 'ENTITY_LINKED' | 'ASSESSMENT_ADDED' | 'NOTE_ADDED';
+  timestamp: Date;
+  coordinatorId: string;
+  coordinatorName: string;
+  description: string;
+  metadata?: any;
+}
+
+export interface IncidentFilters {
+  status?: IncidentStatus[];
+  severity?: IncidentSeverity[];
+  type?: IncidentType[];
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  affectedLGA?: string[];
+  searchTerm?: string;
+}
+
+// Incident Management API Request/Response Types
+export interface IncidentCreationRequest {
+  name: string;
+  type: IncidentType;
+  subType?: string;
+  source?: string;
+  severity: IncidentSeverity;
+  date: Date;
+  affectedEntityIds: string[];
+  preliminaryAssessmentId?: string;
+  description?: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+export interface IncidentListResponse extends ApiResponse<{
+  incidents: {
+    id: string;
+    name: string;
+    type: IncidentType;
+    severity: IncidentSeverity;
+    status: IncidentStatus;
+    date: Date;
+    affectedEntityCount: number;
+    assessmentCount: number;
+    responseCount: number;
+    lastUpdated: Date;
+  }[];
+  totalCount: number;
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    totalCount: number;
+  };
+  stats: {
+    totalIncidents: number;
+    activeIncidents: number;
+    highPriorityIncidents: number;
+    recentlyUpdated: number;
+    byType: Record<IncidentType, number>;
+    bySeverity: Record<IncidentSeverity, number>;
+    byStatus: Record<IncidentStatus, number>;
+  };
+  filters: {
+    availableTypes: IncidentType[];
+    availableSeverities: IncidentSeverity[];
+    availableStatuses: IncidentStatus[];
+    affectedLGAs: string[];
+  };
+}> {}
+
+export interface IncidentDetailResponse extends ApiResponse<{
+  incident: {
+    id: string;
+    name: string;
+    type: IncidentType;
+    subType?: string;
+    source?: string;
+    severity: IncidentSeverity;
+    status: IncidentStatus;
+    date: Date;
+    description?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+    affectedEntityIds: string[];
+    affectedEntities: AffectedEntity[];
+    preliminaryAssessmentIds: string[];
+    preliminaryAssessments: RapidAssessment[];
+    actionItems: IncidentActionItem[];
+    timeline: IncidentTimelineEvent[];
+    createdAt: Date;
+    updatedAt: Date;
+  };
+}> {}
+
+export interface IncidentStatusUpdateRequest {
+  newStatus: IncidentStatus;
+  notes?: string;
+  milestone?: string;
+  actionItems?: IncidentActionItem[];
+}
+
+export interface IncidentTimelineResponse extends ApiResponse<{
+  incidentId: string;
+  timeline: IncidentTimelineEvent[];
+  statusHistory: {
+    status: IncidentStatus;
+    changedAt: Date;
+    changedBy: string;
+    notes?: string;
+    duration?: string; // Time spent in this status
+  }[];
+}> {}
+
+export interface IncidentEntityLinkRequest {
+  entityIds: string[];
+}
+
+export interface IncidentEntityUnlinkRequest {
+  entityId: string;
+}

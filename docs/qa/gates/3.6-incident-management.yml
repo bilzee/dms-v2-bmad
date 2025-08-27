@@ -1,0 +1,66 @@
+schema: 1
+story: '3.6'
+story_title: 'Incident Management'
+gate: CONCERNS
+status_reason: 'Backend implementation excellent but critical UI integration missing. Components orphaned without routing.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-08-26T21:50:00Z'
+
+top_issues:
+  - severity: high
+    category: integration
+    description: 'No page routes exist for incident management functionality'
+    impact: 'Users cannot access incident management features through normal navigation'
+    suggested_owner: dev
+    refs: ['packages/frontend/src/app/(dashboard)/coordinator/incidents/page.tsx']
+  - severity: medium
+    category: navigation
+    description: 'Main coordinator dashboard missing incident management links'
+    impact: 'Poor discoverability of incident management features'
+    suggested_owner: dev
+    refs: ['coordinator dashboard components']
+  - severity: low
+    category: testing
+    description: 'End-to-end testing missing for complete incident workflows'
+    impact: 'User journey validation gaps'
+    suggested_owner: dev
+
+waiver: { active: false }
+
+quality_score: 75
+expires: '2025-09-09T21:50:00Z'
+
+evidence:
+  tests_reviewed: 463
+  risks_identified: 3
+  trace:
+    ac_covered: [1, 2, 3, 4]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Input validation, proper error handling, no sensitive data exposure'
+  performance:
+    status: CONCERNS
+    notes: 'Large incident datasets may cause rendering issues - recommend virtual scrolling'
+  reliability:
+    status: PASS
+    notes: 'Comprehensive error handling and recovery mechanisms implemented'
+  maintainability:
+    status: PASS
+    notes: 'Clean architecture, proper TypeScript typing, consistent patterns'
+
+recommendations:
+  immediate:
+    - action: 'Create incident management page route at /coordinator/incidents'
+      refs: ['packages/frontend/src/app/(dashboard)/coordinator/incidents/page.tsx']
+    - action: 'Add incident management navigation links to coordinator dashboard'
+      refs: ['coordinator dashboard components', 'sidebar navigation']
+    - action: 'Test complete end-to-end incident management workflows'
+      refs: ['E2E test suite']
+  future:
+    - action: 'Implement virtual scrolling for large incident datasets'
+      refs: ['IncidentManagementInterface.tsx']
+    - action: 'Add performance monitoring for incident operations'
+      refs: ['incident API endpoints']

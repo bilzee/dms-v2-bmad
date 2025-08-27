@@ -58,6 +58,12 @@ const navigationSections = {
         { icon: BarChart3, label: 'Response Reviews', href: '/responses/status-review', badge: 1 },
         { icon: AlertTriangle, label: 'All Responses', href: '/verification/responses', badge: 0 }
       ]
+    },
+    {
+      title: 'Incident Management',
+      items: [
+        { icon: AlertTriangle, label: 'Incident Management', href: '/coordinator/incidents', badge: 4, badgeVariant: 'destructive' }
+      ]
     }
   ],
   responder: [

@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { AlertTriangle, Eye, Plus } from 'lucide-react'
 import Link from 'next/link'
 
 // Dashboard metrics interface
@@ -10,6 +11,9 @@ interface DashboardMetrics {
   pendingResponses: number
   recentApprovals: number
   flaggedItems: number
+  activeIncidents: number
+  highPriorityIncidents: number
+  totalIncidents: number
 }
 
 // Mock data - replace with actual API call
@@ -19,7 +23,10 @@ async function getDashboardMetrics(): Promise<DashboardMetrics> {
     pendingAssessments: 8,
     pendingResponses: 5,
     recentApprovals: 12,
-    flaggedItems: 3
+    flaggedItems: 3,
+    activeIncidents: 4,
+    highPriorityIncidents: 2,
+    totalIncidents: 15
   }
 }
 
@@ -97,7 +104,7 @@ export default async function CoordinatorDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Assessment Queue</CardTitle>
@@ -139,6 +146,49 @@ export default async function CoordinatorDashboard() {
             <Link href="/coordinator/responses/review">
               <Button className="w-full">Review Responses</Button>
             </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-red-500" />
+              <div>
+                <CardTitle>Incident Management</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Create and track multi-phase incident responses
+                </p>
+                <p className="text-xs text-blue-600 font-medium">
+                  {metrics.activeIncidents} active incidents
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="font-medium text-red-600">{metrics.activeIncidents}</span>
+                <span className="text-muted-foreground"> Active</span>
+              </div>
+              <div>
+                <span className="font-medium text-orange-600">{metrics.highPriorityIncidents}</span>
+                <span className="text-muted-foreground"> High Priority</span>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/coordinator/incidents" className="flex-1">
+                <Button size="sm" className="w-full">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Manage Incidents
+                </Button>
+              </Link>
+              <Link href="/coordinator/incidents?action=create" className="flex-1">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Incident
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
