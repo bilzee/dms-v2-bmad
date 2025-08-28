@@ -1,0 +1,49 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { backgroundSyncManager } from '@/lib/sync/BackgroundSyncManager';
+import { connectivityDetector } from '@/lib/sync/ConnectivityDetector';
+
+export async function GET(req: NextRequest) {
+  try {
+    const syncStatus = backgroundSyncManager.getStatus();
+    const connectivityStatus = connectivityDetector.getStatus();
+    const progress = backgroundSyncManager.getProgress();
+    
+    // Calculate queue size from sync store (this would typically come from a database)
+    const queueSize = progress?.totalItems || 0;
+    
+    // Calculate estimated completion time
+    let estimatedCompletionTime: Date | undefined;
+    if (progress && progress.currentOperation?.estimatedTimeRemaining) {
+      const remainingItems = progress.totalItems - progress.completedItems;
+      const avgTimePerItem = progress.averageSyncDuration;
+      const totalRemainingSeconds = remainingItems * avgTimePerItem;
+      estimatedCompletionTime = new Date(Date.now() + (totalRemainingSeconds * 1000));
+    }
+
+    const response = {
+      success: true,
+      data: {
+        isActive: syncStatus.isRunning && !syncStatus.isPaused,
+        currentProgress: progress,
+        connectivity: connectivityStatus,
+        queueSize,
+        estimatedCompletionTime,
+        lastError: null, // Would come from error tracking
+      },
+      error: null,
+    };
+
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error('Background sync status error:', error);
+    
+    return NextResponse.json(
+      {
+        success: false,
+        data: null,
+        error: error instanceof Error ? error.message : 'Failed to get background sync status',
+      },
+      { status: 500 }
+    );
+  }
+}
