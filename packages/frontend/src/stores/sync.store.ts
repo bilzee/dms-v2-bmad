@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { OfflineQueueItem, SyncStatus, PriorityQueueItem, PriorityRule, PriorityQueueStats } from '@dms/shared';
 import { OfflineQueueService } from '@/lib/services/OfflineQueueService';
+import { priorityEventLogger } from '@/lib/services/PriorityEventLogger';
 
 interface QueueFilters {
   status?: 'PENDING' | 'SYNCING' | 'FAILED' | 'SYNCED';
@@ -29,6 +30,7 @@ interface SyncState {
   // Queue management
   queue: PriorityQueueItem[];
   filteredQueue: PriorityQueueItem[];
+  priorityQueue: PriorityQueueItem[]; // Separate priority-ordered queue
   currentFilters: QueueFilters;
   queueSummary: QueueSummary | null;
   priorityStats: PriorityQueueStats | null;
@@ -49,6 +51,7 @@ interface SyncState {
   
   // Actions
   loadQueue: (filters?: QueueFilters) => Promise<void>;
+  loadPriorityQueue: () => Promise<void>; // Load priority-ordered queue
   refreshQueue: () => Promise<void>;
   retryQueueItem: (id: string) => Promise<void>;
   removeQueueItem: (id: string) => Promise<void>;
@@ -120,6 +123,7 @@ export const useSyncStore = create<SyncState>()(
       // Initial state
       queue: [],
       filteredQueue: [],
+      priorityQueue: [],
       currentFilters: {},
       queueSummary: null,
       priorityStats: null,
@@ -148,6 +152,7 @@ export const useSyncStore = create<SyncState>()(
           set({
             queue: sortedQueue,
             filteredQueue,
+            priorityQueue: sortedQueue, // Keep priority queue in sync
             currentFilters: filters,
             lastRefresh: new Date(),
             isLoading: false,
@@ -157,6 +162,30 @@ export const useSyncStore = create<SyncState>()(
           const errorMessage = error instanceof Error ? error.message : 'Failed to load queue';
           set({ error: errorMessage, isLoading: false });
           console.error('Queue load error:', error);
+        }
+      },
+
+      // Load priority queue separately for priority visualization
+      loadPriorityQueue: async () => {
+        set({ error: null });
+        
+        try {
+          const response = await fetch('/api/v1/sync/priority/queue');
+          const result = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(result.error || 'Failed to load priority queue');
+          }
+          
+          // Sort by priority score (highest first)
+          const priorityQueue = sortQueueItems(result.data.items || []);
+          
+          set({ priorityQueue });
+          
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to load priority queue';
+          set({ error: errorMessage });
+          console.error('Priority queue load error:', error);
         }
       },
 
@@ -379,6 +408,11 @@ export const useSyncStore = create<SyncState>()(
         set({ error: null });
         
         try {
+          // Find the current item to get old priority
+          const { queue } = get();
+          const currentItem = queue.find(item => item.id === itemId);
+          const oldPriority = currentItem?.priorityScore || 0;
+          
           const response = await fetch('/api/v1/sync/priority/override', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -394,6 +428,19 @@ export const useSyncStore = create<SyncState>()(
           
           if (!response.ok) {
             throw new Error(result.error || 'Failed to override priority');
+          }
+
+          // Log the priority override event
+          if (currentItem) {
+            priorityEventLogger.logPriorityOverride(
+              itemId,
+              currentItem.type as 'ASSESSMENT' | 'RESPONSE' | 'MEDIA',
+              oldPriority,
+              newPriority,
+              justification,
+              'current-user-id', // TODO: Get from auth context
+              'coordinator'
+            );
           }
           
           // Refresh queue to show updated priorities

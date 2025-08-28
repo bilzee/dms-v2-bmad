@@ -1,5 +1,8 @@
 import { db, QueueRecord } from '../offline/db';
 import type { OfflineQueueItem } from '@dms/shared';
+import type { SyncJobData } from '../queues/sync.queue';
+import { priorityRuleService } from './PriorityRuleService';
+import { priorityEventLogger } from './PriorityEventLogger';
 
 export interface QueueFilters {
   status?: 'PENDING' | 'SYNCING' | 'FAILED' | 'SYNCED';
@@ -193,7 +196,7 @@ export class OfflineQueueService {
   }
 
   /**
-   * Perform actual sync process for a queue item
+   * Perform actual sync process for a queue item via API calls
    */
   private async performSync(id: string): Promise<void> {
     const item = await db.queue.get(id);
@@ -208,41 +211,45 @@ export class OfflineQueueService {
         error: undefined, // Clear previous errors
       });
 
-      // Perform the actual sync operation based on item type and action
-      let success = false;
-      let errorMessage = '';
+      // Convert to job format for API
+      const priorityScore = await this.calculatePriorityScore(item);
+      const jobData: SyncJobData = {
+        id: item.id,
+        type: item.type as 'ASSESSMENT' | 'RESPONSE' | 'MEDIA',
+        entityId: item.entityId || item.id,
+        data: item.data,
+        priorityScore,
+        metadata: {
+          source: 'OfflineQueueService',
+          urgency: this.getUrgencyFromPriority(item.priority),
+          timestamp: new Date(),
+        },
+      };
 
-      switch (item.type) {
-        case 'ASSESSMENT':
-          success = await this.syncAssessment(item);
-          break;
-        case 'RESPONSE':
-          success = await this.syncResponse(item);
-          break;
-        case 'MEDIA':
-          success = await this.syncMedia(item);
-          break;
-        case 'INCIDENT':
-          success = await this.syncIncident(item);
-          break;
-        case 'ENTITY':
-          success = await this.syncEntity(item);
-          break;
-        default:
-          errorMessage = `Unknown item type: ${item.type}`;
-          success = false;
+      // Add to priority queue via API call instead of direct BullMQ
+      const response = await fetch('/api/v1/sync/queue/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...jobData,
+          options: {
+            jobId: item.id, // Ensure idempotency
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add item to sync queue');
       }
 
-      if (success) {
-        // Remove from queue on successful sync
-        await db.removeFromQueue(id);
-      } else {
-        // Mark as failed with appropriate error message
-        await db.updateQueueItem(id, {
-          error: errorMessage || 'Sync operation failed',
-          lastAttempt: new Date(),
-        });
-      }
+      // Mark as successfully queued via API
+      await db.updateQueueItem(id, {
+        lastAttempt: new Date(),
+        // Don't remove yet - let backend worker handle completion
+      });
 
     } catch (error) {
       // Handle network or other errors
@@ -251,6 +258,90 @@ export class OfflineQueueService {
         error: `Sync failed: ${errorMessage}`,
         lastAttempt: new Date(),
       });
+    }
+  }
+
+  /**
+   * Calculate priority score based on item data using rule engine
+   */
+  private async calculatePriorityScore(item: QueueRecord): Promise<number> {
+    const originalPriority = item.priority === 'HIGH' ? 80 : 
+                            item.priority === 'NORMAL' ? 50 : 20;
+    
+    try {
+      // Use priority rule service for sophisticated scoring
+      const ruleEvaluation = await priorityRuleService.evaluateRules(
+        item.data, 
+        item.type as 'ASSESSMENT' | 'RESPONSE' | 'MEDIA'
+      );
+      
+      if (ruleEvaluation.priorityScore > 0) {
+        // Log the priority calculation event
+        priorityEventLogger.logPriorityCalculation(
+          item.id,
+          item.type as 'ASSESSMENT' | 'RESPONSE' | 'MEDIA',
+          ruleEvaluation.priorityScore,
+          ruleEvaluation.appliedRules.map(r => ({
+            ruleName: r.rule.name,
+            modifier: r.modifier
+          })),
+          originalPriority
+        );
+        
+        return ruleEvaluation.priorityScore;
+      }
+    } catch (error) {
+      console.warn('Priority rule evaluation failed, using fallback scoring:', error);
+    }
+    
+    // Fallback to simple scoring if rule evaluation fails
+    let contentBoost = 0;
+    
+    // Health emergency keywords
+    const emergencyKeywords = ['emergency', 'urgent', 'critical', 'severe', 'immediate'];
+    const itemContent = JSON.stringify(item.data).toLowerCase();
+    
+    if (emergencyKeywords.some(keyword => itemContent.includes(keyword))) {
+      contentBoost += 20;
+    }
+    
+    // Large population affected
+    if (item.data?.beneficiariesAffected && item.data.beneficiariesAffected > 1000) {
+      contentBoost += 15;
+    }
+    
+    // Assessment type priorities
+    if (item.type === 'ASSESSMENT') {
+      const assessmentType = item.data?.assessmentType;
+      if (assessmentType === 'HEALTH') contentBoost += 10;
+      else if (assessmentType === 'PRELIMINARY') contentBoost += 15;
+    }
+    
+    const finalPriority = Math.min(100, originalPriority + contentBoost);
+    
+    // Log fallback calculation if different from original
+    if (finalPriority !== originalPriority) {
+      priorityEventLogger.logPriorityCalculation(
+        item.id,
+        item.type as 'ASSESSMENT' | 'RESPONSE' | 'MEDIA',
+        finalPriority,
+        [],
+        originalPriority
+      );
+    }
+    
+    return finalPriority;
+  }
+
+  /**
+   * Convert priority level to urgency
+   */
+  private getUrgencyFromPriority(priority: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'EMERGENCY' {
+    switch (priority) {
+      case 'HIGH': return 'HIGH';
+      case 'NORMAL': return 'MEDIUM';
+      case 'LOW': return 'LOW';
+      default: return 'MEDIUM';
     }
   }
 

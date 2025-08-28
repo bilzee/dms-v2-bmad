@@ -2,11 +2,10 @@ import type {
   PriorityQueueItem, 
   PriorityRule, 
   PriorityCondition,
-  AssessmentType,
-  ResponseType,
   RapidAssessment,
   RapidResponse 
 } from '@dms/shared';
+import { AssessmentType, ResponseType } from '@dms/shared';
 
 /**
  * AutomaticPriorityAssigner service for content-based priority detection
@@ -140,7 +139,7 @@ export class AutomaticPriorityAssigner {
     }
 
     // Health emergency keyword detection
-    if (assessment?.type === AssessmentType.HEALTH) {
+    if (assessment?.type === AssessmentType.HEALTH && assessment.data) {
       const healthData = assessment.data;
       const textContent = JSON.stringify(healthData).toLowerCase();
       
