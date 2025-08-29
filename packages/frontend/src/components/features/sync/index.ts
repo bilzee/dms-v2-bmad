@@ -6,3 +6,6 @@ export { AssessmentSyncStatus, CompactAssessmentSyncStatus } from './AssessmentS
 export { PriorityQueueVisualization } from './PriorityQueueVisualization';
 export { PriorityRuleManager } from './PriorityRuleManager';
 export { ManualPriorityOverride } from './ManualPriorityOverride';
+export { ConflictResolver } from './ConflictResolver';
+export { ConflictComparison } from './ConflictComparison';
+export { ConflictAuditTrail } from './ConflictAuditTrail';

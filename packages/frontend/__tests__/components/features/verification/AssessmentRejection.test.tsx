@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssessmentRejection } from '@/components/features/verification/AssessmentRejection';
-import { RapidAssessment } from '@dms/shared';
+import { RapidAssessment, AssessmentType, VerificationStatus, SyncStatus } from '@dms/shared';
 
 // Mock dependencies
 jest.mock('@/hooks/useAuth', () => ({
@@ -24,13 +24,13 @@ global.fetch = jest.fn();
 
 const mockAssessment: RapidAssessment = {
   id: 'test-assessment-id',
-  type: 'HEALTH',
+  type: AssessmentType.HEALTH,
   date: new Date('2023-08-25'),
   affectedEntityId: 'entity-1',
   assessorName: 'John Assessor',
   assessorId: 'assessor-1',
-  verificationStatus: 'PENDING',
-  syncStatus: 'SYNCED',
+  verificationStatus: VerificationStatus.PENDING,
+  syncStatus: SyncStatus.SYNCED,
   data: {
     hasFunctionalClinic: true,
     numberHealthFacilities: 2,
@@ -58,7 +58,7 @@ describe('AssessmentRejection', () => {
   });
 
   it('shows already rejected state for rejected assessments', () => {
-    const rejectedAssessment = { ...mockAssessment, verificationStatus: 'REJECTED' as const };
+    const rejectedAssessment = { ...mockAssessment, verificationStatus: VerificationStatus.REJECTED };
     
     render(<AssessmentRejection assessment={rejectedAssessment} />);
     

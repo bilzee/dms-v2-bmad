@@ -1,4 +1,4 @@
-import { ResponseType, ResponseStatus, RapidResponse } from '@dms/shared';
+import { ResponseType, ResponseStatus, RapidResponse, VerificationStatus, SyncStatus, HealthResponseData, WashResponseData, FoodResponseData } from '@dms/shared';
 
 export const seedResponses: RapidResponse[] = [
   {
@@ -10,14 +10,15 @@ export const seedResponses: RapidResponse[] = [
     assessmentId: 'assessment-1',
     responderId: 'responder-1',
     responderName: 'John Doe',
-    verificationStatus: 'PENDING' as any,
-    syncStatus: 'SYNCED' as any,
+    verificationStatus: VerificationStatus.PENDING,
+    syncStatus: SyncStatus.SYNCED,
     data: {
       medicinesDelivered: [],
       medicalSuppliesDelivered: [],
       healthWorkersDeployed: 2,
       patientsTreated: 0,
-    },
+    } as HealthResponseData,
+    requiresAttention: false,
     otherItemsDelivered: [
       { item: 'Paracetamol', quantity: 100, unit: 'tablets' },
       { item: 'Bandages', quantity: 25, unit: 'rolls' },
@@ -35,14 +36,15 @@ export const seedResponses: RapidResponse[] = [
     assessmentId: 'assessment-2',
     responderId: 'responder-2',
     responderName: 'Jane Smith',
-    verificationStatus: 'PENDING' as any,
-    syncStatus: 'SYNCED' as any,
+    verificationStatus: VerificationStatus.PENDING,
+    syncStatus: SyncStatus.SYNCED,
     data: {
-      waterContainersDistributed: [],
-      hygieneKitsDistributed: [],
-      sanitationFacilitiesConstructed: 1,
-      waterPointsEstablished: 2,
-    },
+      waterDeliveredLiters: 1000,
+      waterContainersDistributed: 50,
+      toiletsConstructed: 1,
+      hygieneKitsDistributed: 30,
+    } as WashResponseData,
+    requiresAttention: false,
     otherItemsDelivered: [
       { item: 'Water Containers', quantity: 50, unit: 'pieces' },
       { item: 'Hygiene Kits', quantity: 30, unit: 'kits' },
@@ -61,14 +63,18 @@ export const seedResponses: RapidResponse[] = [
     assessmentId: 'assessment-3',
     responderId: 'responder-3',
     responderName: 'Bob Wilson',
-    verificationStatus: 'PENDING' as any,
-    syncStatus: 'SYNCED' as any,
+    verificationStatus: VerificationStatus.PENDING,
+    syncStatus: SyncStatus.SYNCED,
     data: {
-      foodPackagesDistributed: [],
-      cookingKitsDistributed: [],
-      mealsServed: 0,
-      nutritionScreeningsCompleted: 0,
-    },
+      foodItemsDelivered: [
+        { item: 'Rice', quantity: 50, unit: 'kg' },
+        { item: 'Ready-to-Eat Meals', quantity: 100, unit: 'packets' }
+      ],
+      householdsServed: 20,
+      personsServed: 80,
+      nutritionSupplementsProvided: 0,
+      additionalDetails: 'Food distribution completed successfully'
+    } as FoodResponseData,
     otherItemsDelivered: [
       { item: 'Rice', quantity: 50, unit: 'kg' },
       { item: 'Cooking Oil', quantity: 10, unit: 'liters' },

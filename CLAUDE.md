@@ -5,6 +5,8 @@ The test strategy located in docs/qa/test-strategy.md and the following agents s
   - PM Agent: Reference quality gates for timeline planning
   - Architect: Validate against testing architecture framework
 
+Test Mocking - Avoid hardcoding mock values at the component level, instead frontend components should point to api endpoints where the mocking should happen. This makes all tests integration-ready by simply connecting the api endpoint to the backend. 
+
 ## Use of MCP Tools by BMad Agents
 BMad agents should utilise available MCPs tools in their tasks. Below are list of BMad agents and recommended MCP tools to use.  
  - pm agent: Sequential Thinking
@@ -16,5 +18,6 @@ BMad agents should utilise available MCPs tools in their tasks. Below are list o
  - ux-expert: Context7; Sequential Thinking
 
  ## Common Error Fixes
+ - Starting the dev server took about 85 seconds while implementing story 4.2 so give the server sufficient time before declaring the lack of response is an error. If such delays will affect building the app too, then consider it when building too. 
  - When you get a workspace error when using "npm", try using "pnmp" instead. 
  - Infinite loop is caused by a common React Hook Form anti-pattern: using watch() with useEffect and setValue (e.g. const currentValues = watch()) creates a circular dependency; the solution in this case would be "const currentValues = getValues(); // Doesn't subscribe to changes"

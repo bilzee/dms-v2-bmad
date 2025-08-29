@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,12 +11,16 @@ import {
   CheckCircle, HelpCircle, Activity, MapPin, BarChart3,
   ClipboardList, Building, UserCheck, Archive
 } from "lucide-react"
+import { useOffline } from '@/hooks/useOffline'
+import { useOfflineStore } from '@/stores/offline.store'
 import { FeatureCard } from '@/components/dashboard/FeatureCard'
 import { AssessmentTypeCard } from '@/components/dashboard/AssessmentTypeCard'
 import { QuickStatsCard } from '@/components/dashboard/QuickStatsCard'
 import { assessmentTypeColors, featureColors, statusColors } from '@/lib/constants/colors'
 
 export default function HomePage() {
+  const { isOffline } = useOffline();
+  const queue = useOfflineStore(state => state.queue);
   const mainFeatures = [
     {
       title: 'Assessments',
@@ -215,7 +221,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          {/* System Status Card */}
+          {/* System Status Card - FIXED */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -224,16 +230,32 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-3" data-testid="system-status">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-700 font-medium">Online</span>
-                  <Badge variant="secondary" className="ml-auto bg-green-100 text-green-800">
-                    Connected
+                  <div className={`w-3 h-3 rounded-full animate-pulse ${
+                    isOffline ? 'bg-orange-500' : 'bg-green-500'
+                  }`}></div>
+                  <span className={`font-medium ${
+                    isOffline ? 'text-orange-700' : 'text-green-700'
+                  }`}>
+                    {isOffline ? 'Offline' : 'Online'}
+                  </span>
+                  <Badge 
+                    variant="secondary" 
+                    className={`ml-auto ${
+                      isOffline 
+                        ? 'bg-orange-100 text-orange-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}
+                  >
+                    {isOffline ? 'Disconnected' : 'Connected'}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  All features available including real-time sync
+                  {isOffline 
+                    ? `Work saved locally. ${queue.length} items will sync when connected.`
+                    : 'All features available including real-time sync'
+                  }
                 </p>
               </div>
             </CardContent>

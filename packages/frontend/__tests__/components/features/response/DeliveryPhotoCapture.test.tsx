@@ -42,15 +42,13 @@ const mockMediaAttachment: MediaAttachment = {
   url: 'data:image/jpeg;base64,mockbase64',
   uploadedAt: new Date('2024-01-15T10:30:00Z'),
   metadata: {
-    gpsLocation: {
+    gpsCoordinates: {
       latitude: 9.0765,
       longitude: 7.3986,
       timestamp: new Date('2024-01-15T10:30:00Z'),
       captureMethod: 'GPS' as const,
     },
-    originalSize: 2048000,
-    compressedSize: 1024000,
-    compressionRatio: 0.5,
+    timestamp: new Date('2024-01-15T10:30:00Z'),
   },
 };
 

@@ -1,6 +1,7 @@
 import Dexie, { Table } from 'dexie';
 import { v4 as uuidv4 } from 'uuid';
 import type { RapidAssessment, OfflineQueueItem, MediaAttachment, AffectedEntity } from '@dms/shared';
+import type { ConflictDetailed, ConflictAuditEntry } from '@/lib/sync/SyncEngine';
 
 // Define the database schema
 export interface AssessmentRecord extends RapidAssessment {
@@ -45,6 +46,38 @@ export interface DraftEntity {
   formData: any;
 }
 
+// Conflict Management Records
+export interface ConflictRecord extends Omit<ConflictDetailed, 'detectedAt' | 'resolvedAt' | 'auditTrail'> {
+  // Convert Date objects to timestamps for IndexedDB storage
+  detectedAt: number;
+  resolvedAt?: number;
+  lastModified: Date;
+}
+
+export interface ConflictAuditRecord extends Omit<ConflictAuditEntry, 'timestamp'> {
+  id: string; // Unique ID for audit entry
+  conflictId: string; // Reference to parent conflict
+  timestamp: number; // Convert Date to timestamp
+  lastModified: Date;
+}
+
+export interface ConflictQueueCache {
+  id: string;
+  cacheKey: string; // Hash of filter parameters
+  conflictIds: string[]; // Array of conflict IDs
+  totalCount: number;
+  cacheTime: Date;
+  expiresAt: Date;
+}
+
+export interface ConflictResolutionCache {
+  id: string;
+  conflictId: string;
+  resolutionData: any;
+  cacheTime: Date;
+  expiresAt: Date;
+}
+
 class OfflineDatabase extends Dexie {
   assessments!: Table<AssessmentRecord>;
   entities!: Table<EntityRecord>;
@@ -52,17 +85,30 @@ class OfflineDatabase extends Dexie {
   media!: Table<MediaRecord>;
   drafts!: Table<DraftAssessment>;
   entityDrafts!: Table<DraftEntity>;
+  
+  // Conflict Management Tables
+  conflicts!: Table<ConflictRecord>;
+  conflictAudit!: Table<ConflictAuditRecord>;
+  conflictQueueCache!: Table<ConflictQueueCache>;
+  conflictResolutionCache!: Table<ConflictResolutionCache>;
 
   constructor() {
     super('DMSOfflineDB');
     
-    this.version(3).stores({
+    // Update version to 4 for conflict management tables
+    this.version(4).stores({
       assessments: 'id, type, date, affectedEntityId, assessorId, syncStatus, verificationStatus, offlineId, lastModified',
       entities: 'id, type, name, lga, ward, latitude, longitude, isDraft, lastModified',
       queue: 'id, type, action, entityId, priority, createdAt, lastAttempt, retryCount, lastModified',
       media: 'id, assessmentId, mimeType, size, isUploaded, lastModified',
       drafts: 'id, type, lastSaved',
       entityDrafts: 'id, type, lastSaved',
+      
+      // Conflict Management Tables
+      conflicts: 'id, entityId, entityType, conflictType, severity, status, detectedAt, resolvedAt, detectedBy, resolvedBy, lastModified',
+      conflictAudit: 'id, conflictId, timestamp, action, performedBy, lastModified',
+      conflictQueueCache: 'id, cacheKey, cacheTime, expiresAt',
+      conflictResolutionCache: 'id, conflictId, cacheTime, expiresAt',
     });
 
     // Add hooks for automatic timestamp updates
@@ -96,6 +142,23 @@ class OfflineDatabase extends Dexie {
 
     this.entities.hook('updating', (modifications, primKey, obj, trans) => {
       (modifications as Partial<EntityRecord>).lastModified = new Date();
+    });
+
+    // Conflict management hooks
+    this.conflicts.hook('creating', (primKey, obj, trans) => {
+      (obj as ConflictRecord).lastModified = new Date();
+    });
+
+    this.conflicts.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as Partial<ConflictRecord>).lastModified = new Date();
+    });
+
+    this.conflictAudit.hook('creating', (primKey, obj, trans) => {
+      (obj as ConflictAuditRecord).lastModified = new Date();
+    });
+
+    this.conflictAudit.hook('updating', (modifications, primKey, obj, trans) => {
+      (modifications as Partial<ConflictAuditRecord>).lastModified = new Date();
     });
   }
 
@@ -583,6 +646,312 @@ class OfflineDatabase extends Dexie {
     return key;
   }
 
+  // Conflict Management Operations
+
+  /**
+   * Save conflict to offline storage
+   */
+  async saveConflict(conflict: ConflictDetailed): Promise<string> {
+    const record: ConflictRecord = {
+      ...conflict,
+      detectedAt: conflict.detectedAt.getTime(),
+      resolvedAt: conflict.resolvedAt?.getTime(),
+      lastModified: new Date(),
+    };
+
+    await this.conflicts.put(record);
+
+    // Save audit trail entries
+    for (const entry of conflict.auditTrail) {
+      await this.saveConflictAuditEntry(conflict.id, entry);
+    }
+
+    return conflict.id;
+  }
+
+  /**
+   * Get conflict by ID with audit trail
+   */
+  async getConflict(conflictId: string): Promise<ConflictDetailed | undefined> {
+    const record = await this.conflicts.get(conflictId);
+    if (!record) return undefined;
+
+    // Get audit trail
+    const auditEntries = await this.conflictAudit
+      .where('conflictId')
+      .equals(conflictId)
+      .toArray();
+
+    // Convert back to ConflictDetailed format
+    const conflict: ConflictDetailed = {
+      ...record,
+      detectedAt: new Date(record.detectedAt),
+      resolvedAt: record.resolvedAt ? new Date(record.resolvedAt) : undefined,
+      auditTrail: auditEntries
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+        .map((entry: any) => ({
+          timestamp: new Date(entry.timestamp),
+          action: entry.action,
+          performedBy: entry.performedBy,
+          details: entry.details
+        }))
+    };
+
+    return conflict;
+  }
+
+  /**
+   * Get pending conflicts with filtering and sorting
+   */
+  async getPendingConflicts(filters?: {
+    entityType?: string;
+    severity?: string;
+    conflictType?: string;
+  }): Promise<ConflictDetailed[]> {
+    let query = this.conflicts.where('status').equals('PENDING');
+
+    if (filters) {
+      if (filters.entityType) {
+        query = query.and(conflict => conflict.entityType === filters.entityType);
+      }
+      if (filters.severity) {
+        query = query.and(conflict => conflict.severity === filters.severity);
+      }
+      if (filters.conflictType) {
+        query = query.and(conflict => conflict.conflictType === filters.conflictType);
+      }
+    }
+
+    const records = await query.toArray();
+    
+    // Sort by detectedAt in memory (newest first)
+    records.sort((a, b) => new Date(b.detectedAt).getTime() - new Date(a.detectedAt).getTime());
+
+    // Convert to ConflictDetailed format with audit trails
+    const conflicts: ConflictDetailed[] = [];
+    for (const record of records) {
+      const conflict = await this.getConflict(record.id);
+      if (conflict) conflicts.push(conflict);
+    }
+
+    return conflicts;
+  }
+
+  /**
+   * Get conflicts for specific entity
+   */
+  async getConflictsForEntity(entityId: string): Promise<ConflictDetailed[]> {
+    const records = await this.conflicts
+      .where('entityId')
+      .equals(entityId)
+      .toArray();
+    
+    // Sort by detectedAt in memory (newest first)
+    records.sort((a, b) => new Date(b.detectedAt).getTime() - new Date(a.detectedAt).getTime());
+
+    const conflicts: ConflictDetailed[] = [];
+    for (const record of records) {
+      const conflict = await this.getConflict(record.id);
+      if (conflict) conflicts.push(conflict);
+    }
+
+    return conflicts;
+  }
+
+  /**
+   * Update conflict status and resolution details
+   */
+  async updateConflictResolution(
+    conflictId: string,
+    resolutionStrategy: string,
+    resolvedBy: string,
+    justification: string
+  ): Promise<void> {
+    const now = Date.now();
+    
+    await this.conflicts.update(conflictId, {
+      status: 'RESOLVED',
+      resolutionStrategy: resolutionStrategy as any,
+      resolvedBy,
+      resolvedAt: now,
+      resolutionJustification: justification,
+      lastModified: new Date()
+    });
+
+    // Add resolution audit entry
+    await this.saveConflictAuditEntry(conflictId, {
+      timestamp: new Date(),
+      action: 'CONFLICT_RESOLVED',
+      performedBy: resolvedBy,
+      details: {
+        strategy: resolutionStrategy,
+        justification
+      }
+    });
+  }
+
+  /**
+   * Save conflict audit entry
+   */
+  async saveConflictAuditEntry(conflictId: string, entry: ConflictAuditEntry): Promise<string> {
+    const id = uuidv4();
+    const record: ConflictAuditRecord = {
+      id,
+      conflictId,
+      timestamp: entry.timestamp.getTime(),
+      action: entry.action,
+      performedBy: entry.performedBy,
+      details: entry.details,
+      lastModified: new Date()
+    };
+
+    await this.conflictAudit.put(record);
+    return id;
+  }
+
+  /**
+   * Get conflict statistics
+   */
+  async getConflictStats(): Promise<{
+    totalConflicts: number;
+    pendingConflicts: number;
+    resolvedConflicts: number;
+    criticalConflicts: number;
+    conflictsByType: Record<string, number>;
+    conflictsBySeverity: Record<string, number>;
+  }> {
+    const allConflicts = await this.conflicts.toArray();
+    
+    const stats = {
+      totalConflicts: allConflicts.length,
+      pendingConflicts: allConflicts.filter(c => c.status === 'PENDING').length,
+      resolvedConflicts: allConflicts.filter(c => c.status === 'RESOLVED').length,
+      criticalConflicts: allConflicts.filter(c => c.severity === 'CRITICAL').length,
+      conflictsByType: allConflicts.reduce((acc, c) => {
+        acc[c.conflictType] = (acc[c.conflictType] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>),
+      conflictsBySeverity: allConflicts.reduce((acc, c) => {
+        acc[c.severity] = (acc[c.severity] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>)
+    };
+
+    return stats;
+  }
+
+  /**
+   * Cache conflict queue for performance
+   */
+  async cacheConflictQueue(
+    cacheKey: string,
+    conflictIds: string[],
+    totalCount: number,
+    ttlMinutes: number = 10
+  ): Promise<void> {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + ttlMinutes * 60 * 1000);
+
+    const cache: ConflictQueueCache = {
+      id: uuidv4(),
+      cacheKey,
+      conflictIds,
+      totalCount,
+      cacheTime: now,
+      expiresAt
+    };
+
+    await this.conflictQueueCache.put(cache);
+
+    // Clean up expired cache entries
+    await this.conflictQueueCache
+      .where('expiresAt')
+      .below(now)
+      .delete();
+  }
+
+  /**
+   * Get cached conflict queue
+   */
+  async getCachedConflictQueue(cacheKey: string): Promise<ConflictQueueCache | null> {
+    const cache = await this.conflictQueueCache
+      .where('cacheKey')
+      .equals(cacheKey)
+      .and(c => c.expiresAt > new Date())
+      .first();
+
+    return cache || null;
+  }
+
+  /**
+   * Cache conflict resolution data
+   */
+  async cacheConflictResolution(
+    conflictId: string,
+    resolutionData: any,
+    ttlMinutes: number = 30
+  ): Promise<void> {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + ttlMinutes * 60 * 1000);
+
+    const cache: ConflictResolutionCache = {
+      id: uuidv4(),
+      conflictId,
+      resolutionData,
+      cacheTime: now,
+      expiresAt
+    };
+
+    await this.conflictResolutionCache.put(cache);
+
+    // Clean up expired cache entries
+    await this.conflictResolutionCache
+      .where('expiresAt')
+      .below(now)
+      .delete();
+  }
+
+  /**
+   * Get cached conflict resolution
+   */
+  async getCachedConflictResolution(conflictId: string): Promise<ConflictResolutionCache | null> {
+    const cache = await this.conflictResolutionCache
+      .where('conflictId')
+      .equals(conflictId)
+      .and(c => c.expiresAt > new Date())
+      .first();
+
+    return cache || null;
+  }
+
+  /**
+   * Clear old resolved conflicts
+   */
+  async clearOldConflicts(daysOld: number = 30): Promise<number> {
+    const cutoffTime = Date.now() - (daysOld * 24 * 60 * 60 * 1000);
+    
+    // Get conflicts to delete
+    const conflictsToDelete = await this.conflicts
+      .where('resolvedAt')
+      .below(cutoffTime)
+      .and(c => c.status === 'RESOLVED')
+      .toArray();
+
+    let deletedCount = 0;
+
+    // Delete conflicts and their audit trails
+    for (const conflict of conflictsToDelete) {
+      // Delete audit trail entries
+      await this.conflictAudit.where('conflictId').equals(conflict.id).delete();
+      
+      // Delete conflict
+      await this.conflicts.delete(conflict.id);
+      deletedCount++;
+    }
+
+    return deletedCount;
+  }
+
   // Cleanup old data
   async cleanup(olderThan: Date = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)): Promise<void> {
     // Remove assessments older than 30 days that are synced
@@ -623,6 +992,22 @@ class OfflineDatabase extends Dexie {
     await this.entityDrafts
       .where('lastSaved')
       .below(olderThan)
+      .delete();
+
+    // Clean up old resolved conflicts (90 days)
+    const conflictCutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    await this.clearOldConflicts(90);
+
+    // Clean up expired cache entries
+    const now = new Date();
+    await this.conflictQueueCache
+      .where('expiresAt')
+      .below(now)
+      .delete();
+
+    await this.conflictResolutionCache
+      .where('expiresAt')
+      .below(now)
       .delete();
   }
 }

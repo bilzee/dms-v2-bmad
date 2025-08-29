@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { AssessmentQueue, QueueSummary } from '@/components/features/sync';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AssessmentQueue, QueueSummary, PriorityQueueVisualization, PriorityRuleManager } from '@/components/features/sync';
 import { SampleDataService } from '@/lib/services/SampleDataService';
 import { useSyncStore } from '@/stores/sync.store';
 import { Plus, Trash2, RefreshCw, Database } from 'lucide-react';
@@ -24,6 +25,7 @@ export default function QueuePage() {
   } = useSyncStore();
   
   const [showSampleDataButtons, setShowSampleDataButtons] = useState(true);
+  const [activeTab, setActiveTab] = useState('queue');
   const sampleDataService = new SampleDataService();
 
   useEffect(() => {
@@ -130,10 +132,12 @@ export default function QueuePage() {
         </div>
       )}
 
-      {/* Queue Summary Widget */}
-      <div className="mb-8">
-        <QueueSummary className="max-w-2xl" />
-      </div>
+      {/* Queue Summary Widget - only show on queue tab */}
+      {activeTab === 'queue' && (
+        <div className="mb-8">
+          <QueueSummary className="max-w-2xl" />
+        </div>
+      )}
 
       {/* Error Display */}
       {error && (
@@ -155,30 +159,56 @@ export default function QueuePage() {
         </div>
       )}
 
-      {/* Main Queue Component */}
+      {/* Main Content with Tabs */}
       <div className="bg-white border border-gray-200 rounded-lg">
-        <AssessmentQueue
-          items={filteredQueue}
-          isLoading={isLoading}
-          onRetry={retryQueueItem}
-          onRemove={removeQueueItem}
-          onFilterChange={updateFilters}
-          currentFilters={currentFilters}
-        />
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0">
+            <TabsTrigger value="queue" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-transparent px-6 py-3">
+              Sync Queue
+            </TabsTrigger>
+            <TabsTrigger value="priority" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-transparent px-6 py-3">
+              Priority View
+            </TabsTrigger>
+            <TabsTrigger value="rules" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-transparent px-6 py-3">
+              Priority Rules
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="queue" className="mt-0 border-t-0">
+            <AssessmentQueue
+              items={filteredQueue}
+              isLoading={isLoading}
+              onRetry={retryQueueItem}
+              onRemove={removeQueueItem}
+              onFilterChange={updateFilters}
+              currentFilters={currentFilters}
+            />
+          </TabsContent>
+          
+          <TabsContent value="priority" className="mt-0 border-t-0 p-6">
+            <PriorityQueueVisualization />
+          </TabsContent>
+          
+          <TabsContent value="rules" className="mt-0 border-t-0 p-6">
+            <PriorityRuleManager />
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* Additional Actions */}
-      <div className="mt-8 flex items-center justify-center gap-4">
-        <Button
-          variant="outline"
-          onClick={() => loadQueue()}
-          disabled={isLoading}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh Queue
-        </Button>
-      </div>
+      {/* Additional Actions - only show refresh on queue tab */}
+      {activeTab === 'queue' && (
+        <div className="mt-8 flex items-center justify-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => loadQueue()}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh Queue
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

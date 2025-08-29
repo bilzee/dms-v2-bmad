@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AssessmentVerificationQueue } from '@/components/features/verification/AssessmentVerificationQueue';
 import { useVerificationStore } from '@/stores/verification.store';
-import { AssessmentType, VerificationStatus } from '@dms/shared';
+import { AssessmentType, VerificationStatus, SyncStatus } from '@dms/shared';
 
 // Mock the verification store
 jest.mock('@/stores/verification.store', () => ({
@@ -39,7 +39,7 @@ const mockQueueData = {
         assessorName: 'Dr. Sarah Johnson',
         assessorId: 'assessor-1',
         verificationStatus: VerificationStatus.PENDING,
-        syncStatus: 'SYNCED' as any,
+        syncStatus: SyncStatus.SYNCED,
         data: {} as any,
         mediaAttachments: [],
         createdAt: new Date(),
@@ -87,7 +87,7 @@ const mockQueueFilters = {
 };
 
 const mockQueueSelection = {
-  selectedAssessmentIds: [],
+  selectedAssessmentIds: [] as string[],
   toggleAssessmentSelection: jest.fn(),
   selectAllVisible: jest.fn(),
   clearSelection: jest.fn(),
@@ -104,7 +104,7 @@ describe('AssessmentVerificationQueue', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
-    (useVerificationStore as jest.Mock).mockReturnValue(mockVerificationStore);
+    (useVerificationStore as jest.MockedFunction<typeof useVerificationStore>).mockReturnValue(mockVerificationStore);
     
     // Mock the individual hooks
     require('@/stores/verification.store').useQueueData.mockReturnValue(mockQueueData);
@@ -209,7 +209,7 @@ describe('AssessmentVerificationQueue', () => {
     
     // Mock selected assessments
     mockQueueSelection.getSelectedCount.mockReturnValue(1);
-    mockQueueSelection.selectedAssessmentIds = ['1'];
+    mockQueueSelection.selectedAssessmentIds.push('1');
     
     render(<AssessmentVerificationQueue onBatchAction={mockOnBatchAction} />);
     

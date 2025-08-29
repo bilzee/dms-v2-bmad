@@ -153,7 +153,6 @@ describe('Preliminary Assessment Offline Functionality', () => {
     offlineId: 'offline-123',
     data: {
       incidentType: IncidentType.FLOOD,
-      incidentSubType: 'Flash flood',
       severity: IncidentSeverity.SEVERE,
       affectedPopulationEstimate: 500,
       affectedHouseholdsEstimate: 100,
@@ -162,8 +161,8 @@ describe('Preliminary Assessment Offline Functionality', () => {
       priorityLevel: 'HIGH',
       additionalDetails: 'Bridge damaged, access limited from north'
     } as PreliminaryAssessmentData,
+    mediaAttachments: [],
     createdAt: new Date(),
-    retryCount: 0,
     updatedAt: new Date(),
     ...overrides
   });
@@ -235,9 +234,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
         action: 'CREATE',
         entityId: assessment.id,
         data: assessment,
-        priority: 'HIGH',
         retryCount: 0,
-        createdAt: new Date()
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       expect(mockIndexedDB.addToQueue).toHaveBeenCalledWith(
@@ -259,9 +260,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
         action: 'CREATE',
         entityId: assessment.id,
         data: assessment,
-        priority: 'HIGH',
         retryCount: 0,
-        createdAt: new Date()
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       // Add incident creation to queue
@@ -276,9 +279,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
           assessorId: assessment.assessorId,
           assessorName: assessment.assessorName
         },
-        priority: 'HIGH',
         retryCount: 0,
-        createdAt: new Date()
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       const queueItems = await db.getQueueItems();
@@ -317,7 +322,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
         action: 'CREATE',
         entityId: highPriorityAssessment.id,
         data: highPriorityAssessment,
-        priority: 'HIGH'
+        retryCount: 0,
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       const queueItems = await db.getQueueItems();
@@ -425,9 +434,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
         action: 'CREATE',
         entityId: assessment.id,
         data: assessment,
-        priority: 'HIGH',
         retryCount: 0,
-        createdAt: new Date()
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       // Simulate coming online
@@ -448,9 +459,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
         action: 'CREATE',
         entityId: assessment.id,
         data: assessment,
-        priority: 'HIGH',
         retryCount: 0,
-        createdAt: new Date()
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       await db.addToQueue({
@@ -461,9 +474,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
           fromAssessmentId: assessment.id,
           assessmentData: assessment.data
         },
-        priority: 'HIGH',
         retryCount: 0,
-        createdAt: new Date()
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       const allItems = await db.getQueueItems();
@@ -482,9 +497,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
         action: 'CREATE',
         entityId: assessment.id,
         data: assessment,
-        priority: 'HIGH',
         retryCount: 0,
-        createdAt: new Date()
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       // Simulate processing error by keeping item in queue
@@ -506,9 +523,11 @@ describe('Preliminary Assessment Offline Functionality', () => {
         action: 'CREATE',
         entityId: assessment.id,
         data: assessment,
-        priority: 'HIGH',
         retryCount: 0,
-        createdAt: new Date()
+        priority: 'HIGH',
+        createdAt: new Date(),
+        lastAttempt: undefined,
+        error: undefined
       });
       
       const savedAssessment = await db.getAssessment(assessment.id);

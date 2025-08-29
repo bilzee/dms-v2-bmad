@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ResponseFeedbackNotification } from '../../../src/components/features/verification/ResponseFeedbackNotification';
-import { Feedback } from '@dms/shared';
+import { Feedback, User } from '@dms/shared';
 import { useAuth } from '../../../src/hooks/useAuth';
 import { toast } from '../../../src/hooks/use-toast';
 
@@ -19,10 +19,15 @@ global.fetch = jest.fn();
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockToast = toast as jest.MockedFunction<typeof toast>;
 
-const mockUser = {
+const mockUser: User = {
   id: 'user-123',
+  email: 'responder@test.com',
   name: 'Test User',
-  role: 'responder',
+  roles: [{ id: 'role-1', name: 'RESPONDER', permissions: [], isActive: true }],
+  activeRole: { id: 'role-1', name: 'RESPONDER', permissions: [], isActive: true },
+  permissions: [],
+  createdAt: new Date('2025-01-01'),
+  updatedAt: new Date('2025-01-01'),
 };
 
 const mockResponseFeedback: Feedback[] = [
@@ -96,8 +101,6 @@ describe('ResponseFeedbackNotification', () => {
       user: mockUser,
       isLoading: false,
       error: null,
-      login: jest.fn(),
-      logout: jest.fn(),
     });
     (global.fetch as jest.Mock).mockImplementation(() =>
       Promise.resolve({

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DeliveryPhotoReviewer from '@/components/features/verification/DeliveryPhotoReviewer';
-import { RapidResponse, MediaAttachment, ResponseType, ResponseStatus, VerificationStatus } from '@dms/shared';
+import { RapidResponse, MediaAttachment, ResponseType, ResponseStatus, VerificationStatus, SyncStatus, FoodResponseData } from '@dms/shared';
 
 // Mock fetch for photo loading
 global.fetch = jest.fn();
@@ -12,32 +12,38 @@ describe('DeliveryPhotoReviewer', () => {
     {
       id: 'photo-1',
       url: 'https://example.com/photo1.jpg',
-      localPath: null,
+      localPath: undefined,
       thumbnailUrl: 'https://example.com/thumb1.jpg',
       mimeType: 'image/jpeg',
       size: 1024000,
       metadata: {
-        gps: { latitude: 12.345, longitude: 67.890, accuracy: 10 },
-        timestamp: '2025-01-15T14:30:00Z',
-        deviceInfo: { model: 'iPhone 12', os: 'iOS 15' }
-      },
-      syncStatus: 'SYNCED',
-      createdAt: new Date('2025-01-15T14:30:00Z')
+        gpsCoordinates: { 
+          latitude: 12.345, 
+          longitude: 67.890, 
+          accuracy: 10,
+          timestamp: new Date('2025-01-15T14:30:00Z'),
+          captureMethod: 'GPS' as const
+        },
+        timestamp: new Date('2025-01-15T14:30:00Z')
+      }
     },
     {
       id: 'photo-2',
       url: 'https://example.com/photo2.jpg',
-      localPath: null,
+      localPath: undefined,
       thumbnailUrl: 'https://example.com/thumb2.jpg',
       mimeType: 'image/jpeg',
       size: 2048000,
       metadata: {
-        gps: { latitude: 12.346, longitude: 67.891, accuracy: 25 },
-        timestamp: '2025-01-15T14:35:00Z',
-        deviceInfo: { model: 'Samsung S21', os: 'Android 12' }
-      },
-      syncStatus: 'SYNCED',
-      createdAt: new Date('2025-01-15T14:35:00Z')
+        gpsCoordinates: { 
+          latitude: 12.346, 
+          longitude: 67.891, 
+          accuracy: 25,
+          timestamp: new Date('2025-01-15T14:35:00Z'),
+          captureMethod: 'GPS' as const
+        },
+        timestamp: new Date('2025-01-15T14:35:00Z')
+      }
     }
   ];
 
@@ -54,8 +60,19 @@ describe('DeliveryPhotoReviewer', () => {
     donorId: 'donor-1',
     donorName: 'Red Cross',
     verificationStatus: VerificationStatus.PENDING,
-    syncStatus: 'SYNCED',
-    data: { items: ['rice', 'beans'], quantity: 100 },
+    syncStatus: SyncStatus.SYNCED,
+    data: {
+      foodItemsDelivered: [
+        { item: 'rice', quantity: 50, unit: 'kg' },
+        { item: 'beans', quantity: 50, unit: 'kg' }
+      ],
+      householdsServed: 25,
+      personsServed: 100,
+      nutritionSupplementsProvided: 0,
+      additionalDetails: ''
+    } as FoodResponseData,
+    otherItemsDelivered: [],
+    requiresAttention: false,
     createdAt: new Date('2025-01-15T08:00:00Z'),
     updatedAt: new Date('2025-01-15T14:30:00Z'),
     deliveryEvidence: mockPhotos
@@ -229,7 +246,13 @@ describe('DeliveryPhotoReviewer', () => {
             ...mockPhotos[0],
             metadata: {
               ...mockPhotos[0].metadata,
-              gps: { latitude: 12.345, longitude: 67.890, accuracy: 150 } // High inaccuracy
+              gpsCoordinates: { 
+                latitude: 12.345, 
+                longitude: 67.890, 
+                accuracy: 150,
+                timestamp: new Date('2025-01-15T14:30:00Z'),
+                captureMethod: 'GPS' as const
+              }
             }
           }
         ]
@@ -333,7 +356,7 @@ describe('DeliveryPhotoReviewer', () => {
             ...mockPhotos[0],
             metadata: {
               ...mockPhotos[0].metadata,
-              timestamp: '2025-01-15T10:00:00Z' // Before delivery started
+              timestamp: new Date('2025-01-15T10:00:00Z') // Before delivery started
             }
           }
         ]

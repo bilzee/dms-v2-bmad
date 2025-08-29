@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
 const path = require('path')
+// MVP: Disable PWA to avoid build complexity
 const withPWA = require('next-pwa')({
   dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  register: false,
+  skipWaiting: false,
+  disable: true, // MVP: Disable PWA entirely
   reloadOnOnline: true,
   customWorkerDir: 'worker',
   // Service worker background sync configuration

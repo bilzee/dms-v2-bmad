@@ -14,11 +14,16 @@
     "clean": "pnpm --recursive clean"
   },
   "devDependencies": {
+    "next-test-api-route-handler": "^5.0.2",
     "turbo": "^1.10.0",
     "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
+  },
+  "dependencies": {
+    "bullmq": "^5.58.0",
+    "ioredis": "^5.7.0"
   }
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+// Standard Jest globals are available without import
 
 describe('Auto-Approval API Integration', () => {
   it('should have auto-approval configuration endpoints', async () => {

@@ -6,6 +6,8 @@ import { ResponseType } from '@dms/shared';
 import { ResponsePlanningForm } from '@/components/features/response/ResponsePlanningForm';
 import { ResponsePlanningErrorBoundary } from '@/components/features/response/ResponsePlanningErrorBoundary';
 import { useResponseStore } from '@/stores/response.store';
+import { useOffline } from '@/hooks/useOffline';
+import { useOfflineStore } from '@/stores/offline.store';
 import { Button } from '@/components/ui/button';
 
 export default function ResponsePlanningPage() {
@@ -175,25 +177,14 @@ export default function ResponsePlanningPage() {
   );
 }
 
-// Offline Status Banner Component
+// Offline Status Banner Component - FIXED
 function OfflineStatusBanner() {
-  const [isOnline, setIsOnline] = useState(true);
+  const { isOffline } = useOffline();
+  const queue = useOfflineStore(state => state.queue);
 
-  useEffect(() => {
-    const updateOnlineStatus = () => setIsOnline(navigator.onLine);
-    
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    
-    return () => {
-      window.removeEventListener('online', updateOnlineStatus);
-      window.removeEventListener('offline', updateOnlineStatus);
-    };
-  }, []);
-
-  if (isOnline) {
+  if (!isOffline) {
     return (
-      <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+      <div data-testid="offline-banner" className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
         <span>Online - Changes will be synced in real-time</span>
       </div>
@@ -201,9 +192,9 @@ function OfflineStatusBanner() {
   }
 
   return (
-    <div className="flex items-center gap-2 text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+    <div data-testid="offline-banner" className="flex items-center gap-2 text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
       <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-      <span>Offline - Your response plan will be saved locally and synced when online</span>
+      <span>Offline - Changes saved locally ({queue.length} items will sync when connected)</span>
     </div>
   );
 }

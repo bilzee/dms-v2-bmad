@@ -69,7 +69,8 @@ const navigationSections = {
       title: 'System Configuration',
       items: [
         { icon: Zap, label: 'Auto-Approval Config', href: '/coordinator/auto-approval', badge: 0 },
-        { icon: BarChart3, label: 'Priority Sync Config', href: '/coordinator/priority-sync', badge: 0 }
+        { icon: BarChart3, label: 'Priority Sync Config', href: '/coordinator/priority-sync', badge: 0 },
+        { icon: AlertTriangle, label: 'Conflict Resolution', href: '/coordinator/conflicts', badge: 3, badgeVariant: 'destructive' }
       ]
     }
   ],

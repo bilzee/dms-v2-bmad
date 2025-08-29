@@ -71,7 +71,6 @@ describe('Incident Creation Workflow Integration', () => {
     offlineId: 'offline-123',
     data: {
       incidentType: IncidentType.FLOOD,
-      incidentSubType: 'Flash flood',
       severity: IncidentSeverity.SEVERE,
       affectedPopulationEstimate: 500,
       affectedHouseholdsEstimate: 100,
@@ -80,6 +79,7 @@ describe('Incident Creation Workflow Integration', () => {
       priorityLevel: 'HIGH',
       additionalDetails: 'Bridge damaged, access limited from north'
     } as PreliminaryAssessmentData,
+    mediaAttachments: [],
     createdAt: new Date(),
     updatedAt: new Date()
   });

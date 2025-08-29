@@ -1050,8 +1050,8 @@ export interface ResponderPerformance {
 
 // Enhanced priority queue management
 export interface PriorityQueueItem extends OfflineQueueItem {
-  priorityScore: number; // 0-100 calculated priority score
-  priorityReason: string; // Why this priority was assigned
+  priorityScore?: number; // 0-100 calculated priority score
+  priorityReason?: string; // Why this priority was assigned
   manualOverride?: {
     coordinatorId: string;
     coordinatorName: string;
@@ -1292,4 +1292,58 @@ export interface IncidentEntityLinkRequest {
 
 export interface IncidentEntityUnlinkRequest {
   entityId: string;
+}
+
+// Story 4.2: Background Synchronization Types
+
+// Enhanced connectivity monitoring
+export interface ConnectivityStatus {
+  isOnline: boolean;
+  connectionType: 'wifi' | 'cellular' | 'ethernet' | 'unknown';
+  connectionQuality: 'excellent' | 'good' | 'poor' | 'offline';
+  lastConnected: Date;
+  networkSpeed?: number; // Mbps estimate
+  batteryLevel?: number; // 0-100
+  isCharging?: boolean;
+}
+
+// Background sync configuration
+export interface BackgroundSyncSettings {
+  enabled: boolean;
+  syncOnlyWhenCharging: boolean;
+  minimumBatteryLevel: number; // Default: 20%
+  maximumConcurrentOperations: number; // Default: 3
+  syncIntervalMinutes: number; // Default: 5
+  maxRetryAttempts: number; // Default: 5
+  priorityThreshold: 'HIGH' | 'NORMAL' | 'LOW'; // Minimum priority for background sync
+}
+
+// Background sync progress tracking
+export interface BackgroundSyncProgress {
+  totalItems: number;
+  completedItems: number;
+  failedItems: number;
+  currentOperation?: {
+    type: 'ASSESSMENT' | 'RESPONSE' | 'MEDIA' | 'INCIDENT' | 'ENTITY';
+    entityId: string;
+    progress: number; // 0-100
+    estimatedTimeRemaining?: number; // seconds
+  };
+  lastSyncAttempt: Date;
+  nextScheduledSync: Date;
+  averageSyncDuration: number; // seconds
+}
+
+// Sync performance metrics
+export interface SyncMetrics {
+  sessionId: string;
+  startTime: Date;
+  endTime?: Date;
+  itemsProcessed: number;
+  itemsSucceeded: number;
+  itemsFailed: number;
+  totalDataSynced: number; // bytes
+  networkUsage: number; // bytes
+  batteryUsed: number; // percentage
+  errors: string[];
 }

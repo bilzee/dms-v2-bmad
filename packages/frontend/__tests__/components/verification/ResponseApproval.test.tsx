@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ResponseApproval } from '../../../src/components/features/verification/ResponseApproval';
-import { RapidResponse, ResponseApprovalRequest } from '@dms/shared';
+import { RapidResponse, ResponseApprovalRequest, ResponseType, ResponseStatus, VerificationStatus, SyncStatus, HealthResponseData, User } from '@dms/shared';
 import { useAuth } from '../../../src/hooks/useAuth';
 import { toast } from '../../../src/hooks/use-toast';
 
@@ -21,8 +21,8 @@ const mockToast = toast as jest.MockedFunction<typeof toast>;
 
 const mockResponse: RapidResponse = {
   id: 'response-123',
-  responseType: 'HEALTH',
-  status: 'DELIVERED',
+  responseType: ResponseType.HEALTH,
+  status: ResponseStatus.DELIVERED,
   plannedDate: new Date('2025-01-20'),
   deliveredDate: new Date('2025-01-21'),
   affectedEntityId: 'entity-123',
@@ -31,14 +31,15 @@ const mockResponse: RapidResponse = {
   responderName: 'John Responder',
   donorId: 'donor-789',
   donorName: 'Test Donor',
-  verificationStatus: 'PENDING',
-  syncStatus: 'SYNCED',
+  verificationStatus: VerificationStatus.PENDING,
+  syncStatus: SyncStatus.SYNCED,
   data: {
-    healthType: 'MEDICAL_SUPPLY',
-    medicalSupplies: [
-      { item: 'Bandages', quantity: 100, unit: 'pieces' }
-    ]
-  },
+    medicinesDelivered: [{ name: 'Aspirin', quantity: 100, unit: 'tablets' }],
+    medicalSuppliesDelivered: [{ name: 'Bandages', quantity: 100 }],
+    healthWorkersDeployed: 2,
+    patientsTreated: 50,
+    additionalDetails: 'Emergency medical supplies delivered'
+  } as HealthResponseData,
   otherItemsDelivered: [],
   deliveryEvidence: [],
   requiresAttention: false,
@@ -46,10 +47,15 @@ const mockResponse: RapidResponse = {
   updatedAt: new Date('2025-01-21'),
 };
 
-const mockUser = {
+const mockUser: User = {
   id: 'coord-123',
+  email: 'coordinator@test.com',
   name: 'Test Coordinator',
-  role: 'coordinator',
+  roles: [{ id: 'role-1', name: 'COORDINATOR', permissions: [], isActive: true }],
+  activeRole: { id: 'role-1', name: 'COORDINATOR', permissions: [], isActive: true },
+  permissions: [],
+  createdAt: new Date('2025-01-01'),
+  updatedAt: new Date('2025-01-01'),
 };
 
 describe('ResponseApproval', () => {
@@ -59,8 +65,6 @@ describe('ResponseApproval', () => {
       user: mockUser,
       isLoading: false,
       error: null,
-      login: jest.fn(),
-      logout: jest.fn(),
     });
     (global.fetch as jest.Mock).mockImplementation(() =>
       Promise.resolve({
@@ -88,7 +92,7 @@ describe('ResponseApproval', () => {
   });
 
   it('shows already approved status for verified response', () => {
-    const verifiedResponse = { ...mockResponse, verificationStatus: 'VERIFIED' as const };
+    const verifiedResponse = { ...mockResponse, verificationStatus: VerificationStatus.VERIFIED };
     
     render(<ResponseApproval response={verifiedResponse} />);
     
@@ -174,8 +178,6 @@ describe('ResponseApproval', () => {
       user: null,
       isLoading: false,
       error: null,
-      login: jest.fn(),
-      logout: jest.fn(),
     });
 
     const user = userEvent.setup();

@@ -282,7 +282,7 @@ export class AutomaticPriorityAssigner {
    * Get nested field value from item using dot notation
    */
   private static getNestedFieldValue(item: PriorityQueueItem, fieldPath: string): any {
-    return fieldPath.split('.').reduce((obj, key) => obj?.[key], item);
+    return fieldPath.split('.').reduce((obj, key) => obj && typeof obj === 'object' ? (obj as any)[key] : undefined, item);
   }
 
   /**

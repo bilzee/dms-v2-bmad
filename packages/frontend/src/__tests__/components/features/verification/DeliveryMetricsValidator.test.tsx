@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DeliveryMetricsValidator from '@/components/features/verification/DeliveryMetricsValidator';
-import { RapidResponse, RapidAssessment, ResponseType, ResponseStatus, VerificationStatus, AssessmentType } from '@dms/shared';
+import { RapidResponse, RapidAssessment, ResponseType, ResponseStatus, VerificationStatus, AssessmentType, SyncStatus, PreliminaryAssessmentData, FoodResponseData, IncidentType, IncidentSeverity } from '@dms/shared';
 
 // Mock fetch for API calls
 global.fetch = jest.fn();
@@ -10,25 +10,24 @@ global.fetch = jest.fn();
 describe('DeliveryMetricsValidator', () => {
   const mockAssessment: RapidAssessment = {
     id: 'assessment-1',
-    type: AssessmentType.NEEDS_ASSESSMENT,
+    type: AssessmentType.PRELIMINARY,
     date: new Date('2025-01-14T12:00:00Z'),
-    location: { latitude: 12.345, longitude: 67.890 },
-    assessorId: 'assessor-1',
-    assessorName: 'Jane Doe',
-    coordinatorId: 'coord-1',
     affectedEntityId: 'entity-1',
+    assessorName: 'Jane Doe',
+    assessorId: 'assessor-1',
     verificationStatus: VerificationStatus.VERIFIED,
-    syncStatus: 'SYNCED',
-    data: { 
-      needsAssessment: {
-        foodNeeds: {
-          rice: { quantity: 500, unit: 'kg', priority: 'high' },
-          beans: { quantity: 200, unit: 'kg', priority: 'medium' }
-        },
-        beneficiaries: 100,
-        urgency: 'high'
-      }
-    },
+    syncStatus: SyncStatus.SYNCED,
+    data: {
+      incidentType: IncidentType.FLOOD,
+      severity: IncidentSeverity.SEVERE,
+      affectedPopulationEstimate: 500,
+      affectedHouseholdsEstimate: 100,
+      immediateNeedsDescription: 'Food and clean water needed urgently',
+      accessibilityStatus: 'ACCESSIBLE',
+      priorityLevel: 'HIGH',
+      additionalDetails: 'Emergency assessment for flood victims'
+    } as PreliminaryAssessmentData,
+    mediaAttachments: [],
     createdAt: new Date('2025-01-14T12:00:00Z'),
     updatedAt: new Date('2025-01-14T12:00:00Z')
   };
@@ -46,15 +45,20 @@ describe('DeliveryMetricsValidator', () => {
     donorId: 'donor-1',
     donorName: 'Red Cross',
     verificationStatus: VerificationStatus.PENDING,
-    syncStatus: 'SYNCED',
+    syncStatus: SyncStatus.SYNCED,
     data: {
-      deliveredItems: {
-        rice: { quantity: 450, unit: 'kg' },
-        beans: { quantity: 180, unit: 'kg' }
-      },
-      beneficiariesReached: 85,
-      deliveryNotes: 'Some rice bags were damaged during transport'
-    },
+      foodItemsDelivered: [
+        { item: 'rice', quantity: 450, unit: 'kg' },
+        { item: 'beans', quantity: 180, unit: 'kg' }
+      ],
+      householdsServed: 25,
+      personsServed: 85,
+      nutritionSupplementsProvided: 0,
+      additionalDetails: 'Some rice bags were damaged during transport'
+    } as FoodResponseData,
+    otherItemsDelivered: [],
+    deliveryEvidence: [],
+    requiresAttention: false,
     createdAt: new Date('2025-01-15T08:00:00Z'),
     updatedAt: new Date('2025-01-15T14:30:00Z')
   };
@@ -429,11 +433,14 @@ describe('DeliveryMetricsValidator', () => {
       const incompleteResponse = {
         ...mockResponse,
         data: {
-          deliveredItems: {
-            rice: { quantity: 450 } // Missing unit
-          }
-          // Missing beneficiariesReached
-        }
+          foodItemsDelivered: [
+            { item: 'rice', quantity: 450, unit: '' } // Missing unit
+          ],
+          householdsServed: 0, // Missing proper count
+          personsServed: 0, // Missing beneficiary count
+          nutritionSupplementsProvided: 0,
+          additionalDetails: ''
+        } as FoodResponseData
       };
 
       render(
@@ -500,7 +507,13 @@ describe('DeliveryMetricsValidator', () => {
     it('handles malformed response data', async () => {
       const malformedResponse = {
         ...mockResponse,
-        data: null
+        data: {
+          foodItemsDelivered: [],
+          householdsServed: 0,
+          personsServed: 0,
+          nutritionSupplementsProvided: 0,
+          additionalDetails: 'Malformed data test'
+        } as FoodResponseData
       };
 
       render(

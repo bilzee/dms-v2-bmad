@@ -31,6 +31,20 @@ export class ConnectivityDetector {
   private lastConnectedTime: Date = new Date();
 
   constructor() {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      // Server-side default values
+      this.networkInfoSupported = false;
+      this.batterySupported = false;
+      this.currentStatus = {
+        isOnline: false,
+        connectionType: 'unknown',
+        connectionQuality: 'offline',
+        lastConnected: this.lastConnectedTime,
+      };
+      return;
+    }
+
     // Check for Network Information API support
     this.networkInfoSupported = 'connection' in navigator || 'mozConnection' in navigator || 'webkitConnection' in navigator;
     this.batterySupported = 'getBattery' in navigator;
@@ -49,7 +63,14 @@ export class ConnectivityDetector {
   /**
    * Initialize all connectivity detection mechanisms
    */
-  private async initializeDetection(): Promise<void> {
+  public initializeDetection(): void {
+    // Only initialize on client-side
+    if (typeof window === 'undefined') {
+      // Set default offline state for SSR
+      this.currentStatus.isOnline = false;
+      return;
+    }
+
     // Setup online/offline event listeners
     this.setupOnlineOfflineListeners();
 
@@ -60,17 +81,23 @@ export class ConnectivityDetector {
 
     // Setup Battery API if supported
     if (this.batterySupported) {
-      await this.setupBatteryListener();
+      this.setupBatteryListener();
     }
 
     // Initial status update
-    await this.updateConnectivityStatus();
+    this.updateConnectivityStatus();
   }
 
   /**
    * Setup basic online/offline event listeners
    */
   private setupOnlineOfflineListeners(): void {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      console.warn('ConnectivityDetector: Skipping event listeners on server-side');
+      return;
+    }
+
     window.addEventListener('online', () => {
       this.lastConnectedTime = new Date();
       this.updateConnectivityStatus();
@@ -124,6 +151,11 @@ export class ConnectivityDetector {
    * Update connectivity status based on all available APIs
    */
   private async updateConnectivityStatus(): Promise<void> {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return;
+    }
+
     const isOnline = navigator.onLine;
     
     // Update last connected time if we're online

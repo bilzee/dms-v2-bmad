@@ -1,20 +1,30 @@
-const nextJest = require('next/jest')
+const nextJest = require('next/jest');
 
 const createJestConfig = nextJest({
-  // Provide the path to your Next.js app to load next.config.js and .env files
   dir: './',
-})
+});
 
-// Add any custom config to be passed to Jest
+/** @type {import('jest').Config} */
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
-  testEnvironment: 'jsdom',
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/__tests__/setup.ts'],
+  moduleDirectories: ['node_modules', '<rootDir>/'],
+  testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
+    // Fix path alias resolution for @/ imports
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@dms/shared$': '<rootDir>/../shared',
-    '^@/components/ui/(.*)$': '<rootDir>/src/components/__mocks__/ui/$1',
+    // Mock CSS modules and static assets
+    '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
+    '\\.(gif|ttf|eot|svg|png|jpg|jpeg)$': 'jest-transform-stub',
   },
+  // Ignore Next.js build files and node_modules
+  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  // Add support for TypeScript and JSX
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
+  },
+  // Global test setup for mocking browser APIs
+  setupFiles: ['<rootDir>/src/test/jest.setup.js'],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',

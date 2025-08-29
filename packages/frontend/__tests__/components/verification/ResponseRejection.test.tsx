@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ResponseRejection } from '../../../src/components/features/verification/ResponseRejection';
-import { RapidResponse, ResponseRejectionRequest } from '@dms/shared';
+import { RapidResponse, ResponseRejectionRequest, ResponseType, ResponseStatus, VerificationStatus, SyncStatus, WashResponseData, User } from '@dms/shared';
 import { useAuth } from '../../../src/hooks/useAuth';
 import { toast } from '../../../src/hooks/use-toast';
 
@@ -21,8 +21,8 @@ const mockToast = toast as jest.MockedFunction<typeof toast>;
 
 const mockResponse: RapidResponse = {
   id: 'response-456',
-  responseType: 'WASH',
-  status: 'DELIVERED',
+  responseType: ResponseType.WASH,
+  status: ResponseStatus.DELIVERED,
   plannedDate: new Date('2025-01-20'),
   deliveredDate: new Date('2025-01-22'),
   affectedEntityId: 'entity-123',
@@ -31,16 +31,15 @@ const mockResponse: RapidResponse = {
   responderName: 'Jane Responder',
   donorId: 'donor-789',
   donorName: 'Test Donor',
-  verificationStatus: 'PENDING',
-  syncStatus: 'SYNCED',
+  verificationStatus: VerificationStatus.PENDING,
+  syncStatus: SyncStatus.SYNCED,
   data: {
-    washType: 'WATER',
-    waterSupply: {
-      waterType: 'POTABLE',
-      quantity: 1000,
-      unit: 'LITERS'
-    }
-  },
+    waterDeliveredLiters: 1000,
+    waterContainersDistributed: 50,
+    toiletsConstructed: 2,
+    hygieneKitsDistributed: 25,
+    additionalDetails: 'Emergency water supply delivered'
+  } as WashResponseData,
   otherItemsDelivered: [],
   deliveryEvidence: [],
   requiresAttention: false,
@@ -48,10 +47,15 @@ const mockResponse: RapidResponse = {
   updatedAt: new Date('2025-01-22'),
 };
 
-const mockUser = {
+const mockUser: User = {
   id: 'coord-456',
+  email: 'coordinator@test.com',
   name: 'Test Coordinator',
-  role: 'coordinator',
+  roles: [{ id: 'role-1', name: 'COORDINATOR', permissions: [], isActive: true }],
+  activeRole: { id: 'role-1', name: 'COORDINATOR', permissions: [], isActive: true },
+  permissions: [],
+  createdAt: new Date('2025-01-01'),
+  updatedAt: new Date('2025-01-01'),
 };
 
 describe('ResponseRejection', () => {
@@ -61,8 +65,6 @@ describe('ResponseRejection', () => {
       user: mockUser,
       isLoading: false,
       error: null,
-      login: jest.fn(),
-      logout: jest.fn(),
     });
     (global.fetch as jest.Mock).mockImplementation(() =>
       Promise.resolve({
@@ -90,7 +92,7 @@ describe('ResponseRejection', () => {
   });
 
   it('shows already rejected status for rejected response', () => {
-    const rejectedResponse = { ...mockResponse, verificationStatus: 'REJECTED' as const };
+    const rejectedResponse = { ...mockResponse, verificationStatus: VerificationStatus.REJECTED };
     
     render(<ResponseRejection response={rejectedResponse} />);
     
@@ -334,8 +336,6 @@ describe('ResponseRejection', () => {
       user: null,
       isLoading: false,
       error: null,
-      login: jest.fn(),
-      logout: jest.fn(),
     });
 
     const user = userEvent.setup();
