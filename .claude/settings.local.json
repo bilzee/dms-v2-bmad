@@ -118,7 +118,10 @@
       "Bash(pnpm --filter @dms/frontend run tsc --noEmit src/lib/sync/SyncEngine.ts src/components/features/sync/ConflictResolver.tsx src/components/features/sync/ConflictComparison.tsx src/components/features/sync/ConflictAuditTrail.tsx src/app/api/v1/sync/conflicts/route.ts src/app/api/v1/sync/conflicts/resolve/route.ts)",
       "Bash(pnpm --filter @dms/frontend test ConflictResolver.test.tsx)",
       "Bash(cd:*)",
-      "Bash(pnpm --filter @dms/frontend run tsc --noEmit)"
+      "Bash(pnpm --filter @dms/frontend run tsc --noEmit)",
+      "Bash(pnpm --filter @dms/frontend run tsc --noEmit src/app/(dashboard)/coordinator/donors/page.tsx src/hooks/useDonorCoordination.ts src/components/features/donors/DonorList.tsx src/components/features/donors/ResourceAvailabilityGrid.tsx src/components/features/donors/CoordinationWorkspace.tsx src/components/features/donors/DonorPerformanceChart.tsx)",
+      "Bash(cd:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "additionalDirectories": [
