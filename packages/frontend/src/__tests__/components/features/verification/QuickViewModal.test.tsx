@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QuickViewModal } from '@/components/features/verification/QuickViewModal';
-import { RapidAssessment, RapidResponse, VerificationStatus, AssessmentType, ResponseType, ResponseStatus } from '@dms/shared';
+import { RapidAssessment, RapidResponse, VerificationStatus, AssessmentType, ResponseType, ResponseStatus, SyncStatus } from '@dms/shared';
 
 // Mock date-fns
 jest.mock('date-fns', () => ({
@@ -19,19 +19,25 @@ const mockAssessment: RapidAssessment = {
   id: 'test-assessment-1',
   type: AssessmentType.HEALTH,
   verificationStatus: VerificationStatus.PENDING,
-  syncStatus: 'SYNCED' as any,
+  syncStatus: SyncStatus.SYNCED,
   date: new Date('2024-01-01T10:00:00Z'),
   assessorId: 'assessor-1',
+  assessorName: 'Jane Assessor',
   affectedEntityId: 'entity-1',
-  gpsCoordinates: {
-    lat: 9.0765,
-    lng: 7.3986
+  data: {
+    hasFunctionalClinic: false,
+    numberHealthFacilities: 1,
+    healthFacilityType: 'clinic',
+    qualifiedHealthWorkers: 2,
+    hasMedicineSupply: false,
+    hasMedicalSupplies: true,
+    hasMaternalChildServices: false,
+    commonHealthIssues: ['malaria'],
+    additionalDetails: 'Critical health situation requiring immediate attention'
   },
-  notes: 'Critical health situation requiring immediate attention',
-  data: {} as any,
+  mediaAttachments: [],
   createdAt: new Date('2024-01-01T10:00:00Z'),
   updatedAt: new Date('2024-01-01T10:00:00Z'),
-  requiresAttention: true,
   lastSyncAttempt: new Date('2024-01-01T10:00:00Z')
 };
 
@@ -39,15 +45,25 @@ const mockResponse: RapidResponse = {
   id: 'test-response-1',
   responseType: ResponseType.FOOD,
   verificationStatus: VerificationStatus.PENDING,
-  syncStatus: 'SYNCED' as any,
+  syncStatus: SyncStatus.SYNCED,
   status: ResponseStatus.PLANNED,
   plannedDate: new Date('2024-01-01T10:00:00Z'),
   deliveredDate: new Date('2024-01-02T10:00:00Z'),
   affectedEntityId: 'entity-1',
   assessmentId: 'assessment-1',
   responderId: 'responder-1',
-  description: 'Emergency food distribution for affected families',
-  data: {} as any,
+  responderName: 'John Responder',
+  data: {
+    foodItemsDelivered: [
+      { item: 'rice', quantity: 50, unit: 'kg' },
+      { item: 'beans', quantity: 25, unit: 'kg' }
+    ],
+    householdsServed: 20,
+    personsServed: 80,
+    nutritionSupplementsProvided: 10,
+    additionalDetails: 'Emergency food distribution for affected families'
+  },
+  otherItemsDelivered: [],
   createdAt: new Date('2024-01-01T10:00:00Z'),
   updatedAt: new Date('2024-01-01T10:00:00Z'),
   requiresAttention: false,

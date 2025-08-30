@@ -2,12 +2,12 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ResponseAccountabilityTracker from '@/components/features/verification/ResponseAccountabilityTracker';
-import { RapidResponse, RapidAssessment, ResponseType, ResponseStatus, VerificationStatus, AssessmentType } from '@dms/shared';
+import { RapidResponse, RapidAssessment, ResponseType, ResponseStatus, VerificationStatus, AssessmentType, SyncStatus } from '@dms/shared';
 
 describe('ResponseAccountabilityTracker', () => {
   const mockAssessment: RapidAssessment = {
     id: 'assessment-1',
-    type: AssessmentType.NEEDS_ASSESSMENT,
+    type: AssessmentType.HEALTH,
     date: new Date('2025-01-14T12:00:00Z'),
     location: { latitude: 12.345, longitude: 67.890 },
     assessorId: 'assessor-1',
@@ -15,12 +15,17 @@ describe('ResponseAccountabilityTracker', () => {
     coordinatorId: 'coord-1',
     affectedEntityId: 'entity-1',
     verificationStatus: VerificationStatus.VERIFIED,
-    syncStatus: 'SYNCED',
+    syncStatus: SyncStatus.SYNCED,
     data: { 
-      needsAssessment: {
-        urgency: 'high',
-        requiredResponseTime: 24 // hours
-      }
+      hasFunctionalClinic: false,
+      numberHealthFacilities: 1,
+      healthFacilityType: 'clinic',
+      qualifiedHealthWorkers: 2,
+      hasMedicineSupply: false,
+      hasMedicalSupplies: true,
+      hasMaternalChildServices: false,
+      commonHealthIssues: ['malaria', 'diarrhea'],
+      additionalDetails: 'Urgent medical assistance needed'
     },
     createdAt: new Date('2025-01-14T12:00:00Z'),
     updatedAt: new Date('2025-01-14T12:00:00Z')
@@ -39,19 +44,16 @@ describe('ResponseAccountabilityTracker', () => {
     donorId: 'donor-1',
     donorName: 'Red Cross',
     verificationStatus: VerificationStatus.PENDING,
-    syncStatus: 'SYNCED',
+    syncStatus: SyncStatus.SYNCED,
     data: {
-      deliveredItems: {
-        rice: { quantity: 450, unit: 'kg' },
-        beans: { quantity: 180, unit: 'kg' }
-      },
-      beneficiariesReached: 85,
-      deliveryNotes: 'Delivery completed successfully',
-      performanceMetrics: {
-        responseTime: 26, // hours from assessment to delivery
-        deliveryEfficiency: 87.5, // percentage
-        qualityScore: 8.5 // out of 10
-      }
+      foodItemsDelivered: [
+        { item: 'rice', quantity: 450, unit: 'kg' },
+        { item: 'beans', quantity: 180, unit: 'kg' }
+      ],
+      householdsServed: 85,
+      personsServed: 340,
+      nutritionSupplementsProvided: 50,
+      additionalDetails: 'Delivery completed successfully with high quality score'
     },
     createdAt: new Date('2025-01-15T08:00:00Z'),
     updatedAt: new Date('2025-01-15T14:30:00Z')
@@ -486,10 +488,13 @@ describe('ResponseAccountabilityTracker', () => {
       const responseWithoutMetrics = {
         ...mockResponse,
         data: {
-          deliveredItems: {
-            rice: { quantity: 450, unit: 'kg' }
-          }
-          // Missing performanceMetrics
+          foodItemsDelivered: [
+            { item: 'rice', quantity: 450, unit: 'kg' }
+          ],
+          householdsServed: 45,
+          personsServed: 180,
+          nutritionSupplementsProvided: 20,
+          additionalDetails: 'Response without performance metrics'
         }
       };
 

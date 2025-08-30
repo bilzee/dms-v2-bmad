@@ -75,6 +75,7 @@ export const seedResponses: RapidResponse[] = [
       nutritionSupplementsProvided: 0,
       additionalDetails: 'Food distribution completed successfully'
     } as FoodResponseData,
+    requiresAttention: false,
     otherItemsDelivered: [
       { item: 'Rice', quantity: 50, unit: 'kg' },
       { item: 'Cooking Oil', quantity: 10, unit: 'liters' },

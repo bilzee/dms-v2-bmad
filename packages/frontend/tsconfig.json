@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2018",
     "downlevelIteration": true,
-    "lib": ["dom", "dom.iterable", "es6"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es6"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -21,10 +25,21 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@dms/shared": ["../shared"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@dms/shared": [
+        "../shared"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

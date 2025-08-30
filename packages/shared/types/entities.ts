@@ -160,6 +160,13 @@ export enum UserRoleType {
   DONOR_ORGANIZATION = 'DONOR_ORGANIZATION'
 }
 
+export enum CommitmentStatus {
+  PLANNED = 'PLANNED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED'
+}
+
 // Polymorphic assessment data types
 export type AssessmentData = 
   | HealthAssessmentData
@@ -1346,4 +1353,261 @@ export interface SyncMetrics {
   networkUsage: number; // bytes
   batteryUsed: number; // percentage
   errors: string[];
+}
+
+// Story 5.2: Donor Coordination & Resource Planning Types
+
+// Core donor models from database schema
+export interface Donor {
+  id: string;
+  name: string;
+  organization: string;
+  email: string;
+  phone?: string;
+  performanceScore: number;
+  commitments: DonorCommitment[];
+  achievements: DonorAchievement[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DonorCommitment {
+  id: string;
+  donorId: string;
+  donor: Donor;
+  responseType: ResponseType;
+  quantity: number;
+  unit: string;
+  targetDate: Date;
+  status: CommitmentStatus;
+  incidentId?: string;
+  affectedEntityId?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DonorAchievement {
+  id: string;
+  donorId: string;
+  commitmentId: string;
+  responseType: ResponseType;
+  quantityDelivered: number;
+  unit: string;
+  deliveryDate: Date;
+  incidentId: string;
+  affectedEntityId: string;
+  verificationStatus: 'PENDING' | 'VERIFIED' | 'DISPUTED';
+  performanceScore: number;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Dashboard coordination interfaces
+export interface ResourceAvailability {
+  responseType: ResponseType;
+  totalCommitted: number;
+  totalAllocated: number;
+  totalAvailable: number;
+  unit: string;
+  commitments: Array<{
+    donorId: string;
+    donorName: string;
+    quantity: number;
+    targetDate: Date;
+    status: CommitmentStatus;
+    incidentId: string;
+  }>;
+  allocations: Array<{
+    affectedEntityId: string;
+    affectedEntityName: string;
+    quantity: number;
+    priority: 'HIGH' | 'MEDIUM' | 'LOW';
+    targetDate: Date;
+  }>;
+  projectedShortfall: number;
+  earliestAvailable: Date;
+  lastUpdated: Date;
+}
+
+export interface CoordinationWorkspace {
+  id: string;
+  donorId: string;
+  responderId?: string;
+  affectedEntityId: string;
+  resourceType: ResponseType;
+  quantity: number;
+  coordinationNotes: CoordinationNote[];
+  deliveryTimeline: DeliveryMilestone[];
+  status: 'PLANNING' | 'COORDINATING' | 'EXECUTING' | 'COMPLETED';
+}
+
+export interface CoordinationNote {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorRole: 'COORDINATOR' | 'DONOR' | 'RESPONDER';
+  message: string;
+  timestamp: Date;
+}
+
+export interface DeliveryMilestone {
+  id: string;
+  title: string;
+  description: string;
+  targetDate: Date;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'DELAYED';
+  assignedTo?: string;
+}
+
+// Request/Response types for donor management
+export interface ResourceAllocationRequest {
+  donorId: string;
+  commitmentId: string;
+  affectedEntityId: string;
+  responderId?: string;
+  coordinatorId: string;
+  allocationNotes?: string;
+}
+
+export interface AvailableResourcesQuery {
+  resourceType?: ResponseType;
+  affectedEntityId?: string;
+  minQuantity?: number;
+  maxDeliveryDate?: Date;
+  donorOrganization?: string;
+}
+
+export interface DonorListResponse extends ApiResponse<{
+  donors: Donor[];
+  totalCount: number;
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    totalCount: number;
+  };
+  stats: {
+    totalDonors: number;
+    activeDonors: number;
+    totalCommitments: number;
+    pendingCommitments: number;
+    byResourceType: Record<ResponseType, number>;
+  };
+}> {}
+
+export interface DonorCommitmentHistoryResponse extends ApiResponse<{
+  commitments: DonorCommitment[];
+  achievements: DonorAchievement[];
+  performanceMetrics: {
+    deliveryRate: number;
+    averageResponseTime: number;
+    totalDeliveries: number;
+    reliabilityScore: number;
+  };
+}> {}
+
+export interface CoordinationWorkspaceResponse extends ApiResponse<{
+  workspaces: CoordinationWorkspace[];
+  totalCount: number;
+}> {}
+
+export interface ResourceAllocationResponse extends ApiResponse<{
+  allocationId: string;
+  status: 'ALLOCATED' | 'PENDING' | 'FAILED';
+  message: string;
+}> {}
+
+// Extended types for Story 5.2 implementation
+
+export interface CoordinationWorkspaceItem {
+  id: string;
+  type: 'RESOURCE_ALLOCATION' | 'CONFLICT_RESOLUTION' | 'DELIVERY_COORDINATION' | 'DONOR_COMMUNICATION';
+  title: string;
+  description: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  assignedTo: string;
+  assignedToName: string;
+  donorId?: string;
+  donorName?: string;
+  affectedEntityId?: string;
+  affectedEntityName?: string;
+  responseType?: ResponseType;
+  quantity?: number;
+  unit?: string;
+  conflictType?: 'TIMING_CONFLICT' | 'QUANTITY_SHORTAGE' | 'RESOURCE_OVERLAP' | 'DELIVERY_ISSUE';
+  conflictDescription?: string;
+  dueDate?: Date;
+  resolution?: any;
+  actions?: CoordinationAction[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CoordinationAction {
+  id: string;
+  type: 'CONFIRM_WITH_DONOR' | 'COORDINATE_LOGISTICS' | 'CONTACT_DONORS' | 'UPDATE_SCHEDULE' | 'VERIFY_DELIVERY';
+  description: string;
+  completed: boolean;
+  completedAt?: Date;
+  dueDate?: Date;
+}
+
+export interface ResourceAllocation {
+  id: string;
+  responseType: ResponseType;
+  quantity: number;
+  unit: string;
+  affectedEntityId: string;
+  affectedEntityName: string;
+  donorCommitmentId?: string;
+  donorName?: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  targetDate: Date;
+  status: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  coordinatorId: string;
+  coordinatorName: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AllocationConflict {
+  type: 'TIMING_CONFLICT' | 'QUANTITY_SHORTAGE' | 'RESOURCE_OVERLAP';
+  description: string;
+  conflictingAllocationId?: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH';
+  suggestion?: string;
+}
+
+export interface DonorStats {
+  totalDonors: number;
+  activeDonors: number;
+  totalCommitments: number;
+  pendingCommitments: number;
+  byResourceType: Record<ResponseType, number>;
+}
+
+export interface ResourceAvailabilityFilters {
+  incidentId?: string;
+  responseTypes?: ResponseType[];
+  priorityFilter?: 'HIGH' | 'MEDIUM' | 'LOW';
+  showShortfalls?: boolean;
+  minQuantity?: number;
+}
+
+export interface ResourceAllocationRequest {
+  responseType: ResponseType;
+  quantity: number;
+  unit?: string;
+  affectedEntityId: string;
+  affectedEntityName?: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  targetDate?: Date;
+  preferredDonorId?: string;
+  preferredDonorName?: string;
+  notes?: string;
+  overrideConflicts?: boolean;
 }
