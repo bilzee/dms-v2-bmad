@@ -19,6 +19,10 @@ const customJestConfig = {
   },
   // Ignore Next.js build files and node_modules
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  // Transform ES modules from react-leaflet
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-leaflet|leaflet)/)',
+  ],
   // Add support for TypeScript and JSX
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
