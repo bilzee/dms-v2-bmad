@@ -63,10 +63,45 @@ export default function HomePage() {
       ...featureColors.queue,
       actions: [
         { label: 'Verification Dashboard', href: '/coordinator/dashboard' },
-        { label: 'Assessment Approvals', href: '/coordinator/assessments/review', variant: 'outline' as const },
+        { label: 'Donor Coordination', href: '/coordinator/donors', variant: 'outline' as const },
+        { label: 'System Monitoring', href: '/coordinator/monitoring', variant: 'outline' as const },
+        { label: 'Assessment Approvals', href: '/coordinator/assessments/review', variant: 'ghost' as const },
         { label: 'Response Approvals', href: '/coordinator/responses/review', variant: 'ghost' as const }
       ],
       stats: { count: 8, label: 'pending review' }
+    },
+    {
+      title: 'Monitoring Tools',
+      description: 'Real-time monitoring and geographic visualization',
+      icon: <Activity className="w-6 h-6" />,
+      ...featureColors.assessments,
+      actions: [
+        { label: 'Situation Display', href: '/monitoring' },
+        { label: 'Interactive Map', href: '/monitoring/map', variant: 'outline' as const }
+      ],
+      stats: { count: 4, label: 'active alerts' }
+    },
+    {
+      title: 'Incident Management',
+      description: 'Manage and track disaster incidents and responses',
+      icon: <AlertTriangle className="w-6 h-6" />,
+      ...featureColors.responses,
+      actions: [
+        { label: 'Manage Incidents', href: '/coordinator/incidents' }
+      ],
+      stats: { count: 0, label: 'active incidents' }
+    },
+    {
+      title: 'System Configuration',
+      description: 'Configure system settings and automation rules',
+      icon: <UserCheck className="w-6 h-6" />,
+      ...featureColors.queue,
+      actions: [
+        { label: 'Auto-Approval Config', href: '/coordinator/auto-approval' },
+        { label: 'Priority Sync Config', href: '/queue', variant: 'outline' as const },
+        { label: 'Conflict Resolution', href: '/coordinator/conflicts', variant: 'ghost' as const }
+      ],
+      stats: { count: 3, label: 'configurations' }
     }
   ]
 

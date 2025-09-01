@@ -48,13 +48,13 @@ const navigationSections = {
       items: [
         { icon: ClipboardList, label: 'Assessment Queue', href: '/verification/queue', badge: 5 },
         { icon: BarChart3, label: 'Response Queue', href: '/verification/responses/queue', badge: 3 },
-        { icon: AlertTriangle, label: 'Verification Dashboard', href: '/verification/queue', badge: 0 }
+        { icon: AlertTriangle, label: 'Verification Dashboard', href: '/verification/dashboard', badge: 0 }
       ]
     },
     {
       title: 'Review Management',
       items: [
-        { icon: ClipboardList, label: 'Assessment Reviews', href: '/verification/queue', badge: 2 },
+        { icon: ClipboardList, label: 'Assessment Reviews', href: '/verification/assessments', badge: 2 },
         { icon: BarChart3, label: 'Response Reviews', href: '/responses/status-review', badge: 1 },
         { icon: AlertTriangle, label: 'All Responses', href: '/verification/responses', badge: 0 }
       ]
@@ -79,6 +79,13 @@ const navigationSections = {
         { icon: Zap, label: 'Auto-Approval Config', href: '/coordinator/auto-approval', badge: 0 },
         { icon: BarChart3, label: 'Priority Sync Config', href: '/coordinator/priority-sync', badge: 0 },
         { icon: AlertTriangle, label: 'Conflict Resolution', href: '/coordinator/conflicts', badge: 3, badgeVariant: 'destructive' }
+      ]
+    },
+    {
+      title: 'Monitoring Tools',
+      items: [
+        { icon: BarChart3, label: 'Situation Display', href: '/monitoring', badge: 0 },
+        { icon: ClipboardList, label: 'Interactive Map', href: '/monitoring/map', badge: 0 }
       ]
     }
   ],
