@@ -8,7 +8,7 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   moduleDirectories: ['node_modules', '<rootDir>/'],
-  testEnvironment: 'jest-environment-jsdom',
+  testEnvironment: 'jest-environment-jsdom', // Default for components
   moduleNameMapper: {
     // Fix path alias resolution for @/ imports
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -17,8 +17,12 @@ const customJestConfig = {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png|jpg|jpeg)$': 'jest-transform-stub',
   },
-  // Ignore Next.js build files and node_modules
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  // Ignore Next.js build files, node_modules, and E2E tests
+  testPathIgnorePatterns: [
+    '<rootDir>/.next/',
+    '<rootDir>/node_modules/',
+    '<rootDir>/src/e2e/', // Exclude E2E tests from Jest
+  ],
   // Transform ES modules from react-leaflet
   transformIgnorePatterns: [
     'node_modules/(?!(react-leaflet|leaflet)/)',
