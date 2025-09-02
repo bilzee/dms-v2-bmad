@@ -1,51 +1,30 @@
-const nextJest = require('next/jest');
+const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({
   dir: './',
-});
+})
 
-/** @type {import('jest').Config} */
 const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
-  moduleDirectories: ['node_modules', '<rootDir>/'],
-  testEnvironment: 'jest-environment-jsdom', // Default for components
-  moduleNameMapper: {
-    // Fix path alias resolution for @/ imports
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@dms/shared$': '<rootDir>/../shared',
-    // Mock CSS modules and static assets
-    '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-    '\\.(gif|ttf|eot|svg|png|jpg|jpeg)$': 'jest-transform-stub',
-  },
-  // Ignore Next.js build files, node_modules, and E2E tests
-  testPathIgnorePatterns: [
-    '<rootDir>/.next/',
-    '<rootDir>/node_modules/',
-    '<rootDir>/src/e2e/', // Exclude E2E tests from Jest
-  ],
-  // Transform ES modules from react-leaflet
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testEnvironment: 'jest-environment-jsdom',
+  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-leaflet|leaflet)/)',
+    // Allow transformation of these ESM modules
+    '/node_modules/(?!(next-auth|@auth|zustand|@tanstack)/)',
   ],
-  // Add support for TypeScript and JSX
-  transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
-  // Global test setup for mocking browser APIs
-  setupFiles: ['<rootDir>/src/test/jest.setup.js'],
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    '!src/**/*.d.ts',
-  ],
-  testEnvironmentOptions: {
-    url: 'http://localhost',
-  },
-  silent: false,
-  verbose: true,
-  maxWorkers: 1,
-  forceExit: true,
-  detectOpenHandles: true,
+  testTimeout: 10000,
 }
 
-// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig)
+module.exports = async () => {
+  const jestConfig = await createJestConfig(customJestConfig)()
+  
+  // Override default transformIgnorePatterns to handle ESM modules
+  jestConfig.transformIgnorePatterns = [
+    '/node_modules/(?!(next-auth|@auth|zustand|@tanstack|react-hook-form)/)',
+  ]
+  
+  return jestConfig
+}

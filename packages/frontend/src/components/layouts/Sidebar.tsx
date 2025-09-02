@@ -1,125 +1,46 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { useRoleContext } from '@/components/providers/RoleContextProvider'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 import {
   ClipboardList, BarChart3, Building, Archive, AlertTriangle,
   HelpCircle, Settings, ChevronLeft, ChevronRight, User,
   Heart, Droplet, Home, Utensils, Shield, Users, Zap, HandHeart
 } from 'lucide-react'
 
+const iconMap = {
+  ClipboardList,
+  BarChart3,
+  Building,
+  Archive,
+  AlertTriangle,
+  Settings,
+  User,
+  Heart,
+  Droplet,
+  Home,
+  Utensils,
+  Shield,
+  Users,
+  Zap,
+  HandHeart,
+  HelpCircle
+};
+
 interface SidebarProps {
   isOpen: boolean
   onToggle: () => void
 }
 
-// Role-based navigation configuration
-const navigationSections = {
-  assessor: [
-    {
-      title: 'Assessment Types',
-      items: [
-        { icon: Heart, label: 'Health', href: '/assessments/new?type=HEALTH', badge: 3 },
-        { icon: Droplet, label: 'WASH', href: '/assessments/new?type=WASH', badge: 1 },
-        { icon: Home, label: 'Shelter', href: '/assessments/new?type=SHELTER', badge: 2 },
-        { icon: Utensils, label: 'Food', href: '/assessments/new?type=FOOD', badge: 0 },
-        { icon: Shield, label: 'Security', href: '/assessments/new?type=SECURITY', badge: 1 },
-        { icon: Users, label: 'Population', href: '/assessments/new?type=POPULATION', badge: 4 }
-      ]
-    },
-    {
-      title: 'Assessment Management',
-      items: [
-        { icon: ClipboardList, label: 'All Assessments', href: '/assessments', badge: 0 },
-        { icon: AlertTriangle, label: 'Emergency Reports', href: '/assessments/new?type=PRELIMINARY', badge: 0 },
-        { icon: Archive, label: 'Assessment Status', href: '/assessments/status', badge: 0 },
-        { icon: Building, label: 'Affected Entities', href: '/entities', badge: 0 },
-        { icon: Archive, label: 'Sync Queue', href: '/queue', badge: 0 }
-      ]
-    }
-  ],
-  coordinator: [
-    {
-      title: 'Verification Dashboard',
-      items: [
-        { icon: ClipboardList, label: 'Assessment Queue', href: '/verification/queue', badge: 5 },
-        { icon: BarChart3, label: 'Response Queue', href: '/verification/responses/queue', badge: 3 },
-        { icon: AlertTriangle, label: 'Verification Dashboard', href: '/verification/dashboard', badge: 0 }
-      ]
-    },
-    {
-      title: 'Review Management',
-      items: [
-        { icon: ClipboardList, label: 'Assessment Reviews', href: '/verification/assessments', badge: 2 },
-        { icon: BarChart3, label: 'Response Reviews', href: '/responses/status-review', badge: 1 },
-        { icon: AlertTriangle, label: 'All Responses', href: '/verification/responses', badge: 0 }
-      ]
-    },
-    {
-      title: 'Incident Management',
-      items: [
-        { icon: AlertTriangle, label: 'Incident Management', href: '/coordinator/incidents', badge: 4, badgeVariant: 'destructive' }
-      ]
-    },
-    {
-      title: 'Donor Coordination',
-      items: [
-        { icon: HandHeart, label: 'Donor Dashboard', href: '/coordinator/donors', badge: 2 },
-        { icon: Users, label: 'Resource Planning', href: '/coordinator/donors?tab=resources', badge: 1 },
-        { icon: AlertTriangle, label: 'Coordination Workspace', href: '/coordinator/donors?tab=workspace', badge: 3, badgeVariant: 'destructive' }
-      ]
-    },
-    {
-      title: 'System Configuration',
-      items: [
-        { icon: Zap, label: 'Auto-Approval Config', href: '/coordinator/auto-approval', badge: 0 },
-        { icon: BarChart3, label: 'Priority Sync Config', href: '/coordinator/priority-sync', badge: 0 },
-        { icon: AlertTriangle, label: 'Conflict Resolution', href: '/coordinator/conflicts', badge: 3, badgeVariant: 'destructive' }
-      ]
-    },
-    {
-      title: 'Monitoring Tools',
-      items: [
-        { icon: BarChart3, label: 'Situation Display', href: '/monitoring', badge: 0 },
-        { icon: ClipboardList, label: 'Interactive Map', href: '/monitoring/map', badge: 0 }
-      ]
-    }
-  ],
-  responder: [
-    {
-      title: 'Response Planning',
-      items: [
-        { icon: BarChart3, label: 'Plan Response', href: '/responses/plan', badge: 0 },
-        { icon: ClipboardList, label: 'Status Review', href: '/responses/status-review', badge: 2 }
-      ]
-    },
-    {
-      title: 'Delivery Management',
-      items: [
-        { icon: Archive, label: 'All Responses', href: '/responses', badge: 1 },
-        { icon: ClipboardList, label: 'Response Tracking', href: '/responses/status-review', badge: 0 }
-      ]
-    }
-  ],
-  donor: [
-    {
-      title: 'Contribution Tracking',
-      items: [
-        { icon: BarChart3, label: 'Donation Planning', href: '/donor/planning', badge: 0 },
-        { icon: ClipboardList, label: 'Commitments', href: '/donor/commitments', badge: 1 },
-        { icon: Archive, label: 'Performance', href: '/donor/performance', badge: 0 }
-      ]
-    }
-  ]
-}
-
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname()
-  const [currentRole, setCurrentRole] = useState<keyof typeof navigationSections>('assessor')
+  const { activeRole } = useRoleContext()
+  const { navigationSections, isAuthorizedForRoute } = useRoleNavigation()
 
   return (
     <div className={cn(
@@ -153,26 +74,19 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </Button>
       </div>
 
-      {/* Role Selection */}
-      {isOpen && (
+      {/* Active Role Display */}
+      {isOpen && activeRole && (
         <div className="p-4 border-b border-gray-200">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Role</label>
-          <select
-            value={currentRole}
-            onChange={(e) => setCurrentRole(e.target.value as keyof typeof navigationSections)}
-            className="w-full mt-1 px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="assessor">Field Assessor</option>
-            <option value="coordinator">Crisis Coordinator</option>
-            <option value="responder">Field Responder</option>
-            <option value="donor">Donor Organization</option>
-          </select>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Active Role</label>
+          <div className="mt-1 px-3 py-2 bg-gray-50 rounded-md text-sm font-medium text-gray-800">
+            {activeRole.name}
+          </div>
         </div>
       )}
 
       {/* Navigation Sections */}
       <div className="flex-1 overflow-y-auto py-4">
-        {navigationSections[currentRole].map((section, sectionIdx) => (
+        {navigationSections.map((section, sectionIdx) => (
           <div key={section.title} className={cn("mb-6", sectionIdx !== 0 && "mt-8")}>
             {isOpen && (
               <h3 className="px-4 text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
@@ -181,15 +95,21 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             )}
             <div className="space-y-1">
               {section.items.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
+                const iconName = typeof item.icon === 'string' ? item.icon : 'ClipboardList';
+                const Icon = iconMap[iconName as keyof typeof iconMap] || ClipboardList;
+                const isActive = pathname === item.href;
+                const isAuthorized = isAuthorizedForRoute(item.href);
+                
+                if (!isAuthorized) {
+                  return null;
+                }
                 
                 return (
                   <Link key={item.href} href={item.href}>
                     <div className={cn(
-                      "mx-2 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                      "mx-2 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150",
                       isActive 
-                        ? "bg-blue-100 text-blue-700 border border-blue-200" 
+                        ? "bg-blue-100 text-blue-700 border border-blue-200 shadow-sm" 
                         : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
                       !isOpen && "justify-center"
                     )}>
@@ -198,7 +118,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                         <>
                           <span className="flex-1">{item.label}</span>
                           {item.badge > 0 && (
-                            <Badge variant={isActive ? "default" : "secondary"} className="h-5 text-xs">
+                            <Badge 
+                              variant={
+                                item.badgeVariant || (isActive ? "default" : "secondary")
+                              } 
+                              className="h-5 text-xs"
+                            >
                               {item.badge}
                             </Badge>
                           )}

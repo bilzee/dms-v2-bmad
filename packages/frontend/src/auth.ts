@@ -12,13 +12,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-        role: user.role || 'FIELD_ASSESSOR',
-      },
-    }),
+    session: async ({ session, user }) => {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: {
+          roles: true,
+          activeRole: true,
+        },
+      });
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          role: dbUser?.activeRole?.name || dbUser?.roles[0]?.name || 'ASSESSOR',
+          assignedRoles: dbUser?.roles || [],
+          activeRole: dbUser?.activeRole || dbUser?.roles[0] || null,
+          permissions: [],
+          organization: user.organization,
+        },
+      };
+    },
   },
 })

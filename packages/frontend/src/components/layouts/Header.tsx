@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge'
 import { Menu, Wifi, WifiOff, Bell, User } from 'lucide-react'
 import { useOffline } from '@/hooks/useOffline'
 import { useOfflineStore } from '@/stores/offline.store'
+import { RoleIndicator } from './RoleIndicator'
+import { useSession } from 'next-auth/react'
 
 interface HeaderProps {
   onSidebarToggle: () => void
@@ -14,6 +16,7 @@ interface HeaderProps {
 export function Header({ onSidebarToggle, sidebarOpen }: HeaderProps) {
   const { isOffline } = useOffline();
   const queue = useOfflineStore(state => state.queue);
+  const { data: session } = useSession();
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 h-16 flex items-center px-6">
@@ -63,10 +66,13 @@ export function Header({ onSidebarToggle, sidebarOpen }: HeaderProps) {
             <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
           </Button>
 
+          {/* Role Indicator */}
+          <RoleIndicator />
+
           {/* User Profile */}
           <Button variant="ghost" size="sm" className="flex items-center gap-2">
             <User className="w-5 h-5" />
-            <span className="hidden sm:block text-sm">Field Worker</span>
+            <span className="hidden sm:block text-sm">{session?.user?.name || 'User'}</span>
           </Button>
         </div>
       </div>

@@ -13,6 +13,8 @@ import {
 } from "lucide-react"
 import { useOffline } from '@/hooks/useOffline'
 import { useOfflineStore } from '@/stores/offline.store'
+import { useRoleContext } from '@/components/providers/RoleContextProvider'
+import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 import { FeatureCard } from '@/components/dashboard/FeatureCard'
 import { AssessmentTypeCard } from '@/components/dashboard/AssessmentTypeCard'
 import { QuickStatsCard } from '@/components/dashboard/QuickStatsCard'
@@ -21,12 +23,19 @@ import { assessmentTypeColors, featureColors, statusColors } from '@/lib/constan
 export default function HomePage() {
   const { isOffline } = useOffline();
   const queue = useOfflineStore(state => state.queue);
-  const mainFeatures = [
+  const { activeRole, hasPermission } = useRoleContext();
+  const { hasAccessToSection } = useRoleNavigation();
+  
+  const currentRole = activeRole?.name || 'ASSESSOR';
+  
+  const allMainFeatures = [
     {
       title: 'Assessments',
       description: 'Create and manage rapid assessments for disaster situations',
       icon: <ClipboardList className="w-6 h-6" />,
       ...featureColors.assessments,
+      roleRestriction: ['ASSESSOR', 'COORDINATOR'],
+      requiredPermissions: ['assessments:read'],
       actions: [
         { label: 'View All Assessments', href: '/assessments' },
         { label: 'Create New Assessment', href: '/assessments/new', variant: 'outline' as const },
@@ -39,6 +48,8 @@ export default function HomePage() {
       description: 'Plan responses and track delivery progress',
       icon: <BarChart3 className="w-6 h-6" />,
       ...featureColors.responses,
+      roleRestriction: ['RESPONDER', 'COORDINATOR'],
+      requiredPermissions: ['responses:read'],
       actions: [
         { label: 'Plan New Response', href: '/responses/plan' },
         { label: 'Track Deliveries', href: '/responses/tracking', variant: 'outline' as const },
@@ -51,6 +62,8 @@ export default function HomePage() {
       description: 'Manage affected entities, camps, and communities',
       icon: <Building className="w-6 h-6" />,
       ...featureColors.entities,
+      roleRestriction: ['ASSESSOR', 'COORDINATOR'],
+      requiredPermissions: ['entities:read'],
       actions: [
         { label: 'View All Entities', href: '/entities' }
       ],
@@ -61,6 +74,8 @@ export default function HomePage() {
       description: 'Verification dashboard and approval management',
       icon: <UserCheck className="w-6 h-6" />,
       ...featureColors.queue,
+      roleRestriction: ['COORDINATOR'],
+      requiredPermissions: ['verification:read'],
       actions: [
         { label: 'Verification Dashboard', href: '/coordinator/dashboard' },
         { label: 'Donor Coordination', href: '/coordinator/donors', variant: 'outline' as const },
@@ -75,6 +90,8 @@ export default function HomePage() {
       description: 'Real-time monitoring and geographic visualization',
       icon: <Activity className="w-6 h-6" />,
       ...featureColors.assessments,
+      roleRestriction: ['COORDINATOR', 'ADMIN'],
+      requiredPermissions: ['monitoring:read'],
       actions: [
         { label: 'Situation Display', href: '/monitoring' },
         { label: 'Interactive Map', href: '/monitoring/map', variant: 'outline' as const }
@@ -86,6 +103,8 @@ export default function HomePage() {
       description: 'Manage and track disaster incidents and responses',
       icon: <AlertTriangle className="w-6 h-6" />,
       ...featureColors.responses,
+      roleRestriction: ['COORDINATOR'],
+      requiredPermissions: ['incidents:manage'],
       actions: [
         { label: 'Manage Incidents', href: '/coordinator/incidents' }
       ],
@@ -96,6 +115,8 @@ export default function HomePage() {
       description: 'Configure system settings and automation rules',
       icon: <UserCheck className="w-6 h-6" />,
       ...featureColors.queue,
+      roleRestriction: ['COORDINATOR', 'ADMIN'],
+      requiredPermissions: ['config:manage'],
       actions: [
         { label: 'Auto-Approval Config', href: '/coordinator/auto-approval' },
         { label: 'Priority Sync Config', href: '/queue', variant: 'outline' as const },
@@ -104,6 +125,24 @@ export default function HomePage() {
       stats: { count: 3, label: 'configurations' }
     }
   ]
+
+  // Filter features based on role and permissions
+  const mainFeatures = allMainFeatures.filter(feature => {
+    // Check role restriction
+    if (feature.roleRestriction && !feature.roleRestriction.includes(currentRole)) {
+      return false;
+    }
+    
+    // Check permissions
+    if (feature.requiredPermissions) {
+      return feature.requiredPermissions.every(permission => {
+        const [resource, action] = permission.split(':');
+        return hasPermission(resource, action);
+      });
+    }
+    
+    return true;
+  })
 
   const assessmentTypes = [
     { 
