@@ -274,3 +274,215 @@ export async function POST(
     }, { status: 500 });
   }
 }
+
+// PUT /api/v1/donors/[id]/commitments - Update existing commitment
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const donorId = params.id;
+    const body = await request.json();
+    const { searchParams } = new URL(request.url);
+    const commitmentId = searchParams.get('commitmentId');
+
+    if (!commitmentId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Missing commitment ID',
+        message: 'Commitment ID is required in query parameters',
+        timestamp: new Date().toISOString(),
+      }, { status: 400 });
+    }
+
+    // Find existing commitment
+    const commitmentIndex = mockCommitments.findIndex(
+      c => c.id === commitmentId && c.donorId === donorId
+    );
+
+    if (commitmentIndex === -1) {
+      return NextResponse.json({
+        success: false,
+        error: 'Commitment not found',
+        message: `Commitment ${commitmentId} not found for donor ${donorId}`,
+        timestamp: new Date().toISOString(),
+      }, { status: 404 });
+    }
+
+    // Validate update data
+    const existingCommitment = mockCommitments[commitmentIndex];
+    const updates: Partial<DonorCommitment> = {};
+
+    if (body.quantity !== undefined) {
+      if (body.quantity < 1 || body.quantity > 999999) {
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid quantity',
+          message: 'Quantity must be between 1 and 999,999',
+          timestamp: new Date().toISOString(),
+        }, { status: 400 });
+      }
+      updates.quantity = body.quantity;
+    }
+
+    if (body.unit !== undefined) {
+      if (!body.unit || body.unit.length > 50) {
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid unit',
+          message: 'Unit is required and cannot exceed 50 characters',
+          timestamp: new Date().toISOString(),
+        }, { status: 400 });
+      }
+      updates.unit = body.unit;
+    }
+
+    if (body.targetDate !== undefined) {
+      const targetDate = new Date(body.targetDate);
+      const minDate = new Date();
+      minDate.setDate(minDate.getDate() + 1);
+      const maxDate = new Date();
+      maxDate.setFullYear(maxDate.getFullYear() + 1);
+
+      if (targetDate < minDate || targetDate > maxDate) {
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid target date',
+          message: 'Target date must be between tomorrow and one year from now',
+          timestamp: new Date().toISOString(),
+        }, { status: 400 });
+      }
+      updates.targetDate = targetDate;
+    }
+
+    if (body.status !== undefined) {
+      if (!['PLANNED', 'IN_PROGRESS', 'DELIVERED', 'CANCELLED'].includes(body.status)) {
+        return NextResponse.json({
+          success: false,
+          error: 'Invalid status',
+          message: 'Status must be PLANNED, IN_PROGRESS, DELIVERED, or CANCELLED',
+          timestamp: new Date().toISOString(),
+        }, { status: 400 });
+      }
+      updates.status = body.status;
+    }
+
+    if (body.notes !== undefined) {
+      if (body.notes && body.notes.length > 500) {
+        return NextResponse.json({
+          success: false,
+          error: 'Notes too long',
+          message: 'Notes cannot exceed 500 characters',
+          timestamp: new Date().toISOString(),
+        }, { status: 400 });
+      }
+      updates.notes = body.notes;
+    }
+
+    // Update commitment
+    const updatedCommitment = {
+      ...existingCommitment,
+      ...updates,
+      updatedAt: new Date(),
+    };
+
+    mockCommitments[commitmentIndex] = updatedCommitment;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        commitment: updatedCommitment,
+      },
+      message: 'Commitment updated successfully',
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Failed to update commitment:', error);
+    
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to update commitment',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      timestamp: new Date().toISOString(),
+    }, { status: 500 });
+  }
+}
+
+// DELETE /api/v1/donors/[id]/commitments - Cancel/delete commitment
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const donorId = params.id;
+    const { searchParams } = new URL(request.url);
+    const commitmentId = searchParams.get('commitmentId');
+    const reason = searchParams.get('reason') || 'No reason provided';
+
+    if (!commitmentId) {
+      return NextResponse.json({
+        success: false,
+        error: 'Missing commitment ID',
+        message: 'Commitment ID is required in query parameters',
+        timestamp: new Date().toISOString(),
+      }, { status: 400 });
+    }
+
+    // Find existing commitment
+    const commitmentIndex = mockCommitments.findIndex(
+      c => c.id === commitmentId && c.donorId === donorId
+    );
+
+    if (commitmentIndex === -1) {
+      return NextResponse.json({
+        success: false,
+        error: 'Commitment not found',
+        message: `Commitment ${commitmentId} not found for donor ${donorId}`,
+        timestamp: new Date().toISOString(),
+      }, { status: 404 });
+    }
+
+    const commitment = mockCommitments[commitmentIndex];
+
+    // Check if commitment can be cancelled
+    if (commitment.status === 'DELIVERED') {
+      return NextResponse.json({
+        success: false,
+        error: 'Cannot cancel delivered commitment',
+        message: 'Commitments that have been delivered cannot be cancelled',
+        timestamp: new Date().toISOString(),
+      }, { status: 400 });
+    }
+
+    // Update status to CANCELLED instead of actually deleting
+    const cancelledCommitment = {
+      ...commitment,
+      status: 'CANCELLED' as const,
+      notes: `${commitment.notes || ''}\n\nCancelled: ${reason}`.trim(),
+      updatedAt: new Date(),
+    };
+
+    mockCommitments[commitmentIndex] = cancelledCommitment;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        commitment: cancelledCommitment,
+        cancellationReason: reason,
+      },
+      message: 'Commitment cancelled successfully',
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Failed to cancel commitment:', error);
+    
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to cancel commitment',
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      timestamp: new Date().toISOString(),
+    }, { status: 500 });
+  }
+}
