@@ -34,3 +34,8 @@ Object.defineProperty(window, 'scrollTo', {
   value: jest.fn(),
   writable: true,
 });
+
+// Polyfill for Node.js environment
+const { TextEncoder, TextDecoder } = require('node:util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;

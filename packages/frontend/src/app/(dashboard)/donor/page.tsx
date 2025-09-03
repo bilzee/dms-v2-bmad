@@ -9,8 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { DonationCommitmentForm } from '@/components/features/donor/DonationCommitmentForm';
 import { CommitmentList } from '@/components/features/donor/CommitmentList';
 import { DonorProfile } from '@/components/features/donor/DonorProfile';
+import { AchievementBadges } from '@/components/features/donor/AchievementBadges';
+import { AchievementNotifications } from '@/components/features/donor/AchievementNotifications';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Heart, Package, Calendar } from 'lucide-react';
+import { Plus, Heart, Package, Calendar, Award } from 'lucide-react';
 
 export default function DonorDashboard() {
   const {
@@ -124,8 +126,10 @@ export default function DonorDashboard() {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="commitments" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="commitments">My Commitments</TabsTrigger>
+          <TabsTrigger value="achievements">Achievements</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="new-commitment">New Commitment</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
         </TabsList>
@@ -145,6 +149,47 @@ export default function DonorDashboard() {
             </Button>
           </div>
           <CommitmentList commitments={commitments} />
+        </TabsContent>
+        
+        <TabsContent value="achievements" className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <Award className="w-5 h-5 mr-2" />
+              My Achievements
+            </h2>
+            <AchievementBadges />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="performance" className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Performance Dashboard</h2>
+            <div className="space-y-6">
+              {/* Performance metrics placeholder - will be replaced with actual dashboard components */}
+              <div className="p-8 text-center bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
+                <div className="max-w-md mx-auto">
+                  <div className="text-4xl mb-4">📈</div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Performance Tracking Coming Soon
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Detailed performance metrics, trends, and impact visualization will be available here.
+                    Track your delivery performance, accuracy rates, and beneficiary impact.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="p-3 bg-white rounded-lg shadow-sm">
+                      <div className="font-semibold text-green-600">87.5%</div>
+                      <div className="text-gray-600">On-Time Rate</div>
+                    </div>
+                    <div className="p-3 bg-white rounded-lg shadow-sm">
+                      <div className="font-semibold text-blue-600">{currentDonor?.performanceScore || 89}</div>
+                      <div className="text-gray-600">Performance Score</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </TabsContent>
         
         <TabsContent value="new-commitment" className="space-y-6">
@@ -171,6 +216,9 @@ export default function DonorDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Achievement Notifications */}
+      <AchievementNotifications donorId={currentDonor?.id} />
     </div>
   );
 }

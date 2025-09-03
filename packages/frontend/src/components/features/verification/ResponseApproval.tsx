@@ -89,11 +89,32 @@ export const ResponseApproval: React.FC<ResponseApprovalProps> = ({
         throw new Error(result.message || 'Failed to approve response');
       }
 
+      // Trigger achievement notifications if any were generated
+      if (result.data.achievementResults && result.data.achievementResults.length > 0) {
+        try {
+          // Import notification trigger dynamically
+          const { triggerAchievementNotification } = await import('@/components/features/donor/AchievementNotifications');
+          
+          // Trigger notification for each donor who earned achievements
+          for (const achievementResult of result.data.achievementResults) {
+            if (achievementResult.newAchievements && achievementResult.newAchievements.length > 0) {
+              triggerAchievementNotification(
+                achievementResult.newAchievements,
+                response.id,
+                result.data.verificationId || 'approval-verification'
+              );
+            }
+          }
+        } catch (error) {
+          console.error('Failed to trigger achievement notifications:', error);
+        }
+      }
+
       toast({
         title: 'Response Approved',
         description: `Response ${response.responseType} delivery has been successfully approved.${
           result.data.notificationSent ? ' Responder has been notified.' : ''
-        }`,
+        }${result.data.achievementResults ? ` ${result.data.achievementResults.length} donor(s) earned new achievements.` : ''}`,
         variant: 'default',
       });
 
@@ -159,11 +180,32 @@ export const ResponseApproval: React.FC<ResponseApprovalProps> = ({
         throw new Error(result.message || 'Failed to approve response');
       }
 
+      // Trigger achievement notifications if any were generated
+      if (result.data.achievementResults && result.data.achievementResults.length > 0) {
+        try {
+          // Import notification trigger dynamically
+          const { triggerAchievementNotification } = await import('@/components/features/donor/AchievementNotifications');
+          
+          // Trigger notification for each donor who earned achievements
+          for (const achievementResult of result.data.achievementResults) {
+            if (achievementResult.newAchievements && achievementResult.newAchievements.length > 0) {
+              triggerAchievementNotification(
+                achievementResult.newAchievements,
+                response.id,
+                result.data.verificationId || 'quick-approval-verification'
+              );
+            }
+          }
+        } catch (error) {
+          console.error('Failed to trigger achievement notifications:', error);
+        }
+      }
+
       toast({
         title: 'Response Approved',
         description: `Response ${response.responseType} delivery has been successfully approved.${
           result.data.notificationSent ? ' Responder has been notified.' : ''
-        }`,
+        }${result.data.achievementResults ? ` ${result.data.achievementResults.length} donor(s) earned new achievements.` : ''}`,
         variant: 'default',
       });
 

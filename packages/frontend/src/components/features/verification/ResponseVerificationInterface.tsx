@@ -14,6 +14,7 @@ import DeliveryPhotoReviewer from './DeliveryPhotoReviewer';
 import DeliveryMetricsValidator from './DeliveryMetricsValidator';
 import ResponseAccountabilityTracker from './ResponseAccountabilityTracker';
 import { StatusBadge } from './VerificationStatusIndicators';
+import { VerificationStamp } from './VerificationStamp';
 
 interface ResponseVerificationInterfaceProps {
   response: RapidResponse;
@@ -130,7 +131,7 @@ const VerificationActions: React.FC<{
   if (response.verificationStatus !== VerificationStatus.PENDING) {
     return (
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-4 space-y-4">
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
             {response.verificationStatus === VerificationStatus.VERIFIED ? (
               <>
@@ -149,6 +150,19 @@ const VerificationActions: React.FC<{
               </>
             )}
           </div>
+          
+          {/* Display Verification Stamp for verified responses */}
+          {response.verificationStatus === VerificationStatus.VERIFIED && response.verificationId && (
+            <div className="border-t pt-4">
+              <VerificationStamp 
+                responseId={response.id}
+                verificationId={response.verificationId}
+                verifiedAt={response.verifiedAt ? new Date(response.verifiedAt) : new Date()}
+                verifiedBy={response.verifiedByName || 'System'}
+                verificationNotes={response.verificationNotes}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     );

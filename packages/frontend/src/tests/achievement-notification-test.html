@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Achievement Notification Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .notification { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            background: #f0f8ff; 
+            border: 1px solid #0066cc;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .achievement { margin: 10px 0; padding: 10px; background: #fffacd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Achievement Notification System Test</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: Single Achievement Notification</h3>
+        <button onclick="triggerSingleAchievement()">Trigger Single Achievement</button>
+        <p>Should show 1 achievement notification in top-right corner</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Multiple Achievements</h3>
+        <button onclick="triggerMultipleAchievements()">Trigger Multiple Achievements</button>
+        <p>Should show 3 achievement notifications with confetti for milestone achievements</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Achievement with Response Details</h3>
+        <button onclick="triggerAchievementWithDetails()">Trigger Achievement with Details</button>
+        <p>Should show achievement with "View Details" button for response verification</p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Event Log</h3>
+        <div id="eventLog" style="background: #f8f9fa; padding: 10px; min-height: 100px; font-family: monospace;"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <script>
+        // Mock the triggerAchievementNotification function
+        function triggerAchievementNotification(achievements, responseId, verificationId) {
+            const event = new CustomEvent('donor-achievement-earned', {
+                detail: {
+                    achievements,
+                    responseId,
+                    verificationId,
+                    timestamp: new Date().toISOString()
+                }
+            });
+            
+            window.dispatchEvent(event);
+            logEvent(`Triggered ${achievements.length} achievement(s) for response ${responseId}`);
+        }
+        
+        // Set up event listener to simulate the AchievementNotifications component
+        window.addEventListener('donor-achievement-earned', (event) => {
+            const { achievements, responseId, verificationId } = event.detail;
+            
+            logEvent(`Received achievement event: ${achievements.length} achievements`);
+            
+            achievements.forEach((achievement, index) => {
+                setTimeout(() => {
+                    showNotification(achievement, responseId);
+                }, index * 500); // Stagger notifications
+            });
+        });
+        
+        function showNotification(achievement, responseId) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="font-size: 24px; margin-right: 10px;">${achievement.badgeIcon || '🏆'}</div>
+                    <div>
+                        <strong>Achievement Unlocked!</strong>
+                        <div style="font-size: 14px; color: #666;">Category: ${achievement.category}</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <strong>${achievement.title}</strong>
+                    <div style="font-size: 14px; margin-top: 5px;">${achievement.description}</div>
+                </div>
+                ${responseId ? `
+                <button onclick="viewDetails('${responseId}')" style="font-size: 12px; padding: 5px 10px;">
+                    View Details
+                </button>
+                ` : ''}
+                <button onclick="this.parentElement.remove()" style="font-size: 12px; padding: 5px 10px; background: #dc3545;">
+                    Dismiss
+                </button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-dismiss after 10 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 10000);
+            
+            // Add animation if it's a major achievement
+            if (achievement.category === 'IMPACT' || achievement.type?.includes('MILESTONE')) {
+                notification.style.animation = 'pulse 2s infinite';
+                logEvent(`Major achievement: ${achievement.title} (with animation)`);
+            }
+        }
+        
+        function triggerSingleAchievement() {
+            const achievement = {
+                id: 'ach_' + Date.now(),
+                title: 'First Verified Delivery',
+                description: 'Completed your first verified humanitarian response delivery',
+                badgeIcon: '🎯',
+                category: 'DELIVERY',
+                type: 'DELIVERY_MILESTONE_1',
+                earnedAt: new Date(),
+                unlockedAt: new Date().toISOString(),
+            };
+            
+            triggerAchievementNotification([achievement], 'response_001', 'verification_001');
+        }
+        
+        function triggerMultipleAchievements() {
+            const achievements = [
+                {
+                    id: 'ach_' + (Date.now() + 1),
+                    title: 'Delivery Streak Master',
+                    description: 'Achieved 5 consecutive verified deliveries without delays',
+                    badgeIcon: '⚡',
+                    category: 'CONSISTENCY',
+                    type: 'STREAK_MILESTONE',
+                    earnedAt: new Date(),
+                    unlockedAt: new Date().toISOString(),
+                },
+                {
+                    id: 'ach_' + (Date.now() + 2),
+                    title: 'Community Hero',
+                    description: 'Your verified deliveries have helped over 1000 beneficiaries',
+                    badgeIcon: '🌟',
+                    category: 'IMPACT',
+                    type: 'IMPACT_MILESTONE_1000',
+                    earnedAt: new Date(),
+                    unlockedAt: new Date().toISOString(),
+                },
+                {
+                    id: 'ach_' + (Date.now() + 3),
+                    title: 'Quality Guardian',
+                    description: 'Maintained 100% verification success rate across 10+ deliveries',
+                    badgeIcon: '🛡️',
+                    category: 'VERIFICATION',
+                    type: 'QUALITY_MILESTONE',
+                    earnedAt: new Date(),
+                    unlockedAt: new Date().toISOString(),
+                }
+            ];
+            
+            triggerAchievementNotification(achievements, 'response_002', 'verification_002');
+        }
+        
+        function triggerAchievementWithDetails() {
+            const achievement = {
+                id: 'ach_' + Date.now(),
+                title: 'Multi-Sector Champion',
+                description: 'Successfully delivered verified responses across all 6 humanitarian sectors',
+                badgeIcon: '🏅',
+                category: 'DIVERSITY',
+                type: 'SECTOR_COMPLETION',
+                earnedAt: new Date(),
+                unlockedAt: new Date().toISOString(),
+            };
+            
+            triggerAchievementNotification([achievement], 'response_003', 'verification_003');
+        }
+        
+        function viewDetails(responseId) {
+            logEvent(`Viewing details for response: ${responseId}`);
+            alert(`Would navigate to verification details for response: ${responseId}`);
+        }
+        
+        function logEvent(message) {
+            const log = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('eventLog').innerHTML = '';
+        }
+        
+        // Add CSS for pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize log
+        logEvent('Achievement notification test initialized');
+    </script>
+</body>
+</html>

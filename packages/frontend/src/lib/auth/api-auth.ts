@@ -4,6 +4,8 @@ export interface AuthResult {
   success: boolean;
   userId?: string;
   userRole?: string;
+  assignedRoles?: string[];
+  activeRole?: string;
   error?: string;
 }
 
@@ -40,9 +42,10 @@ export async function validateApiAccess(
       return mockAuthResult;
     }
 
-    // Check role-based authorization
-    if (requiredRoles.length > 0 && mockAuthResult.userRole) {
-      const hasRequiredRole = requiredRoles.includes(mockAuthResult.userRole);
+    // Check role-based authorization (support both single role and multi-role)
+    if (requiredRoles.length > 0) {
+      const userRoles = mockAuthResult.assignedRoles || [mockAuthResult.userRole].filter(Boolean);
+      const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
       if (!hasRequiredRole) {
         return {
           success: false,
@@ -76,31 +79,39 @@ async function simulateAuthValidation(
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     
-    // Simulate different user types based on token patterns
+    // Simulate different user types based on token patterns with multi-role support
     if (token.includes('admin')) {
       return {
         success: true,
         userId: 'admin-user-123',
         userRole: 'ADMIN',
+        assignedRoles: ['ADMIN', 'COORDINATOR'],
+        activeRole: 'ADMIN',
       };
     } else if (token.includes('coordinator')) {
       return {
         success: true,
         userId: 'coordinator-user-456',
         userRole: 'COORDINATOR',
+        assignedRoles: ['COORDINATOR', 'ASSESSOR'],
+        activeRole: 'COORDINATOR',
       };
     } else if (token.includes('assessor')) {
       return {
         success: true,
         userId: 'assessor-user-789',
         userRole: 'ASSESSOR',
+        assignedRoles: ['ASSESSOR'],
+        activeRole: 'ASSESSOR',
       };
     } else if (token.length > 10) {
       // Valid token format
       return {
         success: true,
         userId: `user-${token.substr(0, 8)}`,
-        userRole: 'ASSESSOR', // Default role
+        userRole: 'ASSESSOR',
+        assignedRoles: ['ASSESSOR'],
+        activeRole: 'ASSESSOR',
       };
     }
   }

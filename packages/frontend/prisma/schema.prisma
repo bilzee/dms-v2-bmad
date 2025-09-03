@@ -27,26 +27,73 @@ model Incident {
 }
 
 model User {
-  id          String    @id @default(cuid())
-  email       String    @unique
-  name        String?
-  roles       Role[]
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String     @id @default(cuid())
+  name          String?
+  email         String?    @unique
+  emailVerified DateTime?
+  image         String?
+  roles         Role[]
+  activeRoleId  String?
+  activeRole    Role?      @relation("ActiveRole", fields: [activeRoleId], references: [id])
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
 
   @@map("users")
 }
 
 model Role {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  isActive  Boolean  @default(true)
-  users     User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String   @unique
+  isActive        Boolean  @default(true)
+  users           User[]
+  usersWithActive User[]   @relation("ActiveRole")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("roles")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 model Notification {
@@ -124,4 +171,105 @@ model PreliminaryAssessment {
   affectedEntity      AffectedEntity? @relation(fields: [affectedEntityId], references: [id])
 
   @@map("preliminary_assessments")
+}
+
+// Donor Management Models
+model Donor {
+  id                String              @id @default(cuid())
+  name              String
+  organization      String
+  email             String              @unique
+  phone             String?
+  performanceScore  Float               @default(0)
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  // Relationships
+  commitments       DonorCommitment[]
+  achievements      DonorAchievement[]
+  rapidResponses    RapidResponse[]
+
+  @@map("donors")
+}
+
+model DonorCommitment {
+  id                String            @id @default(cuid())
+  donorId           String
+  donor             Donor             @relation(fields: [donorId], references: [id])
+  responseType      String
+  quantity          Int
+  unit              String
+  targetDate        DateTime
+  deliveredDate     DateTime?
+  actualQuantity    Int?
+  status            String            @default("PLANNED") // PLANNED, IN_PROGRESS, DELIVERED, CANCELLED
+  incidentId        String?
+  affectedEntityId  String?
+  rapidResponseId   String?
+  rapidResponse     RapidResponse?    @relation(fields: [rapidResponseId], references: [id])
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("donor_commitments")
+}
+
+model DonorAchievement {
+  id                String            @id @default(cuid())
+  donorId           String
+  donor             Donor             @relation(fields: [donorId], references: [id])
+  type              String            // FIRST_DELIVERY, MILESTONE_10, PERFECT_ACCURACY_WEEK, etc.
+  title             String
+  description       String
+  category          String            @default("DELIVERY") // DELIVERY, CONSISTENCY, IMPACT
+  progress          Float             @default(0)
+  isUnlocked        Boolean           @default(false)
+  unlockedAt        DateTime?
+  commitmentId      String?
+  responseType      String?
+  quantityDelivered Int?
+  unit              String?
+  deliveryDate      DateTime?
+  incidentId        String?
+  affectedEntityId  String?
+  verificationStatus String?          // PENDING, VERIFIED, DISPUTED
+  performanceScore  Float?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("donor_achievements")
+}
+
+model RapidResponse {
+  id                        String               @id @default(cuid())
+  responseType              String
+  status                    String
+  plannedDate               DateTime
+  deliveredDate             DateTime?
+  affectedEntityId          String
+  assessmentId              String?
+  responderId               String
+  responderName             String
+  donorId                   String?
+  donor                     Donor?               @relation(fields: [donorId], references: [id])
+  donorName                 String?
+  verificationStatus        String               @default("PENDING")
+  syncStatus                String               @default("PENDING")
+  offlineId                 String?
+  data                      Json
+  otherItemsDelivered       Json                 @default("[]")
+  deliveryEvidence          Json                 @default("[]")
+  partialDeliveryData       Json?
+  deliveryDocumentation     Json?
+  feedbackCount             Int?                 @default(0)
+  lastFeedbackAt            DateTime?
+  requiresAttention         Boolean              @default(false)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+
+  // Relationships
+  donorCommitments          DonorCommitment[]
+
+  @@map("rapid_responses")
 }

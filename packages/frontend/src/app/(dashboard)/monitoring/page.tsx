@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Activity, AlertTriangle, TrendingUp, Database, Globe } from 'lucide-react';
+import { RefreshCw, Activity, AlertTriangle, TrendingUp, Database, Globe, BarChart3 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface SituationOverview {
   timestamp: Date;
@@ -21,6 +22,7 @@ interface SituationOverview {
 }
 
 export default function SituationDisplay() {
+  const router = useRouter();
   const [situationData, setSituationData] = useState<SituationOverview | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'degraded' | 'offline'>('connected');
   const [isLoading, setIsLoading] = useState(true);
@@ -139,6 +141,14 @@ export default function SituationDisplay() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => router.push('/monitoring/drill-down')}
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Drill Down
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={fetchSituationOverview}
             disabled={isLoading}
           >
@@ -150,7 +160,7 @@ export default function SituationDisplay() {
 
       {/* Live Data Overview Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => router.push('/monitoring/drill-down?tab=assessments')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Assessments</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
@@ -158,12 +168,12 @@ export default function SituationDisplay() {
           <CardContent>
             <div className="text-2xl font-bold">{situationData.totalAssessments}</div>
             <p className="text-xs text-muted-foreground">
-              Active assessments across all incidents
+              Active assessments across all incidents • Click for details
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => router.push('/monitoring/drill-down?tab=responses')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Responses</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -171,12 +181,12 @@ export default function SituationDisplay() {
           <CardContent>
             <div className="text-2xl font-bold">{situationData.totalResponses}</div>
             <p className="text-xs text-muted-foreground">
-              {getResponseRate()}% response rate
+              {getResponseRate()}% response rate • Click for details
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => router.push('/monitoring/drill-down?tab=incidents')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Incidents</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
@@ -184,12 +194,12 @@ export default function SituationDisplay() {
           <CardContent>
             <div className="text-2xl font-bold">{situationData.activeIncidents}</div>
             <p className="text-xs text-muted-foreground">
-              Requiring immediate attention
+              Requiring immediate attention • Click for details
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => router.push('/monitoring/drill-down?tab=entities')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Critical Gaps</CardTitle>
             <Database className="h-4 w-4 text-muted-foreground" />
@@ -197,7 +207,7 @@ export default function SituationDisplay() {
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{situationData.criticalGaps}</div>
             <p className="text-xs text-muted-foreground">
-              Urgent needs requiring resources
+              Urgent needs requiring resources • Click for details
             </p>
           </CardContent>
         </Card>

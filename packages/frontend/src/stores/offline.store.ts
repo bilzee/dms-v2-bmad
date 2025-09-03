@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useEffect } from 'react';
 import type { OfflineQueueItem, RapidAssessment } from '@dms/shared';
 
 interface OfflineState {
@@ -20,7 +21,7 @@ interface OfflineState {
 export const useOfflineStore = create<OfflineState>()(
   persist(
     (set, get) => ({
-      isOnline: navigator.onLine,
+      isOnline: true, // Default to true for SSR, updated in useOnlineStatus hook
       queue: [],
       pendingAssessments: [],
 
@@ -85,10 +86,21 @@ export const useOfflineStore = create<OfflineState>()(
 export function useOnlineStatus() {
   const { setOnlineStatus } = useOfflineStore();
 
-  if (typeof window !== 'undefined') {
-    window.addEventListener('online', () => setOnlineStatus(true));
-    window.addEventListener('offline', () => setOnlineStatus(false));
-  }
+  useEffect(() => {
+    // Set initial online status after mount
+    setOnlineStatus(navigator.onLine);
+
+    const handleOnline = () => setOnlineStatus(true);
+    const handleOffline = () => setOnlineStatus(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [setOnlineStatus]);
 
   return useOfflineStore(state => state.isOnline);
 }

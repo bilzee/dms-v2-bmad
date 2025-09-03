@@ -121,7 +121,13 @@
       "Bash(pnpm --filter @dms/frontend run tsc --noEmit)",
       "Bash(pnpm --filter @dms/frontend run tsc --noEmit src/app/(dashboard)/coordinator/donors/page.tsx src/hooks/useDonorCoordination.ts src/components/features/donors/DonorList.tsx src/components/features/donors/ResourceAvailabilityGrid.tsx src/components/features/donors/CoordinationWorkspace.tsx src/components/features/donors/DonorPerformanceChart.tsx)",
       "Bash(cd:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(pnpm --filter @dms/frontend test PerformanceMetrics.test.tsx --passWithNoTests)",
+      "Bash(pnpm --filter @dms/frontend run tsc --noEmit src/app/(dashboard)/coordinator/monitoring/page.tsx src/components/features/monitoring/*.tsx)",
+      "Bash(pnpm --filter @dms/frontend test PerformanceMetrics.test.tsx)",
+      "Bash(pnpm --filter @dms/frontend test UserActivityMonitor.test.tsx)",
+      "Bash(pnpm --filter @dms/frontend test monitoring)",
+      "Bash(pnpm --filter @dms/frontend test PerformanceMetrics.test.tsx UserActivityMonitor.test.tsx)"
     ],
     "deny": [],
     "additionalDirectories": [
@@ -130,10 +136,6 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "context7",
-    "playwright",
-    "puppeteer-mcp-claude",
-    "sequential-thinking",
-    "brave-search"
+    "sequential-thinking"
   ]
 }

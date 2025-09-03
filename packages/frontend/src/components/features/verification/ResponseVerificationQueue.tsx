@@ -25,6 +25,7 @@ import ResponseApproval from './ResponseApproval';
 import ResponseRejection from './ResponseRejection';
 import BatchResponseApprovalRejection from './BatchResponseApprovalRejection';
 import FeedbackNotification from './FeedbackNotification';
+import { VerificationStamp } from './VerificationStamp';
 import { ResponseType, VerificationStatus, ResponseStatus } from '@dms/shared';
 import { format } from 'date-fns';
 
@@ -474,7 +475,7 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* Response Actions */}
+                          {/* Response Actions for PENDING responses */}
                           {item.response.verificationStatus === 'PENDING' && (
                             <>
                               <ResponseApproval
@@ -492,6 +493,18 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
                                 }}
                               />
                             </>
+                          )}
+
+                          {/* Verification Stamp for VERIFIED responses */}
+                          {item.response.verificationStatus === 'VERIFIED' && item.response.verificationId && (
+                            <VerificationStamp 
+                              responseId={item.response.id}
+                              verificationId={item.response.verificationId}
+                              verifiedAt={item.response.verifiedAt ? new Date(item.response.verifiedAt) : new Date()}
+                              verifiedBy={item.response.verifiedByName || 'System'}
+                              verificationNotes={item.response.verificationNotes}
+                              compact={true}
+                            />
                           )}
                           
                           {/* Feedback Notifications */}

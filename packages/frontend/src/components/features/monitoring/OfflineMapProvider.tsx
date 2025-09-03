@@ -31,7 +31,7 @@ interface OfflineMapProviderProps {
 
 export function OfflineMapProvider({ children }: OfflineMapProviderProps) {
   const [state, setState] = useState<OfflineMapState>({
-    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
+    isOnline: true, // Default to true for SSR, will be updated in useEffect
     tilesDownloaded: 0,
     totalTiles: 0,
     cacheSize: 0,
@@ -42,6 +42,9 @@ export function OfflineMapProvider({ children }: OfflineMapProviderProps) {
 
   // Monitor online/offline status
   useEffect(() => {
+    // Set initial online status after mount
+    setState(prev => ({ ...prev, isOnline: navigator.onLine }));
+
     const handleOnline = () => setState(prev => ({ ...prev, isOnline: true }));
     const handleOffline = () => setState(prev => ({ ...prev, isOnline: false }));
 

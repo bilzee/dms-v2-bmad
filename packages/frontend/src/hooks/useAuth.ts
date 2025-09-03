@@ -1,3 +1,4 @@
+import { useSession } from 'next-auth/react';
 import { User } from '@dms/shared';
 
 interface AuthState {
@@ -6,36 +7,41 @@ interface AuthState {
   error: string | null;
 }
 
-// Mock auth hook for Story 3.2
-// TODO: Replace with actual authentication implementation
 export const useAuth = (): AuthState => {
-  // For development/testing, return a mock coordinator user
-  const mockUser: User = {
-    id: 'coord-123',
-    email: 'coordinator@example.com',
-    name: 'Mock Coordinator',
-    phone: '+1234567890',
-    organization: 'Test Organization',
-    roles: [{
-      id: 'coord-role',
-      name: 'COORDINATOR',
-      permissions: [],
-      isActive: true,
-    }],
-    activeRole: {
-      id: 'coord-role',
-      name: 'COORDINATOR',
-      permissions: [],
-      isActive: true,
-    },
-    permissions: [],
-    lastSync: new Date(),
+  const { data: session, status } = useSession();
+
+  if (status === 'loading') {
+    return {
+      user: null,
+      isLoading: true,
+      error: null,
+    };
+  }
+
+  if (status === 'unauthenticated' || !session?.user) {
+    return {
+      user: null,
+      isLoading: false,
+      error: null,
+    };
+  }
+
+  const user: User = {
+    id: session.user.id,
+    email: session.user.email || '',
+    name: session.user.name || '',
+    phone: undefined,
+    organization: session.user.organization,
+    roles: session.user.assignedRoles,
+    activeRole: session.user.activeRole,
+    permissions: session.user.permissions,
+    lastSync: undefined,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
   return {
-    user: mockUser,
+    user,
     isLoading: false,
     error: null,
   };

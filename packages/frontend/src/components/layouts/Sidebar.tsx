@@ -10,7 +10,8 @@ import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 import {
   ClipboardList, BarChart3, Building, Archive, AlertTriangle,
   HelpCircle, Settings, ChevronLeft, ChevronRight, User,
-  Heart, Droplet, Home, Utensils, Shield, Users, Zap, HandHeart
+  Heart, Droplet, Home, Utensils, Shield, Users, Zap, HandHeart,
+  Award, Trophy
 } from 'lucide-react'
 
 const iconMap = {
@@ -29,7 +30,9 @@ const iconMap = {
   Users,
   Zap,
   HandHeart,
-  HelpCircle
+  HelpCircle,
+  Award,
+  Trophy
 };
 
 interface SidebarProps {

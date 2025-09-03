@@ -94,19 +94,50 @@ export async function POST(
     // TODO: Implement database update
     // await updateResponseVerificationStatus(responseId, 'VERIFIED', body.coordinatorId);
 
+    // Generate verification stamp and trigger achievement calculation
+    let achievementResults = [];
+    try {
+      // Import achievement engine dynamically
+      const { VerificationAchievementEngine } = await import('@/lib/achievements/achievementEngine');
+      
+      // Calculate achievements for all linked donors
+      const mockDonorId = 'mock-donor-id'; // In real implementation, get from response.donorCommitments
+      const verificationId = `verification-${Date.now()}`;
+      
+      const achievements = await VerificationAchievementEngine.calculateAchievementsForVerifiedResponse(
+        mockDonorId,
+        responseId,
+        verificationId
+      );
+
+      if (achievements.length > 0) {
+        achievementResults.push({
+          donorId: mockDonorId,
+          donorName: 'Mock Donor',
+          newAchievements: achievements
+        });
+
+        // Trigger browser achievement notification
+        console.log(`Generated ${achievements.length} achievements for donor ${mockDonorId}`);
+      }
+    } catch (error) {
+      console.error('Failed to calculate achievements during approval:', error);
+    }
+
     // Mock: Log approval action for audit trail
     // TODO: Implement audit logging
     console.log(`Response ${responseId} approved by ${body.coordinatorName} at ${approvalTimestamp.toISOString()}`);
 
     const response: ResponseApprovalResponse = {
       success: true,
-      message: 'Response approved successfully',
+      message: `Response approved successfully${achievementResults.length > 0 ? ` and achievements calculated for ${achievementResults.length} donor(s)` : ''}`,
       data: {
         responseId,
         verificationStatus: 'VERIFIED',
         approvedBy: body.coordinatorName,
         approvedAt: approvalTimestamp,
         notificationSent,
+        achievementResults,
       },
     };
 
