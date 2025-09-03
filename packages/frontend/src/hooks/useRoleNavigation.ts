@@ -327,6 +327,20 @@ export const useRoleNavigation = (): UseRoleNavigationReturn => {
           href: '/donor/performance', 
           badge: 0,
           requiredPermissions: ['donations:track']
+        },
+        { 
+          icon: 'Award', 
+          label: 'Achievements', 
+          href: '/dashboard/donor/achievements', 
+          badge: 0,
+          requiredPermissions: ['donations:track']
+        },
+        { 
+          icon: 'Trophy', 
+          label: 'Leaderboard', 
+          href: '/dashboard/donor/leaderboard', 
+          badge: 0,
+          requiredPermissions: ['donations:track']
         }
       ]
     },
