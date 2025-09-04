@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
-import prisma from '@/lib/prisma';
+import DatabaseService from '@/lib/services/DatabaseService';
 
 const achievementsQuerySchema = z.object({
   category: z.enum(['DELIVERY', 'CONSISTENCY', 'IMPACT', 'ALL']).optional().default('ALL'),

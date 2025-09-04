@@ -1,8 +1,15 @@
 import { POST } from '@/app/api/v1/auth/switch-role/route';
 import { auth } from '@/auth';
 import { NextRequest } from 'next/server';
+import DatabaseService from '@/lib/services/DatabaseService';
 
-jest.mock('@/auth');
+jest.mock('@/lib/services/DatabaseService', () => ({
+  default: {
+    getUserWithRoles: jest.fn(),
+    switchUserRole: jest.fn(),
+  },
+}));
+
 jest.mock('@/lib/prisma', () => ({
   user: {
     findUnique: jest.fn(),
@@ -17,6 +24,7 @@ jest.mock('@/lib/prisma', () => ({
 }));
 
 const mockAuth = auth as jest.MockedFunction<typeof auth>;
+const mockDatabaseService = DatabaseService as jest.Mocked<typeof DatabaseService>;
 
 const mockPrisma = {
   user: {
@@ -50,8 +58,8 @@ describe('/api/v1/auth/switch-role', () => {
   describe('Successful Role Switching', () => {
     it('should switch role successfully with performance tracking', async () => {
       mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as any);
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser as any);
-      mockPrisma.user.update.mockResolvedValue({
+      mockDatabaseService.getUserWithRoles.mockResolvedValue(mockUser as any);
+      mockDatabaseService.switchUserRole.mockResolvedValue({
         ...mockUser,
         activeRoleId: 'role-2',
         roles: mockUser.roles

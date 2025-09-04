@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
 import { AffectedEntitySchema, EntityManagementFormSchema } from '@dms/shared';
-
-const prisma = new PrismaClient();
+import DatabaseService from '@/lib/services/DatabaseService';
 
 // GET /api/v1/entities - List entities with optional filtering
 export async function GET(request: NextRequest) {
@@ -28,10 +26,13 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    const entities = await prisma.affectedEntity.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
+    // Use DatabaseService instead of direct Prisma
+    const filters = {
+      type: type as 'CAMP' | 'COMMUNITY' | undefined,
+      lga: lga || undefined,
+      ward: ward || undefined,
+    };
+    const entities = await DatabaseService.getAffectedEntities(filters);
 
     // Transform database records to match frontend interface
     const transformedEntities = entities.map(entity => ({

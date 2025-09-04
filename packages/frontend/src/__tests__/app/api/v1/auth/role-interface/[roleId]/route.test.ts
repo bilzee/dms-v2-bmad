@@ -2,11 +2,12 @@ import { NextRequest } from 'next/server';
 import { GET, PUT } from '@/app/api/v1/auth/role-interface/[roleId]/route';
 
 // Mock next-auth
-const mockAuth = jest.fn();
-
 jest.mock('@/auth', () => ({
-  auth: mockAuth,
+  auth: jest.fn(),
 }));
+
+import { auth } from '@/auth';
+const mockAuth = auth as jest.MockedFunction<typeof auth>;
 
 describe('/api/v1/auth/role-interface/[roleId]', () => {
   const mockSession = {

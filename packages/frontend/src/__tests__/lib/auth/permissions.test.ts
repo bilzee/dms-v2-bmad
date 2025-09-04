@@ -49,7 +49,7 @@ describe('Permission System', () => {
     it('should allow access to entities based on role', () => {
       expect(canAccessEntity(mockUserRoles, 'assessment')).toBe(true);
       expect(canAccessEntity(mockUserRoles, 'incident')).toBe(true);
-      expect(canAccessEntity(mockUserRoles, 'user')).toBe(false);
+      expect(canAccessEntity(mockUserRoles, 'user')).toBe(true); // COORDINATOR has users: ['read']
     });
 
     it('should allow admin to access all entities', () => {

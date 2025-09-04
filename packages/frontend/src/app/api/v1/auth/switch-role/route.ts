@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import prisma from '@/lib/prisma';
+import DatabaseService from '@/lib/services/DatabaseService';
 
 interface RoleSwitchRequest {
   targetRoleId: string;
@@ -60,16 +60,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { 
-        roles: {
-          include: {
-            permissions: true
-          }
-        }
-      },
-    });
+    const user = await DatabaseService.getUserWithRoles(session.user.id);
 
     if (!user) {
       return NextResponse.json(
@@ -122,20 +113,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
       }
     }
 
-    const updatedUser = await prisma.user.update({
-      where: { id: session.user.id },
-      data: { 
-        activeRoleId: targetRoleId,
-        lastRoleSwitch: new Date()
-      },
-      include: {
-        roles: {
-          include: {
-            permissions: true
-          }
-        }
-      }
-    });
+    const updatedUser = await DatabaseService.switchUserRole(session.user.id, targetRoleId);
 
     const activeRole = updatedUser.roles.find(role => role.id === targetRoleId);
     const permissions = activeRole?.permissions || [];

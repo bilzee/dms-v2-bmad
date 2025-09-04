@@ -7,75 +7,7 @@ import {
   IncidentStatus,
   IncidentFilters
 } from '@dms/shared';
-
-// Mock data for development - would be replaced with actual database calls
-const mockIncidents = [
-  {
-    id: '1',
-    name: 'Borno State Flood - August 2024',
-    type: IncidentType.FLOOD,
-    severity: IncidentSeverity.SEVERE,
-    status: IncidentStatus.ACTIVE,
-    date: new Date('2024-08-15'),
-    affectedEntityCount: 3,
-    assessmentCount: 5,
-    responseCount: 2,
-    lastUpdated: new Date('2024-08-20'),
-  },
-  {
-    id: '2',
-    name: 'Maiduguri Market Fire',
-    type: IncidentType.FIRE,
-    severity: IncidentSeverity.MODERATE,
-    status: IncidentStatus.CONTAINED,
-    date: new Date('2024-08-18'),
-    affectedEntityCount: 1,
-    assessmentCount: 2,
-    responseCount: 3,
-    lastUpdated: new Date('2024-08-19'),
-  },
-  {
-    id: '3',
-    name: 'Adamawa Landslide Event',
-    type: IncidentType.LANDSLIDE,
-    severity: IncidentSeverity.CATASTROPHIC,
-    status: IncidentStatus.ACTIVE,
-    date: new Date('2024-08-22'),
-    affectedEntityCount: 5,
-    assessmentCount: 8,
-    responseCount: 1,
-    lastUpdated: new Date('2024-08-23'),
-  },
-];
-
-const mockStats = {
-  totalIncidents: 3,
-  activeIncidents: 2,
-  highPriorityIncidents: 2, // SEVERE + CATASTROPHIC
-  recentlyUpdated: 3,
-  byType: {
-    [IncidentType.FLOOD]: 1,
-    [IncidentType.FIRE]: 1,
-    [IncidentType.LANDSLIDE]: 1,
-    [IncidentType.CYCLONE]: 0,
-    [IncidentType.CONFLICT]: 0,
-    [IncidentType.EPIDEMIC]: 0,
-    [IncidentType.EARTHQUAKE]: 0,
-    [IncidentType.WILDFIRE]: 0,
-    [IncidentType.OTHER]: 0,
-  },
-  bySeverity: {
-    [IncidentSeverity.MINOR]: 0,
-    [IncidentSeverity.MODERATE]: 1,
-    [IncidentSeverity.SEVERE]: 1,
-    [IncidentSeverity.CATASTROPHIC]: 1,
-  },
-  byStatus: {
-    [IncidentStatus.ACTIVE]: 2,
-    [IncidentStatus.CONTAINED]: 1,
-    [IncidentStatus.RESOLVED]: 0,
-  },
-};
+import DatabaseService from '@/lib/services/DatabaseService';
 
 // GET /api/v1/incidents - List incidents with filtering and pagination
 export async function GET(request: NextRequest) {
@@ -99,47 +31,64 @@ export async function GET(request: NextRequest) {
       console.warn('Failed to parse filters:', error);
     }
 
-    // Apply filtering
-    let filteredIncidents = [...mockIncidents];
+    // Build database filters
+    const dbFilters = {
+      status: filters.status?.[0],
+      severity: filters.severity?.[0], 
+      type: filters.type?.[0],
+      dateRange: filters.dateRange ? {
+        start: new Date(filters.dateRange.start),
+        end: new Date(filters.dateRange.end)
+      } : undefined,
+      limit: pageSize,
+      offset: (page - 1) * pageSize
+    };
 
-    // Search filter
+    // Get incidents from database
+    const incidents = await DatabaseService.getIncidents(dbFilters);
+    
+    // Apply search filter (post-database filtering for now)
+    let filteredIncidents = incidents;
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filteredIncidents = filteredIncidents.filter(incident =>
+      filteredIncidents = incidents.filter(incident =>
         incident.name.toLowerCase().includes(term) ||
         incident.type.toLowerCase().includes(term)
       );
     }
 
-    // Status filter
-    if (filters.status && filters.status.length > 0) {
-      filteredIncidents = filteredIncidents.filter(incident =>
-        filters.status!.includes(incident.status)
-      );
-    }
+    // Get stats from database
+    const stats = await DatabaseService.getStats();
 
-    // Severity filter
-    if (filters.severity && filters.severity.length > 0) {
-      filteredIncidents = filteredIncidents.filter(incident =>
-        filters.severity!.includes(incident.severity)
-      );
-    }
-
-    // Type filter
-    if (filters.type && filters.type.length > 0) {
-      filteredIncidents = filteredIncidents.filter(incident =>
-        filters.type!.includes(incident.type)
-      );
-    }
-
-    // Date range filter
-    if (filters.dateRange) {
-      const { start, end } = filters.dateRange;
-      filteredIncidents = filteredIncidents.filter(incident => {
-        const incidentDate = new Date(incident.date);
-        return incidentDate >= new Date(start) && incidentDate <= new Date(end);
-      });
-    }
+    // Calculate statistics
+    const mockStats = {
+      totalIncidents: stats.totalIncidents,
+      activeIncidents: stats.totalIncidents, // TODO: Filter by active status
+      highPriorityIncidents: stats.totalIncidents, // TODO: Calculate properly
+      recentlyUpdated: stats.totalIncidents,
+      byType: {
+        'FLOOD': 0,
+        'FIRE': 0, 
+        'LANDSLIDE': 0,
+        'CYCLONE': 0,
+        'CONFLICT': 0,
+        'EPIDEMIC': 0,
+        'EARTHQUAKE': 0,
+        'WILDFIRE': 0,
+        'OTHER': 0,
+      },
+      bySeverity: {
+        'MINOR': 0,
+        'MODERATE': 0,
+        'SEVERE': 0,
+        'CATASTROPHIC': 0,
+      },
+      byStatus: {
+        'ACTIVE': 0,
+        'CONTAINED': 0,
+        'RESOLVED': 0,
+      },
+    };
 
     // Apply sorting
     filteredIncidents.sort((a, b) => {
@@ -152,23 +101,13 @@ export async function GET(request: NextRequest) {
           break;
         case 'severity':
           const severityOrder = { 
-            [IncidentSeverity.CATASTROPHIC]: 4, 
-            [IncidentSeverity.SEVERE]: 3, 
-            [IncidentSeverity.MODERATE]: 2, 
-            [IncidentSeverity.MINOR]: 1 
+            'CATASTROPHIC': 4, 
+            'SEVERE': 3, 
+            'MODERATE': 2, 
+            'MINOR': 1 
           };
-          aValue = severityOrder[a.severity];
-          bValue = severityOrder[b.severity];
-          break;
-        case 'priority':
-          // Priority = severity + status weight
-          const statusWeight = { 
-            [IncidentStatus.ACTIVE]: 3, 
-            [IncidentStatus.CONTAINED]: 2, 
-            [IncidentStatus.RESOLVED]: 1 
-          };
-          aValue = (severityOrder[a.severity] || 0) * 10 + (statusWeight[a.status] || 0);
-          bValue = (severityOrder[b.severity] || 0) * 10 + (statusWeight[b.status] || 0);
+          aValue = severityOrder[a.severity as keyof typeof severityOrder] || 0;
+          bValue = severityOrder[b.severity as keyof typeof severityOrder] || 0;
           break;
         case 'type':
           aValue = a.type;
@@ -190,17 +129,19 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Apply pagination
     const totalCount = filteredIncidents.length;
     const totalPages = Math.ceil(totalCount / pageSize);
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedIncidents = filteredIncidents.slice(startIndex, endIndex);
 
     const response: IncidentListResponse = {
       success: true,
       data: {
-        incidents: paginatedIncidents,
+        incidents: filteredIncidents.map(incident => ({
+          ...incident,
+          affectedEntityCount: 0, // TODO: Count from relationships
+          assessmentCount: incident.preliminaryAssessmentIds?.length || 0,
+          responseCount: 0, // TODO: Count from relationships
+          lastUpdated: incident.updatedAt
+        })),
         totalCount,
         pagination: {
           page,
@@ -213,7 +154,7 @@ export async function GET(request: NextRequest) {
           availableTypes: Object.values(IncidentType),
           availableSeverities: Object.values(IncidentSeverity),
           availableStatuses: Object.values(IncidentStatus),
-          affectedLGAs: ['Maiduguri', 'Bama', 'Monguno', 'Adamawa'], // Mock LGAs
+          affectedLGAs: ['Maiduguri', 'Bama', 'Monguno', 'Adamawa'], // TODO: Get from database
         },
       },
       message: `Found ${totalCount} incidents`,
@@ -268,50 +209,37 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // In a real implementation, this would:
-    // 1. Save to database
-    // 2. Create audit trail entry
-    // 3. Trigger notifications
-    // 4. Link preliminary assessments if provided
-    // 5. Link affected entities
-
-    const newIncident = {
-      id: Date.now().toString(), // Mock ID generation
+    // Create incident in database using real DatabaseService
+    const incidentData = {
       name: body.name,
       type: body.type,
-      subType: body.subType,
-      source: body.source,
+      subType: body.subType || null,
+      source: body.source || 'Manual Entry',
       severity: body.severity,
-      status: IncidentStatus.ACTIVE, // New incidents start as ACTIVE
+      status: 'ACTIVE', // New incidents start as ACTIVE
       date: new Date(body.date),
-      description: body.description,
-      coordinates: body.coordinates,
-      affectedEntityIds: body.affectedEntityIds || [],
-      affectedEntityCount: (body.affectedEntityIds || []).length,
-      preliminaryAssessmentId: body.preliminaryAssessmentId,
-      assessmentCount: body.preliminaryAssessmentId ? 1 : 0,
-      responseCount: 0,
-      actionItems: [],
-      timeline: [
-        {
-          id: '1',
-          type: 'STATUS_CHANGE' as const,
-          timestamp: new Date(),
-          coordinatorId: 'current-user-id', // Would come from auth
-          coordinatorName: 'Current User', // Would come from auth
-          description: 'Incident created',
-          metadata: { status: IncidentStatus.ACTIVE },
-        },
-      ],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastUpdated: new Date(),
+      preliminaryAssessmentIds: body.preliminaryAssessmentId ? [body.preliminaryAssessmentId] : [],
     };
+
+    const newIncident = await DatabaseService.createIncident(incidentData);
+
+    // TODO: In full implementation:
+    // 1. Create audit trail entry
+    // 2. Trigger notifications
+    // 3. Link affected entities
+    // 4. Send real-time updates
 
     return NextResponse.json({
       success: true,
       data: {
-        incident: newIncident,
+        incident: {
+          ...newIncident,
+          affectedEntityIds: body.affectedEntityIds || [],
+          affectedEntityCount: (body.affectedEntityIds || []).length,
+          assessmentCount: body.preliminaryAssessmentId ? 1 : 0,
+          responseCount: 0,
+          lastUpdated: newIncident.updatedAt,
+        },
       },
       message: 'Incident created successfully',
       timestamp: new Date().toISOString(),

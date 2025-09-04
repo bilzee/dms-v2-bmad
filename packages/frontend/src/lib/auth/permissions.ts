@@ -103,12 +103,24 @@ export function validateCrossRoleAccess(
     return { allowed: true };
   }
 
-  const hasBasicAccess = canAccessEntity(userRoles, targetEntityType as any);
-  if (!hasBasicAccess) {
-    return { 
-      allowed: false, 
-      reason: `No access to ${targetEntityType} entities` 
-    };
+  // Map resource names to entity types for canAccessEntity
+  const resourceToEntityMap: Record<string, string> = {
+    'assessments': 'assessment',
+    'responses': 'response',
+    'incidents': 'incident',
+    'entities': 'entity',
+    'users': 'user'
+  };
+
+  const entityType = resourceToEntityMap[targetEntityType];
+  if (entityType) {
+    const hasBasicAccess = canAccessEntity(userRoles, entityType as any);
+    if (!hasBasicAccess) {
+      return { 
+        allowed: false, 
+        reason: `No access to ${targetEntityType} entities` 
+      };
+    }
   }
 
   // Check specific action permissions
