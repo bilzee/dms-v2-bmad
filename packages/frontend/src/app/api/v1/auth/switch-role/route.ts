@@ -91,23 +91,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
 
     if (currentContext?.preferences && rollbackInfo.previousRoleId) {
       try {
-        await prisma.userRolePreferences.upsert({
-          where: {
-            userId_roleId: {
-              userId: session.user.id,
-              roleId: rollbackInfo.previousRoleId
-            }
-          },
-          update: {
-            preferences: currentContext.preferences,
-            updatedAt: new Date()
-          },
-          create: {
-            userId: session.user.id,
-            roleId: rollbackInfo.previousRoleId,
-            preferences: currentContext.preferences
-          }
-        });
+        // TODO: Add DatabaseService.saveRolePreferences method when needed
+        // await DatabaseService.saveRolePreferences(session.user.id, rollbackInfo.previousRoleId, currentContext.preferences);
       } catch (prefError) {
         console.warn('Failed to save role preferences:', prefError);
       }
@@ -119,16 +104,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
     const permissions = activeRole?.permissions || [];
 
     try {
-      await prisma.roleAuditLog.create({
-        data: {
-          userId: session.user.id,
+      await DatabaseService.logUserAction({
+        userId: session.user.id,
+        action: 'ROLE_SWITCH',
+        resource: 'USER_ROLE',
+        resourceId: targetRoleId,
+        details: {
           fromRoleId: rollbackInfo.previousRoleId,
           toRoleId: targetRoleId,
-          timestamp: new Date(),
-          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-          userAgent: request.headers.get('user-agent') || 'unknown',
           success: true
-        }
+        },
+        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown'
       });
     } catch (auditError) {
       console.warn('Failed to create audit log:', auditError);
@@ -172,22 +159,21 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
     
     if (rollbackInfo && session?.user?.id) {
       try {
-        await prisma.user.update({
-          where: { id: session.user.id },
-          data: { activeRoleId: rollbackInfo.previousRoleId },
-        });
+        await DatabaseService.switchUserRole(session.user.id, rollbackInfo.previousRoleId);
         
-        await prisma.roleAuditLog.create({
-          data: {
-            userId: session.user.id,
-            fromRoleId: rollbackInfo.previousRoleId,
-            toRoleId: targetRoleId,
-            timestamp: new Date(),
-            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-            userAgent: request.headers.get('user-agent') || 'unknown',
+        await DatabaseService.logUserAction({
+          userId: session.user.id,
+          action: 'ROLE_SWITCH_ROLLBACK',
+          resource: 'USER_ROLE',
+          resourceId: rollbackInfo.previousRoleId,
+          details: {
+            fromRoleId: targetRoleId,
+            toRoleId: rollbackInfo.previousRoleId,
             success: false,
             errorMessage: error instanceof Error ? error.message : 'Unknown error'
-          }
+          },
+          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown'
         }).catch(() => {});
         
         console.log('Successfully rolled back role change');

@@ -57,38 +57,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get stats from database
-    const stats = await DatabaseService.getStats();
-
-    // Calculate statistics
-    const mockStats = {
-      totalIncidents: stats.totalIncidents,
-      activeIncidents: stats.totalIncidents, // TODO: Filter by active status
-      highPriorityIncidents: stats.totalIncidents, // TODO: Calculate properly
-      recentlyUpdated: stats.totalIncidents,
-      byType: {
-        'FLOOD': 0,
-        'FIRE': 0, 
-        'LANDSLIDE': 0,
-        'CYCLONE': 0,
-        'CONFLICT': 0,
-        'EPIDEMIC': 0,
-        'EARTHQUAKE': 0,
-        'WILDFIRE': 0,
-        'OTHER': 0,
-      },
-      bySeverity: {
-        'MINOR': 0,
-        'MODERATE': 0,
-        'SEVERE': 0,
-        'CATASTROPHIC': 0,
-      },
-      byStatus: {
-        'ACTIVE': 0,
-        'CONTAINED': 0,
-        'RESOLVED': 0,
-      },
-    };
+    // Get real incident statistics from database
+    const incidentStats = await DatabaseService.getIncidentStats();
 
     // Apply sorting
     filteredIncidents.sort((a, b) => {
@@ -149,7 +119,7 @@ export async function GET(request: NextRequest) {
           totalPages,
           totalCount,
         },
-        stats: mockStats,
+        stats: incidentStats,
         filters: {
           availableTypes: Object.values(IncidentType),
           availableSeverities: Object.values(IncidentSeverity),

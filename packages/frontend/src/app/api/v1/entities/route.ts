@@ -116,10 +116,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create entity in database
-    const newEntity = await prisma.affectedEntity.create({
-      data: entityData,
-    });
+    // Create entity in database using DatabaseService
+    const newEntity = await DatabaseService.createAffectedEntity(entityData);
 
     return NextResponse.json({
       success: true,

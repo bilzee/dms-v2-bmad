@@ -6,6 +6,7 @@ import {
   ResponseType,
   DonorListResponse 
 } from '@dms/shared';
+import DatabaseService from '@/lib/services/DatabaseService';
 
 // Mock data for development - would be replaced with actual database calls
 const mockDonors: Donor[] = [
@@ -148,27 +149,27 @@ export async function GET(request: NextRequest) {
     const organization = searchParams.get('organization');
     const resourceType = searchParams.get('resourceType') as ResponseType;
 
-    // Apply filtering
-    let filteredDonors = [...mockDonors];
+    // Get donors from database using DatabaseService
+    let filteredDonors = await DatabaseService.getDonors();
 
     // Search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filteredDonors = filteredDonors.filter(donor =>
-        donor.name.toLowerCase().includes(term) ||
-        donor.organization.toLowerCase().includes(term) ||
-        donor.email.toLowerCase().includes(term)
+        (donor.name?.toLowerCase().includes(term)) ||
+        (donor.organization?.toLowerCase().includes(term)) ||
+        (donor.email?.toLowerCase().includes(term))
       );
     }
 
     // Status filter (active donors have recent commitments)
     if (status === 'active') {
       filteredDonors = filteredDonors.filter(donor => 
-        donor.commitments.some(c => c.status === 'PLANNED')
+        donor.commitments?.some(c => c.status === 'PLANNED')
       );
     } else if (status === 'inactive') {
       filteredDonors = filteredDonors.filter(donor => 
-        !donor.commitments.some(c => c.status === 'PLANNED')
+        !donor.commitments?.some(c => c.status === 'PLANNED')
       );
     }
 
@@ -176,14 +177,14 @@ export async function GET(request: NextRequest) {
     if (organization) {
       const org = organization.toLowerCase();
       filteredDonors = filteredDonors.filter(donor =>
-        donor.organization.toLowerCase().includes(org)
+        donor.organization?.toLowerCase().includes(org)
       );
     }
 
     // Resource type filter
     if (resourceType) {
       filteredDonors = filteredDonors.filter(donor =>
-        donor.commitments.some(c => c.responseType === resourceType)
+        donor.commitments?.some(c => c.responseType === resourceType)
       );
     }
 

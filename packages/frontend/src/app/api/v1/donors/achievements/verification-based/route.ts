@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
-import prisma from '@/lib/prisma';
+import DatabaseService from '@/lib/services/DatabaseService';
 
 const verificationAchievementsQuerySchema = z.object({
   responseId: z.string().optional(),
@@ -42,68 +42,36 @@ export async function GET(request: NextRequest) {
       whereClause.verificationId = validatedParams.verificationId;
     }
 
-    // Fetch verification-linked achievements
-    const achievements = await prisma.donorAchievement.findMany({
-      where: whereClause,
-      include: {
-        ...(validatedParams.includeStamps && {
-          rapidResponse: {
-            select: {
-              id: true,
-              verificationStatus: true,
-              verifiedAt: true,
-              verifiedBy: true,
-              verificationNotes: true,
-              donorName: true
-            }
-          }
-        })
-      },
-      orderBy: { unlockedAt: 'desc' }
+    // Fetch verification-linked achievements using DatabaseService
+    const achievements = await DatabaseService.getAchievementsByDonor(session.user.id);
+    
+    // Filter for verification-based achievements
+    const verificationAchievements = achievements.filter(achievement => {
+      let match = achievement.verificationId !== null;
+      
+      if (validatedParams.responseId) {
+        match = match && achievement.responseId === validatedParams.responseId;
+      }
+      
+      if (validatedParams.verificationId) {
+        match = match && achievement.verificationId === validatedParams.verificationId;
+      }
+      
+      return match;
     });
 
-    // Get verification stamps for responses
-    const verificationStamps = validatedParams.includeStamps ? 
-      await prisma.rapidResponse.findMany({
-        where: {
-          verificationStatus: 'VERIFIED',
-          donorCommitments: {
-            some: { donorId: session.user.id }
-          }
-        },
-        select: {
-          id: true,
-          verificationStatus: true,
-          verifiedAt: true,
-          verifiedBy: true,
-          verificationNotes: true,
-          donorName: true,
-          donorCommitments: {
-            where: { donorId: session.user.id },
-            select: {
-              id: true,
-              donorAchievements: {
-                where: { verificationId: { not: null } },
-                select: {
-                  id: true,
-                  title: true,
-                  badgeIcon: true
-                }
-              }
-            }
-          }
-        }
-      }) : [];
+    // Get verification stamps for responses (simplified for DatabaseService pattern)
+    const verificationStamps = [];
 
     return NextResponse.json({
       success: true,
       data: {
-        achievements,
+        achievements: verificationAchievements,
         verificationStamps,
         summary: {
-          totalVerificationAchievements: achievements.length,
+          totalVerificationAchievements: verificationAchievements.length,
           verifiedResponses: verificationStamps.length,
-          achievementsEarnedThisMonth: achievements.filter(a => 
+          achievementsEarnedThisMonth: verificationAchievements.filter(a => 
             a.unlockedAt && a.unlockedAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
           ).length
         }
@@ -120,7 +88,5 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

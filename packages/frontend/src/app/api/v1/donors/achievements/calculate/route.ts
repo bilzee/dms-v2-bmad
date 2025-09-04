@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
-import { VerificationAchievementEngine } from '@/lib/achievements/achievementEngine';
-import prisma from '@/lib/prisma';
+import DatabaseService from '@/lib/services/DatabaseService';
 
 const calculateAchievementSchema = z.object({
   responseId: z.string(),
@@ -28,12 +27,11 @@ export async function POST(request: NextRequest) {
     
     // Verify the donor exists and user has permission to calculate achievements
     if (donorId !== session.user.id) {
-      // Check if user is a coordinator who can trigger achievement calculations
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id }
-      });
+      // Check if user has coordinator role
+      const user = await DatabaseService.getUserWithRoles(session.user.id);
       
-      if (user?.role !== 'COORDINATOR') {
+      const hasCoordinatorRole = user?.roles.some(role => role.name === 'COORDINATOR');
+      if (!hasCoordinatorRole) {
         return NextResponse.json(
           { success: false, message: 'Insufficient permissions' },
           { status: 403 }
@@ -41,12 +39,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Trigger achievement calculation
-    const result = await VerificationAchievementEngine.triggerAchievementCalculation(
-      donorId,
-      validatedData.responseId,
-      validatedData.verificationId
-    );
+    // Trigger achievement calculation using DatabaseService
+    const newAchievements = await DatabaseService.onResponseVerified(validatedData.responseId);
+    
+    // Get total achievements for the donor
+    const totalAchievements = await DatabaseService.getAchievementsByDonor(donorId);
+    
+    const result = {
+      newAchievements,
+      totalAchievements: totalAchievements.length
+    };
 
     // If new achievements were earned, trigger notification events
     if (result.newAchievements.length > 0) {

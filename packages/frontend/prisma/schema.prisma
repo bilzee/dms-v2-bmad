@@ -42,13 +42,14 @@ model User {
 }
 
 model Role {
-  id              String   @id @default(cuid())
-  name            String   @unique
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  usersWithActive User[]   @relation("ActiveRole")
-  users           User[]   @relation("RoleToUser")
+  id              String           @id @default(cuid())
+  name            String           @unique
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  usersWithActive User[]           @relation("ActiveRole")
+  users           User[]           @relation("RoleToUser")
+  permissions     RolePermission[]
 
   @@map("roles")
 }
@@ -253,4 +254,64 @@ model RapidResponse {
   donor                 Donor?            @relation(fields: [donorId], references: [id])
 
   @@map("rapid_responses")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  resource    String
+  action      String
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  userName      String?
+  action        String
+  resource      String
+  resourceId    String?
+  details       Json     @default("{}")
+  ipAddress     String?
+  userAgent     String?
+  sessionId     String?
+  timestamp     DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model AchievementRule {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  category     String
+  type         String   // DELIVERY_COUNT, PERFORMANCE_SCORE, TIME_BASED, etc.
+  criteria     Json     // Flexible criteria object
+  reward       Json     // Achievement details and rewards
+  isActive     Boolean  @default(true)
+  priority     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("achievement_rules")
 }

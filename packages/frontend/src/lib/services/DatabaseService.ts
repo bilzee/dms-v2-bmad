@@ -13,6 +13,39 @@ interface CreateUserData {
   roles: string[];
 }
 
+interface UserFilters {
+  search?: string;
+  role?: string;
+  isActive?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+interface CreatePermissionData {
+  name: string;
+  description?: string;
+  resource: string;
+  action: string;
+}
+
+interface UserAction {
+  userId: string;
+  action: string;
+  resource: string;
+  details?: any;
+  timestamp: Date;
+}
+
+interface AuditFilters {
+  userId?: string;
+  action?: string;
+  resource?: string;
+  startDate?: Date;
+  endDate?: Date;
+  limit?: number;
+  offset?: number;
+}
+
 interface IncidentFilters {
   status?: string;
   severity?: string;
@@ -68,6 +101,205 @@ export class DatabaseService {
     return user;
   }
 
+  // Epic 9: Enhanced User Management Methods
+  static async listUsers(filters: UserFilters = {}) {
+    const where: any = {};
+
+    if (filters.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: 'insensitive' } },
+        { email: { contains: filters.search, mode: 'insensitive' } }
+      ];
+    }
+
+    if (filters.role) {
+      where.roles = {
+        some: { name: filters.role }
+      };
+    }
+
+    if (filters.isActive !== undefined) {
+      where.isActive = filters.isActive;
+    }
+
+    const users = await this.prisma.user.findMany({
+      where,
+      include: {
+        roles: true,
+        activeRole: true
+      },
+      take: filters.limit || 50,
+      skip: filters.offset || 0,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const total = await this.prisma.user.count({ where });
+
+    return {
+      users,
+      total,
+      pagination: {
+        limit: filters.limit || 50,
+        offset: filters.offset || 0,
+        totalPages: Math.ceil(total / (filters.limit || 50))
+      }
+    };
+  }
+
+  static async updateUser(id: string, updates: any) {
+    return await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...updates,
+        updatedAt: new Date()
+      },
+      include: {
+        roles: true,
+        activeRole: true
+      }
+    });
+  }
+
+  static async deleteUser(id: string) {
+    // Soft delete by setting isActive to false
+    return await this.prisma.user.update({
+      where: { id },
+      data: {
+        isActive: false,
+        updatedAt: new Date()
+      }
+    });
+  }
+
+  static async assignRole(userId: string, roleId: string) {
+    // Connect user to role
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        roles: {
+          connect: { id: roleId }
+        }
+      }
+    });
+
+    return await this.getUserWithRoles(userId);
+  }
+
+  static async removeRole(userId: string, roleId: string) {
+    // Disconnect user from role
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        roles: {
+          disconnect: { id: roleId }
+        }
+      }
+    });
+
+    return await this.getUserWithRoles(userId);
+  }
+
+  static async createPermission(permission: CreatePermissionData) {
+    return await this.prisma.permission.create({
+      data: {
+        name: permission.name,
+        description: permission.description,
+        resource: permission.resource,
+        action: permission.action
+      }
+    });
+  }
+
+  static async listPermissions() {
+    return await this.prisma.permission.findMany({
+      orderBy: { name: 'asc' }
+    });
+  }
+
+  static async assignPermissionToRole(roleId: string, permissionId: string) {
+    return await this.prisma.rolePermission.create({
+      data: {
+        roleId,
+        permissionId
+      }
+    });
+  }
+
+  static async logUserAction(action: UserAction) {
+    return await this.prisma.auditLog.create({
+      data: {
+        userId: action.userId,
+        action: action.action,
+        resource: action.resource,
+        details: action.details || {},
+        timestamp: action.timestamp
+      }
+    });
+  }
+
+  static async getAuditTrail(filters: AuditFilters = {}) {
+    const where: any = {};
+
+    if (filters.userId) where.userId = filters.userId;
+    if (filters.action) where.action = filters.action;
+    if (filters.resource) where.resource = filters.resource;
+    if (filters.startDate && filters.endDate) {
+      where.timestamp = {
+        gte: filters.startDate,
+        lte: filters.endDate
+      };
+    }
+
+    return await this.prisma.auditLog.findMany({
+      where,
+      include: {
+        user: {
+          select: { name: true, email: true }
+        }
+      },
+      take: filters.limit || 100,
+      skip: filters.offset || 0,
+      orderBy: { timestamp: 'desc' }
+    });
+  }
+
+  static async getUserStats() {
+    const [
+      totalUsers,
+      activeUsers,
+      adminUsers,
+      coordinatorUsers,
+      recentUsers
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { isActive: true } }),
+      this.prisma.user.count({
+        where: {
+          roles: { some: { name: 'ADMIN' } }
+        }
+      }),
+      this.prisma.user.count({
+        where: {
+          roles: { some: { name: 'COORDINATOR' } }
+        }
+      }),
+      this.prisma.user.count({
+        where: {
+          createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+        }
+      })
+    ]);
+
+    return {
+      totalUsers,
+      activeUsers,
+      adminUsers,
+      coordinatorUsers,
+      recentUsers,
+      inactiveUsers: totalUsers - activeUsers
+    };
+  }
+
   static async getUserWithRoles(userId: string) {
     return await this.prisma.user.findUnique({
       where: { id: userId },
@@ -117,8 +349,99 @@ export class DatabaseService {
       where,
       take: filters.limit || 50,
       skip: filters.offset || 0,
-      orderBy: { date: 'desc' }
+      orderBy: { date: 'desc' },
+      include: {
+        affectedEntities: {
+          take: 5 // Include first 5 affected entities
+        }
+      }
     });
+  }
+
+  static async getIncidentWithDetails(id: string) {
+    return await this.prisma.incident.findUnique({
+      where: { id },
+      include: {
+        affectedEntities: {
+          include: {
+            assessments: {
+              orderBy: { createdAt: 'desc' },
+              take: 3
+            }
+          }
+        }
+      }
+    });
+  }
+
+  static async updateIncidentStatus(id: string, status: string, coordinatorId?: string) {
+    return await this.prisma.incident.update({
+      where: { id },
+      data: { 
+        status,
+        updatedAt: new Date()
+      }
+    });
+  }
+
+  static async getIncidentTimeline(incidentId: string) {
+    // For now, return empty array - timeline functionality would need separate timeline table
+    return [];
+  }
+
+  static async getIncidentStats() {
+    const [
+      totalIncidents,
+      activeIncidents,
+      containedIncidents,
+      resolvedIncidents,
+      severeCriticalIncidents
+    ] = await Promise.all([
+      this.prisma.incident.count(),
+      this.prisma.incident.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.incident.count({ where: { status: 'CONTAINED' } }),
+      this.prisma.incident.count({ where: { status: 'RESOLVED' } }),
+      this.prisma.incident.count({ 
+        where: { 
+          severity: { in: ['SEVERE', 'CATASTROPHIC'] } 
+        } 
+      })
+    ]);
+
+    // Get counts by type
+    const typeStats = await this.prisma.incident.groupBy({
+      by: ['type'],
+      _count: { type: true }
+    });
+
+    const bySeverity = await this.prisma.incident.groupBy({
+      by: ['severity'], 
+      _count: { severity: true }
+    });
+
+    const byStatus = await this.prisma.incident.groupBy({
+      by: ['status'],
+      _count: { status: true }
+    });
+
+    return {
+      totalIncidents,
+      activeIncidents,
+      highPriorityIncidents: severeCriticalIncidents,
+      recentlyUpdated: totalIncidents, // TODO: Calculate properly based on updatedAt
+      byType: typeStats.reduce((acc, item) => {
+        acc[item.type] = item._count.type;
+        return acc;
+      }, {} as Record<string, number>),
+      bySeverity: bySeverity.reduce((acc, item) => {
+        acc[item.severity] = item._count.severity;
+        return acc;
+      }, {} as Record<string, number>),
+      byStatus: byStatus.reduce((acc, item) => {
+        acc[item.status] = item._count.status;
+        return acc;
+      }, {} as Record<string, number>)
+    };
   }
 
   static async createIncident(incidentData: any) {
@@ -286,6 +609,126 @@ export class DatabaseService {
     }
 
     return achievements;
+  }
+
+  // Story 8.3: Enhanced Achievement System Methods
+  static async getActiveAchievementRules() {
+    return await this.prisma.achievementRule.findMany({
+      where: { isActive: true },
+      orderBy: { priority: 'desc' }
+    });
+  }
+
+  static async createAchievementRule(ruleData: any) {
+    return await this.prisma.achievementRule.create({
+      data: {
+        name: ruleData.name || ruleData.title,
+        description: ruleData.description,
+        category: ruleData.category,
+        type: ruleData.type,
+        criteria: {
+          triggerType: ruleData.triggerType,
+          conditions: ruleData.triggerConditions || {},
+          ...ruleData.criteria
+        },
+        reward: {
+          badge: ruleData.badge,
+          points: ruleData.points || 0,
+          ...ruleData.reward
+        },
+        priority: ruleData.priority || 1,
+        isActive: true
+      }
+    });
+  }
+
+  static async evaluateAchievementRule(rule: any, response: any): Promise<boolean> {
+    // Simplified rule evaluation - would need more complex logic in production
+    switch (rule.triggerType) {
+      case 'VERIFICATION_COMPLETION':
+        return response.verificationStatus === 'VERIFIED';
+      case 'RESPONSE_DELIVERY':
+        return response.status === 'DELIVERED';
+      case 'MILESTONE_COUNT':
+        // This would need more complex counting logic
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  static async createVerificationBasedAchievement(achievementData: any) {
+    return await this.prisma.donorAchievement.create({
+      data: {
+        donorId: achievementData.donorId,
+        type: achievementData.type,
+        title: achievementData.title,
+        description: achievementData.description,
+        category: achievementData.category || 'VERIFICATION',
+        progress: 100,
+        isUnlocked: true,
+        unlockedAt: new Date(),
+        verificationStatus: 'VERIFIED'
+      }
+    });
+  }
+
+  static async onResponseVerified(responseId: string) {
+    // Get the response with donor information
+    const response = await this.prisma.rapidResponse.findUnique({
+      where: { id: responseId },
+      include: {
+        donor: true,
+        donorCommitments: {
+          include: { donor: true }
+        }
+      }
+    });
+
+    if (!response || !response.donorCommitments.length) {
+      return [];
+    }
+
+    const newAchievements = [];
+    const rules = await this.getActiveAchievementRules();
+
+    for (const commitment of response.donorCommitments) {
+      if (!commitment.donorId) continue;
+
+      for (const rule of rules) {
+        const shouldAward = await this.evaluateAchievementRule(rule, response);
+        
+        if (shouldAward) {
+          // Check if achievement already exists
+          const existing = await this.prisma.donorAchievement.findFirst({
+            where: {
+              donorId: commitment.donorId,
+              type: rule.type
+            }
+          });
+
+          if (!existing) {
+            const achievement = await this.createVerificationBasedAchievement({
+              donorId: commitment.donorId,
+              type: rule.type,
+              title: rule.name,
+              description: rule.description,
+              category: rule.category
+            });
+            newAchievements.push(achievement);
+          }
+        }
+      }
+    }
+
+    return newAchievements;
+  }
+
+  static async getAchievementsByDonor(donorId: string) {
+    return await this.prisma.donorAchievement.findMany({
+      where: { donorId },
+      orderBy: { unlockedAt: 'desc' }
+    });
   }
 
   // Utility methods
