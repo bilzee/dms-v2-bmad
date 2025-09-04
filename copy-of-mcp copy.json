@@ -30,7 +30,12 @@
     }
 }
 
-# Basic syntax 
+#For Context7#
 claude mcp add-from-claude-desktop
 
+#For Playwright#
 claude mcp add playwright npx @playwright/mcp@latest
+
+#For Sequential Thinking#
+In addition to the JSON entry above:
+sudo snap install astral-uv

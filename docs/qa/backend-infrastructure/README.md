@@ -52,6 +52,8 @@
 Please implement Phase 1 Foundation using the instructions in:
 /docs/qa/backend-infrastructure/phase-1-foundation-dev-agent.md
 
+Use Context7 and Sequential Thinking
+
 Focus on:
 - Supabase setup and Prisma deployment
 - NextAuth.js authentication system
@@ -66,6 +68,8 @@ Reference architecture: /docs/architecture.md
 Please validate Phase 1 Foundation using the instructions in:
 /docs/qa/backend-infrastructure/phase-1-validation-qa-agent.md
 
+Use Sequential Thinking
+
 Focus on:
 - Database deployment verification
 - Authentication system testing
@@ -77,6 +81,8 @@ Focus on:
 ```
 Please implement Phase 2 Migration using the instructions in:
 /docs/qa/backend-infrastructure/phase-2-migration-dev-agent.md
+
+Use Context7 and Sequential Thinking
 
 Focus on:
 - Systematic migration of all 189 API endpoints
@@ -90,6 +96,8 @@ Focus on:
 Please validate Phase 2 Migration using the instructions in:
 /docs/qa/backend-infrastructure/phase-2-validation-qa-agent.md
 
+Use Sequential Thinking
+
 Focus on:
 - Complete API migration verification
 - Epic 9 user management testing
@@ -101,6 +109,8 @@ Focus on:
 ```
 Please coordinate Phase 3 Epic Implementation using the instructions in:
 /docs/qa/backend-infrastructure/phase-3-epic-implementation-pm-agent.md
+
+Use Sequential Thinking
 
 Focus on:
 - Epic 10 story coordination (TI-001, TI-002, TI-003, TI-004)
@@ -114,6 +124,8 @@ Focus on:
 Please implement Epic 10 PWA features using the instructions in:
 /docs/qa/backend-infrastructure/phase-3-epic-implementation-dev-agent.md
 
+Use Context7 and Sequential Thinking
+
 Focus on:
 - TI-001: PWA core functionality
 - TI-002: Performance optimization (<3s load requirement)
@@ -125,6 +137,8 @@ Focus on:
 ```
 Please perform final Epic 10 validation using the instructions in:
 /docs/qa/backend-infrastructure/phase-3-validation-qa-agent.md
+
+Use Sequential Thinking
 
 Focus on:
 - Epic 10 user story acceptance criteria

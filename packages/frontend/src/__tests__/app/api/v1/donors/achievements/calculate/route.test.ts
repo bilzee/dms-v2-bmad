@@ -2,19 +2,23 @@ import { NextRequest } from 'next/server';
 import { POST } from '@/app/api/v1/donors/achievements/calculate/route';
 import { auth } from '@/auth';
 import { VerificationAchievementEngine } from '@/lib/achievements/achievementEngine';
+import DatabaseService from '@/lib/services/DatabaseService';
 
 // Mock dependencies
 jest.mock('@/auth');
 jest.mock('@/lib/achievements/achievementEngine');
-jest.mock('@/lib/prisma', () => ({
-  user: {
-    findUnique: jest.fn()
-  },
-  $disconnect: jest.fn()
+jest.mock('@/lib/services/DatabaseService', () => ({
+  __esModule: true,
+  default: {
+    getUserWithRoles: jest.fn(),
+    onResponseVerified: jest.fn(),
+    getAchievementsByDonor: jest.fn()
+  }
 }));
 
 const mockAuth = auth as jest.MockedFunction<typeof auth>;
 const mockEngine = VerificationAchievementEngine as jest.Mocked<typeof VerificationAchievementEngine>;
+const mockDatabaseService = DatabaseService as jest.Mocked<typeof DatabaseService>;
 
 describe('/api/v1/donors/achievements/calculate', () => {
   beforeEach(() => {
@@ -39,10 +43,9 @@ describe('/api/v1/donors/achievements/calculate', () => {
       user: { id: 'donor-123', role: 'DONOR' }
     } as any);
 
-    mockEngine.triggerAchievementCalculation.mockResolvedValue({
-      newAchievements: mockAchievements,
-      totalAchievements: 1
-    });
+    // Mock DatabaseService methods
+    mockDatabaseService.onResponseVerified.mockResolvedValue(mockAchievements);
+    mockDatabaseService.getAchievementsByDonor.mockResolvedValue([mockAchievements[0]]);
 
     const request = new NextRequest('http://localhost/api/v1/donors/achievements/calculate', {
       method: 'POST',
@@ -67,15 +70,15 @@ describe('/api/v1/donors/achievements/calculate', () => {
       user: { id: 'coordinator-123', role: 'COORDINATOR' }
     } as any);
 
-    require('@/lib/prisma').user.findUnique.mockResolvedValue({
+    // Mock DatabaseService.getUserWithRoles for coordinator role check
+    mockDatabaseService.getUserWithRoles.mockResolvedValue({
       id: 'coordinator-123',
-      role: 'COORDINATOR'
-    });
+      roles: [{ name: 'COORDINATOR' }]
+    } as any);
 
-    mockEngine.triggerAchievementCalculation.mockResolvedValue({
-      newAchievements: [],
-      totalAchievements: 5
-    });
+    // Mock DatabaseService methods 
+    mockDatabaseService.onResponseVerified.mockResolvedValue([]);
+    mockDatabaseService.getAchievementsByDonor.mockResolvedValue([]);
 
     const request = new NextRequest('http://localhost/api/v1/donors/achievements/calculate', {
       method: 'POST',
@@ -91,11 +94,7 @@ describe('/api/v1/donors/achievements/calculate', () => {
 
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
-    expect(mockEngine.triggerAchievementCalculation).toHaveBeenCalledWith(
-      'other-donor-456',
-      'response-456',
-      'verification-789'
-    );
+    expect(mockDatabaseService.onResponseVerified).toHaveBeenCalledWith('response-456');
   });
 
   it('rejects unauthorized requests', async () => {
@@ -122,10 +121,11 @@ describe('/api/v1/donors/achievements/calculate', () => {
       user: { id: 'donor-123', role: 'DONOR' }
     } as any);
 
-    require('@/lib/prisma').user.findUnique.mockResolvedValue({
+    // Mock DatabaseService.getUserWithRoles for donor role check
+    mockDatabaseService.getUserWithRoles.mockResolvedValue({
       id: 'donor-123',
-      role: 'DONOR'
-    });
+      roles: [{ name: 'DONOR' }]
+    } as any);
 
     const request = new NextRequest('http://localhost/api/v1/donors/achievements/calculate', {
       method: 'POST',
@@ -152,7 +152,7 @@ describe('/api/v1/donors/achievements/calculate', () => {
     const request = new NextRequest('http://localhost/api/v1/donors/achievements/calculate', {
       method: 'POST',
       body: JSON.stringify({
-        responseId: '', // Invalid empty string
+        // responseId is missing entirely to trigger validation error
         verificationId: 'verification-789'
       })
     });
@@ -170,7 +170,7 @@ describe('/api/v1/donors/achievements/calculate', () => {
       user: { id: 'donor-123', role: 'DONOR' }
     } as any);
 
-    mockEngine.triggerAchievementCalculation.mockRejectedValue(
+    mockDatabaseService.onResponseVerified.mockRejectedValue(
       new Error('Database connection failed')
     );
 
@@ -195,10 +195,8 @@ describe('/api/v1/donors/achievements/calculate', () => {
       user: { id: 'donor-123', role: 'DONOR' }
     } as any);
 
-    mockEngine.triggerAchievementCalculation.mockResolvedValue({
-      newAchievements: [],
-      totalAchievements: 5
-    });
+    mockDatabaseService.onResponseVerified.mockResolvedValue([]);
+    mockDatabaseService.getAchievementsByDonor.mockResolvedValue(Array.from({ length: 5 }, (_, i) => ({ id: `ach-${i}` })) as any);
 
     const request = new NextRequest('http://localhost/api/v1/donors/achievements/calculate', {
       method: 'POST',

@@ -1,20 +1,15 @@
 import { VerificationAchievementEngine } from '@/lib/achievements/achievementEngine';
-import prisma from '@/lib/prisma';
+import DatabaseService from '@/lib/services/DatabaseService';
 
-// Mock Prisma
-jest.mock('@/lib/prisma', () => ({
-  donorCommitment: {
-    findMany: jest.fn()
-  },
-  donorAchievement: {
-    findFirst: jest.fn(),
-    create: jest.fn(),
-    count: jest.fn()
-  },
-  $disconnect: jest.fn()
+// Mock DatabaseService
+jest.mock('@/lib/services/DatabaseService', () => ({
+  getDonorVerificationStats: jest.fn(),
+  checkExistingAchievement: jest.fn(),
+  createVerificationAchievement: jest.fn(),
+  countDonorAchievements: jest.fn()
 }));
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+const mockDatabaseService = DatabaseService as jest.Mocked<typeof DatabaseService>;
 
 describe('VerificationAchievementEngine', () => {
   beforeEach(() => {
@@ -23,35 +18,19 @@ describe('VerificationAchievementEngine', () => {
 
   describe('calculateAchievementsForVerifiedResponse', () => {
     it('awards first verified delivery achievement', async () => {
-      // Mock donor has 1 verified delivery
-      mockPrisma.donorCommitment.findMany
-        .mockResolvedValueOnce([
-          {
-            id: 'commitment-1',
-            donorId: 'donor-123',
-            status: 'DELIVERED',
-            rapidResponse: {
-              id: 'response-1',
-              verificationStatus: 'VERIFIED',
-              data: { personsServed: 10 }
-            }
-          }
-        ])
-        .mockResolvedValueOnce([
-          {
-            id: 'commitment-1',
-            donorId: 'donor-123',
-            status: 'DELIVERED',
-            rapidResponse: {
-              id: 'response-1',
-              verificationStatus: 'VERIFIED',
-              data: { personsServed: 10 }
-            }
-          }
-        ]);
+      // Mock donor verification stats (1 verified delivery)
+      const mockStats = {
+        totalVerifiedDeliveries: 1,
+        totalBeneficiariesHelped: 10,
+        verificationRate: 100,
+        currentVerificationStreak: 1,
+        responseTypeDeliveries: {},
+        latestVerification: new Date()
+      };
+      mockDatabaseService.getDonorVerificationStats.mockResolvedValue(mockStats);
 
       // No existing achievement
-      mockPrisma.donorAchievement.findFirst.mockResolvedValue(null);
+      mockDatabaseService.checkExistingAchievement.mockResolvedValue(false);
 
       // Mock achievement creation
       const mockAchievement = {
@@ -64,7 +43,7 @@ describe('VerificationAchievementEngine', () => {
         category: 'DELIVERY',
         badgeIcon: '✅'
       };
-      mockPrisma.donorAchievement.create.mockResolvedValue(mockAchievement as any);
+      mockDatabaseService.createVerificationAchievement.mockResolvedValue(mockAchievement as any);
 
       const achievements = await VerificationAchievementEngine.calculateAchievementsForVerifiedResponse(
         'donor-123',
@@ -78,29 +57,29 @@ describe('VerificationAchievementEngine', () => {
     });
 
     it('awards verification streak achievement', async () => {
-      // Mock donor has 5 consecutive verified deliveries
-      const mockCommitments = Array.from({ length: 5 }, (_, i) => ({
-        id: `commitment-${i + 1}`,
-        donorId: 'donor-123',
-        status: 'DELIVERED',
-        rapidResponse: {
-          id: `response-${i + 1}`,
-          verificationStatus: 'VERIFIED',
-          data: { personsServed: 10 }
-        }
-      }));
+      // Mock donor verification stats (5 consecutive verified deliveries)
+      const mockStats = {
+        totalVerifiedDeliveries: 5,
+        totalBeneficiariesHelped: 50,
+        verificationRate: 100,
+        currentVerificationStreak: 5,
+        responseTypeDeliveries: {},
+        latestVerification: new Date()
+      };
+      mockDatabaseService.getDonorVerificationStats.mockResolvedValue(mockStats);
 
-      mockPrisma.donorCommitment.findMany
-        .mockResolvedValueOnce(mockCommitments)
-        .mockResolvedValueOnce(mockCommitments);
+      // No existing achievements - need to account for all achievement rule checks
+      mockDatabaseService.checkExistingAchievement
+        .mockResolvedValueOnce(false) // FIRST_VERIFIED_DELIVERY check  
+        .mockResolvedValueOnce(false) // VERIFICATION_STREAK_5 check
+        .mockResolvedValueOnce(true) // VERIFICATION_STREAK_10 check (already exists)
+        .mockResolvedValueOnce(true) // HEALTH_SPECIALIST check (doesn't qualify)
+        .mockResolvedValueOnce(true) // WASH_EXPERT check (doesn't qualify) 
+        .mockResolvedValueOnce(true) // IMPACT_50_VERIFIED check (already exists)
+        .mockResolvedValueOnce(true); // IMPACT_200_VERIFIED check (doesn't qualify)
 
-      // No existing streak achievement
-      mockPrisma.donorAchievement.findFirst
-        .mockResolvedValueOnce(null) // FIRST_VERIFIED_DELIVERY check
-        .mockResolvedValueOnce(null); // VERIFICATION_STREAK_5 check
-
-      // Mock achievement creation
-      mockPrisma.donorAchievement.create
+      // Mock achievement creation - only for the two we expect
+      mockDatabaseService.createVerificationAchievement
         .mockResolvedValueOnce({
           id: 'ach-1',
           type: 'FIRST_VERIFIED_DELIVERY',
@@ -123,28 +102,24 @@ describe('VerificationAchievementEngine', () => {
     });
 
     it('awards specialization achievement for health responses', async () => {
-      // Mock donor has 10 verified health service deliveries
-      const mockCommitments = Array.from({ length: 10 }, (_, i) => ({
-        id: `commitment-${i + 1}`,
-        donorId: 'donor-123',
-        status: 'DELIVERED',
-        responseType: 'HEALTH_SERVICES',
-        rapidResponse: {
-          id: `response-${i + 1}`,
-          verificationStatus: 'VERIFIED',
-          data: { personsServed: 5 }
-        }
-      }));
-
-      mockPrisma.donorCommitment.findMany
-        .mockResolvedValueOnce(mockCommitments)
-        .mockResolvedValueOnce(mockCommitments);
+      // Mock donor verification stats (10 verified health service deliveries)
+      const mockStats = {
+        totalVerifiedDeliveries: 10,
+        totalBeneficiariesHelped: 50,
+        verificationRate: 100,
+        currentVerificationStreak: 10,
+        responseTypeDeliveries: {
+          HEALTH: Array.from({ length: 10 }, (_, i) => ({ id: `commitment-${i + 1}` }))
+        },
+        latestVerification: new Date()
+      };
+      mockDatabaseService.getDonorVerificationStats.mockResolvedValue(mockStats);
 
       // Mock no existing achievements
-      mockPrisma.donorAchievement.findFirst.mockResolvedValue(null);
+      mockDatabaseService.checkExistingAchievement.mockResolvedValue(false);
 
       // Mock achievement creation
-      mockPrisma.donorAchievement.create.mockResolvedValue({
+      mockDatabaseService.createVerificationAchievement.mockResolvedValue({
         id: 'ach-health',
         type: 'HEALTH_SPECIALIST',
         title: 'Health Specialist',
@@ -161,25 +136,20 @@ describe('VerificationAchievementEngine', () => {
     });
 
     it('awards impact achievement based on beneficiaries helped', async () => {
-      // Mock donor has helped 60 people through verified responses
-      const mockCommitments = Array.from({ length: 6 }, (_, i) => ({
-        id: `commitment-${i + 1}`,
-        donorId: 'donor-123',
-        status: 'DELIVERED',
-        rapidResponse: {
-          id: `response-${i + 1}`,
-          verificationStatus: 'VERIFIED',
-          data: { personsServed: 10 }
-        }
-      }));
+      // Mock donor verification stats (helped 60 people through verified responses)
+      const mockStats = {
+        totalVerifiedDeliveries: 6,
+        totalBeneficiariesHelped: 60,
+        verificationRate: 100,
+        currentVerificationStreak: 6,
+        responseTypeDeliveries: {},
+        latestVerification: new Date()
+      };
+      mockDatabaseService.getDonorVerificationStats.mockResolvedValue(mockStats);
 
-      mockPrisma.donorCommitment.findMany
-        .mockResolvedValueOnce(mockCommitments)
-        .mockResolvedValueOnce(mockCommitments);
+      mockDatabaseService.checkExistingAchievement.mockResolvedValue(false);
 
-      mockPrisma.donorAchievement.findFirst.mockResolvedValue(null);
-
-      mockPrisma.donorAchievement.create.mockResolvedValue({
+      mockDatabaseService.createVerificationAchievement.mockResolvedValue({
         id: 'ach-impact',
         type: 'IMPACT_50_VERIFIED',
         title: 'Community Helper',
@@ -196,24 +166,19 @@ describe('VerificationAchievementEngine', () => {
     });
 
     it('does not award existing achievements', async () => {
-      // Mock donor has 1 verified delivery
-      mockPrisma.donorCommitment.findMany.mockResolvedValue([
-        {
-          id: 'commitment-1',
-          donorId: 'donor-123',
-          status: 'DELIVERED',
-          rapidResponse: {
-            verificationStatus: 'VERIFIED',
-            data: { personsServed: 10 }
-          }
-        }
-      ]);
+      // Mock donor verification stats (1 verified delivery)
+      const mockStats = {
+        totalVerifiedDeliveries: 1,
+        totalBeneficiariesHelped: 10,
+        verificationRate: 100,
+        currentVerificationStreak: 1,
+        responseTypeDeliveries: {},
+        latestVerification: new Date()
+      };
+      mockDatabaseService.getDonorVerificationStats.mockResolvedValue(mockStats);
 
       // Mock existing achievement
-      mockPrisma.donorAchievement.findFirst.mockResolvedValue({
-        id: 'existing-ach',
-        type: 'FIRST_VERIFIED_DELIVERY'
-      } as any);
+      mockDatabaseService.checkExistingAchievement.mockResolvedValue(true);
 
       const achievements = await VerificationAchievementEngine.calculateAchievementsForVerifiedResponse(
         'donor-123',
@@ -222,7 +187,7 @@ describe('VerificationAchievementEngine', () => {
       );
 
       expect(achievements).toHaveLength(0);
-      expect(mockPrisma.donorAchievement.create).not.toHaveBeenCalled();
+      expect(mockDatabaseService.createVerificationAchievement).not.toHaveBeenCalled();
     });
   });
 
@@ -236,7 +201,7 @@ describe('VerificationAchievementEngine', () => {
       jest.spyOn(VerificationAchievementEngine, 'calculateAchievementsForVerifiedResponse')
         .mockResolvedValue(mockNewAchievements as any);
 
-      mockPrisma.donorAchievement.count.mockResolvedValue(5);
+      mockDatabaseService.countDonorAchievements.mockResolvedValue(5);
 
       const result = await VerificationAchievementEngine.triggerAchievementCalculation(
         'donor-123',

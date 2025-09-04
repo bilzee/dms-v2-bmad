@@ -724,10 +724,147 @@ export class DatabaseService {
     return newAchievements;
   }
 
-  static async getAchievementsByDonor(donorId: string) {
+  static async getAchievementsByDonor(donorId: string, filters?: any) {
+    const whereClause: any = { donorId };
+    
+    if (filters?.category && filters.category !== 'ALL') {
+      whereClause.category = filters.category;
+    }
+
     return await this.prisma.donorAchievement.findMany({
-      where: { donorId },
-      orderBy: { unlockedAt: 'desc' }
+      where: whereClause,
+      orderBy: [
+        { isUnlocked: 'desc' },
+        { unlockedAt: 'desc' },
+        { createdAt: 'desc' }
+      ]
+    });
+  }
+
+  static async getDonorCommitmentsStats(donorId: string) {
+    return await this.prisma.donorCommitment.findMany({
+      where: {
+        donorId,
+        status: 'DELIVERED'
+      },
+      include: {
+        rapidResponse: {
+          where: { verificationStatus: 'VERIFIED' }
+        }
+      }
+    });
+  }
+
+  static async updateAchievementProgress(achievementId: string, progress: number, shouldUnlock?: boolean) {
+    return await this.prisma.donorAchievement.update({
+      where: { id: achievementId },
+      data: {
+        progress,
+        isUnlocked: shouldUnlock || undefined,
+        unlockedAt: shouldUnlock ? new Date() : undefined,
+      }
+    });
+  }
+
+  static async createDonorAchievement(achievementData: any) {
+    return await this.prisma.donorAchievement.create({
+      data: achievementData
+    });
+  }
+
+  static async getVerificationById(verificationId: string) {
+    return await this.prisma.rapidResponse.findUnique({
+      where: { id: verificationId },
+      include: {
+        donor: true,
+        donorCommitments: true
+      }
+    });
+  }
+
+  // Achievement Engine support methods
+  static async getDonorVerificationStats(donorId: string) {
+    // Get all verified responses linked to this donor
+    const verifiedCommitments = await this.prisma.donorCommitment.findMany({
+      where: {
+        donorId,
+        status: 'DELIVERED'
+      },
+      include: {
+        rapidResponse: {
+          where: { verificationStatus: 'VERIFIED' }
+        }
+      },
+      orderBy: { deliveredDate: 'desc' }
+    });
+
+    const verifiedDeliveries = verifiedCommitments.filter(c => c.rapidResponse);
+    
+    // Calculate beneficiaries helped through verified responses
+    const totalBeneficiaries = verifiedDeliveries.reduce((total, commitment) => {
+      if (commitment.rapidResponse?.data) {
+        const responseData = commitment.rapidResponse.data as any;
+        if (responseData.personsServed) total += responseData.personsServed;
+        if (responseData.householdsServed) total += responseData.householdsServed * 4;
+      }
+      return total;
+    }, 0);
+
+    // Group by response type for specialization tracking
+    const responseTypeGroups = verifiedDeliveries.reduce((groups, commitment) => {
+      const responseType = commitment.responseType;
+      if (!groups[responseType]) groups[responseType] = [];
+      groups[responseType].push(commitment);
+      return groups;
+    }, {} as Record<string, any[]>);
+
+    // Calculate verification streak
+    let currentStreak = 0;
+    const allCommitments = await this.prisma.donorCommitment.findMany({
+      where: { donorId, status: 'DELIVERED' },
+      include: { rapidResponse: true },
+      orderBy: { deliveredDate: 'desc' }
+    });
+
+    for (const commitment of allCommitments) {
+      if (commitment.rapidResponse?.verificationStatus === 'VERIFIED') {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      totalVerifiedDeliveries: verifiedDeliveries.length,
+      totalBeneficiariesHelped: totalBeneficiaries,
+      verificationRate: allCommitments.length > 0 
+        ? (verifiedDeliveries.length / allCommitments.length) * 100 
+        : 0,
+      currentVerificationStreak: currentStreak,
+      responseTypeDeliveries: responseTypeGroups,
+      latestVerification: verifiedDeliveries[0]?.rapidResponse?.updatedAt
+    };
+  }
+
+  static async checkExistingAchievement(donorId: string, ruleId: string) {
+    const existing = await this.prisma.donorAchievement.findFirst({
+      where: {
+        donorId,
+        type: ruleId
+      }
+    });
+    return !!existing;
+  }
+
+  static async createVerificationAchievement(achievementData: any) {
+    return await this.prisma.donorAchievement.create({
+      data: achievementData
+    });
+  }
+
+  static async countDonorAchievements(donorId: string) {
+    return await this.prisma.donorAchievement.count({
+      where: { donorId, isUnlocked: true }
     });
   }
 

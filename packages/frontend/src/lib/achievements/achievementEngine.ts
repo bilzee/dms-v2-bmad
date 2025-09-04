@@ -1,5 +1,5 @@
 import { DonorAchievement, ResponseType } from '@dms/shared';
-import prisma from '@/lib/prisma';
+import DatabaseService from '@/lib/services/DatabaseService';
 
 export interface AchievementRule {
   id: string;
@@ -133,11 +133,11 @@ export class VerificationAchievementEngine {
     const newAchievements: DonorAchievement[] = [];
 
     // Get donor's verification statistics
-    const donorStats = await this.getDonorVerificationStats(donorId);
+    const donorStats = await DatabaseService.getDonorVerificationStats(donorId);
     
     // Check each achievement rule
     for (const rule of VERIFICATION_ACHIEVEMENT_RULES) {
-      const hasAchievement = await this.checkExistingAchievement(donorId, rule.id);
+      const hasAchievement = await DatabaseService.checkExistingAchievement(donorId, rule.id);
       
       if (!hasAchievement && this.evaluateRule(rule, donorStats)) {
         const achievement = await this.createAchievement(
@@ -153,68 +153,7 @@ export class VerificationAchievementEngine {
     return newAchievements;
   }
 
-  private static async getDonorVerificationStats(donorId: string) {
-    // Get all verified responses linked to this donor
-    const verifiedCommitments = await prisma.donorCommitment.findMany({
-      where: {
-        donorId,
-        status: 'DELIVERED'
-      },
-      include: {
-        rapidResponse: {
-          where: { verificationStatus: 'VERIFIED' }
-        }
-      },
-      orderBy: { deliveredDate: 'desc' }
-    });
-
-    const verifiedDeliveries = verifiedCommitments.filter(c => c.rapidResponse);
-    
-    // Calculate beneficiaries helped through verified responses
-    const totalBeneficiaries = verifiedDeliveries.reduce((total, commitment) => {
-      if (commitment.rapidResponse?.data) {
-        const responseData = commitment.rapidResponse.data as any;
-        if (responseData.personsServed) total += responseData.personsServed;
-        if (responseData.householdsServed) total += responseData.householdsServed * 4;
-      }
-      return total;
-    }, 0);
-
-    // Group by response type for specialization tracking
-    const responseTypeGroups = verifiedDeliveries.reduce((groups, commitment) => {
-      const responseType = commitment.responseType;
-      if (!groups[responseType]) groups[responseType] = [];
-      groups[responseType].push(commitment);
-      return groups;
-    }, {} as Record<string, any[]>);
-
-    // Calculate verification streak (consecutive verified deliveries)
-    let currentStreak = 0;
-    const allCommitments = await prisma.donorCommitment.findMany({
-      where: { donorId, status: 'DELIVERED' },
-      include: { rapidResponse: true },
-      orderBy: { deliveredDate: 'desc' }
-    });
-
-    for (const commitment of allCommitments) {
-      if (commitment.rapidResponse?.verificationStatus === 'VERIFIED') {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-
-    return {
-      totalVerifiedDeliveries: verifiedDeliveries.length,
-      totalBeneficiariesHelped: totalBeneficiaries,
-      verificationRate: allCommitments.length > 0 
-        ? (verifiedDeliveries.length / allCommitments.length) * 100 
-        : 0,
-      currentVerificationStreak: currentStreak,
-      responseTypeDeliveries: responseTypeGroups,
-      latestVerification: verifiedDeliveries[0]?.rapidResponse?.updatedAt
-    };
-  }
+  // Method moved to DatabaseService
 
   private static evaluateRule(rule: AchievementRule, stats: any): boolean {
     const { conditions } = rule;
@@ -254,15 +193,7 @@ export class VerificationAchievementEngine {
     return true;
   }
 
-  private static async checkExistingAchievement(donorId: string, ruleId: string): Promise<boolean> {
-    const existing = await prisma.donorAchievement.findFirst({
-      where: {
-        donorId,
-        type: ruleId
-      }
-    });
-    return !!existing;
-  }
+  // Method moved to DatabaseService
 
   private static async createAchievement(
     donorId: string, 
@@ -270,25 +201,24 @@ export class VerificationAchievementEngine {
     verificationId: string,
     responseId: string
   ): Promise<DonorAchievement> {
-    const achievement = await prisma.donorAchievement.create({
-      data: {
-        donorId,
-        type: rule.id,
-        title: rule.badge.title,
-        description: rule.badge.description,
-        category: rule.type === 'DELIVERY_MILESTONE' ? 'DELIVERY' :
-                 rule.type === 'VERIFICATION_SUCCESS' ? 'CONSISTENCY' :
-                 rule.type === 'IMPACT_ACHIEVEMENT' ? 'IMPACT' : 'SPECIALIZATION',
-        progress: 100,
-        isUnlocked: true,
-        unlockedAt: new Date(),
-        verificationId,
-        responseId,
-        badgeIcon: rule.badge.icon,
-        badgeColor: rule.badge.color
-      }
-    });
+    const achievementData = {
+      donorId,
+      type: rule.id,
+      title: rule.badge.title,
+      description: rule.badge.description,
+      category: rule.type === 'DELIVERY_MILESTONE' ? 'DELIVERY' :
+               rule.type === 'VERIFICATION_SUCCESS' ? 'CONSISTENCY' :
+               rule.type === 'IMPACT_ACHIEVEMENT' ? 'IMPACT' : 'SPECIALIZATION',
+      progress: 100,
+      isUnlocked: true,
+      unlockedAt: new Date(),
+      verificationId,
+      responseId,
+      badgeIcon: rule.badge.icon,
+      badgeColor: rule.badge.color
+    };
 
+    const achievement = await DatabaseService.createVerificationAchievement(achievementData);
     return achievement as DonorAchievement;
   }
 
@@ -306,9 +236,7 @@ export class VerificationAchievementEngine {
       verificationId
     );
 
-    const totalAchievements = await prisma.donorAchievement.count({
-      where: { donorId, isUnlocked: true }
-    });
+    const totalAchievements = await DatabaseService.countDonorAchievements(donorId);
 
     return {
       newAchievements,

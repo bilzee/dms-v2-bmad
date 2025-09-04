@@ -49,27 +49,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch achievements
-    const achievements = await prisma.donorAchievement.findMany({
-      where: whereClause,
-      orderBy: [
-        { isUnlocked: 'desc' },
-        { unlockedAt: 'desc' },
-        { createdAt: 'desc' }
-      ]
-    });
+    const achievements = await DatabaseService.getAchievementsByDonor(
+      session.user.id, 
+      { category: validatedParams.category }
+    );
 
     // Get donor's current stats for calculating progress
-    const donorStats = await prisma.donorCommitment.findMany({
-      where: {
-        donorId: session.user.id,
-        status: 'DELIVERED'
-      },
-      include: {
-        rapidResponse: {
-          where: { verificationStatus: 'VERIFIED' }
-        }
-      }
-    });
+    const donorStats = await DatabaseService.getDonorCommitmentsStats(session.user.id);
 
     const totalDeliveries = donorStats.length;
     const totalBeneficiaries = donorStats.reduce((total, commitment) => {
@@ -115,14 +101,11 @@ export async function GET(request: NextRequest) {
           const shouldUnlock = progress >= 100 && !achievement.isUnlocked;
           
           if (achievement.progress !== progress || shouldUnlock) {
-            await prisma.donorAchievement.update({
-              where: { id: achievement.id },
-              data: {
-                progress,
-                isUnlocked: shouldUnlock || achievement.isUnlocked,
-                unlockedAt: shouldUnlock ? new Date() : achievement.unlockedAt,
-              }
-            });
+            await DatabaseService.updateAchievementProgress(
+              achievement.id,
+              progress,
+              shouldUnlock || achievement.isUnlocked
+            );
             
             achievement.progress = progress;
             achievement.isUnlocked = shouldUnlock || achievement.isUnlocked;
@@ -171,7 +154,7 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
+    // DatabaseService manages connections, no need to disconnect
   }
 }
 
@@ -198,9 +181,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Create achievement in database
-    const achievement = await prisma.donorAchievement.create({
-      data: achievementData
-    });
+    const achievement = await DatabaseService.createDonorAchievement(achievementData);
 
     return NextResponse.json({
       success: true,
@@ -219,6 +200,6 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
+    // DatabaseService manages connections, no need to disconnect
   }
 }
