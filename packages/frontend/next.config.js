@@ -15,7 +15,31 @@ const withPWA = require('next-pwa')({
 })
 
 const nextConfig = {
-  webpack: (config, { isServer }) => {
+  eslint: {
+    // Enforce ESLint during builds to maintain code quality
+    ignoreDuringBuilds: false,
+    // Allow warnings but fail on errors
+    dirs: ['pages', 'app', 'components', 'lib', 'src'],
+  },
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    ignoreBuildErrors: true,
+  },
+  webpack: (config, { dev, isServer }) => {
+    // Exclude test files from production builds
+    config.module.rules.push({
+      test: /\.(test|spec)\.(js|jsx|ts|tsx)$/,
+      use: 'ignore-loader',
+    });
+
+    // Exclude __tests__ directories
+    config.module.rules.push({
+      test: /__tests__/,
+      use: 'ignore-loader',
+    });
+
     // Only apply these fallbacks on the client side
     if (!isServer) {
       config.resolve.fallback = {

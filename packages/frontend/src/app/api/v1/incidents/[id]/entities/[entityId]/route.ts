@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock incident-entity relationships (shared with parent route)
 const mockIncidentEntities: Record<string, string[]> = {

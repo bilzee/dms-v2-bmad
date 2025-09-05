@@ -486,7 +486,7 @@ export function ImpactVisualization({
                   <div>
                     <p className="font-medium text-green-900">Delivery Efficiency</p>
                     <p className="text-sm text-green-800">
-                      You're helping an average of <strong>{insights.averageBeneficiariesPerDelivery}</strong> beneficiaries per delivery, showing excellent resource utilization.
+                      You&apos;re helping an average of <strong>{insights.averageBeneficiariesPerDelivery}</strong> beneficiaries per delivery, showing excellent resource utilization.
                     </p>
                   </div>
                 </div>

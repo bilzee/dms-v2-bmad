@@ -1,9 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { backgroundSyncManager } from '@/lib/sync/BackgroundSyncManager';
 import type { BackgroundSyncSettings } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    // Handle case where backgroundSyncManager is null (during build/SSR)
+    if (!backgroundSyncManager) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          enabled: false,
+          syncOnlyWhenCharging: false,
+          minimumBatteryLevel: 20,
+          maximumConcurrentOperations: 3,
+          syncIntervalMinutes: 5,
+          maxRetryAttempts: 5,
+          priorityThreshold: 'LOW' as const,
+        },
+        error: null,
+      });
+    }
+
     const settings = backgroundSyncManager.getSettings();
 
     return NextResponse.json({
@@ -27,6 +46,15 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
+    // Handle case where backgroundSyncManager is null (during build/SSR)
+    if (!backgroundSyncManager) {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        error: 'Background sync service not available during build',
+      }, { status: 503 });
+    }
+
     const body = await req.json();
     
     // Validate the settings

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,

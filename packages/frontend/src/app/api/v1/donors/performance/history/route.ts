@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Historical performance data point interface
 interface PerformanceHistoryPoint {

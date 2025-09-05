@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
 interface RolePreferencesRequest {
   roleId: string;
   preferences: Record<string, any>;

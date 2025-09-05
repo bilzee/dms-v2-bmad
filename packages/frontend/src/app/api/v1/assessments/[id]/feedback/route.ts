@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { type CoordinatorFeedback } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock feedback data - replace with actual database queries
 const generateMockFeedback = (assessmentId: string): CoordinatorFeedback[] => {

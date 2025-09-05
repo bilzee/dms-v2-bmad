@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // GET /api/v1/queue/summary - Queue API has been moved to client-side
 export async function GET(request: NextRequest) {

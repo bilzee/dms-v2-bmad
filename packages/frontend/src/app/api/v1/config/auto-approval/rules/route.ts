@@ -5,6 +5,8 @@ import {
   AutoApprovalConfig,
   AutoApprovalRule 
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // GET /api/v1/config/auto-approval/rules - Get current auto-approval configuration
 export async function GET(request: NextRequest): Promise<NextResponse<AutoApprovalRulesResponse>> {

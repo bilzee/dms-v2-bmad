@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Query parameters schema for filtering response plans
 const ResponsePlansQuerySchema = z.object({

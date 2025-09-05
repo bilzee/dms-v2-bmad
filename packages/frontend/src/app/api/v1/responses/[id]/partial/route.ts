@@ -12,6 +12,8 @@ import {
   SyncStatus
 } from '@dms/shared';
 import { z } from 'zod';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Validation schema for partial delivery update
 const partialDeliveryUpdateSchema = z.object({

@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
-import { CreateUserRequest, UserListFilters } from '@shared/types/admin';
 import { z } from 'zod';
 import { requireAdminRole, getCurrentUser } from '@/lib/auth-middleware';
-import { PasswordService } from '@/lib/services/PasswordService';
-import { EmailService } from '@/lib/services/EmailService';
+
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
+
+
+
+
+
 
 // Validation schemas
 const createUserSchema = z.object({

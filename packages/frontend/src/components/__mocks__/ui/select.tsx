@@ -48,6 +48,7 @@ export const SelectItem = ({ children, value, ...props }: any) => {
       data-testid="select-item" 
       data-value={value} 
       role="option"
+      aria-selected={context?.value === value}
       onClick={handleClick}
       style={{ cursor: 'pointer', pointerEvents: 'auto' }}
       {...props}
@@ -64,13 +65,17 @@ export const SelectTrigger = ({ children, className, id, ...props }: any) => {
     context?.setIsOpen(!context?.isOpen);
   };
   
+  const triggerId = id || 'select-trigger';
+  const contentId = `${triggerId}-content`;
+  
   return (
     <button 
       data-testid="select-trigger" 
       className={className}
-      id={id}
+      id={triggerId}
       role="combobox"
       aria-expanded={context?.isOpen}
+      aria-controls={contentId}
       aria-haspopup="listbox"
       onClick={handleClick}
       type="button"

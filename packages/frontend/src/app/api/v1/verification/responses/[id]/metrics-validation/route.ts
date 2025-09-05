@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { UserRoleType, ResponseType } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 interface DeliveryItem {
   itemType: ResponseType;

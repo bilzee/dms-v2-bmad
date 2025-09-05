@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import type { PriorityQueueItem, PriorityOverrideRequest } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock queue data (in real implementation, use actual database/queue system)
 let mockQueue: PriorityQueueItem[] = [

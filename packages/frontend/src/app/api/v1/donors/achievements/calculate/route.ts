@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 const calculateAchievementSchema = z.object({
   responseId: z.string(),

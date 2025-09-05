@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import type { PriorityRule, PriorityCondition } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock database for priority rules (in real implementation, use actual database)
 let priorityRules: PriorityRule[] = [

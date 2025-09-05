@@ -5,6 +5,8 @@ import {
   RapidResponse,
   Feedback 
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,

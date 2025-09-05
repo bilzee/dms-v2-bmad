@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // PUT /api/v1/queue/:id/retry - Queue API has been moved to client-side
 export async function PUT(

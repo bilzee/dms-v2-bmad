@@ -98,6 +98,11 @@ export class BackgroundSyncManager {
    * Initialize background sync functionality
    */
   private async initializeBackgroundSync(): Promise<void> {
+    // Only initialize in browser environment
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return;
+    }
+
     // Register service worker for true background sync
     await this.registerServiceWorker();
 
@@ -116,7 +121,7 @@ export class BackgroundSyncManager {
    * Register service worker for background sync events
    */
   private async registerServiceWorker(): Promise<void> {
-    if ('serviceWorker' in navigator) {
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
       try {
         this.serviceWorkerRegistration = await navigator.serviceWorker.ready;
         
@@ -126,7 +131,7 @@ export class BackgroundSyncManager {
         });
 
         // Register for background sync if supported
-        if ('sync' in window.ServiceWorkerRegistration.prototype) {
+        if (typeof window !== 'undefined' && 'sync' in window.ServiceWorkerRegistration.prototype) {
           await this.setupBackgroundSyncEvents();
         }
       } catch (error) {
@@ -295,7 +300,7 @@ export class BackgroundSyncManager {
    */
   private pauseActiveOperations(): void {
     // Signal service worker to pause operations
-    if (this.serviceWorkerRegistration) {
+    if (this.serviceWorkerRegistration && typeof navigator !== 'undefined') {
       navigator.serviceWorker.controller?.postMessage({
         type: 'PAUSE_BACKGROUND_SYNC'
       });
@@ -743,4 +748,7 @@ export class BackgroundSyncManager {
 }
 
 // Export singleton instance for app-wide usage
-export const backgroundSyncManager = new BackgroundSyncManager();
+// Only create instance in browser environment
+export const backgroundSyncManager = typeof window !== 'undefined' 
+  ? new BackgroundSyncManager() 
+  : null;

@@ -1293,6 +1293,418 @@ export class DatabaseService {
     };
   }
 
+  // Enhanced Role Assignment Methods for Story 9.2
+  static async assignUserRoles(
+    userId: string,
+    roleIds: string[],
+    changedBy: string,
+    changedByName: string,
+    reason?: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) {
+    // Get current user roles for history tracking
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { roles: true }
+    });
+
+    if (!currentUser) {
+      throw new Error('User not found');
+    }
+
+    const currentRoleIds = currentUser.roles.map(r => r.id);
+    const newRoleIds = roleIds;
+
+    // Get roles being added and removed
+    const addedRoleIds = newRoleIds.filter(id => !currentRoleIds.includes(id));
+    const removedRoleIds = currentRoleIds.filter(id => !newRoleIds.includes(id));
+
+    // Update user roles
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        roles: {
+          set: roleIds.map(id => ({ id }))
+        },
+        activeRoleId: roleIds[0] || null,
+        updatedAt: new Date()
+      },
+      include: {
+        roles: {
+          include: {
+            permissions: {
+              include: {
+                permission: true
+              }
+            }
+          }
+        },
+        activeRole: true
+      }
+    });
+
+    // Log role history for added roles
+    for (const roleId of addedRoleIds) {
+      await this.prisma.roleHistory.create({
+        data: {
+          userId,
+          roleId,
+          action: 'ADDED',
+          previousData: { currentRoles: currentRoleIds },
+          changedBy,
+          changedByName,
+          reason,
+          ipAddress,
+          userAgent
+        }
+      });
+    }
+
+    // Log role history for removed roles
+    for (const roleId of removedRoleIds) {
+      await this.prisma.roleHistory.create({
+        data: {
+          userId,
+          roleId,
+          action: 'REMOVED',
+          previousData: { currentRoles: currentRoleIds },
+          changedBy,
+          changedByName,
+          reason,
+          ipAddress,
+          userAgent
+        }
+      });
+    }
+
+    // Log audit trail
+    await this.logUserAction({
+      userId: changedBy,
+      userName: changedByName,
+      action: 'ASSIGN_ROLES',
+      resource: 'USER_ROLES',
+      resourceId: userId,
+      details: {
+        addedRoles: addedRoleIds,
+        removedRoles: removedRoleIds,
+        newRoles: newRoleIds,
+        reason
+      },
+      ipAddress,
+      userAgent
+    });
+
+    return updatedUser;
+  }
+
+  static async bulkAssignRoles(
+    userIds: string[],
+    roleIds: string[],
+    changedBy: string,
+    changedByName: string,
+    reason?: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) {
+    const results = [];
+    
+    for (const userId of userIds) {
+      try {
+        const result = await this.assignUserRoles(
+          userId,
+          roleIds,
+          changedBy,
+          changedByName,
+          reason,
+          ipAddress,
+          userAgent
+        );
+        results.push({ userId, success: true, user: result });
+      } catch (error) {
+        results.push({ 
+          userId, 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        });
+      }
+    }
+
+    return results;
+  }
+
+  static async getUserRoleHistory(
+    userId: string,
+    limit: number = 50,
+    offset: number = 0
+  ) {
+    const history = await this.prisma.roleHistory.findMany({
+      where: { userId },
+      take: limit,
+      skip: offset,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const total = await this.prisma.roleHistory.count({
+      where: { userId }
+    });
+
+    return {
+      history,
+      total,
+      pagination: {
+        limit,
+        offset,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  static async getPermissionMatrix() {
+    const [roles, permissions] = await Promise.all([
+      this.prisma.role.findMany({
+        include: {
+          permissions: {
+            include: {
+              permission: true
+            }
+          },
+          _count: {
+            select: {
+              users: true
+            }
+          }
+        },
+        where: { isActive: true },
+        orderBy: { name: 'asc' }
+      }),
+      this.prisma.permission.findMany({
+        where: { isActive: true },
+        orderBy: { name: 'asc' }
+      })
+    ]);
+
+    // Build matrix
+    const matrix: Record<string, Record<string, boolean>> = {};
+    
+    roles.forEach(role => {
+      matrix[role.id] = {};
+      const rolePermissionIds = role.permissions.map(rp => rp.permissionId);
+      
+      permissions.forEach(permission => {
+        matrix[role.id][permission.id] = rolePermissionIds.includes(permission.id);
+      });
+    });
+
+    return {
+      roles: roles.map(role => ({
+        id: role.id,
+        name: role.name,
+        description: `System role with ${role.permissions.length} permissions`,
+        userCount: role._count.users,
+        permissions: role.permissions.map(rp => ({
+          id: rp.permission.id,
+          name: rp.permission.name,
+          description: rp.permission.description,
+          resource: rp.permission.resource,
+          action: rp.permission.action,
+          isActive: rp.permission.isActive
+        })),
+        isActive: role.isActive
+      })),
+      permissions: permissions.map(permission => ({
+        id: permission.id,
+        name: permission.name,
+        description: permission.description,
+        resource: permission.resource,
+        action: permission.action,
+        isActive: permission.isActive
+      })),
+      matrix
+    };
+  }
+
+  static async rollbackRoleChange(
+    historyId: string,
+    rolledBackBy: string,
+    rolledBackByName: string,
+    reason?: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) {
+    const historyRecord = await this.prisma.roleHistory.findUnique({
+      where: { id: historyId }
+    });
+
+    if (!historyRecord) {
+      throw new Error('Role history record not found');
+    }
+
+    const { userId, roleId, action, previousData } = historyRecord;
+    
+    // Determine rollback action
+    let rollbackAction: string;
+    let newRoleIds: string[];
+
+    if (previousData && typeof previousData === 'object' && 'currentRoles' in previousData) {
+      newRoleIds = (previousData as any).currentRoles as string[];
+      rollbackAction = 'ROLLBACK';
+    } else {
+      // Fallback: reverse the action
+      if (action === 'ADDED') {
+        rollbackAction = 'REMOVED';
+        const currentUser = await this.prisma.user.findUnique({
+          where: { id: userId },
+          include: { roles: true }
+        });
+        newRoleIds = currentUser?.roles.filter(r => r.id !== roleId).map(r => r.id) || [];
+      } else if (action === 'REMOVED') {
+        rollbackAction = 'ADDED';
+        const currentUser = await this.prisma.user.findUnique({
+          where: { id: userId },
+          include: { roles: true }
+        });
+        newRoleIds = [...(currentUser?.roles.map(r => r.id) || []), roleId];
+      } else {
+        throw new Error('Cannot rollback this type of role change');
+      }
+    }
+
+    // Apply rollback
+    const rolledBackUser = await this.assignUserRoles(
+      userId,
+      newRoleIds,
+      rolledBackBy,
+      rolledBackByName,
+      `Rollback: ${reason || 'Role change reverted'}`,
+      ipAddress,
+      userAgent
+    );
+
+    // Log rollback action
+    await this.prisma.roleHistory.create({
+      data: {
+        userId,
+        roleId: historyRecord.roleId,
+        action: 'ROLLBACK',
+        previousData: { 
+          originalHistoryId: historyId,
+          originalAction: action 
+        },
+        changedBy: rolledBackBy,
+        changedByName: rolledBackByName,
+        reason: `Rollback: ${reason || 'Role change reverted'}`,
+        ipAddress,
+        userAgent
+      }
+    });
+
+    return rolledBackUser;
+  }
+
+  static async setActiveRole(
+    userId: string,
+    roleId: string,
+    changedBy: string,
+    changedByName: string,
+    ipAddress?: string,
+    userAgent?: string
+  ) {
+    // Verify user has this role
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { roles: true, activeRole: true }
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const hasRole = user.roles.some(role => role.id === roleId);
+    if (!hasRole) {
+      throw new Error('User does not have the specified role');
+    }
+
+    const previousActiveRoleId = user.activeRoleId;
+
+    // Update active role
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        activeRoleId: roleId,
+        updatedAt: new Date()
+      },
+      include: {
+        roles: {
+          include: {
+            permissions: {
+              include: {
+                permission: true
+              }
+            }
+          }
+        },
+        activeRole: true
+      }
+    });
+
+    // Log role history
+    if (previousActiveRoleId) {
+      await this.prisma.roleHistory.create({
+        data: {
+          userId,
+          roleId: previousActiveRoleId,
+          action: 'DEACTIVATED',
+          changedBy,
+          changedByName,
+          reason: 'Role switch',
+          ipAddress,
+          userAgent
+        }
+      });
+    }
+
+    await this.prisma.roleHistory.create({
+      data: {
+        userId,
+        roleId,
+        action: 'ACTIVATED',
+        changedBy,
+        changedByName,
+        reason: 'Role switch',
+        ipAddress,
+        userAgent
+      }
+    });
+
+    // Log audit trail
+    await this.logUserAction({
+      userId: changedBy,
+      userName: changedByName,
+      action: 'SWITCH_ACTIVE_ROLE',
+      resource: 'USER_ROLE',
+      resourceId: userId,
+      details: {
+        previousActiveRoleId,
+        newActiveRoleId: roleId
+      },
+      ipAddress,
+      userAgent
+    });
+
+    return updatedUser;
+  }
+
+  // Notification management
+  static async createNotification(notificationData: any) {
+    return await this.prisma.notification.create({
+      data: {
+        ...notificationData,
+        status: 'PENDING'
+      }
+    });
+  }
+
   static async disconnect() {
     await this.prisma.$disconnect();
   }

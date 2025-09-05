@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // GET /api/v1/monitoring/situation/overview - Get real-time situation summary data
 export async function GET(request: NextRequest) {

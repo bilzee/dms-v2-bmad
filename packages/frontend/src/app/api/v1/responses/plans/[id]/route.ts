@@ -5,6 +5,8 @@ import {
   ResponseStatus,
   VerificationStatus,
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Path parameters schema
 const ParamsSchema = z.object({

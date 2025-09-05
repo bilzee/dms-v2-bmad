@@ -6,6 +6,8 @@ import {
   IncidentStatus,
 } from '@dms/shared';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // GET /api/v1/incidents/[id] - Get incident details
 export async function GET(

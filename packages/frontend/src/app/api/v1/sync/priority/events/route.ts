@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { PriorityEvent } from '@/lib/services/PriorityEventLogger';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 /**
  * API endpoint for priority event logging

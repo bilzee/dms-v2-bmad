@@ -322,6 +322,22 @@ model AchievementRule {
   @@map("achievement_rules")
 }
 
+model RoleHistory {
+  id           String   @id @default(cuid())
+  userId       String
+  roleId       String
+  action       String   // ADDED, REMOVED, ACTIVATED, DEACTIVATED
+  previousData Json?    // Previous role state for rollback
+  changedBy    String   // Admin user ID who made the change
+  changedByName String  // Admin user name
+  reason       String?  // Optional reason for the change
+  ipAddress    String?  // IP address of admin who made change
+  userAgent    String?  // User agent of admin session
+  createdAt    DateTime @default(now())
+
+  @@map("role_history")
+}
+
 model BulkImport {
   id                String   @id @default(cuid())
   fileName          String

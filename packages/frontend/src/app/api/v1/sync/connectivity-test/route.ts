@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   // This is a lightweight endpoint for connectivity testing

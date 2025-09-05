@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { AdminUser, UserListFilters } from '@shared/types/admin';
+import { useState, useEffect, useCallback } from 'react';
+import { AdminUser, UserListFilters } from '../../../../../shared/types/admin';
 import { UserList } from '@/components/features/admin/users/UserList';
 import { CreateUserModal } from '@/components/features/admin/users/CreateUserModal';
 import { BulkImportModal } from '@/components/features/admin/users/BulkImportModal';
@@ -34,7 +34,7 @@ export default function AdminUsersPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [bulkImportModalOpen, setBulkImportModalOpen] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams();
@@ -73,11 +73,11 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchUsers();
-  }, [filters]);
+  }, [fetchUsers]);
 
   const handleFilterChange = (newFilters: Partial<UserListFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters, offset: 0 }));

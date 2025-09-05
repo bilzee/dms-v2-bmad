@@ -8,6 +8,8 @@ import {
   RapidResponse,
   generateOfflineId,
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock database - in production, this would be replaced with actual database calls
 const mockResponses: Record<string, RapidResponse> = {};

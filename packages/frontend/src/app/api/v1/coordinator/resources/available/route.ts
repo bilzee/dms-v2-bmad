@@ -4,6 +4,8 @@ import {
   ResourceAvailability,
   ResourceAvailabilityFilters 
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock resource availability data - would be calculated from database
 const mockResourceAvailability: ResourceAvailability[] = [

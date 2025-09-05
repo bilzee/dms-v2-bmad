@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { BulkImportData, BulkImportError } from '@shared/types/admin';
+import { BulkImportData, BulkImportError } from '../../../../../../../shared/types/admin';
 import {
   Dialog,
   DialogContent,
@@ -242,8 +242,8 @@ export function BulkImportModal({ open, onClose, onSuccess }: BulkImportModalPro
           <strong>CSV Format Requirements:</strong>
           <ul className="list-disc list-inside mt-1 text-sm">
             <li>Headers: name, email, phone, organization, roles, isActive</li>
-            <li>Roles should be comma-separated (e.g., "ASSESSOR,RESPONDER")</li>
-            <li>isActive should be "true" or "false"</li>
+            <li>Roles should be comma-separated (e.g., &quot;ASSESSOR,RESPONDER&quot;)</li>
+            <li>isActive should be &quot;true&quot; or &quot;false&quot;</li>
             <li>Email addresses must be unique</li>
           </ul>
         </AlertDescription>

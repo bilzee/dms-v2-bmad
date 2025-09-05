@@ -12,6 +12,8 @@ import {
 import prisma from '@/lib/prisma';
 import { validateApiAccess } from '@/lib/auth/api-auth';
 import { IncidentQueue } from '@/lib/queues/incident.queue';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 const createIncidentSchema = z.object({
   assessmentId: z.string().uuid(),

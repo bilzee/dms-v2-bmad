@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ResubmissionRequest, ResubmissionResponse } from '@dms/shared/types/api-status-review';
 import { RapidResponse, ResubmissionLog, VerificationStatus, ResponseStatus } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock response data storage
 const mockResponseData: Record<string, RapidResponse> = {

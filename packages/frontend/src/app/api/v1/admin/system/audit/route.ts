@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Middleware function to check admin access
 async function requireAdminRole(request: NextRequest) {

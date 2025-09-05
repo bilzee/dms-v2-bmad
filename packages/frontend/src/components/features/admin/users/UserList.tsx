@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AdminUser, UserListFilters } from '@shared/types/admin';
+import { AdminUser, UserListFilters } from '../../../../../../../shared/types/admin';
 import { EditUserModal } from './EditUserModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -375,7 +375,7 @@ export function UserList({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Status Change</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to {statusAction?.action} user "{statusAction?.user.name}"?
+              Are you sure you want to {statusAction?.action} user &quot;{statusAction?.user.name}&quot;?
               {statusAction?.action === 'deactivate' && 
                 ' This will prevent them from accessing the system.'
               }

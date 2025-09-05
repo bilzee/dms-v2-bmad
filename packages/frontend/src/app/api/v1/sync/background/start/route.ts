@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { backgroundSyncManager } from '@/lib/sync/BackgroundSyncManager';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    // Handle case where backgroundSyncManager is null (during build/SSR)
+    if (!backgroundSyncManager) {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        error: 'Background sync service not available during build',
+      }, { status: 503 });
+    }
+
     const body = await req.json();
     const { reason = 'manual_trigger' } = body;
 

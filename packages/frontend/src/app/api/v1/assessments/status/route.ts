@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AssessmentType, IncidentType, IncidentSeverity, VerificationStatus, SyncStatus, type RapidAssessment } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock data for demonstration - replace with actual database queries
 const generateMockAssessments = (userId?: string): RapidAssessment[] => {

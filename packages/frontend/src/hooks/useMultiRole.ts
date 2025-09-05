@@ -55,12 +55,24 @@ export const useMultiRole = (): UseMultiRoleReturn => {
 
   const getRoleContext = useCallback(async (): Promise<RoleContext | null> => {
     try {
-      const response = await fetch('/api/v1/auth/role-context');
+      const response = await fetch('/api/v1/session/role');
       const result = await response.json();
       
       if (result.success) {
-        setRoleContext(result.context);
-        return result.context;
+        const context = {
+          activeRole: result.data.activeRole,
+          availableRoles: result.data.availableRoles,
+          permissions: result.data.activeRole?.permissions || [],
+          sessionData: {
+            preferences: {},
+            workflowState: {},
+            offlineData: false
+          },
+          canSwitchRoles: result.data.canSwitchRoles,
+          lastRoleSwitch: new Date().toISOString()
+        };
+        setRoleContext(context);
+        return context;
       } else {
         setError(result.error || 'Failed to get role context');
         return null;
@@ -87,30 +99,57 @@ export const useMultiRole = (): UseMultiRoleReturn => {
     setError(null);
 
     try {
-      const response = await fetch('/api/v1/auth/switch-role', {
-        method: 'POST',
+      const response = await fetch('/api/v1/session/role', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          targetRoleId: roleId, 
-          targetRoleName: roleName,
-          currentContext 
+          roleId
         }),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        rollbackInfoRef.current = result.rollbackInfo || null;
-        setRoleContext(result.sessionContext);
-        setPerformanceMs(result.performanceMs || Date.now() - startTime);
+        // Store rollback info
+        if (roleContext?.activeRole) {
+          rollbackInfoRef.current = {
+            previousRoleId: roleContext.activeRole.id,
+            timestamp: new Date().toISOString()
+          };
+        }
+
+        // Update context with new role data
+        const newContext = {
+          activeRole: result.data.activeRole,
+          availableRoles: result.data.availableRoles,
+          permissions: result.data.activeRole?.permissions || [],
+          sessionData: {
+            preferences: currentContext?.preferences || {},
+            workflowState: currentContext?.workflowState || {},
+            offlineData: false
+          },
+          canSwitchRoles: result.data.availableRoles.length > 1,
+          lastRoleSwitch: new Date().toISOString()
+        };
         
-        await update();
+        setRoleContext(newContext);
+        setPerformanceMs(Date.now() - startTime);
+        
+        // Update NextAuth session
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            activeRole: result.data.activeRole?.name,
+            role: result.data.activeRole?.name
+          }
+        });
+        
         return true;
       } else {
         setError(result.error || 'Failed to switch role');
-        rollbackInfoRef.current = result.rollbackInfo || null;
         return false;
       }
     } catch (err) {
@@ -119,7 +158,7 @@ export const useMultiRole = (): UseMultiRoleReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [update]);
+  }, [update, roleContext, session]);
 
   const rollbackLastSwitch = useCallback(async (): Promise<boolean> => {
     if (!rollbackInfoRef.current) {

@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, afterAll } from '@jest/globals'
+import '@testing-library/jest-dom'
 
 // Mock next/navigation for tests
 jest.mock('next/navigation', () => ({

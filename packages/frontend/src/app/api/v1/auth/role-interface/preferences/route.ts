@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
 interface PreferencesRequest {
   roleId: string;
   preferences: Record<string, any>;

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 const leaderboardQuerySchema = z.object({
   category: z.enum(['VERIFICATION', 'DELIVERY', 'IMPACT', 'OVERALL']).optional().default('OVERALL'),

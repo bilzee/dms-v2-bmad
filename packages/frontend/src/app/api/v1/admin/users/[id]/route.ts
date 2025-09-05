@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
 import { z } from 'zod';
 import { requireAdminRole, getCurrentUser } from '@/lib/auth-middleware';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 const updateUserSchema = z.object({
   name: z.string().min(2).optional(),

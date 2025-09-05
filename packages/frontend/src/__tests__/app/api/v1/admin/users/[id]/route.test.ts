@@ -20,6 +20,7 @@ describe('/api/v1/admin/users/[id]', () => {
         phone: '+1234567890',
         organization: 'Relief Org',
         isActive: true,
+        activeRole: null,
         roles: [{ id: 'role-1', name: 'ASSESSOR' }],
         createdAt: new Date('2023-01-01'),
         lastSync: null

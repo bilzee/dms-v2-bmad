@@ -7,6 +7,8 @@ import {
   DonorListResponse 
 } from '@dms/shared';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock data for development - would be replaced with actual database calls
 const mockDonors: Donor[] = [

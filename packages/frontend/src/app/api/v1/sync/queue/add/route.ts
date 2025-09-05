@@ -3,6 +3,8 @@ import type { PriorityQueueItem } from '@dms/shared';
 
 // Import AutomaticPriorityAssigner for priority calculation
 import { AutomaticPriorityAssigner } from '@/lib/sync/AutomaticPriorityAssigner';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Function to add job to backend BullMQ queue
 async function addToBullMQQueue(queueItem: PriorityQueueItem) {

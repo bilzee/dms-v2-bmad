@@ -1,9 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { backgroundSyncManager } from '@/lib/sync/BackgroundSyncManager';
 import type { SyncMetrics } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    // Handle case where backgroundSyncManager is null (during build/SSR)
+    if (!backgroundSyncManager) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          metrics: [],
+          pagination: { limit: 10, offset: 0, total: 0 },
+          averagePerformance: {
+            averageDuration: 0,
+            averageItemsPerSession: 0,
+            successRate: 0,
+            averageDataSynced: 0,
+          },
+          currentMetrics: null,
+        },
+        error: null,
+      });
+    }
+
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);

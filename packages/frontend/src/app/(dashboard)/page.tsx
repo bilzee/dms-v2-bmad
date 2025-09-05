@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+
+// Force this page to be dynamic since it depends on user authentication and role data
+export const dynamic = 'force-dynamic';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { QueueSummary } from '@/components/features/sync';

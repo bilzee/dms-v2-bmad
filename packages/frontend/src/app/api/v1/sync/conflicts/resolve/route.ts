@@ -11,6 +11,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { syncEngine } from '@/lib/sync/SyncEngine';
 import { z } from 'zod';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Request validation schema
 const ConflictResolutionRequestSchema = z.object({

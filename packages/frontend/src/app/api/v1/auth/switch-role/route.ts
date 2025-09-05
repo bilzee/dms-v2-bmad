@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import DatabaseService from '@/lib/services/DatabaseService';
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
 interface RoleSwitchRequest {
   targetRoleId: string;
   targetRoleName: 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN';

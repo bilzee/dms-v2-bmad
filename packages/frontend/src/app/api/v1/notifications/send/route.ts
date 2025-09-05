@@ -4,6 +4,8 @@ import prisma from '@/lib/prisma';
 import { NotificationQueue } from '@/lib/queues/notification.queue';
 import { emailService } from '@/lib/services/email.service';
 import { pushNotificationService } from '@/lib/services/push.service';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 const NotificationRequestSchema = z.object({
   type: z.enum(['INCIDENT_CREATED', 'ASSESSMENT_SUBMITTED', 'VERIFICATION_REQUIRED']),

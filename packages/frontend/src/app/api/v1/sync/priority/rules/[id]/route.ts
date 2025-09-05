@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import type { PriorityRule } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Import from parent route file (in real implementation, use shared storage/database)
 // For this demo, we'll use the same mock data structure

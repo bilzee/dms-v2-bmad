@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
 import { requireAdminRole } from '@/lib/auth-middleware';
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
+
+
 
 // GET /api/v1/admin/users/export - Export user data
 export async function GET(request: NextRequest) {

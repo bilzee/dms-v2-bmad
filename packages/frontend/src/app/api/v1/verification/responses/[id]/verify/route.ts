@@ -9,6 +9,8 @@ import {
   VerificationStatus,
   UserRoleType
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 interface ResponseVerificationRequest {
   status: 'VERIFIED' | 'REJECTED';

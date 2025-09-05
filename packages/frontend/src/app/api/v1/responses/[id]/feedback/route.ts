@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FeedbackResponse } from '@dms/shared/types/api-status-review';
 import { Feedback, ResubmissionLog } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock feedback data for development/testing
 const mockFeedbackData: Record<string, { feedback: Feedback[]; resubmissionHistory: ResubmissionLog[] }> = {

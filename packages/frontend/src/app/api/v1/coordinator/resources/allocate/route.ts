@@ -5,6 +5,8 @@ import {
   ResourceAllocationRequest,
   AllocationConflict 
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock allocation tracking - would be replaced with database
 const mockAllocations: ResourceAllocation[] = [

@@ -9,6 +9,8 @@ import {
   generateUUID,
   generateOfflineId,
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // API Request/Response schemas
 const CreateResponsePlanSchema = ResponsePlanFormSchema.extend({

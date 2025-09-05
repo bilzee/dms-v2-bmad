@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { PriorityQueueItem, PriorityRule } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock data (same as other endpoints - in real implementation, use shared database)
 let mockQueue: PriorityQueueItem[] = [

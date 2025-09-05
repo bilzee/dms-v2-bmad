@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { PriorityQueueItem, PriorityQueueStats } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // NOTE: Backend BullMQ imports are handled in server-side environment
 // We'll call the backend service functions when available

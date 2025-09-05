@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiResponse, MediaAttachment, RapidResponse } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 interface ResponsePhotosResponse extends ApiResponse<{
   photos: MediaAttachment[];

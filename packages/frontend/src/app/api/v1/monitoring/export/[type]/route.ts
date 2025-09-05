@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock export functionality - would integrate with actual data sources
 const generateExportData = async (type: string, filters: any = {}, format: string = 'json') => {

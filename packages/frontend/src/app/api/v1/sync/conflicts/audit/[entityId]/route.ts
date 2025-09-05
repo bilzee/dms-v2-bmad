@@ -7,6 +7,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { syncEngine } from '@/lib/sync/SyncEngine';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 interface ConflictAuditResponse {
   success: boolean;

@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { backgroundSyncManager } from '@/lib/sync/BackgroundSyncManager';
 import { connectivityDetector } from '@/lib/sync/ConnectivityDetector';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    // Handle case where backgroundSyncManager is null (during build/SSR)
+    if (!backgroundSyncManager) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          isActive: false,
+          currentProgress: null,
+          connectivity: { isOnline: true, connectionQuality: 'good' as const },
+          queueSize: 0,
+          estimatedCompletionTime: null,
+          lastError: 'Service not available during build',
+        },
+        error: null,
+      });
+    }
+
     const syncStatus = backgroundSyncManager.getStatus();
     const connectivityStatus = connectivityDetector.getStatus();
     const progress = backgroundSyncManager.getProgress();

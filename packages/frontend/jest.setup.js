@@ -1,5 +1,8 @@
 import '@testing-library/jest-dom'
 
+// Mock Next.js router
+jest.mock('next/router', () => require('next-router-mock'))
+
 // Mock Web APIs for Next.js API routes
 global.Request = global.Request || class MockRequest {
   constructor(url, options = {}) {

@@ -7,6 +7,8 @@ import {
   RapidAssessment,
   RapidResponse
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 interface AutoApprovalTestRequest {
   rules: AutoApprovalRule[];

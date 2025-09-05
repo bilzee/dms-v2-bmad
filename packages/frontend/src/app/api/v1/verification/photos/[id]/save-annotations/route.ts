@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 interface SaveAnnotationsRequest {
   notes: string;

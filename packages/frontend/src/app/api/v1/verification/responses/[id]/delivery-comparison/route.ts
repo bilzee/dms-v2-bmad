@@ -8,6 +8,8 @@ import {
   VarianceFlag,
   ResponseType
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 interface DeliveryComparisonResponse extends ApiResponse<{
   responseId: string;

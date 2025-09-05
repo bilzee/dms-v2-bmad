@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { StatusReviewRequest, StatusReviewResponse } from '@dms/shared/types/api-status-review';
 import { RapidResponse, VerificationStatus, ResponseType } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock data for development/testing
 const mockResponses: RapidResponse[] = [

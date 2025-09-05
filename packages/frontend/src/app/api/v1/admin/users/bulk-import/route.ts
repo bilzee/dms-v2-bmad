@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
-import { CreateUserRequest } from '@shared/types/admin';
+import { CreateUserRequest } from '../../../../../../../shared/types/admin';
 import { z } from 'zod';
 import { parse as csvParse } from 'csv-parse/sync';
 import { requireAdminRole, getCurrentUser } from '@/lib/auth-middleware';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Validation schema for CSV row
 const csvUserSchema = z.object({

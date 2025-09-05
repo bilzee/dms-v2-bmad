@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RapidAssessment, AssessmentType, VerificationStatus } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock assessment data for development
 const mockAssessments: Record<string, RapidAssessment> = {

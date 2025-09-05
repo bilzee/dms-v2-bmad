@@ -393,7 +393,7 @@ export function PerformanceTrends({ period, responseType, className }: Performan
             {trends && trends.beneficiariesHelped > 10 && (
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <strong>Growing Impact:</strong> You're helping {trends.beneficiariesHelped.toFixed(1)}% more beneficiaries. Your contributions are making a real difference!
+                  <strong>Growing Impact:</strong> You&apos;re helping {trends.beneficiariesHelped.toFixed(1)}% more beneficiaries. Your contributions are making a real difference!
                 </p>
               </div>
             )}

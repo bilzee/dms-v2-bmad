@@ -5,6 +5,8 @@ import {
   ResponseType,
   CommitmentStatus 
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock commitment data - would be replaced with actual database calls
 const mockCommitments: DonorCommitment[] = [

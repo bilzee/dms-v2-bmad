@@ -3,6 +3,8 @@ import {
   IncidentStatusUpdateRequest,
   IncidentStatus,
 } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Valid status transitions
 const statusTransitions: Record<IncidentStatus, IncidentStatus[]> = {

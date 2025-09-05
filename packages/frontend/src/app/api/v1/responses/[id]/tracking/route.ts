@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RapidResponse, ItemCompletionData, ResponseType, ResponseStatus, VerificationStatus, SyncStatus } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock database function to get response
 async function getResponseById(id: string): Promise<RapidResponse | null> {

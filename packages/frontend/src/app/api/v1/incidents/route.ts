@@ -8,6 +8,8 @@ import {
   IncidentFilters
 } from '@dms/shared';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // GET /api/v1/incidents - List incidents with filtering and pagination
 export async function GET(request: NextRequest) {

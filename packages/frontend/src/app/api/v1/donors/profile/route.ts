@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Donor } from '@dms/shared';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // Mock donor profile data - would be replaced with actual database calls
 const mockDonorProfiles: Donor[] = [

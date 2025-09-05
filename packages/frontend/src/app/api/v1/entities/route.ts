@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AffectedEntitySchema, EntityManagementFormSchema } from '@dms/shared';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 // GET /api/v1/entities - List entities with optional filtering
 export async function GET(request: NextRequest) {

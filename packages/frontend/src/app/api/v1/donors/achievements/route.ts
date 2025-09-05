@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/auth';
 import DatabaseService from '@/lib/services/DatabaseService';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 
 const achievementsQuerySchema = z.object({
   category: z.enum(['DELIVERY', 'CONSISTENCY', 'IMPACT', 'ALL']).optional().default('ALL'),

@@ -2,7 +2,7 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import { useRoleInterface } from '@/hooks/useRoleInterface';
-import { PermissionGuard, WidgetGuard, LoadingGuard, ErrorGuard } from '@/components/shared/PermissionGuard';
+import { PermissionGuard, WidgetGuard, LoadingGuard, ErrorGuard, QuickActionGuard } from '@/components/shared/PermissionGuard';
 import { RoleSpecificDashboard } from '@/components/layouts/RoleBasedNavigation';
 
 interface DashboardLayoutProps {
