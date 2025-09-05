@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "bullmq": "^5.58.0",
+    "csv-parse": "^6.1.0",
     "ioredis": "^5.7.0",
     "recharts": "^2.12.7"
   }

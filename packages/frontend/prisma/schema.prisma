@@ -24,19 +24,25 @@ model Incident {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  activeRoleId  String?
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  activeRole    Role?     @relation("ActiveRole", fields: [activeRoleId], references: [id])
-  roles         Role[]    @relation("RoleToUser")
+  id                   String    @id @default(cuid())
+  name                 String?
+  email                String?   @unique
+  emailVerified        DateTime?
+  image                String?
+  phone                String?
+  organization         String?
+  activeRoleId         String?
+  isActive             Boolean   @default(true)
+  lastSync             DateTime?
+  resetToken           String?
+  resetTokenExpiry     DateTime?
+  requirePasswordReset Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  accounts             Account[]
+  sessions             Session[]
+  activeRole           Role?     @relation("ActiveRole", fields: [activeRoleId], references: [id])
+  roles                Role[]    @relation("RoleToUser")
 
   @@map("users")
 }
@@ -314,4 +320,24 @@ model AchievementRule {
   updatedAt    DateTime @updatedAt
 
   @@map("achievement_rules")
+}
+
+model BulkImport {
+  id                String   @id @default(cuid())
+  fileName          String
+  fileSize          Int
+  totalRows         Int
+  processedRows     Int      @default(0)
+  successfulRows    Int      @default(0)
+  failedRows        Int      @default(0)
+  status            String   @default("PROCESSING") // PROCESSING, COMPLETED, FAILED, CANCELLED
+  errors            Json     @default("[]")        // Array of error messages with row numbers
+  importedBy        String
+  importedByName    String
+  startedAt         DateTime @default(now())
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("bulk_imports")
 }

@@ -915,6 +915,384 @@ export class DatabaseService {
     };
   }
 
+  // Additional User Management Methods for Admin Features
+  static async createUserWithAdmin(userData: {
+    name: string;
+    email: string;
+    phone?: string;
+    organization?: string;
+    roleIds: string[];
+    isActive?: boolean;
+    createdBy: string;
+    createdByName: string;
+  }) {
+    // Get role records
+    const roleRecords = await this.prisma.role.findMany({
+      where: {
+        id: {
+          in: userData.roleIds
+        }
+      }
+    });
+
+    const user = await this.prisma.user.create({
+      data: {
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        organization: userData.organization,
+        isActive: userData.isActive ?? true,
+        roles: {
+          connect: roleRecords.map(role => ({ id: role.id }))
+        },
+        activeRoleId: roleRecords[0]?.id
+      },
+      include: {
+        roles: {
+          include: {
+            permissions: {
+              include: {
+                permission: true
+              }
+            }
+          }
+        },
+        activeRole: true
+      }
+    });
+
+    // Log audit trail
+    await this.logUserAction({
+      userId: userData.createdBy,
+      userName: userData.createdByName,
+      action: 'CREATE_USER',
+      resource: 'USER',
+      resourceId: user.id,
+      details: {
+        newUser: {
+          name: userData.name,
+          email: userData.email,
+          organization: userData.organization,
+          roles: roleRecords.map(r => r.name)
+        }
+      }
+    });
+
+    return user;
+  }
+
+  static async updateUserWithAdmin(
+    userId: string, 
+    updates: {
+      name?: string;
+      phone?: string;
+      organization?: string;
+      roleIds?: string[];
+      isActive?: boolean;
+    },
+    updatedBy: string,
+    updatedByName: string
+  ) {
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { roles: true }
+    });
+
+    if (!currentUser) {
+      throw new Error('User not found');
+    }
+
+    const updateData: any = {};
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.phone !== undefined) updateData.phone = updates.phone;
+    if (updates.organization !== undefined) updateData.organization = updates.organization;
+    if (updates.isActive !== undefined) updateData.isActive = updates.isActive;
+
+    // Handle role updates
+    if (updates.roleIds) {
+      const roleRecords = await this.prisma.role.findMany({
+        where: { id: { in: updates.roleIds } }
+      });
+
+      updateData.roles = {
+        set: roleRecords.map(role => ({ id: role.id }))
+      };
+      
+      if (roleRecords.length > 0) {
+        updateData.activeRoleId = roleRecords[0].id;
+      }
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      include: {
+        roles: {
+          include: {
+            permissions: {
+              include: {
+                permission: true
+              }
+            }
+          }
+        },
+        activeRole: true
+      }
+    });
+
+    // Log audit trail
+    await this.logUserAction({
+      userId: updatedBy,
+      userName: updatedByName,
+      action: 'UPDATE_USER',
+      resource: 'USER',
+      resourceId: userId,
+      details: {
+        updates,
+        oldValues: {
+          name: currentUser.name,
+          phone: currentUser.phone,
+          organization: currentUser.organization,
+          isActive: currentUser.isActive,
+          roles: currentUser.roles.map(r => r.name)
+        }
+      }
+    });
+
+    return updatedUser;
+  }
+
+  static async toggleUserStatus(
+    userIds: string[],
+    isActive: boolean,
+    updatedBy: string,
+    updatedByName: string,
+    reason?: string
+  ) {
+    const updatedUsers = await this.prisma.user.updateMany({
+      where: { id: { in: userIds } },
+      data: { isActive }
+    });
+
+    // Log audit trail for batch operation
+    await this.logUserAction({
+      userId: updatedBy,
+      userName: updatedByName,
+      action: isActive ? 'ACTIVATE_USERS' : 'DEACTIVATE_USERS',
+      resource: 'USER',
+      details: {
+        userIds,
+        isActive,
+        reason,
+        affectedCount: updatedUsers.count
+      }
+    });
+
+    return updatedUsers;
+  }
+
+  static async getAllRoles() {
+    return await this.prisma.role.findMany({
+      include: {
+        permissions: {
+          include: {
+            permission: true
+          }
+        },
+        _count: {
+          select: {
+            users: true
+          }
+        }
+      },
+      orderBy: { name: 'asc' }
+    });
+  }
+
+  static async getUserStats() {
+    const [
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      recentUsers,
+      adminUsers,
+      coordinatorUsers
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { isActive: true } }),
+      this.prisma.user.count({ where: { isActive: false } }),
+      this.prisma.user.count({
+        where: {
+          createdAt: {
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
+          }
+        }
+      }),
+      this.prisma.user.count({
+        where: {
+          roles: {
+            some: { name: 'ADMIN' }
+          }
+        }
+      }),
+      this.prisma.user.count({
+        where: {
+          roles: {
+            some: { name: 'COORDINATOR' }
+          }
+        }
+      })
+    ]);
+
+    return {
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      recentUsers,
+      adminUsers,
+      coordinatorUsers
+    };
+  }
+
+  // Enhanced audit logging
+  static async logUserAction(action: {
+    userId: string;
+    userName?: string;
+    action: string;
+    resource: string;
+    resourceId?: string;
+    details?: any;
+    ipAddress?: string;
+    userAgent?: string;
+    sessionId?: string;
+  }) {
+    return await this.prisma.auditLog.create({
+      data: {
+        userId: action.userId,
+        userName: action.userName,
+        action: action.action,
+        resource: action.resource,
+        resourceId: action.resourceId,
+        details: action.details || {},
+        ipAddress: action.ipAddress,
+        userAgent: action.userAgent,
+        sessionId: action.sessionId,
+        timestamp: new Date()
+      }
+    });
+  }
+
+  static async getAuditLogs(filters: AuditFilters = {}) {
+    const where: any = {};
+
+    if (filters.userId) where.userId = filters.userId;
+    if (filters.action) where.action = { contains: filters.action, mode: 'insensitive' };
+    if (filters.resource) where.resource = filters.resource;
+    if (filters.startDate && filters.endDate) {
+      where.timestamp = {
+        gte: filters.startDate,
+        lte: filters.endDate
+      };
+    }
+
+    const logs = await this.prisma.auditLog.findMany({
+      where,
+      take: filters.limit || 100,
+      skip: filters.offset || 0,
+      orderBy: { timestamp: 'desc' }
+    });
+
+    const total = await this.prisma.auditLog.count({ where });
+
+    return {
+      logs,
+      total,
+      pagination: {
+        limit: filters.limit || 100,
+        offset: filters.offset || 0,
+        totalPages: Math.ceil(total / (filters.limit || 100))
+      }
+    };
+  }
+
+  // Bulk import tracking methods
+  static async createBulkImport(data: {
+    fileName: string;
+    fileSize: number;
+    totalRows: number;
+    importedBy: string;
+    importedByName: string;
+  }) {
+    return await this.prisma.bulkImport.create({
+      data: {
+        fileName: data.fileName,
+        fileSize: data.fileSize,
+        totalRows: data.totalRows,
+        importedBy: data.importedBy,
+        importedByName: data.importedByName,
+        status: 'PROCESSING'
+      }
+    });
+  }
+
+  static async updateBulkImportProgress(
+    importId: string,
+    updates: {
+      processedRows?: number;
+      successfulRows?: number;
+      failedRows?: number;
+      errors?: any[];
+      status?: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+    }
+  ) {
+    const updateData: any = { ...updates };
+    if (updates.status === 'COMPLETED' || updates.status === 'FAILED') {
+      updateData.completedAt = new Date();
+    }
+
+    return await this.prisma.bulkImport.update({
+      where: { id: importId },
+      data: updateData
+    });
+  }
+
+  static async getBulkImport(importId: string) {
+    return await this.prisma.bulkImport.findUnique({
+      where: { id: importId }
+    });
+  }
+
+  static async getBulkImports(filters: {
+    importedBy?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  } = {}) {
+    const where: any = {};
+
+    if (filters.importedBy) where.importedBy = filters.importedBy;
+    if (filters.status) where.status = filters.status;
+
+    const imports = await this.prisma.bulkImport.findMany({
+      where,
+      take: filters.limit || 50,
+      skip: filters.offset || 0,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const total = await this.prisma.bulkImport.count({ where });
+
+    return {
+      imports,
+      total,
+      pagination: {
+        limit: filters.limit || 50,
+        offset: filters.offset || 0,
+        totalPages: Math.ceil(total / (filters.limit || 50))
+      }
+    };
+  }
+
   static async disconnect() {
     await this.prisma.$disconnect();
   }
