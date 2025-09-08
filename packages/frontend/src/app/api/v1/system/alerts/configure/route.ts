@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
     if (!body.type || !body.severity || body.threshold === undefined || !body.title) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
+      data: null,
+        errors: ['Missing required fields'],
         message: 'type, severity, threshold, and title are required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -87,7 +88,8 @@ export async function POST(request: NextRequest) {
     if (!validTypes.includes(body.type)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid alert type',
+      data: null,
+        errors: ['Invalid alert type'],
         message: `Alert type must be one of: ${validTypes.join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -98,7 +100,8 @@ export async function POST(request: NextRequest) {
     if (!validSeverities.includes(body.severity)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid severity level',
+      data: null,
+        errors: ['Invalid severity level'],
         message: `Severity must be one of: ${validSeverities.join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -109,7 +112,8 @@ export async function POST(request: NextRequest) {
     if (body.notificationChannels && !Array.isArray(body.notificationChannels)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid notification channels',
+      data: null,
+        errors: ['Invalid notification channels'],
         message: 'notificationChannels must be an array',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -120,7 +124,8 @@ export async function POST(request: NextRequest) {
         if (!validChannels.includes(channel)) {
           return NextResponse.json({
             success: false,
-            error: 'Invalid notification channel',
+      data: null,
+            errors: ['Invalid notification channel'],
             message: `Notification channels must be one of: ${validChannels.join(', ')}`,
             timestamp: new Date().toISOString(),
           }, { status: 400 });
@@ -160,7 +165,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -168,7 +174,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to create alert configuration',
+      data: null,
+      errors: ['Failed to create alert configuration'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -232,7 +239,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch alert configurations',
+      data: null,
+      errors: ['Failed to fetch alert configurations'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

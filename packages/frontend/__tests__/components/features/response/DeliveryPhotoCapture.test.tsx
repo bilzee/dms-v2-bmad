@@ -36,19 +36,18 @@ const defaultProps = {
 
 const mockMediaAttachment: MediaAttachment = {
   id: 'photo-123',
-  filename: 'delivery-photo.jpg',
+  localPath: 'delivery-photo.jpg',
   mimeType: 'image/jpeg',
   size: 1024000,
   url: 'data:image/jpeg;base64,mockbase64',
-  uploadedAt: new Date('2024-01-15T10:30:00Z'),
   metadata: {
+    timestamp: new Date('2024-01-15T10:30:00Z'),
     gpsCoordinates: {
       latitude: 9.0765,
       longitude: 7.3986,
       timestamp: new Date('2024-01-15T10:30:00Z'),
       captureMethod: 'GPS' as const,
     },
-    timestamp: new Date('2024-01-15T10:30:00Z'),
   },
 };
 

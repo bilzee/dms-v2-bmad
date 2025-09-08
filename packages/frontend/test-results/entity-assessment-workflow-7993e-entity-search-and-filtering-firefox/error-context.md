@@ -1,0 +1,52 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e9]
+          - generic [ref=e16]:
+            - heading "DMS" [level=2] [ref=e17]
+            - paragraph [ref=e18]: Field Operations
+        - button [ref=e19] [cursor=pointer]:
+          - img [ref=e20] [cursor=pointer]
+      - link "Help & Support" [ref=e24] [cursor=pointer]:
+        - /url: /help
+        - generic [ref=e25] [cursor=pointer]:
+          - img [ref=e26] [cursor=pointer]
+          - generic [ref=e30] [cursor=pointer]: Help & Support
+    - generic [ref=e31]:
+      - banner [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e35]:
+            - heading "Disaster Management" [level=1] [ref=e36]
+            - paragraph [ref=e37]: Field Operations Dashboard
+          - generic [ref=e38]:
+            - generic [ref=e39]:
+              - img [ref=e41]
+              - generic [ref=e46]: Online
+            - generic [ref=e47]: 0 queued
+            - button [ref=e48] [cursor=pointer]:
+              - img [ref=e49] [cursor=pointer]
+            - button "User" [ref=e53] [cursor=pointer]:
+              - img [ref=e54] [cursor=pointer]
+              - generic [ref=e57] [cursor=pointer]: User
+      - main [ref=e58]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - heading "Sign in to DMS v2" [level=2] [ref=e64]
+            - paragraph [ref=e65]: Disaster Management System
+          - generic [ref=e66]:
+            - button "Sign in with GitHub" [ref=e68] [cursor=pointer]
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - textbox "Email address" [ref=e72]
+                - textbox "Password" [ref=e74]
+              - button "Sign in with Credentials" [ref=e75] [cursor=pointer]
+              - paragraph [ref=e76]: "Test credentials: admin@test.com / admin123"
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e77]
+```

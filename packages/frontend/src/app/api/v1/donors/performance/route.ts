@@ -139,6 +139,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
+      data: null,
           message: 'Invalid query parameters',
           errors: error.errors,
         },
@@ -149,6 +150,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
+      data: null,
         message: 'Failed to fetch performance metrics',
       },
       { status: 500 }

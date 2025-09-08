@@ -34,6 +34,7 @@ export async function GET(
     if (!conflictId) {
       return NextResponse.json({
         success: false,
+      data: null,
         error: 'Conflict ID is required'
       }, { status: 400 });
     }
@@ -44,6 +45,7 @@ export async function GET(
     if (!conflict) {
       return NextResponse.json({
         success: false,
+      data: null,
         error: 'Conflict not found'
       }, { status: 404 });
     }
@@ -102,6 +104,7 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
+      data: null,
       error: 'Internal server error'
     }, { status: 500 });
   }

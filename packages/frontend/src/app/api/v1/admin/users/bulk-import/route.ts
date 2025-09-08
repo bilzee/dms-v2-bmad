@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
-import { CreateUserRequest } from '../../../../../../../shared/types/admin';
+import { CreateUserRequest } from '@dms/shared/types/admin';
 import { z } from 'zod';
 import { parse as csvParse } from 'csv-parse/sync';
 import { requireAdminRole, getCurrentUser } from '@/lib/auth-middleware';
@@ -55,7 +55,7 @@ async function validateAndProcessUsers(records: any[], roleMap: Map<string, stri
           errors.push({
             row: rowNumber,
             field: error.path.join('.'),
-            value: record[error.path[0]] || '',
+            value: record[error.path[0] || ''],
             error: error.message
           });
         }
@@ -149,7 +149,8 @@ export async function POST(request: NextRequest) {
     if (!file || file.type !== 'text/csv') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid file',
+      data: null,
+        errors: ['Invalid file'],
         message: 'Please provide a valid CSV file',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -161,7 +162,8 @@ export async function POST(request: NextRequest) {
     if (records.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'Empty file',
+      data: null,
+        errors: ['Empty file'],
         message: 'CSV file contains no data rows',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -220,7 +222,8 @@ export async function POST(request: NextRequest) {
     if (errors.length > 0) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: `Found ${errors.length} validation errors`,
         data: {
           errors: errors.slice(0, 50) // Limit error response size
@@ -309,7 +312,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Bulk import failed',
+      data: null,
+      errors: ['Bulk import failed'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

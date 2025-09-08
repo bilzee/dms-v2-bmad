@@ -26,7 +26,8 @@ export async function PUT(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -36,7 +37,8 @@ export async function PUT(
     if (!body.newStatus) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required field',
+      data: null,
+        errors: ['Missing required field'],
         message: 'newStatus is required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -46,7 +48,8 @@ export async function PUT(
     if (!Object.values(IncidentStatus).includes(body.newStatus)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid status',
+      data: null,
+        errors: ['Invalid status'],
         message: `Status must be one of: ${Object.values(IncidentStatus).join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -66,7 +69,8 @@ export async function PUT(
     if (!validTransitions.includes(body.newStatus)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid status transition',
+      data: null,
+        errors: ['Invalid status transition'],
         message: `Cannot transition from ${currentStatus} to ${body.newStatus}. Valid transitions: ${validTransitions.join(', ') || 'none'}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -141,7 +145,8 @@ export async function PUT(
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -149,7 +154,8 @@ export async function PUT(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to update incident status',
+      data: null,
+      errors: ['Failed to update incident status'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -168,7 +174,8 @@ export async function GET(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -219,7 +226,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to get status history',
+      data: null,
+      errors: ['Failed to get status history'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

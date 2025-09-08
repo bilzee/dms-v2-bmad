@@ -26,7 +26,8 @@ export async function GET(
     if (!userId || typeof userId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid user ID',
+      data: null,
+        errors: ['Invalid user ID'],
         message: 'User ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -38,7 +39,8 @@ export async function GET(
     if (!user) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: `No user found with ID: ${userId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -74,7 +76,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch user details',
+      data: null,
+      errors: ['Failed to fetch user details'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -98,7 +101,8 @@ export async function PATCH(
     if (!userId || typeof userId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid user ID',
+      data: null,
+        errors: ['Invalid user ID'],
         message: 'User ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -109,7 +113,8 @@ export async function PATCH(
     if (!existingUser) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: `No user found with ID: ${userId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -121,7 +126,8 @@ export async function PATCH(
       if (!emailRegex.test(updates.email)) {
         return NextResponse.json({
           success: false,
-          error: 'Invalid email format',
+      data: null,
+          errors: ['Invalid email format'],
           message: 'Please provide a valid email address',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -171,7 +177,8 @@ export async function PATCH(
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -181,7 +188,8 @@ export async function PATCH(
     if (error instanceof Error && error.message.includes('Unique constraint')) {
       return NextResponse.json({
         success: false,
-        error: 'Email already exists',
+      data: null,
+        errors: ['Email already exists'],
         message: 'A user with this email address already exists',
         timestamp: new Date().toISOString(),
       }, { status: 409 });
@@ -189,7 +197,8 @@ export async function PATCH(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to update user',
+      data: null,
+      errors: ['Failed to update user'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -212,7 +221,8 @@ export async function DELETE(
     if (!userId || typeof userId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid user ID',
+      data: null,
+        errors: ['Invalid user ID'],
         message: 'User ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -223,7 +233,8 @@ export async function DELETE(
     if (!existingUser) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: `No user found with ID: ${userId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -256,7 +267,8 @@ export async function DELETE(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to delete user',
+      data: null,
+      errors: ['Failed to delete user'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

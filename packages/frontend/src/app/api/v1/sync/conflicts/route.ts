@@ -51,6 +51,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ConflictQu
     if (page < 1 || pageSize < 1 || pageSize > 100) {
       return NextResponse.json({
         success: false,
+      data: null,
         data: {
           conflicts: [],
           pagination: { page: 1, pageSize: 20, total: 0, totalPages: 0 },
@@ -135,6 +136,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ConflictQu
     
     return NextResponse.json({
       success: false,
+      data: null,
       data: {
         conflicts: [],
         pagination: { page: 1, pageSize: 20, total: 0, totalPages: 0 },

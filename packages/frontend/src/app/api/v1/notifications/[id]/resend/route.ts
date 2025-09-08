@@ -28,7 +28,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (!notification) {
       return NextResponse.json({
         success: false,
-        error: 'Notification not found',
+      data: null,
+        errors: ['Notification not found'],
         message: 'Notification with the specified ID does not exist',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -38,7 +39,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (notification.status !== 'FAILED') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid notification status',
+      data: null,
+        errors: ['Invalid notification status'],
         message: 'Only failed notifications can be resent',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -105,7 +107,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
       return NextResponse.json({
         success: false,
-        error: 'Failed to resend notification',
+      data: null,
+        errors: ['Failed to resend notification'],
         message: resendError instanceof Error ? resendError.message : 'Unknown error occurred',
         timestamp: new Date().toISOString(),
       }, { status: 500 });
@@ -116,7 +119,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to resend notification',
+      data: null,
+      errors: ['Failed to resend notification'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

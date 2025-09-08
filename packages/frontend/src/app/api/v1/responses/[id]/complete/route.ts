@@ -31,7 +31,7 @@ export async function PATCH(
     const validationResult = CompletionRequestSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid completion data', details: validationResult.error.errors },
+        { errors: ['Invalid completion data'], details: validationResult.error.errors },
         { status: 400 }
       );
     }
@@ -42,7 +42,7 @@ export async function PATCH(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -50,14 +50,14 @@ export async function PATCH(
     // Validate that response can be completed
     if (existingResponse.status === ResponseStatus.DELIVERED) {
       return NextResponse.json(
-        { error: 'Response is already completed' },
+        { errors: ['Response is already completed'] },
         { status: 400 }
       );
     }
 
     if (existingResponse.status === ResponseStatus.CANCELLED) {
       return NextResponse.json(
-        { error: 'Cannot complete a cancelled response' },
+        { errors: ['Cannot complete a cancelled response'] },
         { status: 400 }
       );
     }
@@ -95,7 +95,7 @@ export async function PATCH(
   } catch (error) {
     console.error('Response completion error:', error);
     return NextResponse.json(
-      { error: 'Failed to complete response' },
+      { errors: ['Failed to complete response'] },
       { status: 500 }
     );
   }
@@ -113,7 +113,7 @@ export async function GET(
     const response = mockResponses[responseId];
     if (!response) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -138,7 +138,7 @@ export async function GET(
   } catch (error) {
     console.error('Get completion status error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }

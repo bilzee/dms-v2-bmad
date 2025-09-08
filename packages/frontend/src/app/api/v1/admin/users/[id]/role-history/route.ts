@@ -27,7 +27,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
     if (limit > 100) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid parameters',
+      data: null,
+        errors: ['Invalid parameters'],
         message: 'Limit cannot exceed 100',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -46,7 +47,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
     if (!user) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: 'User with the specified ID does not exist',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -97,7 +99,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch role history',
+      data: null,
+      errors: ['Failed to fetch role history'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

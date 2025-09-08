@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { PreliminaryAssessmentForm } from '../PreliminaryAssessmentForm';
 import { IncidentType, IncidentSeverity } from '@dms/shared';
 import { useOfflineStore } from '@/stores/offline.store';
@@ -85,17 +86,20 @@ describe('PreliminaryAssessmentForm', () => {
     // Change to HIGH priority
     fireEvent.change(prioritySelect, { target: { value: 'HIGH' } });
     expect(screen.getByText('🚨 HIGH PRIORITY')).toBeInTheDocument();
-    expect(screen.getByText('🚨 HIGH PRIORITY')).toHaveClass('bg-red-100', 'text-red-800');
+    expect(screen.getByText('🚨 HIGH PRIORITY')).toHaveClass('bg-red-100');
+    expect(screen.getByText('🚨 HIGH PRIORITY')).toHaveClass('text-red-800');
 
     // Change to NORMAL priority
     fireEvent.change(prioritySelect, { target: { value: 'NORMAL' } });
     expect(screen.getByText('📋 NORMAL PRIORITY')).toBeInTheDocument();
-    expect(screen.getByText('📋 NORMAL PRIORITY')).toHaveClass('bg-blue-100', 'text-blue-800');
+    expect(screen.getByText('📋 NORMAL PRIORITY')).toHaveClass('bg-blue-100');
+    expect(screen.getByText('📋 NORMAL PRIORITY')).toHaveClass('text-blue-800');
 
     // Change to LOW priority
     fireEvent.change(prioritySelect, { target: { value: 'LOW' } });
     expect(screen.getByText('🕐 LOW PRIORITY')).toBeInTheDocument();
-    expect(screen.getByText('🕐 LOW PRIORITY')).toHaveClass('bg-gray-100', 'text-gray-800');
+    expect(screen.getByText('🕐 LOW PRIORITY')).toHaveClass('bg-gray-100');
+    expect(screen.getByText('🕐 LOW PRIORITY')).toHaveClass('text-gray-800');
   });
 
   it('validates required fields', async () => {

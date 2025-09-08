@@ -1,38 +1,40 @@
 // lib/__tests__/performance-monitor.test.ts
 
-import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { performanceMonitor } from '../performance-monitor';
-import { mockDeep } from 'vitest-mock-extended';
+// Jest mock implementation
 
-// Mock Prisma
-const mockPrisma = mockDeep<any>();
-vi.mock('../prisma', () => ({
+// Mock Prisma with centralized mock system
+import { createMockPrisma } from '../../__tests__/utils/mockPrisma';
+
+const mockPrisma = createMockPrisma();
+jest.mock('../prisma', () => ({
   default: mockPrisma,
 }));
 
 // Mock queue monitor
 const mockQueueMonitor = {
-  getQueueMetrics: vi.fn(),
+  getQueueMetrics: jest.fn(),
 };
-vi.mock('../queue-monitor', () => ({
+jest.mock('../queue-monitor', () => ({
   queueMonitor: mockQueueMonitor,
 }));
 
 // Mock console to suppress output during tests
 const consoleMock = {
-  error: vi.fn(),
-  log: vi.fn(),
-  warn: vi.fn(),
+  error: jest.fn(),
+  log: jest.fn(),
+  warn: jest.fn(),
 };
-vi.stubGlobal('console', consoleMock);
+// Mock console globally
+global.console = consoleMock as any;
 
 describe('SystemPerformanceMonitor', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
+    mockPrisma.$reset();
     
-    // Setup default mock responses
-    mockPrisma.userActivity.findMany.mockResolvedValue([]);
-    mockPrisma.systemMetrics.findMany.mockResolvedValue([]);
+    // Setup default mock responses - no need to mock since createMockPrisma provides working implementations
     
     mockQueueMonitor.getQueueMetrics.mockResolvedValue({
       activeJobs: 3,

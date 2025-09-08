@@ -47,6 +47,7 @@ export async function GET(
     if (!responseId) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Response ID is required',
         data: null,
         errors: ['Response ID parameter is missing'],
@@ -87,6 +88,7 @@ export async function GET(
     if (!mockResponse || !mockAssessment) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Response or related assessment not found',
         data: null,
         errors: ['Response or assessment data is missing'],
@@ -224,6 +226,7 @@ export async function GET(
     
     const errorResponse: DeliveryComparisonResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred while retrieving delivery comparison',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -236,21 +239,21 @@ export async function GET(
 // Handle unsupported methods
 export async function POST() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve delivery comparison.' },
+    { errors: ['Method not allowed. Use GET to retrieve delivery comparison.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve delivery comparison.' },
+    { errors: ['Method not allowed. Use GET to retrieve delivery comparison.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve delivery comparison.' },
+    { errors: ['Method not allowed. Use GET to retrieve delivery comparison.'] },
     { status: 405 }
   );
 }

@@ -5,7 +5,8 @@ import { auth } from '@/auth';
 
 // Mock auth
 jest.mock('@/auth');
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+import type { Session } from 'next-auth';
+const mockAuth = auth as jest.MockedFunction<any>;
 
 // Mock Prisma Client
 jest.mock('@prisma/client', () => ({

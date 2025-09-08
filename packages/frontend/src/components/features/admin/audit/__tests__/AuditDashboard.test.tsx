@@ -1,18 +1,19 @@
 // components/features/admin/audit/__tests__/AuditDashboard.test.tsx
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { AuditDashboard } from '../AuditDashboard';
 import * as useToastModule from '@/components/ui/use-toast';
 
 // Mock the toast hook
-const mockToast = vi.fn();
-vi.mock('@/components/ui/use-toast', () => ({
+const mockToast = jest.fn();
+jest.mock('@/components/ui/use-toast', () => ({
   useToast: () => ({ toast: mockToast }),
 }));
 
 // Mock child components to focus on testing the dashboard logic
-vi.mock('../UserActivityTable', () => ({
+jest.mock('../UserActivityTable', () => ({
   UserActivityTable: ({ activities, showPagination, maxHeight }: any) => (
     <div data-testid="user-activity-table">
       <div>Activities: {activities?.length || 0}</div>
@@ -22,7 +23,7 @@ vi.mock('../UserActivityTable', () => ({
   ),
 }));
 
-vi.mock('../SecurityEventsPanel', () => ({
+jest.mock('../SecurityEventsPanel', () => ({
   SecurityEventsPanel: ({ events, showFilters, showPagination }: any) => (
     <div data-testid="security-events-panel">
       <div>Events: {events?.length || 0}</div>
@@ -32,7 +33,7 @@ vi.mock('../SecurityEventsPanel', () => ({
   ),
 }));
 
-vi.mock('../SystemMetricsDisplay', () => ({
+jest.mock('../SystemMetricsDisplay', () => ({
   SystemMetricsDisplay: ({ metrics, alerts, showDetailedView }: any) => (
     <div data-testid="system-metrics-display">
       <div>Metrics: {metrics ? 'loaded' : 'none'}</div>
@@ -42,14 +43,14 @@ vi.mock('../SystemMetricsDisplay', () => ({
   ),
 }));
 
-vi.mock('../AuditExportControls', () => ({
+jest.mock('../AuditExportControls', () => ({
   AuditExportControls: () => (
     <div data-testid="audit-export-controls">Export Controls</div>
   ),
 }));
 
 // Mock fetch globally
-const mockFetch = vi.fn();
+const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 // Mock data
@@ -124,7 +125,7 @@ const mockPerformanceResponse = {
 
 describe('AuditDashboard', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     
     // Setup default fetch responses
     mockFetch.mockImplementation((url: string) => {
@@ -147,12 +148,12 @@ describe('AuditDashboard', () => {
     });
 
     // Mock current time
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2024-01-01T10:00:00Z'));
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-01T10:00:00Z'));
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
   describe('Component Rendering', () => {
@@ -350,10 +351,10 @@ describe('AuditDashboard', () => {
         expect(mockFetch).toHaveBeenCalledTimes(3);
       });
 
-      vi.clearAllMocks();
+      jest.clearAllMocks();
 
       // Fast-forward 30 seconds
-      vi.advanceTimersByTime(30000);
+      jest.advanceTimersByTime(30000);
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledTimes(3);
@@ -369,8 +370,8 @@ describe('AuditDashboard', () => {
 
       unmount();
 
-      vi.clearAllMocks();
-      vi.advanceTimersByTime(30000);
+      jest.clearAllMocks();
+      jest.advanceTimersByTime(30000);
 
       // Should not refresh after unmount
       expect(mockFetch).not.toHaveBeenCalled();
@@ -386,7 +387,7 @@ describe('AuditDashboard', () => {
         expect(mockFetch).toHaveBeenCalledTimes(3);
       });
 
-      vi.clearAllMocks();
+      jest.clearAllMocks();
 
       // Click refresh button
       const refreshButton = screen.getByRole('button', { name: /Refresh/ });

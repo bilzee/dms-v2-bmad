@@ -32,7 +32,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<{ success:
     
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<{ success:
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, errors: ['User not found'] },
         { status: 404 }
       );
     }
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<{ success:
   } catch (error) {
     console.error('Error getting role context:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, errors: ['Internal server error'] },
       { status: 500 }
     );
   }

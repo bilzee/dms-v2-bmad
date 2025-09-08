@@ -182,7 +182,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch active alerts',
+      data: null,
+      errors: ['Failed to fetch active alerts'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -197,7 +198,8 @@ export async function POST(request: NextRequest) {
     if (!body.alertId) {
       return NextResponse.json({
         success: false,
-        error: 'Missing alert ID',
+      data: null,
+        errors: ['Missing alert ID'],
         message: 'alertId is required for acknowledgment',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -225,7 +227,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -233,7 +236,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to acknowledge alert',
+      data: null,
+      errors: ['Failed to acknowledge alert'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

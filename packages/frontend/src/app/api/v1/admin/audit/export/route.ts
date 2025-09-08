@@ -24,7 +24,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token) {
       return NextResponse.json({
         success: false,
-        error: 'Authentication required',
+      data: null,
+        errors: ['Authentication required'],
         message: 'You must be logged in to access this resource'
       }, { status: 401 });
     }
@@ -33,7 +34,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
       return NextResponse.json({
         success: false,
-        error: 'Access denied',
+      data: null,
+        errors: ['Access denied'],
         message: 'Admin role required to export audit data'
       }, { status: 403 });
     }
@@ -43,7 +45,8 @@ async function requireAdminRole(request: NextRequest) {
     console.error('Admin role check failed:', error);
     return NextResponse.json({
       success: false,
-      error: 'Authentication error',
+      data: null,
+      errors: ['Authentication error'],
       message: 'Failed to verify user permissions'
     }, { status: 500 });
   }
@@ -53,7 +56,7 @@ async function requireAdminRole(request: NextRequest) {
  * POST /api/v1/admin/audit/export
  * Create a new audit data export
  */
-export async function POST(request: NextRequest): Promise<NextResponse<AuditDataExportResponse>> {
+export async function POST(request: NextRequest): Promise<NextResponse<any>> {
   try {
     // Check admin access
     const authError = await requireAdminRole(request);
@@ -76,9 +79,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<AuditData
     if (validationError) {
       const response: AuditDataExportResponse = {
         success: false,
-        error: 'Invalid export request',
-        message: validationError,
-        timestamp: new Date().toISOString()
+      data: null,
+        errors: ['Invalid export request'],
+        message: validationError
       };
       return NextResponse.json(response, { status: 400 });
     }
@@ -93,8 +96,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AuditData
     const response: AuditDataExportResponse = {
       success: true,
       data: result,
-      message: 'Export request created successfully. Processing will begin shortly.',
-      timestamp: new Date().toISOString()
+      message: 'Export request created successfully. Processing will begin shortly.'
     };
 
     return NextResponse.json(response);
@@ -104,9 +106,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<AuditData
     
     const response: AuditDataExportResponse = {
       success: false,
-      error: 'Failed to create export',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString()
+      data: null,
+      errors: ['Failed to create export'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     };
 
     return NextResponse.json(response, { status: 500 });
@@ -117,7 +119,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AuditData
  * GET /api/v1/admin/audit/export?exportId={id}
  * Get export status
  */
-export async function GET(request: NextRequest): Promise<NextResponse<AuditDataExportResponse>> {
+export async function GET(request: NextRequest): Promise<NextResponse<any>> {
   try {
     // Check admin access
     const authError = await requireAdminRole(request);
@@ -129,9 +131,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<AuditDataE
     if (!exportId) {
       const response: AuditDataExportResponse = {
         success: false,
-        error: 'Missing export ID',
-        message: 'Export ID parameter is required',
-        timestamp: new Date().toISOString()
+      data: null,
+        errors: ['Missing export ID'],
+        message: 'Export ID parameter is required'
       };
       return NextResponse.json(response, { status: 400 });
     }
@@ -142,9 +144,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<AuditDataE
     if (!exportData) {
       const response: AuditDataExportResponse = {
         success: false,
-        error: 'Export not found',
-        message: 'The specified export ID does not exist',
-        timestamp: new Date().toISOString()
+      data: null,
+        errors: ['Export not found'],
+        message: 'The specified export ID does not exist'
       };
       return NextResponse.json(response, { status: 404 });
     }
@@ -152,8 +154,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<AuditDataE
     const response: AuditDataExportResponse = {
       success: true,
       data: exportData,
-      message: 'Export status retrieved successfully',
-      timestamp: new Date().toISOString()
+      message: 'Export status retrieved successfully'
     };
 
     return NextResponse.json(response);
@@ -163,9 +164,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<AuditDataE
     
     const response: AuditDataExportResponse = {
       success: false,
-      error: 'Failed to get export status',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString()
+      data: null,
+      errors: ['Failed to get export status'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     };
 
     return NextResponse.json(response, { status: 500 });

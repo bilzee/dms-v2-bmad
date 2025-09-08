@@ -76,7 +76,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
     return NextResponse.json<AutoApprovalRulesResponse>(
       {
         success: false,
-        error: 'Failed to fetch auto-approval configuration',
+      data: null,
+        errors: ['Failed to fetch auto-approval configuration'],
         meta: {
           timestamp: new Date().toISOString(),
           version: '1.0.0',
@@ -97,7 +98,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalRulesResponse>(
         {
           success: false,
-          error: 'Invalid request body: rules array is required',
+      data: null,
+          errors: ['Invalid request body: rules array is required'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -126,7 +128,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalRulesResponse>(
         {
           success: false,
-          error: 'Validation failed',
+      data: null,
+          errors: ['Validation failed'],
           data: {
             rulesCreated: 0,
             rulesUpdated: 0,
@@ -174,7 +177,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
     return NextResponse.json<AutoApprovalRulesResponse>(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Internal server error'],
         meta: {
           timestamp: new Date().toISOString(),
           version: '1.0.0',

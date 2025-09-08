@@ -192,7 +192,7 @@ export async function GET(
     const response = await getResponseById(responseId);
     if (!response) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -200,7 +200,7 @@ export async function GET(
     // Check if response has tracking data
     if (!response.partialDeliveryData || !response.partialDeliveryData.itemCompletionTracking) {
       return NextResponse.json(
-        { error: 'No tracking data found for this response' },
+        { errors: ['No tracking data found for this response'] },
         { status: 404 }
       );
     }
@@ -270,7 +270,7 @@ export async function GET(
     console.error('Get tracking data error:', error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }

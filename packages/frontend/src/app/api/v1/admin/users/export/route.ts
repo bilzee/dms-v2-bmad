@@ -96,9 +96,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: false,
-      error: 'Invalid format',
-      message: 'Supported formats: csv, json',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Invalid format'],
+      message: 'Supported formats: csv, json'
     }, { status: 400 });
 
   } catch (error) {
@@ -106,9 +106,9 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to export users',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Failed to export users'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }

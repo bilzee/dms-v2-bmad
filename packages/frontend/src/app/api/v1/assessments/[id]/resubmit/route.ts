@@ -23,7 +23,7 @@ export async function PUT(
 
     if (!assessmentId) {
       return NextResponse.json(
-        { error: 'Assessment ID is required' },
+        { errors: ['Assessment ID is required'] },
         { status: 400 }
       );
     }
@@ -34,21 +34,21 @@ export async function PUT(
     // Validate request body
     if (!resubmissionNotes || resubmissionNotes.trim().length < 10) {
       return NextResponse.json(
-        { error: 'Resubmission notes must be at least 10 characters long' },
+        { errors: ['Resubmission notes must be at least 10 characters long'] },
         { status: 400 }
       );
     }
 
     if (!acknowledgedFeedback) {
       return NextResponse.json(
-        { error: 'You must acknowledge that you have addressed the feedback' },
+        { errors: ['You must acknowledge that you have addressed the feedback'] },
         { status: 400 }
       );
     }
 
     if (resubmissionNotes.length > 500) {
       return NextResponse.json(
-        { error: 'Resubmission notes must be less than 500 characters' },
+        { errors: ['Resubmission notes must be less than 500 characters'] },
         { status: 400 }
       );
     }
@@ -88,13 +88,13 @@ export async function PUT(
     // Handle specific error types
     if (error instanceof SyntaxError) {
       return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
+        { errors: ['Invalid JSON in request body'] },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { error: 'Failed to resubmit assessment. Please try again.' },
+      { errors: ['Failed to resubmit assessment. Please try again.'] },
       { status: 500 }
     );
   }
@@ -103,21 +103,21 @@ export async function PUT(
 // Handle unauthorized resubmission attempts
 export async function POST(): Promise<NextResponse> {
   return NextResponse.json(
-    { error: 'Use PUT method for resubmission' },
+    { errors: ['Use PUT method for resubmission'] },
     { status: 405 }
   );
 }
 
 export async function GET(): Promise<NextResponse> {
   return NextResponse.json(
-    { error: 'Method not allowed' },
+    { errors: ['Method not allowed'] },
     { status: 405 }
   );
 }
 
 export async function DELETE(): Promise<NextResponse> {
   return NextResponse.json(
-    { error: 'Method not allowed' },
+    { errors: ['Method not allowed'] },
     { status: 405 }
   );
 }

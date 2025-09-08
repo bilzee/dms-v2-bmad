@@ -17,7 +17,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
       return NextResponse.json<AutoApprovalStatsResponse>(
         {
           success: false,
-          error: `Invalid time range. Must be one of: ${validTimeRanges.join(', ')}`,
+      data: null,
+          errors: [`Invalid time range. Must be one of: ${validTimeRanges.join(', ')}`],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -33,7 +34,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
         return NextResponse.json<AutoApprovalStatsResponse>(
           {
             success: false,
-            error: 'Start date and end date are required for custom time range',
+      data: null,
+            errors: ['Start date and end date are required for custom time range'],
             meta: {
               timestamp: new Date().toISOString(),
               version: '1.0.0',
@@ -50,7 +52,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
         return NextResponse.json<AutoApprovalStatsResponse>(
           {
             success: false,
-            error: 'Invalid date format. Use ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)',
+      data: null,
+            errors: ['Invalid date format. Use ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)'],
             meta: {
               timestamp: new Date().toISOString(),
               version: '1.0.0',
@@ -64,7 +67,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
         return NextResponse.json<AutoApprovalStatsResponse>(
           {
             success: false,
-            error: 'Start date must be before end date',
+      data: null,
+            errors: ['Start date must be before end date'],
             meta: {
               timestamp: new Date().toISOString(),
               version: '1.0.0',
@@ -185,7 +189,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
     return NextResponse.json<AutoApprovalStatsResponse>(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Internal server error'],
         meta: {
           timestamp: new Date().toISOString(),
           version: '1.0.0',

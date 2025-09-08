@@ -85,7 +85,8 @@ export async function POST(
     if (!validTypes.includes(type)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid export type',
+      data: null,
+        errors: ['Invalid export type'],
         message: `Export type must be one of: ${validTypes.join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -96,7 +97,8 @@ export async function POST(
     if (!validFormats.includes(format)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid export format',
+      data: null,
+        errors: ['Invalid export format'],
         message: `Export format must be one of: ${validFormats.join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -131,7 +133,8 @@ export async function POST(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to initiate export',
+      data: null,
+      errors: ['Failed to initiate export'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -151,7 +154,8 @@ export async function GET(
     if (!exportId) {
       return NextResponse.json({
         success: false,
-        error: 'Export ID required',
+      data: null,
+        errors: ['Export ID required'],
         message: 'Please provide an exportId parameter',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -186,7 +190,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to get export status',
+      data: null,
+      errors: ['Failed to get export status'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

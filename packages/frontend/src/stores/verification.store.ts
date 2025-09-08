@@ -1358,7 +1358,7 @@ export const useResponseQueueSelection = () => useVerificationStore((state) => (
   selectedResponseIds: state.selectedResponseIds,
   toggleResponseSelection: state.toggleResponseSelection,
   selectAllVisible: state.selectAllResponsesVisible,
-  clearSelection: state.clearResponseSelection,
+  clearResponseSelection: state.clearResponseSelection,
   getSelectedCount: state.getSelectedResponseCount,
 }));
 

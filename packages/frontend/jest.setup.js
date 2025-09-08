@@ -105,6 +105,15 @@ jest.mock('@/auth', () => ({
   signOut: jest.fn(),
 }))
 
+// Mock Prisma Client to avoid browser environment issues
+jest.mock('@prisma/client', () => {
+  const { createMockPrisma } = require('./src/__tests__/utils/mockPrisma');
+  return {
+    PrismaClient: jest.fn(() => createMockPrisma()),
+    __esModule: true,
+  };
+})
+
 // Mock next-auth/react
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({

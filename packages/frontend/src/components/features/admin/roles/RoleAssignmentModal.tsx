@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, Shield, Users, CheckCircle2, AlertCircle } from 'lucide-react';
-import { AdminRole, AdminUser, RoleAssignmentRequest, RoleAssignmentResponse } from '../../../../../../../shared/types/admin';
+import { AdminRole, AdminUser, RoleAssignmentRequest, RoleAssignmentResponse } from '@dms/shared/types/admin';
 import { toast } from '@/components/ui/use-toast';
 
 interface RoleAssignmentModalProps {

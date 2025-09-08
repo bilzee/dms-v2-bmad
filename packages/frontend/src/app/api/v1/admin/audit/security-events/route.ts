@@ -25,7 +25,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token) {
       return NextResponse.json({
         success: false,
-        error: 'Authentication required',
+      data: null,
+        errors: ['Authentication required'],
         message: 'You must be logged in to access this resource'
       }, { status: 401 });
     }
@@ -34,7 +35,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
       return NextResponse.json({
         success: false,
-        error: 'Access denied',
+      data: null,
+        errors: ['Access denied'],
         message: 'Admin role required to access security events'
       }, { status: 403 });
     }
@@ -44,7 +46,8 @@ async function requireAdminRole(request: NextRequest) {
     console.error('Admin role check failed:', error);
     return NextResponse.json({
       success: false,
-      error: 'Authentication error',
+      data: null,
+      errors: ['Authentication error'],
       message: 'Failed to verify user permissions'
     }, { status: 500 });
   }
@@ -159,7 +162,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<SecurityEv
     
     const response: SecurityEventResponse = {
       success: false,
-      error: 'Failed to fetch security events',
+      data: null,
+      errors: ['Failed to fetch security events'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString()
     };
@@ -184,7 +188,8 @@ export async function PUT(request: NextRequest) {
     if (!eventId || !investigationStatus) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
+      data: null,
+        errors: ['Missing required fields'],
         message: 'Event ID and investigation status are required'
       }, { status: 400 });
     }
@@ -210,7 +215,8 @@ export async function PUT(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to update security event',
+      data: null,
+      errors: ['Failed to update security event'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString()
     }, { status: 500 });

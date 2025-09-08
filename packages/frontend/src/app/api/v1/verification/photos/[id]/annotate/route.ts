@@ -26,6 +26,7 @@ export async function POST(
     if (!photoId) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Photo ID is required',
         data: null,
         errors: ['Photo ID parameter is missing'],
@@ -38,6 +39,7 @@ export async function POST(
     if (body.qualityScore !== undefined && (body.qualityScore < 1 || body.qualityScore > 10)) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Quality score must be between 1 and 10',
         data: null,
         errors: ['qualityScore must be a number between 1 and 10'],
@@ -47,6 +49,7 @@ export async function POST(
     if (body.relevanceScore !== undefined && (body.relevanceScore < 1 || body.relevanceScore > 10)) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Relevance score must be between 1 and 10',
         data: null,
         errors: ['relevanceScore must be a number between 1 and 10'],
@@ -98,6 +101,7 @@ export async function POST(
     
     const errorResponse: PhotoAnnotationResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred while updating photo annotation',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -110,21 +114,21 @@ export async function POST(
 // Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to annotate photos.' },
+    { errors: ['Method not allowed. Use POST to annotate photos.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to annotate photos.' },
+    { errors: ['Method not allowed. Use POST to annotate photos.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to annotate photos.' },
+    { errors: ['Method not allowed. Use POST to annotate photos.'] },
     { status: 405 }
   );
 }

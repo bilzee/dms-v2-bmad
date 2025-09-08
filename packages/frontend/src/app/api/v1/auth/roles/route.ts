@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, errors: ['User not found'] },
         { status: 404 }
       );
     }
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching user roles:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, errors: ['Internal server error'] },
       { status: 500 }
     );
   }

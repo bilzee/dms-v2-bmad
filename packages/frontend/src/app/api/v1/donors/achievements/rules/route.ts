@@ -53,7 +53,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to fetch achievement rules',
+      data: null,
+        errors: ['Failed to fetch achievement rules'],
         message: error instanceof Error ? error.message : 'Unknown error occurred',
         timestamp: new Date().toISOString(),
       },
@@ -88,7 +89,8 @@ export async function POST(request: NextRequest) {
     if (!body.type || !body.title || !body.category || !body.triggerType) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
+      data: null,
+        errors: ['Missing required fields'],
         message: 'Type, title, category, and triggerType are required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -145,7 +147,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -153,7 +156,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to create achievement rule',
+      data: null,
+      errors: ['Failed to create achievement rule'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

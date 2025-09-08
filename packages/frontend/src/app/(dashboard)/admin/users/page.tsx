@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AdminUser, UserListFilters } from '../../../../../shared/types/admin';
+import { AdminUser, UserListFilters } from '@dms/shared/types/admin';
 import { UserList } from '@/components/features/admin/users/UserList';
 import { CreateUserModal } from '@/components/features/admin/users/CreateUserModal';
 import { BulkImportModal } from '@/components/features/admin/users/BulkImportModal';

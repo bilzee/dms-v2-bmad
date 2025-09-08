@@ -1,7 +1,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { useSession } from 'next-auth/react';
-import { useMultiRole } from '../useMultiRole';
+import { useMultiRole } from '@/hooks/useMultiRole';
 
 // Mock next-auth
 jest.mock('next-auth/react');
@@ -22,7 +22,8 @@ const mockSessionData = {
       { id: 'role-2', name: 'COORDINATOR', permissions: [], isActive: true }
     ],
     activeRole: { id: 'role-1', name: 'RESPONDER', permissions: [], isActive: true }
-  }
+  },
+  expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 };
 
 describe('useMultiRole', () => {
@@ -39,7 +40,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: mockSessionData,
       status: 'authenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     const { result } = renderHook(() => useMultiRole());
@@ -54,7 +55,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: mockSessionData,
       status: 'authenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     mockFetch.mockResolvedValueOnce({
@@ -77,7 +78,7 @@ describe('useMultiRole', () => {
   });
 
   it('switches roles successfully', async () => {
-    const mockUpdate = jest.fn();
+    const mockUpdate = jest.fn() as any;
     mockUseSession.mockReturnValue({
       data: mockSessionData,
       status: 'authenticated',
@@ -134,7 +135,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: mockSessionData,
       status: 'authenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     // Mock failed role switch
@@ -168,7 +169,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: mockSessionData,
       status: 'authenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     let callCount = 0;
@@ -227,7 +228,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: mockSessionData,
       status: 'authenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     mockFetch.mockImplementation((url, options) => {
@@ -272,7 +273,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: mockSessionData,
       status: 'authenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     const { result } = renderHook(() => useMultiRole());
@@ -294,7 +295,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: singleRoleSession,
       status: 'authenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     const { result } = renderHook(() => useMultiRole());
@@ -307,7 +308,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: null,
       status: 'unauthenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     const { result } = renderHook(() => useMultiRole());
@@ -322,7 +323,7 @@ describe('useMultiRole', () => {
     mockUseSession.mockReturnValue({
       data: mockSessionData,
       status: 'authenticated',
-      update: jest.fn()
+      update: jest.fn() as any
     });
 
     mockFetch.mockImplementation((url, options) => {

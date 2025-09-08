@@ -64,7 +64,7 @@ export async function GET(
 
     if (!assessmentId) {
       return NextResponse.json(
-        { error: 'Assessment ID is required' },
+        { errors: ['Assessment ID is required'] },
         { status: 400 }
       );
     }
@@ -88,7 +88,7 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching feedback:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch feedback' },
+      { errors: ['Failed to fetch feedback'] },
       { status: 500 }
     );
   }
@@ -106,7 +106,7 @@ export async function PUT(
 
     if (!assessmentId) {
       return NextResponse.json(
-        { error: 'Assessment ID is required' },
+        { errors: ['Assessment ID is required'] },
         { status: 400 }
       );
     }
@@ -122,7 +122,7 @@ export async function PUT(
       console.log(`Marking feedback ${feedbackId} as read for assessment ${assessmentId}`);
     } else {
       return NextResponse.json(
-        { error: 'Either feedbackId or markAllAsRead must be provided' },
+        { errors: ['Either feedbackId or markAllAsRead must be provided'] },
         { status: 400 }
       );
     }
@@ -136,7 +136,7 @@ export async function PUT(
   } catch (error) {
     console.error('Error marking feedback as read:', error);
     return NextResponse.json(
-      { error: 'Failed to mark feedback as read' },
+      { errors: ['Failed to mark feedback as read'] },
       { status: 500 }
     );
   }
@@ -145,14 +145,14 @@ export async function PUT(
 // Handle unsupported methods
 export async function POST(): Promise<NextResponse> {
   return NextResponse.json(
-    { error: 'Method not allowed' },
+    { errors: ['Method not allowed'] },
     { status: 405 }
   );
 }
 
 export async function DELETE(): Promise<NextResponse> {
   return NextResponse.json(
-    { error: 'Method not allowed' },
+    { errors: ['Method not allowed'] },
     { status: 405 }
   );
 }

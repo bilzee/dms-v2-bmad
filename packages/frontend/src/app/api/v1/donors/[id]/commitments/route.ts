@@ -177,7 +177,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch donor commitments',
+      data: null,
+      errors: ['Failed to fetch donor commitments'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -197,7 +198,8 @@ export async function POST(
     if (!body.responseType || !body.quantity || !body.unit || !body.targetDate || !body.incidentId) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
+      data: null,
+        errors: ['Missing required fields'],
         message: 'Response type, quantity, unit, target date, and incident ID are required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -207,7 +209,8 @@ export async function POST(
     if (!Object.values(ResponseType).includes(body.responseType)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid response type',
+      data: null,
+        errors: ['Invalid response type'],
         message: `Response type must be one of: ${Object.values(ResponseType).join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -262,7 +265,8 @@ export async function POST(
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -270,7 +274,8 @@ export async function POST(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to create commitment',
+      data: null,
+      errors: ['Failed to create commitment'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -291,7 +296,8 @@ export async function PUT(
     if (!commitmentId) {
       return NextResponse.json({
         success: false,
-        error: 'Missing commitment ID',
+      data: null,
+        errors: ['Missing commitment ID'],
         message: 'Commitment ID is required in query parameters',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -305,7 +311,8 @@ export async function PUT(
     if (commitmentIndex === -1) {
       return NextResponse.json({
         success: false,
-        error: 'Commitment not found',
+      data: null,
+        errors: ['Commitment not found'],
         message: `Commitment ${commitmentId} not found for donor ${donorId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -319,7 +326,8 @@ export async function PUT(
       if (body.quantity < 1 || body.quantity > 999999) {
         return NextResponse.json({
           success: false,
-          error: 'Invalid quantity',
+      data: null,
+          errors: ['Invalid quantity'],
           message: 'Quantity must be between 1 and 999,999',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -331,7 +339,8 @@ export async function PUT(
       if (!body.unit || body.unit.length > 50) {
         return NextResponse.json({
           success: false,
-          error: 'Invalid unit',
+      data: null,
+          errors: ['Invalid unit'],
           message: 'Unit is required and cannot exceed 50 characters',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -349,7 +358,8 @@ export async function PUT(
       if (targetDate < minDate || targetDate > maxDate) {
         return NextResponse.json({
           success: false,
-          error: 'Invalid target date',
+      data: null,
+          errors: ['Invalid target date'],
           message: 'Target date must be between tomorrow and one year from now',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -361,7 +371,8 @@ export async function PUT(
       if (!['PLANNED', 'IN_PROGRESS', 'DELIVERED', 'CANCELLED'].includes(body.status)) {
         return NextResponse.json({
           success: false,
-          error: 'Invalid status',
+      data: null,
+          errors: ['Invalid status'],
           message: 'Status must be PLANNED, IN_PROGRESS, DELIVERED, or CANCELLED',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -373,7 +384,8 @@ export async function PUT(
       if (body.notes && body.notes.length > 500) {
         return NextResponse.json({
           success: false,
-          error: 'Notes too long',
+      data: null,
+          errors: ['Notes too long'],
           message: 'Notes cannot exceed 500 characters',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -404,7 +416,8 @@ export async function PUT(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to update commitment',
+      data: null,
+      errors: ['Failed to update commitment'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -425,7 +438,8 @@ export async function DELETE(
     if (!commitmentId) {
       return NextResponse.json({
         success: false,
-        error: 'Missing commitment ID',
+      data: null,
+        errors: ['Missing commitment ID'],
         message: 'Commitment ID is required in query parameters',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -439,7 +453,8 @@ export async function DELETE(
     if (commitmentIndex === -1) {
       return NextResponse.json({
         success: false,
-        error: 'Commitment not found',
+      data: null,
+        errors: ['Commitment not found'],
         message: `Commitment ${commitmentId} not found for donor ${donorId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -451,7 +466,8 @@ export async function DELETE(
     if (commitment.status === 'DELIVERED') {
       return NextResponse.json({
         success: false,
-        error: 'Cannot cancel delivered commitment',
+      data: null,
+        errors: ['Cannot cancel delivered commitment'],
         message: 'Commitments that have been delivered cannot be cancelled',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -482,7 +498,8 @@ export async function DELETE(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to cancel commitment',
+      data: null,
+      errors: ['Failed to cancel commitment'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

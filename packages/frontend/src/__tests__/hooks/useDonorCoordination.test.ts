@@ -3,7 +3,8 @@ import { jest } from '@jest/globals';
 import { useDonorCoordination } from '@/hooks/useDonorCoordination';
 
 // Mock fetch
-global.fetch = jest.fn();
+const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
+global.fetch = mockFetch;
 
 const mockDonorsResponse = {
   success: true,
@@ -101,7 +102,7 @@ const mockAllocationResponse = {
 describe('useDonorCoordination', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (fetch as jest.Mock).mockClear();
+    mockFetch.mockClear();
   });
 
   it('initializes with empty state', () => {
@@ -116,7 +117,7 @@ describe('useDonorCoordination', () => {
   });
 
   it('fetches data successfully on refreshData call', async () => {
-    (fetch as jest.Mock)
+    mockFetch
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockDonorsResponse,
@@ -147,7 +148,7 @@ describe('useDonorCoordination', () => {
   });
 
   it('handles fetch errors gracefully', async () => {
-    (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
     const { result } = renderHook(() => useDonorCoordination());
 
@@ -169,7 +170,7 @@ describe('useDonorCoordination', () => {
       timestamp: new Date().toISOString(),
     };
 
-    (fetch as jest.Mock).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => errorResponse,
     });
@@ -187,7 +188,7 @@ describe('useDonorCoordination', () => {
   });
 
   it('updates donor successfully', async () => {
-    (fetch as jest.Mock)
+    mockFetch
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockDonorsResponse,
@@ -216,7 +217,7 @@ describe('useDonorCoordination', () => {
   });
 
   it('creates allocation successfully', async () => {
-    (fetch as jest.Mock)
+    mockFetch
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockDonorsResponse,
@@ -254,7 +255,7 @@ describe('useDonorCoordination', () => {
       priority: 'HIGH' as const,
     };
 
-    let result_data;
+    let result_data: any;
     await act(async () => {
       result_data = await result.current.createAllocation(allocationRequest);
     });
@@ -285,7 +286,7 @@ describe('useDonorCoordination', () => {
       timestamp: new Date().toISOString(),
     };
 
-    (fetch as jest.Mock)
+    mockFetch
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockDonorsResponse,
@@ -315,7 +316,7 @@ describe('useDonorCoordination', () => {
       priority: 'HIGH' as const,
     };
 
-    let result_data;
+    let result_data: any;
     await act(async () => {
       result_data = await result.current.createAllocation(allocationRequest);
     });
@@ -330,7 +331,7 @@ describe('useDonorCoordination', () => {
   });
 
   it('resolves conflicts successfully', async () => {
-    (fetch as jest.Mock)
+    mockFetch
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockDonorsResponse,
@@ -373,7 +374,7 @@ describe('useDonorCoordination', () => {
 
   it('sets loading state during async operations', async () => {
     // Mock slow response
-    (fetch as jest.Mock).mockImplementation(() => 
+    mockFetch.mockImplementation(() => 
       new Promise(resolve => 
         setTimeout(() => resolve({
           ok: true,

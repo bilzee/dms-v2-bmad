@@ -1,35 +1,43 @@
 // lib/__tests__/audit-logger.test.ts
 
-import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest';
-import { auditLogger } from '../audit-logger';
-import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+// Jest mock implementation
 
-// Mock Prisma
-const mockPrisma = mockDeep<any>();
-vi.mock('../prisma', () => ({
+// Use centralized mock system instead of direct Prisma import
+import { createMockPrisma } from '../../__tests__/utils/mockPrisma';
+
+const mockPrisma = createMockPrisma();
+
+// Mock the prisma module BEFORE importing auditLogger
+jest.mock('../prisma', () => ({
   default: mockPrisma,
 }));
 
+// Now import auditLogger after mocking prisma
+import { auditLogger } from '../audit-logger';
+
 // Mock console methods to suppress output during tests
 const consoleMock = {
-  error: vi.fn(),
-  log: vi.fn(),
-  warn: vi.fn(),
+  error: jest.fn(),
+  log: jest.fn(),
+  warn: jest.fn(),
 };
 
-vi.stubGlobal('console', consoleMock);
+// Mock console globally  
+global.console = consoleMock as any;
 
 describe('AuditLogger', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Reset the audit logger instance
-    (auditLogger as any).activityBatch = [];
-    (auditLogger as any).securityEventBatch = [];
-    (auditLogger as any).batchTimer = null;
+    jest.clearAllMocks();
+    mockPrisma.$reset();
+    // Reset the audit logger instance buffers
+    (auditLogger as any).batchBuffer = [];
+    (auditLogger as any).securityBuffer = [];
+    (auditLogger as any).flushTimer = null;
   });
 
   afterEach(() => {
-    vi.clearAllTimers();
+    jest.clearAllTimers();
   });
 
   describe('logActivity', () => {
@@ -50,9 +58,9 @@ describe('AuditLogger', () => {
       // Should not call database immediately (batched)
       expect(mockPrisma.userActivity.createMany).not.toHaveBeenCalled();
 
-      // Batch should contain the activity
-      expect((auditLogger as any).activityBatch).toHaveLength(1);
-      expect((auditLogger as any).activityBatch[0]).toMatchObject({
+      // Batch should contain the activity (audit logger uses batchBuffer, not activityBatch)
+      expect((auditLogger as any).batchBuffer).toHaveLength(1);
+      expect((auditLogger as any).batchBuffer[0]).toMatchObject({
         userId: 'test-user-123',
         eventType: 'LOGIN',
         module: 'auth',
@@ -68,20 +76,27 @@ describe('AuditLogger', () => {
 
       await auditLogger.logActivity(minimalActivity);
 
-      const batchedActivity = (auditLogger as any).activityBatch[0];
-      expect(batchedActivity.userId).toBeNull();
-      expect(batchedActivity.module).toBeNull();
-      expect(batchedActivity.endpoint).toBeNull();
-      expect(batchedActivity.statusCode).toBeNull();
-      expect(batchedActivity.responseTime).toBeNull();
+      const batchedActivity = (auditLogger as any).batchBuffer[0];
+      expect(batchedActivity.userId).toBeUndefined();
+      expect(batchedActivity.module).toBeUndefined();
+      expect(batchedActivity.endpoint).toBeUndefined();
+      expect(batchedActivity.statusCode).toBeUndefined();
+      expect(batchedActivity.responseTime).toBeUndefined();
     });
 
     it('should flush batch when it reaches maximum size', async () => {
-      mockPrisma.userActivity.createMany.mockResolvedValue({ count: 100 });
+      // Mock the create method for individual insertions within transaction
+      mockPrisma.userActivity.create.mockResolvedValue({
+        id: 'mock-activity-id',
+        userId: 'user-0',
+        eventType: 'API_ACCESS',
+        ipAddress: '192.168.1.1',
+        timestamp: new Date(),
+      });
 
-      // Add activities to reach batch limit
+      // Add activities to reach batch limit (batch size is 50 in the audit-logger)
       const promises = [];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 50; i++) {
         promises.push(auditLogger.logActivity({
           userId: `user-${i}`,
           eventType: 'API_ACCESS' as const,
@@ -91,19 +106,29 @@ describe('AuditLogger', () => {
 
       await Promise.all(promises);
 
-      // Should have flushed to database
-      expect(mockPrisma.userActivity.createMany).toHaveBeenCalledWith({
-        data: expect.arrayContaining([
-          expect.objectContaining({ userId: 'user-0' }),
-          expect.objectContaining({ userId: 'user-99' }),
-        ]),
-        skipDuplicates: true,
-      });
+      // Should have flushed to database using individual create calls in transaction
+      expect(mockPrisma.userActivity.create).toHaveBeenCalledTimes(50);
+      expect(mockPrisma.$transaction).toHaveBeenCalledWith(expect.any(Function));
     });
   });
 
   describe('logSecurityEvent', () => {
-    it('should batch security events for efficient database writes', async () => {
+    it('should log security events immediately (not batched)', async () => {
+      mockPrisma.securityEvent.create.mockResolvedValue({
+        id: 'mock-security-id',
+        eventType: 'SUSPICIOUS_ACTIVITY',
+        severity: 'HIGH',
+        description: 'Multiple failed login attempts detected',
+        userId: 'test-user-123',
+        ipAddress: '192.168.1.100',
+        userAgent: 'Suspicious User Agent',
+        details: {
+          attemptCount: 5,
+          timeWindow: '5 minutes',
+        },
+        timestamp: new Date(),
+      });
+
       const securityEvent = {
         eventType: 'SUSPICIOUS_ACTIVITY',
         severity: 'HIGH' as const,
@@ -119,20 +144,27 @@ describe('AuditLogger', () => {
 
       await auditLogger.logSecurityEvent(securityEvent);
 
-      // Should not call database immediately (batched)
-      expect(mockPrisma.securityEvent.createMany).not.toHaveBeenCalled();
-
-      // Batch should contain the security event
-      expect((auditLogger as any).securityEventBatch).toHaveLength(1);
-      expect((auditLogger as any).securityEventBatch[0]).toMatchObject({
-        eventType: 'SUSPICIOUS_ACTIVITY',
-        severity: 'HIGH',
-        description: 'Multiple failed login attempts detected',
-        userId: 'test-user-123',
+      // Should call database immediately (security events are not batched)
+      expect(mockPrisma.securityEvent.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          eventType: 'SUSPICIOUS_ACTIVITY',
+          severity: 'HIGH',
+          description: 'Multiple failed login attempts detected',
+          userId: 'test-user-123',
+        })
       });
     });
 
-    it('should generate unique IDs for security events', async () => {
+    it('should handle security event persistence', async () => {
+      mockPrisma.securityEvent.create.mockResolvedValue({
+        id: 'mock-security-breach-id',
+        eventType: 'DATA_BREACH',
+        severity: 'CRITICAL',
+        description: 'Unauthorized data access detected',
+        ipAddress: '10.0.0.1',
+        timestamp: new Date(),
+      });
+
       await auditLogger.logSecurityEvent({
         eventType: 'DATA_BREACH',
         severity: 'CRITICAL' as const,
@@ -140,10 +172,14 @@ describe('AuditLogger', () => {
         ipAddress: '10.0.0.1',
       });
 
-      const batchedEvent = (auditLogger as any).securityEventBatch[0];
-      expect(batchedEvent.id).toBeDefined();
-      expect(typeof batchedEvent.id).toBe('string');
-      expect(batchedEvent.id.length).toBeGreaterThan(10);
+      expect(mockPrisma.securityEvent.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          eventType: 'DATA_BREACH',
+          severity: 'CRITICAL',
+          description: 'Unauthorized data access detected',
+          ipAddress: '10.0.0.1',
+        })
+      });
     });
 
     it('should handle JSON serialization of details object', async () => {
@@ -154,6 +190,16 @@ describe('AuditLogger', () => {
         metadata: { source: 'intrusion-detection', confidence: 0.95 },
       };
 
+      mockPrisma.securityEvent.create.mockResolvedValue({
+        id: 'mock-malicious-request-id',
+        eventType: 'MALICIOUS_REQUEST',
+        severity: 'MEDIUM',
+        description: 'Potential SQL injection attempt',
+        ipAddress: '192.168.1.1',
+        details: complexDetails,
+        timestamp: new Date(),
+      });
+
       await auditLogger.logSecurityEvent({
         eventType: 'MALICIOUS_REQUEST',
         severity: 'MEDIUM' as const,
@@ -162,17 +208,25 @@ describe('AuditLogger', () => {
         details: complexDetails,
       });
 
-      const batchedEvent = (auditLogger as any).securityEventBatch[0];
-      expect(batchedEvent.details).toEqual(complexDetails);
+      expect(mockPrisma.securityEvent.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          details: complexDetails,
+        })
+      });
     });
   });
 
-  describe('flushBatches', () => {
-    it('should write all batched activities and security events to database', async () => {
-      mockPrisma.userActivity.createMany.mockResolvedValue({ count: 2 });
-      mockPrisma.securityEvent.createMany.mockResolvedValue({ count: 1 });
+  describe('flushActivityBuffer', () => {
+    it('should write all batched activities to database', async () => {
+      mockPrisma.userActivity.create.mockResolvedValue({
+        id: 'mock-activity-id',
+        eventType: 'LOGIN',
+        ipAddress: '192.168.1.1',
+        userId: 'user-1',
+        timestamp: new Date(),
+      });
 
-      // Add some activities and security events to batches
+      // Add some activities to batch (security events are logged immediately)
       await auditLogger.logActivity({
         eventType: 'LOGIN' as const,
         ipAddress: '192.168.1.1',
@@ -185,40 +239,23 @@ describe('AuditLogger', () => {
         userId: 'user-1',
       });
 
-      await auditLogger.logSecurityEvent({
-        eventType: 'FAILED_LOGIN',
-        severity: 'LOW' as const,
-        description: 'Failed login attempt',
-        ipAddress: '192.168.1.1',
-      });
+      // Verify activities are batched
+      expect((auditLogger as any).batchBuffer).toHaveLength(2);
 
       // Manually flush
-      await auditLogger.flushBatches();
+      await (auditLogger as any).flushActivityBuffer();
 
-      // Should have written to both tables
-      expect(mockPrisma.userActivity.createMany).toHaveBeenCalledWith({
-        data: expect.arrayContaining([
-          expect.objectContaining({ eventType: 'LOGIN' }),
-          expect.objectContaining({ eventType: 'LOGOUT' }),
-        ]),
-        skipDuplicates: true,
-      });
+      // Should have written activities using individual create calls in transaction
+      expect(mockPrisma.userActivity.create).toHaveBeenCalledTimes(2);
+      expect(mockPrisma.$transaction).toHaveBeenCalledWith(expect.any(Function));
 
-      expect(mockPrisma.securityEvent.createMany).toHaveBeenCalledWith({
-        data: expect.arrayContaining([
-          expect.objectContaining({ eventType: 'FAILED_LOGIN' }),
-        ]),
-        skipDuplicates: true,
-      });
-
-      // Batches should be empty after flush
-      expect((auditLogger as any).activityBatch).toHaveLength(0);
-      expect((auditLogger as any).securityEventBatch).toHaveLength(0);
+      // Batch should be empty after flush
+      expect((auditLogger as any).batchBuffer).toHaveLength(0);
     });
 
     it('should handle database errors gracefully', async () => {
       const dbError = new Error('Database connection failed');
-      mockPrisma.userActivity.createMany.mockRejectedValue(dbError);
+      mockPrisma.$transaction.mockRejectedValue(dbError);
 
       await auditLogger.logActivity({
         eventType: 'ERROR' as const,
@@ -226,51 +263,63 @@ describe('AuditLogger', () => {
       });
 
       // Manually flush should not throw
-      await expect(auditLogger.flushBatches()).resolves.not.toThrow();
+      await expect((auditLogger as any).flushActivityBuffer()).resolves.not.toThrow();
 
       // Should log the error
       expect(consoleMock.error).toHaveBeenCalledWith(
-        'Failed to flush audit batches:',
+        'Failed to flush activity buffer:',
         dbError
       );
     });
 
     it('should not attempt database operations when batches are empty', async () => {
-      await auditLogger.flushBatches();
+      await (auditLogger as any).flushActivityBuffer();
 
-      expect(mockPrisma.userActivity.createMany).not.toHaveBeenCalled();
-      expect(mockPrisma.securityEvent.createMany).not.toHaveBeenCalled();
+      expect(mockPrisma.userActivity.create).not.toHaveBeenCalled();
+      expect(mockPrisma.$transaction).not.toHaveBeenCalled();
     });
   });
 
   describe('automatic batch flushing', () => {
     it('should flush batches automatically after timeout', async () => {
-      vi.useFakeTimers();
-      mockPrisma.userActivity.createMany.mockResolvedValue({ count: 1 });
+      jest.useFakeTimers();
+      mockPrisma.userActivity.create.mockResolvedValue({
+        id: 'mock-activity-id',
+        eventType: 'API_ACCESS',
+        ipAddress: '192.168.1.1',
+        timestamp: new Date(),
+      });
 
       await auditLogger.logActivity({
         eventType: 'API_ACCESS' as const,
         ipAddress: '192.168.1.1',
       });
 
-      expect(mockPrisma.userActivity.createMany).not.toHaveBeenCalled();
+      expect(mockPrisma.userActivity.create).not.toHaveBeenCalled();
 
-      // Fast-forward time by 5 seconds (default batch timeout)
-      vi.advanceTimersByTime(5000);
+      // Fast-forward time by 30 seconds (actual flush interval in audit-logger)
+      jest.advanceTimersByTime(30000);
 
       // Wait for next tick to allow promise resolution
       await new Promise(resolve => setTimeout(resolve, 0));
 
-      expect(mockPrisma.userActivity.createMany).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.userActivity.create).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
 
-      vi.useRealTimers();
+      jest.useRealTimers();
     });
   });
 
   describe('shutdown', () => {
     it('should flush all remaining batches and clear timers', async () => {
-      vi.useFakeTimers();
-      mockPrisma.userActivity.createMany.mockResolvedValue({ count: 1 });
+      jest.useFakeTimers();
+      mockPrisma.userActivity.create.mockResolvedValue({
+        id: 'mock-shutdown-activity-id',
+        eventType: 'LOGOUT',
+        ipAddress: '192.168.1.1',
+        userId: 'user-shutdown-test',
+        timestamp: new Date(),
+      });
 
       await auditLogger.logActivity({
         eventType: 'LOGOUT' as const,
@@ -279,33 +328,42 @@ describe('AuditLogger', () => {
       });
 
       // Should not have flushed yet
-      expect(mockPrisma.userActivity.createMany).not.toHaveBeenCalled();
+      expect(mockPrisma.userActivity.create).not.toHaveBeenCalled();
 
       // Shutdown should flush immediately
       await auditLogger.shutdown();
 
-      expect(mockPrisma.userActivity.createMany).toHaveBeenCalledWith({
-        data: expect.arrayContaining([
-          expect.objectContaining({ 
-            eventType: 'LOGOUT',
-            userId: 'user-shutdown-test' 
-          }),
-        ]),
-        skipDuplicates: true,
+      expect(mockPrisma.userActivity.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ 
+          eventType: 'LOGOUT',
+          userId: 'user-shutdown-test' 
+        })
       });
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1);
 
-      // Timer should be cleared
-      expect((auditLogger as any).batchTimer).toBeNull();
+      // Timer should be cleared (property is flushTimer, not batchTimer)
+      expect((auditLogger as any).flushTimer).toBeUndefined();
 
-      vi.useRealTimers();
+      jest.useRealTimers();
     });
   });
 
   describe('error handling', () => {
     it('should continue operating after database errors', async () => {
-      mockPrisma.userActivity.createMany
+      mockPrisma.$transaction
         .mockRejectedValueOnce(new Error('Database error'))
-        .mockResolvedValue({ count: 1 });
+        .mockImplementationOnce(async (fn) => {
+          // Second transaction should succeed
+          return await fn(mockPrisma);
+        });
+
+      mockPrisma.userActivity.create.mockResolvedValue({
+        id: 'mock-recovery-id',
+        eventType: 'LOGIN',
+        ipAddress: '192.168.1.1',
+        userId: 'recovery-test',
+        timestamp: new Date(),
+      });
 
       // First activity should fail to flush but not crash
       await auditLogger.logActivity({
@@ -314,7 +372,7 @@ describe('AuditLogger', () => {
       });
 
       // Force flush to trigger error
-      await auditLogger.flushBatches();
+      await (auditLogger as any).flushActivityBuffer();
 
       // Should have logged error
       expect(consoleMock.error).toHaveBeenCalled();
@@ -326,17 +384,14 @@ describe('AuditLogger', () => {
         userId: 'recovery-test',
       });
 
-      await auditLogger.flushBatches();
+      await (auditLogger as any).flushActivityBuffer();
 
       // Second flush should succeed
-      expect(mockPrisma.userActivity.createMany).toHaveBeenCalledWith({
-        data: expect.arrayContaining([
-          expect.objectContaining({ 
-            eventType: 'LOGIN',
-            userId: 'recovery-test' 
-          }),
-        ]),
-        skipDuplicates: true,
+      expect(mockPrisma.userActivity.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ 
+          eventType: 'LOGIN',
+          userId: 'recovery-test' 
+        })
       });
     });
   });

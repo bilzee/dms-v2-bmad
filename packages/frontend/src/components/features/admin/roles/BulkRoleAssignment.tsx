@@ -20,7 +20,7 @@ import {
   Clock,
   User
 } from 'lucide-react';
-import { AdminRole, AdminUser, BulkRoleAssignmentRequest } from '../../../../../../../shared/types/admin';
+import { AdminRole, AdminUser, BulkRoleAssignmentRequest } from '@dms/shared/types/admin';
 import { toast } from '@/components/ui/use-toast';
 
 interface BulkRoleAssignmentProps {

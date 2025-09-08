@@ -23,7 +23,9 @@ const mockUsers = [
     email: 'john@example.com',
     roles: [{ id: 'role-1', name: 'RESPONDER' }],
     isActive: true,
-    lastLogin: new Date().toISOString()
+    lastLogin: new Date().toISOString(),
+    requirePasswordReset: false,
+    lastSync: null
   },
   {
     id: 'user-2',
@@ -31,7 +33,9 @@ const mockUsers = [
     email: 'jane@example.com',
     roles: [{ id: 'role-2', name: 'COORDINATOR' }],
     isActive: true,
-    lastLogin: new Date().toISOString()
+    lastLogin: new Date().toISOString(),
+    requirePasswordReset: false,
+    lastSync: null
   }
 ];
 
@@ -42,7 +46,9 @@ const mockRoles = [
     description: 'Emergency response role',
     permissions: [],
     userCount: 10,
-    isActive: true
+    isActive: true,
+    createdAt: new Date('2023-01-01'),
+    updatedAt: new Date('2023-01-01')
   },
   {
     id: 'role-2',
@@ -50,7 +56,9 @@ const mockRoles = [
     description: 'Coordination role',
     permissions: [],
     userCount: 5,
-    isActive: true
+    isActive: true,
+    createdAt: new Date('2023-01-01'),
+    updatedAt: new Date('2023-01-01')
   }
 ];
 

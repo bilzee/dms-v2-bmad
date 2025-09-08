@@ -80,7 +80,8 @@ export async function GET(request: NextRequest) {
     console.error('Failed to fetch incident stats:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch incident statistics',
+      data: null,
+      errors: ['Failed to fetch incident statistics'],
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }

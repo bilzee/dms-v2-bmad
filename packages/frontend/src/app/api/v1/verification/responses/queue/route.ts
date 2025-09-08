@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized - session required' },
+        { success: false, errors: ['Unauthorized - session required'] },
         { status: 401 }
       );
     }
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     // Verify coordinator role
     if (session.user.role !== UserRoleType.COORDINATOR) {
       return NextResponse.json(
-        { success: false, error: 'Access denied - coordinator role required' },
+        { success: false, errors: ['Access denied - coordinator role required'] },
         { status: 403 }
       );
     }
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching response verification queue:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch verification queue' },
+      { success: false, errors: ['Failed to fetch verification queue'] },
       { status: 500 }
     );
   }

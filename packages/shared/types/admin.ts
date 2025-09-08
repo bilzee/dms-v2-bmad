@@ -133,6 +133,24 @@ export interface UserActivityFilters {
   endDate?: Date;
   limit?: number;
   offset?: number;
+  sortBy?: 'timestamp' | 'severity' | 'eventType';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface SystemAlert {
+  id?: string;
+  type: 'HIGH_ERROR_RATE' | 'SLOW_RESPONSE' | 'HIGH_QUEUE_SIZE' | 'SYNC_FAILURE' | 'PERFORMANCE' | 'SECURITY' | 'SYSTEM' | 'RESOURCE';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'WARNING';
+  title?: string;
+  message: string;
+  timestamp: Date;
+  source?: string;
+  value?: number;
+  threshold?: number;
+  isAcknowledged?: boolean;
+  acknowledgedBy?: string;
+  acknowledgedAt?: Date;
+  metadata?: Record<string, any>;
 }
 
 export interface UserActivityResponse extends ApiResponse<{

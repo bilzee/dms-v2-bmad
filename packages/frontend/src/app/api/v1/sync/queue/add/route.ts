@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!queueItemData.id || !queueItemData.type) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: id, type' },
+        { success: false, data: null, errors: ['Missing required fields: id, type'] },
         { status: 400 }
       );
     }
@@ -81,8 +81,9 @@ export async function POST(request: NextRequest) {
     console.error('Failed to add item to queue:', error);
     return NextResponse.json(
       { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to add item to queue'
+        success: false,
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Failed to add item to queue']
       },
       { status: 500 }
     );

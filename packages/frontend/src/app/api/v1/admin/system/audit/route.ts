@@ -108,7 +108,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch audit trail',
+      data: null,
+      errors: ['Failed to fetch audit trail'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

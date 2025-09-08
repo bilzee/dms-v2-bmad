@@ -111,7 +111,7 @@ export class OptimisticUIManager {
       const queueItem: Partial<PriorityQueueItem> = {
         id: uuidv4(),
         type: entityType,
-        operation: operation.toLowerCase() as any,
+        action: operation.toLowerCase() as any,
         data: optimisticData,
         entityId,
         priority: 'NORMAL',
@@ -119,8 +119,6 @@ export class OptimisticUIManager {
         priorityReason: `Optimistic ${operation.toLowerCase()} operation`,
         createdAt: timestamp,
         retryCount: 0,
-        maxRetries: 3,
-        status: 'PENDING' as any,
       };
 
       const syncQueueId = await this.queueService.addToQueue(queueItem as PriorityQueueItem);

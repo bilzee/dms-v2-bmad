@@ -33,7 +33,7 @@ import {
   UserListResponse,
   RoleAssignmentRequest,
   BulkRoleAssignmentRequest
-} from '../../../../../shared/types/admin';
+} from '@dms/shared/types/admin';
 import { toast } from '@/components/ui/use-toast';
 
 interface RoleStats {

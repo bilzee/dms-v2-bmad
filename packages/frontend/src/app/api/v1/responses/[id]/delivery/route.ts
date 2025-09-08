@@ -41,7 +41,7 @@ export async function POST(
     const validationResult = DeliveryDocumentationRequestSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid delivery documentation data', details: validationResult.error.errors },
+        { errors: ['Invalid delivery documentation data'], details: validationResult.error.errors },
         { status: 400 }
       );
     }
@@ -52,7 +52,7 @@ export async function POST(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -61,7 +61,7 @@ export async function POST(
     if (![ResponseStatus.PLANNED, ResponseStatus.IN_PROGRESS].includes(existingResponse.status)) {
       return NextResponse.json(
         {
-          error: 'Response cannot be documented',
+          errors: ['Response cannot be documented'],
           message: `Response status ${existingResponse.status} does not allow delivery documentation`,
         },
         { status: 400 }
@@ -117,7 +117,7 @@ export async function POST(
   } catch (error) {
     console.error('Delivery documentation creation error:', error);
     return NextResponse.json(
-      { error: 'Failed to create delivery documentation' },
+      { errors: ['Failed to create delivery documentation'] },
       { status: 500 }
     );
   }
@@ -152,7 +152,7 @@ export async function PATCH(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -161,7 +161,7 @@ export async function PATCH(
     if (![ResponseStatus.PLANNED, ResponseStatus.IN_PROGRESS, ResponseStatus.DELIVERED].includes(existingResponse.status)) {
       return NextResponse.json(
         {
-          error: 'Response cannot be updated',
+          errors: ['Response cannot be updated'],
           message: `Response status ${existingResponse.status} does not allow delivery updates`,
         },
         { status: 400 }
@@ -221,7 +221,7 @@ export async function PATCH(
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
-          error: 'Validation failed',
+          errors: ['Validation failed'],
           details: error.errors,
         },
         { status: 400 }
@@ -230,7 +230,7 @@ export async function PATCH(
 
     return NextResponse.json(
       {
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: 'Failed to update delivery details',
       },
       { status: 500 }
@@ -250,7 +250,7 @@ export async function GET(
     const response = mockResponses[responseId];
     if (!response) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -273,7 +273,7 @@ export async function GET(
   } catch (error) {
     console.error('Get delivery details error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }
@@ -291,7 +291,7 @@ export async function DELETE(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -300,7 +300,7 @@ export async function DELETE(
     if (existingResponse.status !== ResponseStatus.DELIVERED) {
       return NextResponse.json(
         {
-          error: 'Response cannot be reverted',
+          errors: ['Response cannot be reverted'],
           message: `Only delivered responses can be reverted to planned status`,
         },
         { status: 400 }
@@ -330,7 +330,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Delivery revert error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }

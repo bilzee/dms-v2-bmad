@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import DatabaseService from '@/lib/services/DatabaseService';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
@@ -73,7 +72,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch users',
+      data: null,
+      errors: ['Failed to fetch users'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -93,7 +93,8 @@ export async function POST(request: NextRequest) {
     if (!body.name || !body.email || !body.password) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
+      data: null,
+        errors: ['Missing required fields'],
         message: 'Name, email, and password are required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -104,7 +105,8 @@ export async function POST(request: NextRequest) {
     if (!emailRegex.test(body.email)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid email format',
+      data: null,
+        errors: ['Invalid email format'],
         message: 'Please provide a valid email address',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -114,7 +116,8 @@ export async function POST(request: NextRequest) {
     if (!Array.isArray(body.roles) || body.roles.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid roles',
+      data: null,
+        errors: ['Invalid roles'],
         message: 'At least one role must be assigned',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -168,7 +171,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -178,7 +182,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.includes('Unique constraint')) {
       return NextResponse.json({
         success: false,
-        error: 'Email already exists',
+      data: null,
+        errors: ['Email already exists'],
         message: 'A user with this email address already exists',
         timestamp: new Date().toISOString(),
       }, { status: 409 });
@@ -186,7 +191,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to create user',
+      data: null,
+      errors: ['Failed to create user'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

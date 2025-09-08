@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Failed to get priority rules:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to get priority rules' },
+      { success: false, errors: ['Failed to get priority rules'] },
       { status: 500 }
     );
   }
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     
     if (userRules.length >= 10) {
       return NextResponse.json(
-        { success: false, error: 'Rate limit exceeded: maximum 10 rules per hour' },
+        { success: false, errors: ['Rate limit exceeded: maximum 10 rules per hour'] },
         { status: 429 }
       );
     }
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Invalid request data',
+          errors: ['Invalid request data'],
           details: error.errors 
         },
         { status: 400 }
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Failed to create priority rule' },
+      { success: false, errors: ['Failed to create priority rule'] },
       { status: 500 }
     );
   }

@@ -38,9 +38,33 @@ describe('/api/v1/admin/users/bulk-import', () => {
   describe('POST /api/v1/admin/users/bulk-import', () => {
     it('should validate CSV file and return preview (validateOnly=true)', async () => {
       const mockRoles = [
-        { id: 'role-1', name: 'ASSESSOR' },
-        { id: 'role-2', name: 'COORDINATOR' },
-        { id: 'role-3', name: 'RESPONDER' }
+        { 
+          id: 'role-1', 
+          name: 'ASSESSOR', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 5 }
+        },
+        { 
+          id: 'role-2', 
+          name: 'COORDINATOR', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 3 }
+        },
+        { 
+          id: 'role-3', 
+          name: 'RESPONDER', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 8 }
+        }
       ];
 
       mockDatabaseService.getAllRoles.mockResolvedValue(mockRoles);
@@ -69,9 +93,33 @@ describe('/api/v1/admin/users/bulk-import', () => {
 
     it('should identify validation errors in CSV data', async () => {
       const mockRoles = [
-        { id: 'role-1', name: 'ASSESSOR' },
-        { id: 'role-2', name: 'COORDINATOR' },
-        { id: 'role-3', name: 'RESPONDER' }
+        { 
+          id: 'role-1', 
+          name: 'ASSESSOR', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 5 }
+        },
+        { 
+          id: 'role-2', 
+          name: 'COORDINATOR', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 3 }
+        },
+        { 
+          id: 'role-3', 
+          name: 'RESPONDER', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 8 }
+        }
       ];
 
       mockDatabaseService.getAllRoles.mockResolvedValue(mockRoles);
@@ -104,18 +152,51 @@ describe('/api/v1/admin/users/bulk-import', () => {
 
     it('should process valid CSV import successfully', async () => {
       const mockRoles = [
-        { id: 'role-1', name: 'ASSESSOR' },
-        { id: 'role-2', name: 'COORDINATOR' },
-        { id: 'role-3', name: 'RESPONDER' }
+        { 
+          id: 'role-1', 
+          name: 'ASSESSOR', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 5 }
+        },
+        { 
+          id: 'role-2', 
+          name: 'COORDINATOR', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 3 }
+        },
+        { 
+          id: 'role-3', 
+          name: 'RESPONDER', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 8 }
+        }
       ];
 
       const mockImportRecord = {
         id: 'import-123',
         fileName: 'users.csv',
+        fileSize: 1024,
         totalRows: 3,
+        processedRows: 3,
         successfulRows: 3,
         failedRows: 0,
-        status: 'COMPLETED'
+        status: 'COMPLETED',
+        errors: [],
+        importedBy: 'admin-1',
+        importedByName: 'Admin User',
+        startedAt: new Date('2023-01-01T10:00:00Z'),
+        completedAt: new Date('2023-01-01T10:05:00Z'),
+        createdAt: new Date('2023-01-01T10:00:00Z'),
+        updatedAt: new Date('2023-01-01T10:05:00Z')
       };
 
       mockDatabaseService.getAllRoles.mockResolvedValue(mockRoles);
@@ -123,7 +204,34 @@ describe('/api/v1/admin/users/bulk-import', () => {
       mockDatabaseService.createUserWithAdmin.mockResolvedValue({
         id: 'user-123',
         name: 'Test User',
-        email: 'test@example.com'
+        email: 'test@example.com',
+        emailVerified: null,
+        image: null,
+        phone: null,
+        organization: 'Test Org',
+        isActive: true,
+        resetToken: null,
+        resetTokenExpiry: null,
+        activeRoleId: 'role-1',
+        createdAt: new Date('2023-01-01'),
+        updatedAt: new Date('2023-01-01'),
+        lastSync: null,
+        requirePasswordReset: false,
+        activeRole: {
+          id: 'role-1',
+          name: 'ASSESSOR',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+          isActive: true
+        },
+        roles: [{
+          id: 'role-1',
+          name: 'ASSESSOR',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+          isActive: true,
+          permissions: []
+        }]
       });
       mockDatabaseService.updateBulkImportProgress.mockResolvedValue(mockImportRecord);
 
@@ -156,18 +264,51 @@ John Doe,john@example.com,+1234567890,Relief Org,ASSESSOR,true
 Bob Wilson,bob@example.com,,Health Services,RESPONDER,false`;
 
       const mockRoles = [
-        { id: 'role-1', name: 'ASSESSOR' },
-        { id: 'role-2', name: 'COORDINATOR' },
-        { id: 'role-3', name: 'RESPONDER' }
+        { 
+          id: 'role-1', 
+          name: 'ASSESSOR', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 5 }
+        },
+        { 
+          id: 'role-2', 
+          name: 'COORDINATOR', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 3 }
+        },
+        { 
+          id: 'role-3', 
+          name: 'RESPONDER', 
+          isActive: true, 
+          createdAt: new Date('2023-01-01'), 
+          updatedAt: new Date('2023-01-01'),
+          permissions: [],
+          _count: { users: 8 }
+        }
       ];
 
       const mockImportRecord = {
         id: 'import-456',
         fileName: 'users.csv',
+        fileSize: 1024,
         totalRows: 3,
+        processedRows: 3,
         successfulRows: 2,
         failedRows: 1,
-        status: 'COMPLETED'
+        status: 'COMPLETED',
+        errors: [{ row: 2, field: 'name', error: 'Name is required' }],
+        importedBy: 'admin-1',
+        importedByName: 'Admin User',
+        startedAt: new Date('2023-01-01T10:00:00Z'),
+        completedAt: new Date('2023-01-01T10:05:00Z'),
+        createdAt: new Date('2023-01-01T10:00:00Z'),
+        updatedAt: new Date('2023-01-01T10:05:00Z')
       };
 
       mockDatabaseService.getAllRoles.mockResolvedValue(mockRoles);
@@ -178,7 +319,34 @@ Bob Wilson,bob@example.com,,Health Services,RESPONDER,false`;
         .mockResolvedValueOnce({
           id: 'user-1',
           name: 'John Doe',
-          email: 'john@example.com'
+          email: 'john@example.com',
+          emailVerified: null,
+          image: null,
+          phone: '+1234567890',
+          organization: 'Relief Org',
+          isActive: true,
+          resetToken: null,
+          resetTokenExpiry: null,
+          activeRoleId: 'role-1',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+          lastSync: null,
+          requirePasswordReset: false,
+          activeRole: {
+            id: 'role-1',
+            name: 'ASSESSOR',
+            createdAt: new Date('2023-01-01'),
+            updatedAt: new Date('2023-01-01'),
+            isActive: true
+          },
+          roles: [{
+            id: 'role-1',
+            name: 'ASSESSOR',
+            createdAt: new Date('2023-01-01'),
+            updatedAt: new Date('2023-01-01'),
+            isActive: true,
+            permissions: []
+          }]
         })
         // Second user fails (validation error)
         .mockRejectedValueOnce(new Error('Name is required'))
@@ -186,7 +354,34 @@ Bob Wilson,bob@example.com,,Health Services,RESPONDER,false`;
         .mockResolvedValueOnce({
           id: 'user-3',
           name: 'Bob Wilson',
-          email: 'bob@example.com'
+          email: 'bob@example.com',
+          emailVerified: null,
+          image: null,
+          phone: null,
+          organization: 'Health Services',
+          isActive: false,
+          resetToken: null,
+          resetTokenExpiry: null,
+          activeRoleId: 'role-3',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+          lastSync: null,
+          requirePasswordReset: false,
+          activeRole: {
+            id: 'role-3',
+            name: 'RESPONDER',
+            createdAt: new Date('2023-01-01'),
+            updatedAt: new Date('2023-01-01'),
+            isActive: true
+          },
+          roles: [{
+            id: 'role-3',
+            name: 'RESPONDER',
+            createdAt: new Date('2023-01-01'),
+            updatedAt: new Date('2023-01-01'),
+            isActive: true,
+            permissions: []
+          }]
         });
 
       mockDatabaseService.updateBulkImportProgress.mockResolvedValue(mockImportRecord);

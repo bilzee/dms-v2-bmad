@@ -5,6 +5,13 @@ import { getToken } from 'next-auth/jwt';
 import { SystemActivityLog, SecurityEvent } from '@dms/shared/types/admin';
 import { auditLogger } from './audit-logger';
 
+// Extend NextRequest to include audit context
+declare module 'next/server' {
+  interface NextRequest {
+    auditContext?: AuditContext;
+  }
+}
+
 export interface AuditContext {
   userId?: string;
   userName?: string;
@@ -187,7 +194,7 @@ function getClientIP(request: NextRequest): string {
     return realIP;
   }
   
-  return request.ip || 'unknown';
+  return request.ip ?? 'unknown';
 }
 
 /**

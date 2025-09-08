@@ -21,7 +21,8 @@ const mockUsers = [
     isActive: true,
     roles: [{ name: 'ASSESSOR' }],
     createdAt: '2023-01-01T00:00:00Z',
-    lastSync: null
+    lastSync: null,
+    requirePasswordReset: false
   },
   {
     id: 'user-2',
@@ -32,7 +33,8 @@ const mockUsers = [
     isActive: false,
     roles: [{ name: 'COORDINATOR' }],
     createdAt: '2023-01-02T00:00:00Z',
-    lastSync: '2023-01-15T10:30:00Z'
+    lastSync: '2023-01-15T10:30:00Z',
+    requirePasswordReset: false
   }
 ];
 
@@ -63,8 +65,19 @@ describe('UserList Component', () => {
   });
 
   const mockProps = {
-    onEditUser: jest.fn(),
-    refreshTrigger: 0
+    users: mockUsers,
+    loading: false,
+    totalCount: mockUsers.length,
+    filters: {
+      search: '',
+      role: '',
+      isActive: undefined,
+      page: 1,
+      limit: 10
+    },
+    onFilterChange: jest.fn(),
+    onPageChange: jest.fn(),
+    onUserUpdated: jest.fn()
   };
 
   it('renders user list with data', async () => {
@@ -301,8 +314,8 @@ describe('UserList Component', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
-    // Change the refresh trigger
-    rerender(<UserList {...mockProps} refreshTrigger={1} />);
+    // Trigger a rerender with updated props
+    rerender(<UserList {...mockProps} totalCount={5} />);
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledTimes(2);

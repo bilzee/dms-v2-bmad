@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { AssessmentStatusCard } from '@/components/features/assessment/AssessmentStatusCard';
 import { AssessmentType, VerificationStatus, SyncStatus, type RapidAssessment } from '@dms/shared';
 
@@ -285,7 +286,8 @@ describe('AssessmentStatusCard', () => {
     render(<AssessmentStatusCard assessment={failedAssessment} />);
     
     const syncBadge = screen.getByText('FAILED');
-    expect(syncBadge).toHaveClass('bg-red-100', 'text-red-800');
+    expect(syncBadge).toHaveClass('bg-red-100');
+    expect(syncBadge).toHaveClass('text-red-800');
   });
 
   it('handles missing action handlers gracefully', () => {

@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
     if (!currentUser) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
-        message: 'Unable to find current user session',
-        timestamp: new Date().toISOString(),
+      data: null,
+        errors: ['User not found'],
+        message: 'Unable to find current user session'
       }, { status: 404 });
     }
 
@@ -33,9 +33,9 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
-        message: 'User data not found in database',
-        timestamp: new Date().toISOString(),
+      data: null,
+        errors: ['User not found'],
+        message: 'User data not found in database'
       }, { status: 404 });
     }
 
@@ -78,8 +78,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: sessionData,
-      message: 'User session data retrieved successfully',
-      timestamp: new Date().toISOString(),
+      message: 'User session data retrieved successfully'
     });
 
   } catch (error) {
@@ -87,9 +86,9 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch user session',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Failed to fetch user session'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }
@@ -105,9 +104,9 @@ export async function PUT(request: NextRequest) {
     if (!currentUser) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
-        message: 'Unable to find current user session',
-        timestamp: new Date().toISOString(),
+      data: null,
+        errors: ['User not found'],
+        message: 'Unable to find current user session'
       }, { status: 404 });
     }
 
@@ -118,10 +117,10 @@ export async function PUT(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: 'Invalid request data',
-        details: validationResult.error.errors,
-        timestamp: new Date().toISOString(),
+        details: validationResult.error.errors
       }, { status: 400 });
     }
 
@@ -182,8 +181,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: responseData,
-      message: 'Active role switched successfully',
-      timestamp: new Date().toISOString(),
+      message: 'Active role switched successfully'
     });
 
   } catch (error) {
@@ -192,26 +190,26 @@ export async function PUT(request: NextRequest) {
     if (error instanceof Error && error.message === 'User not found') {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
-        message: 'User with the specified ID does not exist',
-        timestamp: new Date().toISOString(),
+      data: null,
+        errors: ['User not found'],
+        message: 'User with the specified ID does not exist'
       }, { status: 404 });
     }
 
     if (error instanceof Error && error.message === 'User does not have the specified role') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid role',
-        message: 'You do not have the specified role assigned',
-        timestamp: new Date().toISOString(),
+      data: null,
+        errors: ['Invalid role'],
+        message: 'You do not have the specified role assigned'
       }, { status: 400 });
     }
 
     return NextResponse.json({
       success: false,
-      error: 'Failed to switch role',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Failed to switch role'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }

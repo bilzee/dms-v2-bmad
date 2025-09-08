@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json(
         {
-          error: 'Invalid request data',
+          errors: ['Invalid request data'],
           details: validationResult.error.issues,
         },
         { status: 400 }
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating response plan:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

@@ -18,6 +18,7 @@ export async function POST(
     if (!body.assessmentIds || !Array.isArray(body.assessmentIds) || body.assessmentIds.length === 0) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Assessment IDs are required',
         data: null,
         errors: ['assessmentIds must be a non-empty array'],
@@ -27,6 +28,7 @@ export async function POST(
     if (!body.coordinatorId || !body.coordinatorName) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Coordinator information is required',
         data: null,
         errors: ['coordinatorId and coordinatorName are required'],
@@ -38,6 +40,7 @@ export async function POST(
     if (body.assessmentIds.length > maxBatchSize) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: `Batch size too large. Maximum ${maxBatchSize} assessments allowed.`,
         data: null,
         errors: [`Maximum batch size is ${maxBatchSize} assessments`],
@@ -67,7 +70,7 @@ export async function POST(
           results.push({
             assessmentId,
             status: 'FAILED',
-            error: 'Assessment not found',
+            errors: ['Assessment not found'],
           });
           failed++;
           continue;
@@ -77,7 +80,7 @@ export async function POST(
           results.push({
             assessmentId,
             status: 'FAILED',
-            error: 'Assessment not in pending status',
+            errors: ['Assessment not in pending status'],
           });
           failed++;
           continue;
@@ -130,7 +133,7 @@ export async function POST(
         results.push({
           assessmentId,
           status: 'FAILED',
-          error: error instanceof Error ? error.message : 'Unknown error',
+          errors: [error instanceof Error ? error.message : 'Unknown error'],
         });
         failed++;
       }
@@ -159,6 +162,7 @@ export async function POST(
     
     const errorResponse: BatchApprovalResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred during batch approval',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -171,21 +175,21 @@ export async function POST(
 // Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST for batch approvals.' },
+    { errors: ['Method not allowed. Use POST for batch approvals.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST for batch approvals.' },
+    { errors: ['Method not allowed. Use POST for batch approvals.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST for batch approvals.' },
+    { errors: ['Method not allowed. Use POST for batch approvals.'] },
     { status: 405 }
   );
 }

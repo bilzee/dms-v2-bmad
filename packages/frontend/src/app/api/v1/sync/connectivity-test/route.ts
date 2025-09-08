@@ -31,8 +31,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        data: null,
-        error: 'Connectivity test failed',
+      data: null,
+        errors: ['Connectivity test failed'],
         responseTime: Date.now() - startTime,
       },
       { status: 500 }

@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { RoleIndicator } from '@/components/layouts/RoleIndicator';
 import { useMultiRole } from '@/hooks/useMultiRole';
 
@@ -59,7 +60,9 @@ describe('RoleIndicator Component - Context Switching', () => {
 
       const indicator = screen.getByTestId('role-indicator');
       expect(indicator).toHaveTextContent('ASSESSOR');
-      expect(indicator).toHaveClass('bg-blue-100', 'text-blue-800', 'border-blue-200');
+      expect(indicator).toHaveClass('bg-blue-100');
+      expect(indicator).toHaveClass('text-blue-800');
+      expect(indicator).toHaveClass('border-blue-200');
     });
 
     it('should show dropdown for multi-role users with enhanced visuals', () => {
@@ -86,7 +89,8 @@ describe('RoleIndicator Component - Context Switching', () => {
       render(<RoleIndicator />);
 
       const indicator = screen.getByTestId('role-indicator');
-      expect(indicator).toHaveClass('bg-blue-500', 'text-white');
+      expect(indicator).toHaveClass('bg-blue-500');
+      expect(indicator).toHaveClass('text-white');
       
       const button = screen.getByRole('button');
       expect(button).toBeDisabled();

@@ -49,7 +49,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
     
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
 
     if (!targetRoleId || !targetRoleName) {
       return NextResponse.json(
-        { success: false, error: 'Target role ID and name are required' },
+        { success: false, errors: ['Target role ID and name are required'] },
         { status: 400 }
       );
     }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, errors: ['User not found'] },
         { status: 404 }
       );
     }
@@ -75,14 +75,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
     const targetRole = user.roles.find(role => role.id === targetRoleId);
     if (!targetRole) {
       return NextResponse.json(
-        { success: false, error: 'User does not have access to this role' },
+        { success: false, errors: ['User does not have access to this role'] },
         { status: 403 }
       );
     }
 
     if (targetRole.name !== targetRoleName) {
       return NextResponse.json(
-        { success: false, error: 'Role ID and name mismatch' },
+        { success: false, errors: ['Role ID and name mismatch'] },
         { status: 400 }
       );
     }
@@ -173,6 +173,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
             fromRoleId: targetRoleId,
             toRoleId: rollbackInfo.previousRoleId,
             success: false,
+      data: null,
             errorMessage: error instanceof Error ? error.message : 'Unknown error'
           },
           ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
@@ -188,7 +189,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Internal server error during role switch',
+        errors: ['Internal server error during role switch'],
         rollbackInfo: rollbackInfo
       },
       { status: 500 }

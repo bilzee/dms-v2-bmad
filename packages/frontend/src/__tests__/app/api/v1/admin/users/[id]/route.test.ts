@@ -17,19 +17,33 @@ describe('/api/v1/admin/users/[id]', () => {
         id: 'user-123',
         name: 'John Doe',
         email: 'john@example.com',
+        emailVerified: null,
+        image: null,
         phone: '+1234567890',
         organization: 'Relief Org',
         isActive: true,
+        resetToken: null,
+        resetTokenExpiry: null,
+        activeRoleId: null,
         activeRole: null,
-        roles: [{ id: 'role-1', name: 'ASSESSOR' }],
+        roles: [{ 
+          id: 'role-1', 
+          name: 'ASSESSOR',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+          isActive: true,
+          permissions: []
+        }],
         createdAt: new Date('2023-01-01'),
-        lastSync: null
+        updatedAt: new Date('2023-01-01'),
+        lastSync: null,
+        requirePasswordReset: false
       };
 
       mockDatabaseService.getUserWithRoles.mockResolvedValue(mockUser);
 
       const request = new NextRequest('http://localhost/api/v1/admin/users/user-123');
-      const response = await GET(request, { params: { id: 'user-123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -42,7 +56,7 @@ describe('/api/v1/admin/users/[id]', () => {
       mockDatabaseService.getUserWithRoles.mockResolvedValue(null);
 
       const request = new NextRequest('http://localhost/api/v1/admin/users/non-existent');
-      const response = await GET(request, { params: { id: 'non-existent' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'non-existent' }) });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -54,7 +68,7 @@ describe('/api/v1/admin/users/[id]', () => {
       mockDatabaseService.getUserWithRoles.mockRejectedValue(new Error('Database error'));
 
       const request = new NextRequest('http://localhost/api/v1/admin/users/user-123');
-      const response = await GET(request, { params: { id: 'user-123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -76,9 +90,32 @@ describe('/api/v1/admin/users/[id]', () => {
         id: 'user-123',
         ...updateData,
         email: 'john@example.com',
+        emailVerified: null,
+        image: null,
         isActive: true,
-        roles: [{ id: 'role-2', name: 'COORDINATOR' }],
-        updatedAt: new Date()
+        resetToken: null,
+        resetTokenExpiry: null,
+        activeRoleId: 'role-2',
+        createdAt: new Date('2023-01-01'),
+        activeRole: { 
+          id: 'role-2', 
+          name: 'COORDINATOR',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+          isActive: true,
+          permissions: []
+        },
+        roles: [{ 
+          id: 'role-2', 
+          name: 'COORDINATOR',
+          createdAt: new Date('2023-01-01'),
+          updatedAt: new Date('2023-01-01'),
+          isActive: true,
+          permissions: []
+        }],
+        updatedAt: new Date(),
+        lastSync: null,
+        requirePasswordReset: false
       };
 
       mockDatabaseService.updateUserWithAdmin.mockResolvedValue(mockUpdatedUser);
@@ -88,7 +125,7 @@ describe('/api/v1/admin/users/[id]', () => {
         body: JSON.stringify(updateData)
       });
 
-      const response = await PUT(request, { params: { id: 'user-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -113,9 +150,20 @@ describe('/api/v1/admin/users/[id]', () => {
         id: 'user-123',
         name: 'John Updated',
         email: 'john@example.com',
+        emailVerified: null,
+        image: null,
+        phone: '+1234567890',
+        organization: 'Relief Org',
         isActive: true,
+        resetToken: null,
+        resetTokenExpiry: null,
+        activeRoleId: null,
+        activeRole: null,
         roles: [],
-        updatedAt: new Date()
+        createdAt: new Date('2023-01-01'),
+        updatedAt: new Date(),
+        lastSync: null,
+        requirePasswordReset: false
       };
 
       mockDatabaseService.updateUserWithAdmin.mockResolvedValue(mockUpdatedUser);
@@ -125,7 +173,7 @@ describe('/api/v1/admin/users/[id]', () => {
         body: JSON.stringify(partialUpdate)
       });
 
-      const response = await PUT(request, { params: { id: 'user-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -141,7 +189,7 @@ describe('/api/v1/admin/users/[id]', () => {
         body: JSON.stringify({ name: 'Updated Name' })
       });
 
-      const response = await PUT(request, { params: { id: 'non-existent' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'non-existent' }) });
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -159,7 +207,7 @@ describe('/api/v1/admin/users/[id]', () => {
         body: JSON.stringify(invalidData)
       });
 
-      const response = await PUT(request, { params: { id: 'user-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);

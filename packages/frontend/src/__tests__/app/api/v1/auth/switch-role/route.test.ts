@@ -23,7 +23,8 @@ jest.mock('@/lib/prisma', () => ({
   },
 }));
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+import type { Session } from 'next-auth';
+const mockAuth = auth as jest.MockedFunction<any>;
 const mockDatabaseService = DatabaseService as jest.Mocked<typeof DatabaseService>;
 
 const mockPrisma = {
@@ -45,6 +46,8 @@ describe('/api/v1/auth/switch-role', () => {
   const mockUser = {
     id: 'user-1',
     activeRoleId: 'role-1',
+    requirePasswordReset: false,
+    lastSync: null,
     roles: [
       { id: 'role-1', name: 'ASSESSOR', permissions: [{ id: 'p1', name: 'assess', resource: 'assessments', action: 'create' }] },
       { id: 'role-2', name: 'COORDINATOR', permissions: [{ id: 'p2', name: 'coordinate', resource: 'incidents', action: 'manage' }] }

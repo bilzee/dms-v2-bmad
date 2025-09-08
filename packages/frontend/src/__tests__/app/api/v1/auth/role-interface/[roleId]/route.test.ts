@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { GET, PUT } from '@/app/api/v1/auth/role-interface/[roleId]/route';
+import { createMockUserWithPermissions } from '@/__tests__/utils/mockObjects';
 
 // Mock next-auth
 jest.mock('@/auth', () => ({
@@ -7,18 +8,16 @@ jest.mock('@/auth', () => ({
 }));
 
 import { auth } from '@/auth';
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+import type { Session } from 'next-auth';
+const mockAuth = auth as jest.MockedFunction<any>;
 
 describe('/api/v1/auth/role-interface/[roleId]', () => {
   const mockSession = {
-    user: {
+    user: createMockUserWithPermissions({
       id: 'user123',
-      email: 'test@example.com',
-      roles: [
-        { id: 'ASSESSOR_001', name: 'ASSESSOR' },
-        { id: 'COORDINATOR_002', name: 'COORDINATOR' },
-      ],
-    },
+      email: 'test@example.com'
+    }),
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
   };
 
   beforeEach(() => {

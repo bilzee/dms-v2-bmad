@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { AssessmentType } from '@dms/shared';
 import { AssessmentForm } from '@/components/features/assessment/AssessmentForm';
 
@@ -595,7 +596,8 @@ describe('AssessmentForm - PRELIMINARY Assessment', () => {
     
     // Check that emergency styling classes are applied
     const container = screen.getByText('🚨 Emergency Incident Report').closest('div');
-    expect(container).toHaveClass('bg-red-50', 'border-red-200');
+    expect(container).toHaveClass('bg-red-50');
+    expect(container).toHaveClass('border-red-200');
   });
 
   test('priority radio buttons work correctly', async () => {

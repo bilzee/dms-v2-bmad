@@ -12,9 +12,9 @@ global.fetch = jest.fn();
 const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
 
 const mockRoles = [
-  { id: 'role-1', name: 'ASSESSOR', permissions: [] },
-  { id: 'role-2', name: 'COORDINATOR', permissions: [] },
-  { id: 'role-3', name: 'RESPONDER', permissions: [] }
+  { id: 'role-1', name: 'ASSESSOR', permissions: [], isActive: true, createdAt: new Date('2023-01-01'), updatedAt: new Date('2023-01-01') },
+  { id: 'role-2', name: 'COORDINATOR', permissions: [], isActive: true, createdAt: new Date('2023-01-01'), updatedAt: new Date('2023-01-01') },
+  { id: 'role-3', name: 'RESPONDER', permissions: [], isActive: true, createdAt: new Date('2023-01-01'), updatedAt: new Date('2023-01-01') }
 ];
 
 describe('CreateUserModal Component', () => {

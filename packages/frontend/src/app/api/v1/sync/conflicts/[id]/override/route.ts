@@ -44,6 +44,7 @@ export async function PUT(
     if (!conflictId) {
       return NextResponse.json({
         success: false,
+      data: null,
         error: 'Conflict ID is required'
       }, { status: 400 });
     }
@@ -55,6 +56,7 @@ export async function PUT(
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
+      data: null,
         error: `Validation error: ${validationResult.error.issues.map(i => i.message).join(', ')}`
       }, { status: 400 });
     }
@@ -73,6 +75,7 @@ export async function PUT(
     if (!conflict) {
       return NextResponse.json({
         success: false,
+      data: null,
         error: 'Conflict not found'
       }, { status: 404 });
     }
@@ -81,6 +84,7 @@ export async function PUT(
     if (conflict.status === 'RESOLVED') {
       return NextResponse.json({
         success: false,
+      data: null,
         error: 'Cannot override a resolved conflict'
       }, { status: 409 });
     }
@@ -100,6 +104,7 @@ export async function PUT(
     if (escalationLevel === 'emergency' && coordinatorRole !== 'admin') {
       return NextResponse.json({
         success: false,
+      data: null,
         error: 'Emergency override requires admin privileges'
       }, { status: 403 });
     }
@@ -107,6 +112,7 @@ export async function PUT(
     if (conflict.severity === 'CRITICAL' && coordinatorRole === 'coordinator' && !emergencyOverride) {
       return NextResponse.json({
         success: false,
+      data: null,
         error: 'Critical conflicts require supervisor or admin privileges'
       }, { status: 403 });
     }
@@ -187,6 +193,7 @@ export async function PUT(
     
     return NextResponse.json({
       success: false,
+      data: null,
       error: error instanceof Error ? error.message : 'Internal server error'
     }, { status: 500 });
   }

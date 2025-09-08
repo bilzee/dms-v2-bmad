@@ -21,7 +21,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token) {
       return NextResponse.json({
         success: false,
-        error: 'Authentication required',
+      data: null,
+        errors: ['Authentication required'],
         message: 'You must be logged in to access this resource'
       }, { status: 401 });
     }
@@ -30,7 +31,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
       return NextResponse.json({
         success: false,
-        error: 'Access denied',
+      data: null,
+        errors: ['Access denied'],
         message: 'Admin role required to access performance metrics'
       }, { status: 403 });
     }
@@ -40,7 +42,8 @@ async function requireAdminRole(request: NextRequest) {
     console.error('Admin role check failed:', error);
     return NextResponse.json({
       success: false,
-      error: 'Authentication error',
+      data: null,
+      errors: ['Authentication error'],
       message: 'Failed to verify user permissions'
     }, { status: 500 });
   }
@@ -90,8 +93,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<SystemPerf
         alerts,
         healthStatus
       },
-      message: 'Performance metrics retrieved successfully',
-      timestamp: new Date().toISOString()
+      message: 'Performance metrics retrieved successfully'
     };
 
     return NextResponse.json(response);
@@ -101,7 +103,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<SystemPerf
     
     const response: SystemPerformanceResponse = {
       success: false,
-      error: 'Failed to fetch performance metrics',
+      data: null,
+      errors: ['Failed to fetch performance metrics'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString()
     };
@@ -133,8 +136,7 @@ export async function POST(request: NextRequest) {
         metrics,
         storedAt: new Date()
       },
-      message: 'Performance metrics collected and stored successfully',
-      timestamp: new Date().toISOString()
+      message: 'Performance metrics collected and stored successfully'
     });
 
   } catch (error) {
@@ -142,9 +144,9 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to collect performance metrics',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString()
+      data: null,
+      errors: ['Failed to collect performance metrics'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }

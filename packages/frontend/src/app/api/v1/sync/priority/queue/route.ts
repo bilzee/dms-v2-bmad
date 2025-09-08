@@ -28,7 +28,7 @@ async function getBullMQQueueData() {
         priorityReason: job.data.priorityReason || 'Default priority',
         createdAt: new Date(job.timestamp),
         estimatedSyncTime: calculateEstimatedSyncTime(job),
-        error: job.failedReason || undefined,
+        errors: [job.failedReason || undefined],
         lastAttempt: job.processedOn ? new Date(job.processedOn) : undefined,
       }));
       
@@ -105,7 +105,7 @@ const mockQueue: PriorityQueueItem[] = [
     priorityReason: 'Shelter assessment; Moderate beneficiary count',
     createdAt: new Date('2025-08-27T08:00:00Z'),
     estimatedSyncTime: new Date(Date.now() + 30 * 60 * 1000),
-    error: 'Network timeout',
+    errors: ['Network timeout'],
     lastAttempt: new Date('2025-08-27T12:00:00Z'),
   },
 ];
@@ -259,7 +259,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Failed to get priority queue:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to get priority queue' },
+      { success: false, data: null, errors: ['Failed to get priority queue'] },
       { status: 500 }
     );
   }

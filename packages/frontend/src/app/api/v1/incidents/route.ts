@@ -139,7 +139,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch incidents',
+      data: null,
+      errors: ['Failed to fetch incidents'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -155,7 +156,8 @@ export async function POST(request: NextRequest) {
     if (!body.name || !body.type || !body.severity || !body.date) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
+      data: null,
+        errors: ['Missing required fields'],
         message: 'Name, type, severity, and date are required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -165,7 +167,8 @@ export async function POST(request: NextRequest) {
     if (!Object.values(IncidentType).includes(body.type)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident type',
+      data: null,
+        errors: ['Invalid incident type'],
         message: `Incident type must be one of: ${Object.values(IncidentType).join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -175,7 +178,8 @@ export async function POST(request: NextRequest) {
     if (!Object.values(IncidentSeverity).includes(body.severity)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid severity level',
+      data: null,
+        errors: ['Invalid severity level'],
         message: `Severity must be one of: ${Object.values(IncidentSeverity).join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -223,7 +227,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -231,7 +236,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to create incident',
+      data: null,
+      errors: ['Failed to create incident'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

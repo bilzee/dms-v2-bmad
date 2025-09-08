@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { ResponsePlanningForm } from '../ResponsePlanningForm';
 import { useResponseStore } from '@/stores/response.store';
 import { useGPS } from '@/hooks/useGPS';

@@ -19,7 +19,7 @@ import {
   Settings,
   RotateCcw
 } from 'lucide-react';
-import { PermissionMatrix as PermissionMatrixType, AdminRole, RolePermission } from '../../../../../../../shared/types/admin';
+import { PermissionMatrix as PermissionMatrixType, AdminRole, RolePermission } from '@dms/shared/types/admin';
 
 interface PermissionMatrixProps {
   matrix: PermissionMatrixType;

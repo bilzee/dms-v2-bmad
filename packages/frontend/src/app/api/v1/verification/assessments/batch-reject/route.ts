@@ -18,6 +18,7 @@ export async function POST(
     if (!body.assessmentIds || !Array.isArray(body.assessmentIds) || body.assessmentIds.length === 0) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Assessment IDs are required',
         data: null,
         errors: ['assessmentIds must be a non-empty array'],
@@ -27,6 +28,7 @@ export async function POST(
     if (!body.coordinatorId || !body.coordinatorName || !body.rejectionComments?.trim()) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Required rejection information is missing',
         data: null,
         errors: ['coordinatorId, coordinatorName, and rejectionComments are required'],
@@ -38,6 +40,7 @@ export async function POST(
     if (!validRejectionReasons.includes(body.rejectionReason)) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Invalid rejection reason',
         data: null,
         errors: [`rejectionReason must be one of: ${validRejectionReasons.join(', ')}`],
@@ -49,6 +52,7 @@ export async function POST(
     if (!validPriorities.includes(body.priority)) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Invalid priority level',
         data: null,
         errors: [`priority must be one of: ${validPriorities.join(', ')}`],
@@ -60,6 +64,7 @@ export async function POST(
     if (body.assessmentIds.length > maxBatchSize) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: `Batch size too large. Maximum ${maxBatchSize} assessments allowed.`,
         data: null,
         errors: [`Maximum batch size is ${maxBatchSize} assessments`],
@@ -90,7 +95,7 @@ export async function POST(
           results.push({
             assessmentId,
             status: 'FAILED',
-            error: 'Assessment not found',
+            errors: ['Assessment not found'],
           });
           failed++;
           continue;
@@ -100,7 +105,7 @@ export async function POST(
           results.push({
             assessmentId,
             status: 'FAILED',
-            error: 'Assessment not in pending status',
+            errors: ['Assessment not in pending status'],
           });
           failed++;
           continue;
@@ -153,7 +158,7 @@ export async function POST(
         results.push({
           assessmentId,
           status: 'FAILED',
-          error: error instanceof Error ? error.message : 'Unknown error',
+          errors: [error instanceof Error ? error.message : 'Unknown error'],
         });
         failed++;
       }
@@ -185,6 +190,7 @@ export async function POST(
     
     const errorResponse: BatchRejectionResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred during batch rejection',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -197,21 +203,21 @@ export async function POST(
 // Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST for batch rejections.' },
+    { errors: ['Method not allowed. Use POST for batch rejections.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST for batch rejections.' },
+    { errors: ['Method not allowed. Use POST for batch rejections.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST for batch rejections.' },
+    { errors: ['Method not allowed. Use POST for batch rejections.'] },
     { status: 405 }
   );
 }

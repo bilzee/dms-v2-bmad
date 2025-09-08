@@ -51,6 +51,7 @@ export async function POST(
     if (!responseId) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Response ID is required',
         data: null,
         errors: ['Response ID parameter is missing'],
@@ -63,6 +64,7 @@ export async function POST(
     if (!body.coordinatorId || !body.coordinatorName) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Coordinator information is required',
         data: null,
         errors: ['coordinatorId and coordinatorName are required'],
@@ -72,6 +74,7 @@ export async function POST(
     if (!body.status || !['VERIFIED', 'REJECTED'].includes(body.status)) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Valid verification status is required',
         data: null,
         errors: ['status must be either VERIFIED or REJECTED'],
@@ -85,6 +88,7 @@ export async function POST(
       if (!photosVerified || !metricsVerified || !accountabilityVerified) {
         return NextResponse.json({
           success: false,
+      data: null,
           message: 'All verification components must be completed before approval',
           data: null,
           errors: ['Photos, metrics, and accountability must all be verified'],
@@ -98,6 +102,7 @@ export async function POST(
     if (!session?.user) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Unauthorized - session required',
         data: null,
         errors: ['Authentication required'],
@@ -108,6 +113,7 @@ export async function POST(
     if (session.user.role !== UserRoleType.COORDINATOR) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Access denied - coordinator role required',
         data: null,
         errors: ['Coordinator role required for verification'],
@@ -130,6 +136,7 @@ export async function POST(
     if (!existingResponse) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Response not found',
         data: null,
         errors: ['Response does not exist'],
@@ -139,6 +146,7 @@ export async function POST(
     if (existingResponse.verificationStatus !== VerificationStatus.PENDING) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Response not in pending status',
         data: null,
         errors: ['Response must be in PENDING status to be verified'],
@@ -234,6 +242,7 @@ export async function POST(
     
     const errorResponse: ResponseVerificationResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred while completing verification',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -279,21 +288,21 @@ function calculateAccountabilityScore(factors: {
 // Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to verify responses.' },
+    { errors: ['Method not allowed. Use POST to verify responses.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to verify responses.' },
+    { errors: ['Method not allowed. Use POST to verify responses.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to verify responses.' },
+    { errors: ['Method not allowed. Use POST to verify responses.'] },
     { status: 405 }
   );
 }

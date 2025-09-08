@@ -621,8 +621,8 @@ export const useSyncStore = create<SyncState>()(
           
           if (response.ok) {
             set({ backgroundSyncSettings: result.data.settings });
-            // Also update the manager directly
-            backgroundSyncManager.updateSettings(newSettings);
+            // Also update the manager directly if available
+            backgroundSyncManager?.updateSettings(newSettings);
           } else {
             throw new Error(result.error || 'Failed to update background sync settings');
           }
@@ -656,11 +656,11 @@ export const useSyncStore = create<SyncState>()(
       },
 
       pauseBackgroundSync: () => {
-        backgroundSyncManager.pause();
+        backgroundSyncManager?.pause();
       },
 
       resumeBackgroundSync: () => {
-        backgroundSyncManager.resume();
+        backgroundSyncManager?.resume();
       },
 
       updateConnectivityStatus: (status: ConnectivityStatus) => {
@@ -950,16 +950,16 @@ export const useSyncStore = create<SyncState>()(
         }
       },
 
-      rollbackAllFailed: async () => {
+      rollbackAllFailed: async (): Promise<void> => {
         set({ rollbackInProgress: true, error: null });
         
         try {
-          const rolledBackCount = await optimisticUIManager.rollbackAllFailed();
+          await optimisticUIManager.rollbackAllFailed();
           
           // Clear all failed updates from store
           const { optimisticUpdates, pendingOperations } = get();
           const newOptimisticUpdates = new Map(optimisticUpdates);
-          const newPendingOperations = new Set();
+          const newPendingOperations = new Set<string>();
           
           // Remove failed updates
           for (const [id, update] of optimisticUpdates.entries()) {
@@ -974,8 +974,6 @@ export const useSyncStore = create<SyncState>()(
             optimisticUpdates: newOptimisticUpdates,
             pendingOperations: newPendingOperations
           });
-          
-          return rolledBackCount;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Rollback all failed';
           set({ error: errorMessage });

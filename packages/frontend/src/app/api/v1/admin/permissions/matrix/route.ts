@@ -59,8 +59,7 @@ export async function GET(request: NextRequest) {
         },
         lastUpdated
       },
-      message: 'Permission matrix retrieved successfully',
-      timestamp: new Date().toISOString(),
+      message: 'Permission matrix retrieved successfully'
     });
 
   } catch (error) {
@@ -68,9 +67,9 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch permission matrix',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Failed to fetch permission matrix'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }

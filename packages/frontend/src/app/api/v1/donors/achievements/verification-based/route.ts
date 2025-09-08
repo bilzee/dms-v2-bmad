@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get verification stamps for responses (simplified for DatabaseService pattern)
-    const verificationStamps = [];
+    const verificationStamps: any[] = [];
 
     return NextResponse.json({
       success: true,
@@ -86,6 +86,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
+      data: null,
         message: 'Failed to fetch verification-based achievements',
       },
       { status: 500 }

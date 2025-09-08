@@ -28,7 +28,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalOverrideResponse>(
         {
           success: false,
-          error: 'Invalid target type. Must be ASSESSMENT or RESPONSE',
+      data: null,
+          errors: ['Invalid target type. Must be ASSESSMENT or RESPONSE'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -42,7 +43,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalOverrideResponse>(
         {
           success: false,
-          error: 'Target IDs array is required and cannot be empty',
+      data: null,
+          errors: ['Target IDs array is required and cannot be empty'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -56,7 +58,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalOverrideResponse>(
         {
           success: false,
-          error: 'Invalid new status. Must be PENDING or REJECTED',
+      data: null,
+          errors: ['Invalid new status. Must be PENDING or REJECTED'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -70,7 +73,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalOverrideResponse>(
         {
           success: false,
-          error: 'Override reason is required',
+      data: null,
+          errors: ['Override reason is required'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -84,7 +88,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalOverrideResponse>(
         {
           success: false,
-          error: 'Detailed reason must be at least 10 characters',
+      data: null,
+          errors: ['Detailed reason must be at least 10 characters'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -98,7 +103,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalOverrideResponse>(
         {
           success: false,
-          error: 'Coordinator ID is required',
+      data: null,
+          errors: ['Coordinator ID is required'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -123,7 +129,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return {
         targetId,
         success,
-        error: success ? undefined : 'Failed to update status - item may not exist or not be auto-verified',
+        errors: [success ? undefined : 'Failed to update status - item may not exist or not be auto-verified'],
       };
     });
 
@@ -171,7 +177,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
     return NextResponse.json<AutoApprovalOverrideResponse>(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Internal server error'],
         meta: {
           timestamp: new Date().toISOString(),
           version: '1.0.0',

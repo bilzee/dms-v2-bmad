@@ -28,10 +28,16 @@ export class EmailService {
   static async sendWelcomeEmail(userData: WelcomeEmailData): Promise<void> {
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${userData.resetToken}`
     
+    // Validate required email address
+    const fromAddress = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
+    if (!fromAddress) {
+      throw new Error('SMTP_FROM_EMAIL or SMTP_USER environment variable is required');
+    }
+    
     const mailOptions = {
       from: {
         name: 'DMS Admin',
-        address: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER
+        address: fromAddress
       },
       to: userData.email,
       subject: 'Welcome to DMS - Account Created',
@@ -87,10 +93,16 @@ export class EmailService {
   static async sendPasswordResetEmail(userData: { name: string; email: string; resetToken: string }): Promise<void> {
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${userData.resetToken}`
     
+    // Validate required email address
+    const fromAddress = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
+    if (!fromAddress) {
+      throw new Error('SMTP_FROM_EMAIL or SMTP_USER environment variable is required');
+    }
+    
     const mailOptions = {
       from: {
         name: 'DMS Admin',
-        address: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER
+        address: fromAddress
       },
       to: userData.email,
       subject: 'DMS - Password Reset Request',
@@ -136,10 +148,16 @@ export class EmailService {
    * Send bulk import notification email
    */
   static async sendBulkImportNotification(adminEmail: string, results: { successful: number; failed: number; importId: string }): Promise<void> {
+    // Validate required email address
+    const fromAddress = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER;
+    if (!fromAddress) {
+      throw new Error('SMTP_FROM_EMAIL or SMTP_USER environment variable is required');
+    }
+    
     const mailOptions = {
       from: {
         name: 'DMS System',
-        address: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER
+        address: fromAddress
       },
       to: adminEmail,
       subject: 'DMS - Bulk User Import Completed',
@@ -199,3 +217,5 @@ export class EmailService {
     }
   }
 }
+
+export default EmailService;

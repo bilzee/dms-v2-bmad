@@ -22,7 +22,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RolePrefe
     
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RolePrefe
 
     if (!roleId || !preferences) {
       return NextResponse.json(
-        { success: false, error: 'Role ID and preferences are required' },
+        { success: false, errors: ['Role ID and preferences are required'] },
         { status: 400 }
       );
     }
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RolePrefe
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, errors: ['User not found'] },
         { status: 404 }
       );
     }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RolePrefe
     const hasRole = user.roles.some(role => role.id === roleId);
     if (!hasRole) {
       return NextResponse.json(
-        { success: false, error: 'User does not have access to this role' },
+        { success: false, errors: ['User does not have access to this role'] },
         { status: 403 }
       );
     }
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RolePrefe
   } catch (error) {
     console.error('Error saving role preferences:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, errors: ['Internal server error'] },
       { status: 500 }
     );
   }
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<RolePrefer
     
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<RolePrefer
 
     if (!roleId) {
       return NextResponse.json(
-        { success: false, error: 'Role ID is required' },
+        { success: false, errors: ['Role ID is required'] },
         { status: 400 }
       );
     }
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<RolePrefer
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, errors: ['User not found'] },
         { status: 404 }
       );
     }
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<RolePrefer
     const hasRole = user.roles.some(role => role.id === roleId);
     if (!hasRole) {
       return NextResponse.json(
-        { success: false, error: 'User does not have access to this role' },
+        { success: false, errors: ['User does not have access to this role'] },
         { status: 403 }
       );
     }
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<RolePrefer
   } catch (error) {
     console.error('Error getting role preferences:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, errors: ['Internal server error'] },
       { status: 500 }
     );
   }

@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const itemIndex = mockQueue.findIndex(item => item.id === validatedData.itemId);
     if (itemIndex === -1) {
       return NextResponse.json(
-        { success: false, error: 'Queue item not found' },
+        { success: false, data: null, errors: ['Queue item not found'] },
         { status: 404 }
       );
     }
@@ -115,8 +115,10 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { 
-          success: false, 
-          error: 'Invalid request data',
+          success: false,
+      data: null,
+          data: null,
+          errors: ['Invalid request data'],
           details: error.errors 
         },
         { status: 400 }
@@ -124,7 +126,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Failed to apply priority override' },
+      { success: false, data: null, errors: ['Failed to apply priority override'] },
       { status: 500 }
     );
   }

@@ -66,7 +66,8 @@ export async function DELETE(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -76,7 +77,8 @@ export async function DELETE(
     if (!entityId || typeof entityId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid entity ID',
+      data: null,
+        errors: ['Invalid entity ID'],
         message: 'Entity ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -87,7 +89,8 @@ export async function DELETE(
     if (!entity) {
       return NextResponse.json({
         success: false,
-        error: 'Entity not found',
+      data: null,
+        errors: ['Entity not found'],
         message: `No entity found with ID: ${entityId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -100,7 +103,8 @@ export async function DELETE(
     if (!currentLinkedEntities.includes(entityId)) {
       return NextResponse.json({
         success: false,
-        error: 'Entity not linked',
+      data: null,
+        errors: ['Entity not linked'],
         message: `Entity ${entity.name} is not linked to this incident`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -168,7 +172,8 @@ export async function DELETE(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to unlink entity from incident',
+      data: null,
+      errors: ['Failed to unlink entity from incident'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -188,7 +193,8 @@ export async function GET(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -198,7 +204,8 @@ export async function GET(
     if (!entityId || typeof entityId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid entity ID',
+      data: null,
+        errors: ['Invalid entity ID'],
         message: 'Entity ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -209,7 +216,8 @@ export async function GET(
     if (!entity) {
       return NextResponse.json({
         success: false,
-        error: 'Entity not found',
+      data: null,
+        errors: ['Entity not found'],
         message: `No entity found with ID: ${entityId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -222,7 +230,8 @@ export async function GET(
     if (!currentLinkedEntities.includes(entityId)) {
       return NextResponse.json({
         success: false,
-        error: 'Entity not linked',
+      data: null,
+        errors: ['Entity not linked'],
         message: `Entity ${entity.name} is not linked to this incident`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -275,7 +284,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to get entity relationship details',
+      data: null,
+      errors: ['Failed to get entity relationship details'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

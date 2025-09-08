@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     if (!roleId || !preferences) {
       return NextResponse.json(
-        { error: 'Role ID and preferences are required' },
+        { errors: ['Role ID and preferences are required'] },
         { status: 400 }
       );
     }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     if (!hasRoleAccess) {
       return NextResponse.json(
-        { error: 'Access denied for this role' },
+        { errors: ['Access denied for this role'] },
         { status: 403 }
       );
     }
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     if (invalidKeys.length > 0) {
       return NextResponse.json(
-        { error: `Invalid preference keys: ${invalidKeys.join(', ')}` },
+        { errors: [`Invalid preference keys: ${invalidKeys.join(', ')}`] },
         { status: 400 }
       );
     }
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (preferences.dashboardLayout && 
         !['single-column', 'two-column', 'three-column', 'grid'].includes(preferences.dashboardLayout)) {
       return NextResponse.json(
-        { error: 'Invalid dashboard layout value' },
+        { errors: ['Invalid dashboard layout value'] },
         { status: 400 }
       );
     }
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     if (preferences.refreshInterval && 
         (typeof preferences.refreshInterval !== 'number' || preferences.refreshInterval < 5000)) {
       return NextResponse.json(
-        { error: 'Refresh interval must be a number >= 5000ms' },
+        { errors: ['Refresh interval must be a number >= 5000ms'] },
         { status: 400 }
       );
     }
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error saving role preferences:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
 
     if (!roleId) {
       return NextResponse.json(
-        { error: 'Role ID is required' },
+        { errors: ['Role ID is required'] },
         { status: 400 }
       );
     }
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
 
     if (!hasRoleAccess) {
       return NextResponse.json(
-        { error: 'Access denied for this role' },
+        { errors: ['Access denied for this role'] },
         { status: 403 }
       );
     }
@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching role preferences:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }
@@ -171,7 +171,7 @@ export async function DELETE(request: NextRequest) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -181,7 +181,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!roleId) {
       return NextResponse.json(
-        { error: 'Role ID is required' },
+        { errors: ['Role ID is required'] },
         { status: 400 }
       );
     }
@@ -194,7 +194,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!hasRoleAccess) {
       return NextResponse.json(
-        { error: 'Access denied for this role' },
+        { errors: ['Access denied for this role'] },
         { status: 403 }
       );
     }
@@ -214,7 +214,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Error resetting role preferences:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }

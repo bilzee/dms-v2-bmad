@@ -30,9 +30,11 @@ describe('OptimisticUIManager', () => {
     
     // Mock OfflineQueueService
     mockQueueService = {
-      addToQueue: jest.fn().mockResolvedValue('queue-item-123'),
-      removeQueueItem: jest.fn().mockResolvedValue(undefined),
+      addToQueue: jest.fn() as jest.MockedFunction<(item: any) => Promise<string>>,
+      removeQueueItem: jest.fn() as jest.MockedFunction<(itemId: string) => Promise<void>>,
     };
+    mockQueueService.addToQueue.mockResolvedValue('queue-item-123');
+    mockQueueService.removeQueueItem.mockResolvedValue(undefined);
 
     // Mock sync store
     mockSyncStore = {

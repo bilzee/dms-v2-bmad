@@ -7,7 +7,7 @@ const generateHistoricalComparison = (type: string, filters: any = {}) => {
   const now = new Date();
   const currentData = { date: now, metrics: {} as Record<string, number> };
   const historicalData = [];
-  const trends = [];
+  const trends: any[] = [];
   
   // Generate 30 days of historical data
   for (let day = 29; day >= 0; day--) {
@@ -98,7 +98,8 @@ export async function GET(
     if (!validTypes.includes(type)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid historical data type',
+      data: null,
+        errors: ['Invalid historical data type'],
         message: `Type must be one of: ${validTypes.join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -153,7 +154,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch historical comparison data',
+      data: null,
+      errors: ['Failed to fetch historical comparison data'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

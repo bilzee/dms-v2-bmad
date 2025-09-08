@@ -20,7 +20,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token) {
       return NextResponse.json({
         success: false,
-        error: 'Authentication required',
+      data: null,
+        errors: ['Authentication required'],
         message: 'You must be logged in to access this resource'
       }, { status: 401 });
     }
@@ -29,7 +30,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
       return NextResponse.json({
         success: false,
-        error: 'Access denied',
+      data: null,
+        errors: ['Access denied'],
         message: 'Admin role required to download audit data'
       }, { status: 403 });
     }
@@ -39,7 +41,8 @@ async function requireAdminRole(request: NextRequest) {
     console.error('Admin role check failed:', error);
     return NextResponse.json({
       success: false,
-      error: 'Authentication error',
+      data: null,
+      errors: ['Authentication error'],
       message: 'Failed to verify user permissions'
     }, { status: 500 });
   }
@@ -63,7 +66,8 @@ export async function GET(
     if (!exportId) {
       return NextResponse.json({
         success: false,
-        error: 'Missing export ID',
+      data: null,
+        errors: ['Missing export ID'],
         message: 'Export ID is required'
       }, { status: 400 });
     }
@@ -74,7 +78,8 @@ export async function GET(
     if (!exportData) {
       return NextResponse.json({
         success: false,
-        error: 'Export not found',
+      data: null,
+        errors: ['Export not found'],
         message: 'The specified export ID does not exist'
       }, { status: 404 });
     }
@@ -82,7 +87,8 @@ export async function GET(
     if (exportData.status !== 'COMPLETED') {
       return NextResponse.json({
         success: false,
-        error: 'Export not ready',
+      data: null,
+        errors: ['Export not ready'],
         message: `Export status is ${exportData.status}. Only completed exports can be downloaded.`
       }, { status: 400 });
     }
@@ -91,7 +97,8 @@ export async function GET(
     if (exportData.expiresAt && new Date() > new Date(exportData.expiresAt)) {
       return NextResponse.json({
         success: false,
-        error: 'Export expired',
+      data: null,
+        errors: ['Export expired'],
         message: 'This export has expired and is no longer available for download'
       }, { status: 410 });
     }
@@ -101,7 +108,8 @@ export async function GET(
     if (!exportRecord) {
       return NextResponse.json({
         success: false,
-        error: 'Export details not found',
+      data: null,
+        errors: ['Export details not found'],
         message: 'Unable to retrieve export details'
       }, { status: 404 });
     }
@@ -114,7 +122,8 @@ export async function GET(
     if (!fileStream) {
       return NextResponse.json({
         success: false,
-        error: 'Export file not found',
+      data: null,
+        errors: ['Export file not found'],
         message: 'The export file is not available. It may have been deleted or corrupted.'
       }, { status: 404 });
     }
@@ -156,7 +165,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to download export',
+      data: null,
+      errors: ['Failed to download export'],
       message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }

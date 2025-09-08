@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: 'Invalid request data',
         details: validationResult.error.errors,
         timestamp: new Date().toISOString(),
@@ -122,7 +123,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to perform bulk role assignment',
+      data: null,
+      errors: ['Failed to perform bulk role assignment'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

@@ -152,7 +152,7 @@ export async function PATCH(
     const response = await getResponseById(responseId);
     if (!response) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -160,7 +160,7 @@ export async function PATCH(
     // Verify response is in correct status for partial delivery updates
     if (!['PLANNED', 'IN_PROGRESS'].includes(response.status)) {
       return NextResponse.json(
-        { error: 'Partial delivery can only be updated for planned or in-progress responses' },
+        { errors: ['Partial delivery can only be updated for planned or in-progress responses'] },
         { status: 400 }
       );
     }
@@ -218,13 +218,13 @@ export async function PATCH(
 
     if (error instanceof Error) {
       return NextResponse.json(
-        { error: error.message },
+        { errors: [error.message] },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }
@@ -242,14 +242,14 @@ export async function GET(
     const response = await getResponseById(responseId);
     if (!response) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
 
     if (!response.partialDeliveryData) {
       return NextResponse.json(
-        { error: 'No partial delivery data found for this response' },
+        { errors: ['No partial delivery data found for this response'] },
         { status: 404 }
       );
     }
@@ -269,7 +269,7 @@ export async function GET(
     console.error('Get partial delivery error:', error);
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }

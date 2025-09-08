@@ -1,0 +1,51 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e9]
+          - generic [ref=e12]:
+            - heading "DMS" [level=2] [ref=e13]
+            - paragraph [ref=e14]: Field Operations
+        - button [ref=e15] [cursor=pointer]:
+          - img [ref=e16] [cursor=pointer]
+      - link "Help & Support" [ref=e20] [cursor=pointer]:
+        - /url: /help
+        - generic [ref=e21] [cursor=pointer]:
+          - img [ref=e22] [cursor=pointer]
+          - generic [ref=e25] [cursor=pointer]: Help & Support
+    - generic [ref=e26]:
+      - banner [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e30]:
+            - heading "Disaster Management" [level=1] [ref=e31]
+            - paragraph [ref=e32]: Field Operations Dashboard
+          - generic [ref=e33]:
+            - generic [ref=e34]:
+              - img [ref=e36]
+              - generic [ref=e40]: Online
+            - generic [ref=e41]: 0 queued
+            - button [ref=e42] [cursor=pointer]:
+              - img [ref=e43] [cursor=pointer]
+            - button "User" [ref=e47] [cursor=pointer]:
+              - img [ref=e48] [cursor=pointer]
+              - generic [ref=e51] [cursor=pointer]: User
+      - main [ref=e52]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - heading "Sign in to DMS v2" [level=2] [ref=e58]
+            - paragraph [ref=e59]: Disaster Management System
+          - generic [ref=e60]:
+            - button "Sign in with GitHub" [ref=e62] [cursor=pointer]
+            - generic [ref=e63]:
+              - generic [ref=e64]:
+                - textbox "Email address" [ref=e66]
+                - textbox "Password" [ref=e68]
+              - button "Sign in with Credentials" [ref=e69] [cursor=pointer]
+              - paragraph [ref=e70]: "Test credentials: admin@test.com / admin123"
+  - region "Notifications (F8)":
+    - list
+```

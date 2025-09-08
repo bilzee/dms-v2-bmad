@@ -63,7 +63,7 @@ export async function PUT(
     const ruleIndex = priorityRules.findIndex(rule => rule.id === ruleId);
     if (ruleIndex === -1) {
       return NextResponse.json(
-        { success: false, error: 'Priority rule not found' },
+        { success: false, errors: ['Priority rule not found'] },
         { status: 404 }
       );
     }
@@ -89,7 +89,7 @@ export async function PUT(
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Invalid request data',
+          errors: ['Invalid request data'],
           details: error.errors 
         },
         { status: 400 }
@@ -97,7 +97,7 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { success: false, error: 'Failed to update priority rule' },
+      { success: false, errors: ['Failed to update priority rule'] },
       { status: 500 }
     );
   }
@@ -123,7 +123,7 @@ export async function DELETE(
     const ruleIndex = priorityRules.findIndex(rule => rule.id === ruleId);
     if (ruleIndex === -1) {
       return NextResponse.json(
-        { success: false, error: 'Priority rule not found' },
+        { success: false, errors: ['Priority rule not found'] },
         { status: 404 }
       );
     }
@@ -140,7 +140,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Failed to delete priority rule:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to delete priority rule' },
+      { success: false, errors: ['Failed to delete priority rule'] },
       { status: 500 }
     );
   }

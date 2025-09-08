@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
-import { GET, POST } from '../route';
+import { GET, POST } from '../../../../app/api/v1/incidents/route';
 import { IncidentType, IncidentSeverity, IncidentStatus } from '@dms/shared';
 
 // Mock environment variables
-process.env.NODE_ENV = 'test';
+(process.env as any).NODE_ENV = 'test';
 
 describe('/api/v1/incidents Integration Tests', () => {
   describe('GET /api/v1/incidents', () => {

@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
           maxRetryAttempts: 5,
           priorityThreshold: 'LOW' as const,
         },
-        error: null,
+        errors: [null],
       });
     }
 
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: settings,
-      error: null,
+      errors: [null],
     });
   } catch (error) {
     console.error('Get background sync settings error:', error);
@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        data: null,
-        error: error instanceof Error ? error.message : 'Failed to get background sync settings',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Failed to get background sync settings'],
       },
       { status: 500 }
     );
@@ -50,8 +50,8 @@ export async function PUT(req: NextRequest) {
     if (!backgroundSyncManager) {
       return NextResponse.json({
         success: false,
-        data: null,
-        error: 'Background sync service not available during build',
+      data: null,
+        errors: ['Background sync service not available during build'],
       }, { status: 503 });
     }
 
@@ -72,7 +72,7 @@ export async function PUT(req: NextRequest) {
         settings: updatedSettings,
         updatedAt: new Date().toISOString(),
       },
-      error: null,
+      errors: [null],
     });
 
   } catch (error) {
@@ -81,8 +81,8 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        data: null,
-        error: error instanceof Error ? error.message : 'Failed to update background sync settings',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Failed to update background sync settings'],
       },
       { status: 500 }
     );

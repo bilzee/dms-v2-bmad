@@ -29,7 +29,10 @@
         "./src/*"
       ],
       "@dms/shared": [
-        "../shared"
+        "../shared/index.ts"
+      ],
+      "@dms/shared/*": [
+        "../shared/*"
       ]
     }
   },
@@ -37,7 +40,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "src/types/**/*.d.ts",
+    "jest-setup.d.ts"
   ],
   "exclude": [
     "node_modules"

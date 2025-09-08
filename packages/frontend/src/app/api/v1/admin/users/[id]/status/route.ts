@@ -30,7 +30,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: 'Invalid request data',
         details: validationResult.error.errors,
         timestamp: new Date().toISOString(),
@@ -52,7 +53,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (!user) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: 'User with the specified ID does not exist',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -76,7 +78,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to update user status',
+      data: null,
+      errors: ['Failed to update user status'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { ResponseFeedbackNotification } from '../../../src/components/features/verification/ResponseFeedbackNotification';
 import { Feedback, User } from '@dms/shared';
 import { useAuth } from '../../../src/hooks/useAuth';

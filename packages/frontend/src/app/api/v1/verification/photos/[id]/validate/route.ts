@@ -25,6 +25,7 @@ export async function POST(
     if (!photoId) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Photo ID is required',
         data: null,
         errors: ['Photo ID parameter is missing'],
@@ -56,6 +57,7 @@ export async function POST(
     if (!mockPhoto) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Photo not found',
         data: null,
         errors: ['Photo does not exist or has been deleted'],
@@ -161,6 +163,7 @@ export async function POST(
     
     const errorResponse: PhotoValidationResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred while validating photo metadata',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -173,21 +176,21 @@ export async function POST(
 // Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to validate photo metadata.' },
+    { errors: ['Method not allowed. Use POST to validate photo metadata.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to validate photo metadata.' },
+    { errors: ['Method not allowed. Use POST to validate photo metadata.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to validate photo metadata.' },
+    { errors: ['Method not allowed. Use POST to validate photo metadata.'] },
     { status: 405 }
   );
 }

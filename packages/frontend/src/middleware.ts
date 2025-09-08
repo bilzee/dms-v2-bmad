@@ -3,6 +3,10 @@ import type { NextRequest } from "next/server";
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
 
+interface UserRole {
+  name: string;
+}
+
 const { auth } = NextAuth(authConfig);
 
 // Define role-based route access control
@@ -49,7 +53,7 @@ export default auth((req) => {
 
   // Check role-based access for page routes only
   const userRole = req.auth.user.role;
-  const userRoles = req.auth.user.roles?.map((r: any) => r.name) || [userRole];
+  const userRoles = req.auth.user.roles?.map((r: UserRole) => r.name) || [userRole];
 
   // Find matching route permission (excluding API routes)
   const matchedRoute = Object.keys(ROUTE_PERMISSIONS).find(route => 
@@ -58,7 +62,7 @@ export default auth((req) => {
 
   if (matchedRoute) {
     const allowedRoles = ROUTE_PERMISSIONS[matchedRoute as keyof typeof ROUTE_PERMISSIONS];
-    const hasAccess = userRoles.some(role => allowedRoles.includes(role));
+    const hasAccess = userRoles.some((role: string) => allowedRoles.includes(role));
 
     if (!hasAccess) {
       // Redirect to unauthorized page or dashboard based on their role

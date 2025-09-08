@@ -1,19 +1,24 @@
 // app/api/v1/admin/audit/activity/__tests__/route.test.ts
 
-import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { NextRequest } from 'next/server';
 import { GET } from '../route';
 import { getToken } from 'next-auth/jwt';
-import { mockDeep } from 'vitest-mock-extended';
+// Mock implementation with Jest
 
 // Mock Next Auth
-vi.mock('next-auth/jwt', () => ({
-  getToken: vi.fn(),
+jest.mock('next-auth/jwt', () => ({
+  getToken: jest.fn(),
 }));
 
 // Mock Prisma
-const mockPrisma = mockDeep<any>();
-vi.mock('@/lib/prisma', () => ({
+const mockPrisma = {
+  userActivity: {
+    findMany: jest.fn(),
+    count: jest.fn(),
+  },
+} as any;
+jest.mock('@/lib/prisma', () => ({
   default: mockPrisma,
 }));
 
@@ -21,7 +26,7 @@ const mockGetToken = getToken as Mock;
 
 describe('Audit Activity API Route', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     
     // Default to successful auth
     mockGetToken.mockResolvedValue({
@@ -383,7 +388,7 @@ describe('Audit Activity API Route', () => {
   describe('Time Range Calculations', () => {
     it('should calculate 1 hour time range correctly', async () => {
       const now = new Date('2024-01-01T12:00:00Z');
-      vi.setSystemTime(now);
+      jest.setSystemTime(now);
 
       const request = new NextRequest('http://localhost/api/v1/admin/audit/activity?timeRange=1h');
       await GET(request);
@@ -401,7 +406,7 @@ describe('Audit Activity API Route', () => {
 
     it('should calculate 7 days time range correctly', async () => {
       const now = new Date('2024-01-08T12:00:00Z');
-      vi.setSystemTime(now);
+      jest.setSystemTime(now);
 
       const request = new NextRequest('http://localhost/api/v1/admin/audit/activity?timeRange=7d');
       await GET(request);

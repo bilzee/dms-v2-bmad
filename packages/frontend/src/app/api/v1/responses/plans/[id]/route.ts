@@ -31,7 +31,7 @@ export async function GET(
     if (!validationResult.success) {
       return NextResponse.json(
         {
-          error: 'Invalid response plan ID',
+          errors: ['Invalid response plan ID'],
           details: validationResult.error.issues,
         },
         { status: 400 }
@@ -54,7 +54,7 @@ export async function GET(
 
     // if (!responsePlan) {
     //   return NextResponse.json(
-    //     { error: 'Response plan not found' },
+    //     { errors: ['Response plan not found'] },
     //     { status: 404 }
     //   );
     // }
@@ -99,7 +99,7 @@ export async function GET(
     console.error('Error fetching response plan:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
@@ -117,7 +117,7 @@ export async function PUT(
     if (!paramsValidation.success) {
       return NextResponse.json(
         {
-          error: 'Invalid response plan ID',
+          errors: ['Invalid response plan ID'],
           details: paramsValidation.error.issues,
         },
         { status: 400 }
@@ -134,7 +134,7 @@ export async function PUT(
     if (!validationResult.success) {
       return NextResponse.json(
         {
-          error: 'Invalid request data',
+          errors: ['Invalid request data'],
           details: validationResult.error.issues,
         },
         { status: 400 }
@@ -150,7 +150,7 @@ export async function PUT(
 
     // if (!existingPlan) {
     //   return NextResponse.json(
-    //     { error: 'Response plan not found' },
+    //     { errors: ['Response plan not found'] },
     //     { status: 404 }
     //   );
     // }
@@ -206,7 +206,7 @@ export async function PUT(
     console.error('Error updating response plan:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
@@ -224,7 +224,7 @@ export async function DELETE(
     if (!validationResult.success) {
       return NextResponse.json(
         {
-          error: 'Invalid response plan ID',
+          errors: ['Invalid response plan ID'],
           details: validationResult.error.issues,
         },
         { status: 400 }
@@ -240,7 +240,7 @@ export async function DELETE(
 
     // if (!existingPlan) {
     //   return NextResponse.json(
-    //     { error: 'Response plan not found' },
+    //     { errors: ['Response plan not found'] },
     //     { status: 404 }
     //   );
     // }
@@ -248,7 +248,7 @@ export async function DELETE(
     // // Check if plan can be deleted (only PLANNED status typically)
     // if (existingPlan.status !== 'PLANNED') {
     //   return NextResponse.json(
-    //     { error: 'Cannot delete response plan that is not in PLANNED status' },
+    //     { errors: ['Cannot delete response plan that is not in PLANNED status'] },
     //     { status: 400 }
     //   );
     // }
@@ -269,7 +269,7 @@ export async function DELETE(
     console.error('Error deleting response plan:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

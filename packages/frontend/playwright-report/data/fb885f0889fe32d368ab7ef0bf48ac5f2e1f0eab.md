@@ -1,0 +1,182 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e9]
+          - generic [ref=e12]:
+            - heading "DMS" [level=2] [ref=e13]
+            - paragraph [ref=e14]: Field Operations
+        - button [ref=e15] [cursor=pointer]:
+          - img [ref=e16] [cursor=pointer]
+      - link "Help & Support" [ref=e20] [cursor=pointer]:
+        - /url: /help
+        - generic [ref=e21] [cursor=pointer]:
+          - img [ref=e22] [cursor=pointer]
+          - generic [ref=e25] [cursor=pointer]: Help & Support
+    - generic [ref=e26]:
+      - banner [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e30]:
+            - heading "Disaster Management" [level=1] [ref=e31]
+            - paragraph [ref=e32]: Field Operations Dashboard
+          - generic [ref=e33]:
+            - generic [ref=e34]:
+              - img [ref=e36]
+              - generic [ref=e40]: Online
+            - generic [ref=e41]: 0 queued
+            - button [ref=e42] [cursor=pointer]:
+              - img [ref=e43] [cursor=pointer]
+            - button "User" [ref=e47] [cursor=pointer]:
+              - img [ref=e48] [cursor=pointer]
+              - generic [ref=e51] [cursor=pointer]: User
+      - main [ref=e52]:
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - heading "Welcome back, Field Worker" [level=2] [ref=e56]
+            - paragraph [ref=e57]: Here's your current operational overview
+          - generic [ref=e58]:
+            - generic [ref=e61]:
+              - img [ref=e63]
+              - generic [ref=e66]:
+                - paragraph [ref=e67]: "12"
+                - paragraph [ref=e68]: Active Assessments
+                - generic [ref=e69]: ↗ 15% from yesterday
+            - generic [ref=e72]:
+              - img [ref=e74]
+              - generic [ref=e77]:
+                - paragraph [ref=e78]: "8"
+                - paragraph [ref=e79]: Completed Today
+                - generic [ref=e80]: ↗ 25% above target
+            - generic [ref=e83]:
+              - img [ref=e85]
+              - generic [ref=e88]:
+                - paragraph [ref=e89]: "3"
+                - paragraph [ref=e90]: Pending Sync
+            - generic [ref=e93]:
+              - img [ref=e95]
+              - generic [ref=e97]:
+                - paragraph [ref=e98]: "1"
+                - paragraph [ref=e99]: Critical Issues
+          - heading "Main Features" [level=3] [ref=e101]
+          - generic [ref=e102]:
+            - heading "Quick Assessment Creation" [level=3] [ref=e103]
+            - generic [ref=e104]:
+              - link "Health 3 pending" [ref=e105] [cursor=pointer]:
+                - /url: /assessments/new?type=HEALTH
+                - generic [ref=e107] [cursor=pointer]:
+                  - img [ref=e110] [cursor=pointer]
+                  - heading "Health" [level=3] [ref=e112] [cursor=pointer]
+                  - generic [ref=e113] [cursor=pointer]: 3 pending
+              - link "WASH 1 pending" [ref=e114] [cursor=pointer]:
+                - /url: /assessments/new?type=WASH
+                - generic [ref=e116] [cursor=pointer]:
+                  - img [ref=e119] [cursor=pointer]
+                  - heading "WASH" [level=3] [ref=e121] [cursor=pointer]
+                  - generic [ref=e122] [cursor=pointer]: 1 pending
+              - link "Shelter 2 pending" [ref=e123] [cursor=pointer]:
+                - /url: /assessments/new?type=SHELTER
+                - generic [ref=e125] [cursor=pointer]:
+                  - img [ref=e128] [cursor=pointer]
+                  - heading "Shelter" [level=3] [ref=e131] [cursor=pointer]
+                  - generic [ref=e132] [cursor=pointer]: 2 pending
+              - link "Food 0 pending" [ref=e133] [cursor=pointer]:
+                - /url: /assessments/new?type=FOOD
+                - generic [ref=e135] [cursor=pointer]:
+                  - img [ref=e138] [cursor=pointer]
+                  - heading "Food" [level=3] [ref=e141] [cursor=pointer]
+                  - generic [ref=e142] [cursor=pointer]: 0 pending
+              - link "Security 1 pending" [ref=e143] [cursor=pointer]:
+                - /url: /assessments/new?type=SECURITY
+                - generic [ref=e145] [cursor=pointer]:
+                  - img [ref=e148] [cursor=pointer]
+                  - heading "Security" [level=3] [ref=e150] [cursor=pointer]
+                  - generic [ref=e151] [cursor=pointer]: 1 pending
+              - link "Population 4 pending" [ref=e152] [cursor=pointer]:
+                - /url: /assessments/new?type=POPULATION
+                - generic [ref=e154] [cursor=pointer]:
+                  - img [ref=e157] [cursor=pointer]
+                  - heading "Population" [level=3] [ref=e162] [cursor=pointer]
+                  - generic [ref=e163] [cursor=pointer]: 4 pending
+          - generic [ref=e164]:
+            - generic [ref=e165]:
+              - generic [ref=e167]:
+                - img [ref=e168]
+                - text: Emergency Report
+              - generic [ref=e170]:
+                - alert [ref=e171]:
+                  - img [ref=e172]
+                  - heading "Immediate Action Required" [level=5] [ref=e174]
+                  - generic [ref=e175]: Report new disaster situations immediately for incident creation
+                - link "Create Emergency Report" [ref=e176] [cursor=pointer]:
+                  - /url: /assessments/new?type=PRELIMINARY
+                  - button "Create Emergency Report" [ref=e177] [cursor=pointer]
+            - generic [ref=e178]:
+              - generic [ref=e180]:
+                - img [ref=e181]
+                - text: Response Tracking
+              - generic [ref=e184]:
+                - paragraph [ref=e185]: Track delivery progress and partial deliveries
+                - generic [ref=e186]:
+                  - link "Status Review" [ref=e187] [cursor=pointer]:
+                    - /url: /responses/status-review
+                    - button "Status Review" [ref=e188] [cursor=pointer]
+                  - link "Response Queue" [ref=e189] [cursor=pointer]:
+                    - /url: /verification/responses
+                    - button "Response Queue" [ref=e190] [cursor=pointer]
+            - generic [ref=e191]:
+              - generic [ref=e193]:
+                - img [ref=e194]
+                - text: System Status
+              - generic [ref=e197]:
+                - generic [ref=e198]:
+                  - generic [ref=e200]: Online
+                  - generic [ref=e201]: Connected
+                - paragraph [ref=e202]: All features available including real-time sync
+            - generic [ref=e203]:
+              - generic [ref=e205]:
+                - img [ref=e206]
+                - text: Quick Actions
+              - generic [ref=e209]:
+                - generic [ref=e210]:
+                  - generic [ref=e211]:
+                    - img [ref=e212]
+                    - link "View Drafts" [ref=e216] [cursor=pointer]:
+                      - /url: /assessments/drafts
+                  - generic [ref=e217]: "2"
+                - generic [ref=e218]:
+                  - generic [ref=e219]:
+                    - img [ref=e220]
+                    - link "Review Queue" [ref=e224] [cursor=pointer]:
+                      - /url: /verification/queue
+                  - generic [ref=e225]: "5"
+                - generic [ref=e226]:
+                  - generic [ref=e227]:
+                    - img [ref=e228]
+                    - link "Sync Queue" [ref=e231] [cursor=pointer]:
+                      - /url: /queue
+                  - generic [ref=e232]: "0"
+            - generic [ref=e233]:
+              - generic [ref=e235]:
+                - img [ref=e236]
+                - text: Help & Documentation
+              - generic [ref=e240]:
+                - link "Assessment Guide" [ref=e241] [cursor=pointer]:
+                  - /url: /help/assessment-guide
+                  - img [ref=e242] [cursor=pointer]
+                  - text: Assessment Guide
+                - link "Offline Mode Help" [ref=e245] [cursor=pointer]:
+                  - /url: /help/offline-mode
+                  - img [ref=e246] [cursor=pointer]
+                  - text: Offline Mode Help
+                - link "Emergency Procedures" [ref=e250] [cursor=pointer]:
+                  - /url: /help/emergency-procedures
+                  - img [ref=e251] [cursor=pointer]
+                  - text: Emergency Procedures
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e253]
+```

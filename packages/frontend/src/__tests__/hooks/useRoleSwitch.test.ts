@@ -18,7 +18,8 @@ describe('useMultiRole Hook - Role Switching', () => {
         { id: 'role-2', name: 'COORDINATOR', permissions: [], isActive: false }
       ],
       activeRole: { id: 'role-1', name: 'ASSESSOR', permissions: [], isActive: true }
-    }
+    },
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
   };
 
   beforeEach(() => {

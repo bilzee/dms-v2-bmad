@@ -151,6 +151,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
+      data: null,
         message: 'Failed to fetch achievements',
       },
       { status: 500 }
@@ -197,6 +198,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
+      data: null,
         message: 'Failed to create achievement',
       },
       { status: 500 }

@@ -190,7 +190,7 @@ describe('useDrillDownData', () => {
   it('handles different data types correctly', async () => {
     const { rerender } = renderHook(
       ({ dataType }) => useDrillDownData(dataType, {}),
-      { initialProps: { dataType: 'assessments' as const } }
+      { initialProps: { dataType: 'assessments' as 'assessments' | 'responses' | 'incidents' | 'entities' } }
     );
 
     await waitFor(() => {

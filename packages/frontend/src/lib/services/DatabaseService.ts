@@ -66,7 +66,7 @@ interface AffectedEntityFilters {
   offset?: number;
 }
 
-export class DatabaseService {
+class DatabaseService {
   private static prisma = prisma;
 
   // User Management (Epic 9: Multi-role authentication)
@@ -225,17 +225,7 @@ export class DatabaseService {
     });
   }
 
-  static async logUserAction(action: UserAction) {
-    return await this.prisma.auditLog.create({
-      data: {
-        userId: action.userId,
-        action: action.action,
-        resource: action.resource,
-        details: action.details || {},
-        timestamp: action.timestamp
-      }
-    });
-  }
+  // Note: Enhanced logUserAction method is implemented below at line ~1158
 
   static async getAuditTrail(filters: AuditFilters = {}) {
     const where: any = {};
@@ -252,53 +242,13 @@ export class DatabaseService {
 
     return await this.prisma.auditLog.findMany({
       where,
-      include: {
-        user: {
-          select: { name: true, email: true }
-        }
-      },
       take: filters.limit || 100,
       skip: filters.offset || 0,
       orderBy: { timestamp: 'desc' }
     });
   }
 
-  static async getUserStats() {
-    const [
-      totalUsers,
-      activeUsers,
-      adminUsers,
-      coordinatorUsers,
-      recentUsers
-    ] = await Promise.all([
-      this.prisma.user.count(),
-      this.prisma.user.count({ where: { isActive: true } }),
-      this.prisma.user.count({
-        where: {
-          roles: { some: { name: 'ADMIN' } }
-        }
-      }),
-      this.prisma.user.count({
-        where: {
-          roles: { some: { name: 'COORDINATOR' } }
-        }
-      }),
-      this.prisma.user.count({
-        where: {
-          createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
-        }
-      })
-    ]);
-
-    return {
-      totalUsers,
-      activeUsers,
-      adminUsers,
-      coordinatorUsers,
-      recentUsers,
-      inactiveUsers: totalUsers - activeUsers
-    };
-  }
+  // Note: Enhanced getUserStats method is implemented below at line ~1112
 
   static async getUserWithRoles(userId: string) {
     return await this.prisma.user.findUnique({
@@ -350,27 +300,14 @@ export class DatabaseService {
       take: filters.limit || 50,
       skip: filters.offset || 0,
       orderBy: { date: 'desc' },
-      include: {
-        affectedEntities: {
-          take: 5 // Include first 5 affected entities
-        }
-      }
+      // Note: affectedEntities relation not defined in schema
     });
   }
 
   static async getIncidentWithDetails(id: string) {
     return await this.prisma.incident.findUnique({
       where: { id },
-      include: {
-        affectedEntities: {
-          include: {
-            assessments: {
-              orderBy: { createdAt: 'desc' },
-              take: 3
-            }
-          }
-        }
-      }
+      // Note: affectedEntities relation not defined in schema
     });
   }
 

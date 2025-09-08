@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { PriorityRuleManager } from '@/components/features/sync/PriorityRuleManager';
 
 // Mock the sync store

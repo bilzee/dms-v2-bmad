@@ -2,8 +2,7 @@
 
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/authOptions';
+import { auth } from '@/auth';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard - DMS',
@@ -16,7 +15,7 @@ interface AdminLayoutProps {
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {
   // Check if user is authenticated and has admin role
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   
   if (!session?.user) {
     redirect('/auth/signin?callbackUrl=/admin');

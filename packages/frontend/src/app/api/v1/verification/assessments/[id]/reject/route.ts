@@ -18,6 +18,7 @@ export async function POST(
     if (!assessmentId) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Assessment ID is required',
         data: null,
         errors: ['Assessment ID parameter is missing'],
@@ -30,6 +31,7 @@ export async function POST(
     if (!body.coordinatorId || !body.coordinatorName || !body.rejectionComments?.trim()) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Required rejection information is missing',
         data: null,
         errors: ['coordinatorId, coordinatorName, and rejectionComments are required'],
@@ -41,6 +43,7 @@ export async function POST(
     if (!validRejectionReasons.includes(body.rejectionReason)) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Invalid rejection reason',
         data: null,
         errors: [`rejectionReason must be one of: ${validRejectionReasons.join(', ')}`],
@@ -52,6 +55,7 @@ export async function POST(
     if (!validPriorities.includes(body.priority)) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Invalid priority level',
         data: null,
         errors: [`priority must be one of: ${validPriorities.join(', ')}`],
@@ -71,6 +75,7 @@ export async function POST(
     if (!mockAssessment || mockAssessment.verificationStatus !== 'PENDING') {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Assessment not found or not in pending status',
         data: null,
         errors: ['Assessment must be in PENDING status to be rejected'],
@@ -138,6 +143,7 @@ export async function POST(
     
     const errorResponse: AssessmentRejectionResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred while rejecting assessment',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -150,21 +156,21 @@ export async function POST(
 // Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to reject assessments.' },
+    { errors: ['Method not allowed. Use POST to reject assessments.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to reject assessments.' },
+    { errors: ['Method not allowed. Use POST to reject assessments.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to reject assessments.' },
+    { errors: ['Method not allowed. Use POST to reject assessments.'] },
     { status: 405 }
   );
 }

@@ -21,7 +21,7 @@ export async function GET(
     const response = mockResponses[responseId];
     if (!response) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -29,7 +29,7 @@ export async function GET(
     // Check if response has delivery documentation
     if (!response.deliveryDocumentation) {
       return NextResponse.json(
-        { error: 'No delivery documentation found for this response' },
+        { errors: ['No delivery documentation found for this response'] },
         { status: 404 }
       );
     }
@@ -59,7 +59,7 @@ export async function GET(
   } catch (error) {
     console.error('Get delivery documentation error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }
@@ -92,7 +92,7 @@ export async function PUT(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -100,7 +100,7 @@ export async function PUT(
     // Validate that response has existing documentation
     if (!existingResponse.deliveryDocumentation) {
       return NextResponse.json(
-        { error: 'No existing documentation to update' },
+        { errors: ['No existing documentation to update'] },
         { status: 400 }
       );
     }
@@ -132,7 +132,7 @@ export async function PUT(
   } catch (error) {
     console.error('Update delivery documentation error:', error);
     return NextResponse.json(
-      { error: 'Failed to update delivery documentation' },
+      { errors: ['Failed to update delivery documentation'] },
       { status: 500 }
     );
   }
@@ -150,7 +150,7 @@ export async function DELETE(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -173,7 +173,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Delete delivery documentation error:', error);
     return NextResponse.json(
-      { error: 'Failed to remove delivery documentation' },
+      { errors: ['Failed to remove delivery documentation'] },
       { status: 500 }
     );
   }

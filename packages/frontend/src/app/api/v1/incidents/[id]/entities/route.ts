@@ -79,7 +79,8 @@ export async function POST(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -89,7 +90,8 @@ export async function POST(
     if (!body.entityIds || !Array.isArray(body.entityIds) || body.entityIds.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid entity IDs',
+      data: null,
+        errors: ['Invalid entity IDs'],
         message: 'entityIds is required and must be a non-empty array',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -100,7 +102,8 @@ export async function POST(
     if (invalidEntityIds.length > 0) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid entity IDs',
+      data: null,
+        errors: ['Invalid entity IDs'],
         message: `The following entity IDs do not exist: ${invalidEntityIds.join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -116,7 +119,8 @@ export async function POST(
     if (newEntityIds.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'No new entities to link',
+      data: null,
+        errors: ['No new entities to link'],
         message: `All specified entities are already linked to this incident: ${alreadyLinkedIds.join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -189,7 +193,8 @@ export async function POST(
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -197,7 +202,8 @@ export async function POST(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to link entities to incident',
+      data: null,
+      errors: ['Failed to link entities to incident'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -216,7 +222,8 @@ export async function GET(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -268,7 +275,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to get linked entities',
+      data: null,
+      errors: ['Failed to get linked entities'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

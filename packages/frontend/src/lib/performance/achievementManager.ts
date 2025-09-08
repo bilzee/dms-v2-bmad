@@ -272,7 +272,7 @@ class AchievementManager {
       
       // Get already earned achievements
       const earnedAchievements = await this.fetchEarnedAchievements(eventData.donorId);
-      const earnedIds = new Set(earnedAchievements.map((a: any) => a.type));
+      const earnedIds = new Set<string>(earnedAchievements.map((a: any) => a.type));
 
       // Check each rule
       for (const rule of this.rules.values()) {
@@ -428,7 +428,7 @@ class AchievementManager {
     try {
       const stats = await this.fetchDonorStats(donorId);
       const earnedAchievements = await this.fetchEarnedAchievements(donorId);
-      const earnedIds = new Set(earnedAchievements.map((a: any) => a.type));
+      const earnedIds = new Set<string>(earnedAchievements.map((a: any) => a.type));
 
       const progress = [];
 

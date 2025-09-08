@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!eventData.id || !eventData.itemId || !eventData.eventType) {
       return NextResponse.json(
-        { error: 'Missing required fields: id, itemId, eventType' },
+        { errors: ['Missing required fields: id, itemId, eventType'] },
         { status: 400 }
       );
     }
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error logging priority event:', error);
     return NextResponse.json(
-      { error: 'Failed to log priority event' },
+      { errors: ['Failed to log priority event'] },
       { status: 500 }
     );
   }
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error retrieving priority events:', error);
     return NextResponse.json(
-      { error: 'Failed to retrieve priority events' },
+      { errors: ['Failed to retrieve priority events'] },
       { status: 500 }
     );
   }
@@ -162,7 +162,7 @@ export async function DELETE(request: NextRequest) {
 
     if (confirm !== 'true') {
       return NextResponse.json(
-        { error: 'Missing confirmation parameter' },
+        { errors: ['Missing confirmation parameter'] },
         { status: 400 }
       );
     }
@@ -182,7 +182,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Error clearing priority events:', error);
     return NextResponse.json(
-      { error: 'Failed to clear priority events' },
+      { errors: ['Failed to clear priority events'] },
       { status: 500 }
     );
   }

@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
     if (!donorProfile) {
       return NextResponse.json({
         success: false,
-        error: 'Donor profile not found',
+      data: null,
+        errors: ['Donor profile not found'],
         message: 'No donor profile found for current user',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -61,7 +62,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch donor profile',
+      data: null,
+      errors: ['Failed to fetch donor profile'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -80,7 +82,8 @@ export async function PUT(request: NextRequest) {
     if (donorIndex >= mockDonorProfiles.length) {
       return NextResponse.json({
         success: false,
-        error: 'Donor profile not found',
+      data: null,
+        errors: ['Donor profile not found'],
         message: 'No donor profile found for current user',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -94,7 +97,8 @@ export async function PUT(request: NextRequest) {
       if (!body.name || body.name.length > 100) {
         return NextResponse.json({
           success: false,
-          error: 'Invalid name',
+      data: null,
+          errors: ['Invalid name'],
           message: 'Name is required and cannot exceed 100 characters',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -106,7 +110,8 @@ export async function PUT(request: NextRequest) {
       if (!body.organization || body.organization.length > 100) {
         return NextResponse.json({
           success: false,
-          error: 'Invalid organization',
+      data: null,
+          errors: ['Invalid organization'],
           message: 'Organization is required and cannot exceed 100 characters',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -118,7 +123,8 @@ export async function PUT(request: NextRequest) {
       if (body.phone && (body.phone.length < 10 || body.phone.length > 20)) {
         return NextResponse.json({
           success: false,
-          error: 'Invalid phone number',
+      data: null,
+          errors: ['Invalid phone number'],
           message: 'Phone number must be between 10 and 20 characters',
           timestamp: new Date().toISOString(),
         }, { status: 400 });
@@ -130,7 +136,8 @@ export async function PUT(request: NextRequest) {
     if (body.email !== undefined && body.email !== existingProfile.email) {
       return NextResponse.json({
         success: false,
-        error: 'Email updates not allowed',
+      data: null,
+        errors: ['Email updates not allowed'],
         message: 'Email address cannot be changed through this endpoint',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -160,7 +167,8 @@ export async function PUT(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -168,7 +176,8 @@ export async function PUT(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to update donor profile',
+      data: null,
+      errors: ['Failed to update donor profile'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

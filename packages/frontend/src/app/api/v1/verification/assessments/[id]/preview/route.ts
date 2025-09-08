@@ -132,7 +132,7 @@ export async function GET(
     
     if (!assessmentId) {
       return NextResponse.json(
-        { success: false, error: 'Assessment ID is required' },
+        { success: false, errors: ['Assessment ID is required'] },
         { status: 400 }
       );
     }
@@ -142,7 +142,7 @@ export async function GET(
     
     if (!assessment) {
       return NextResponse.json(
-        { success: false, error: 'Assessment not found' },
+        { success: false, errors: ['Assessment not found'] },
         { status: 404 }
       );
     }
@@ -158,7 +158,8 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Unknown error occurred'],
       },
       { status: 500 }
     );

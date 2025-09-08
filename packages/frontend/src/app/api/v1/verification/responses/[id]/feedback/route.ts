@@ -25,6 +25,7 @@ export async function GET(
     if (!responseId) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Response ID is required',
         data: null,
         errors: ['Response ID parameter is missing'],
@@ -120,6 +121,7 @@ export async function GET(
     
     const errorResponse: ResponseFeedbackHistoryResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred while retrieving response feedback',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -132,21 +134,21 @@ export async function GET(
 // Handle unsupported methods
 export async function POST() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve response feedback history.' },
+    { errors: ['Method not allowed. Use GET to retrieve response feedback history.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve response feedback history.' },
+    { errors: ['Method not allowed. Use GET to retrieve response feedback history.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve response feedback history.' },
+    { errors: ['Method not allowed. Use GET to retrieve response feedback history.'] },
     { status: 405 }
   );
 }

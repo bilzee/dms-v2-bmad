@@ -33,7 +33,8 @@ export async function POST(
     if (!assessmentId) {
       const errorResponse: VerifyAssessmentResponse = {
         success: false,
-        error: 'Assessment ID is required',
+      data: null,
+        errors: ['Assessment ID is required'],
       };
       return NextResponse.json(errorResponse, { status: 400 });
     }
@@ -44,7 +45,8 @@ export async function POST(
     if (!['APPROVE', 'REJECT'].includes(body.action)) {
       const errorResponse: VerifyAssessmentResponse = {
         success: false,
-        error: 'Invalid action. Must be APPROVE or REJECT',
+      data: null,
+        errors: ['Invalid action. Must be APPROVE or REJECT'],
       };
       return NextResponse.json(errorResponse, { status: 400 });
     }
@@ -53,7 +55,8 @@ export async function POST(
     if (body.action === 'REJECT' && !body.feedback) {
       const errorResponse: VerifyAssessmentResponse = {
         success: false,
-        error: 'Feedback is required for rejection',
+      data: null,
+        errors: ['Feedback is required for rejection'],
       };
       return NextResponse.json(errorResponse, { status: 400 });
     }
@@ -61,7 +64,8 @@ export async function POST(
     if (body.action === 'REJECT' && body.feedback && !body.feedback.comments.trim()) {
       const errorResponse: VerifyAssessmentResponse = {
         success: false,
-        error: 'Comments are required for rejection feedback',
+      data: null,
+        errors: ['Comments are required for rejection feedback'],
       };
       return NextResponse.json(errorResponse, { status: 400 });
     }
@@ -105,7 +109,8 @@ export async function POST(
     
     const errorResponse: VerifyAssessmentResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      data: null,
+      errors: [error instanceof Error ? error.message : 'Unknown error occurred'],
     };
     
     return NextResponse.json(errorResponse, { status: 500 });

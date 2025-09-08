@@ -46,7 +46,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (error instanceof Error && error.message.includes('Record to update not found')) {
       return NextResponse.json({
         success: false,
-        error: 'Notification not found',
+      data: null,
+        errors: ['Notification not found'],
         message: 'Notification with the specified ID does not exist',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -54,7 +55,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({
       success: false,
-      error: 'Failed to mark notification as read',
+      data: null,
+      errors: ['Failed to mark notification as read'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

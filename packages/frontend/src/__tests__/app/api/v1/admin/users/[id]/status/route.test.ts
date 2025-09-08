@@ -13,22 +13,18 @@ describe('/api/v1/admin/users/[id]/status', () => {
 
   describe('PUT /api/v1/admin/users/[id]/status', () => {
     it('should activate user successfully', async () => {
-      const mockUser = {
-        id: 'user-123',
-        name: 'John Doe',
-        email: 'john@example.com',
-        isActive: true,
-        updatedAt: new Date()
+      const mockBatchResult = {
+        count: 1
       };
 
-      mockDatabaseService.toggleUserStatus.mockResolvedValue(mockUser);
+      mockDatabaseService.toggleUserStatus.mockResolvedValue(mockBatchResult);
 
       const request = new NextRequest('http://localhost/api/v1/admin/users/user-123/status', {
         method: 'PUT',
         body: JSON.stringify({ isActive: true })
       });
 
-      const response = await PUT(request, { params: { id: 'user-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -44,22 +40,18 @@ describe('/api/v1/admin/users/[id]/status', () => {
     });
 
     it('should deactivate user successfully', async () => {
-      const mockUser = {
-        id: 'user-123',
-        name: 'John Doe',
-        email: 'john@example.com',
-        isActive: false,
-        updatedAt: new Date()
+      const mockBatchResult = {
+        count: 1
       };
 
-      mockDatabaseService.toggleUserStatus.mockResolvedValue(mockUser);
+      mockDatabaseService.toggleUserStatus.mockResolvedValue(mockBatchResult);
 
       const request = new NextRequest('http://localhost/api/v1/admin/users/user-123/status', {
         method: 'PUT',
         body: JSON.stringify({ isActive: false })
       });
 
-      const response = await PUT(request, { params: { id: 'user-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -74,7 +66,7 @@ describe('/api/v1/admin/users/[id]/status', () => {
         body: JSON.stringify({})
       });
 
-      const response = await PUT(request, { params: { id: 'user-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -90,7 +82,7 @@ describe('/api/v1/admin/users/[id]/status', () => {
         body: JSON.stringify({ isActive: true })
       });
 
-      const response = await PUT(request, { params: { id: 'non-existent' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'non-existent' }) });
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -106,7 +98,7 @@ describe('/api/v1/admin/users/[id]/status', () => {
         body: JSON.stringify({ isActive: true })
       });
 
-      const response = await PUT(request, { params: { id: 'user-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -120,7 +112,7 @@ describe('/api/v1/admin/users/[id]/status', () => {
         body: 'invalid-json'
       });
 
-      const response = await PUT(request, { params: { id: 'user-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'user-123' }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);

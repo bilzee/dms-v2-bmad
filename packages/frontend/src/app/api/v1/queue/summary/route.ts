@@ -7,7 +7,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(
     {
       success: false,
-      error: 'Queue API has been moved to client-side',
+      data: null,
+      errors: ['Queue API has been moved to client-side'],
       message: 'This API endpoint is no longer available. Queue functionality now uses IndexedDB directly from the client via the OfflineQueueService and related hooks.',
       redirectTo: 'Use useQueueSummary hook or OfflineQueueService.getQueueSummary() directly in client components',
     },

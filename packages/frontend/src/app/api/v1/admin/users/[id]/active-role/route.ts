@@ -29,7 +29,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: 'Invalid request data',
         details: validationResult.error.errors,
         timestamp: new Date().toISOString(),
@@ -94,7 +95,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (error instanceof Error && error.message === 'User not found') {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: 'User with the specified ID does not exist',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -103,7 +105,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (error instanceof Error && error.message === 'User does not have the specified role') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid role',
+      data: null,
+        errors: ['Invalid role'],
         message: 'User does not have the specified role assigned',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -111,7 +114,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({
       success: false,
-      error: 'Failed to set active role',
+      data: null,
+      errors: ['Failed to set active role'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -134,7 +138,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
     if (!user) {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: 'User with the specified ID does not exist',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -185,7 +190,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch user role information',
+      data: null,
+      errors: ['Failed to fetch user role information'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

@@ -67,7 +67,8 @@ export async function GET(
     if (isNaN(z) || isNaN(x) || isNaN(y)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid tile parameters',
+      data: null,
+        errors: ['Invalid tile parameters'],
         message: 'Tile coordinates must be valid numbers',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -77,7 +78,8 @@ export async function GET(
     if (z < 0 || z > 18) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid zoom level',
+      data: null,
+        errors: ['Invalid zoom level'],
         message: 'Zoom level must be between 0 and 18',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -107,7 +109,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to serve map tile',
+      data: null,
+      errors: ['Failed to serve map tile'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
     if (!body.responseType || !body.quantity || !body.affectedEntityId || !body.priority) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
+      data: null,
+        errors: ['Missing required fields'],
         message: 'Response type, quantity, affected entity ID, and priority are required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -49,7 +50,8 @@ export async function POST(request: NextRequest) {
     if (!Object.values(ResponseType).includes(body.responseType)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid response type',
+      data: null,
+        errors: ['Invalid response type'],
         message: `Response type must be one of: ${Object.values(ResponseType).join(', ')}`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -59,7 +61,8 @@ export async function POST(request: NextRequest) {
     if (!['HIGH', 'MEDIUM', 'LOW'].includes(body.priority)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid priority level',
+      data: null,
+        errors: ['Invalid priority level'],
         message: 'Priority must be HIGH, MEDIUM, or LOW',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -125,7 +128,8 @@ export async function POST(request: NextRequest) {
     if (highSeverityConflicts.length > 0 && !body.overrideConflicts) {
       return NextResponse.json({
         success: false,
-        error: 'Allocation conflicts detected',
+      data: null,
+        errors: ['Allocation conflicts detected'],
         conflicts: highSeverityConflicts,
         message: 'Please review conflicts and resubmit with overrideConflicts=true if needed',
         timestamp: new Date().toISOString(),
@@ -205,7 +209,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -213,7 +218,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to create resource allocation',
+      data: null,
+      errors: ['Failed to create resource allocation'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -293,7 +299,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch allocations',
+      data: null,
+      errors: ['Failed to fetch allocations'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

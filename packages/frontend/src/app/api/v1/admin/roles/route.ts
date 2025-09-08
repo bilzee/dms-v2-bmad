@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import DatabaseService from '@/lib/services/DatabaseService';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
@@ -37,8 +38,7 @@ export async function GET(request: NextRequest) {
       data: {
         roles: formattedRoles
       },
-      message: 'Roles retrieved successfully',
-      timestamp: new Date().toISOString(),
+      message: 'Roles retrieved successfully'
     });
 
   } catch (error) {
@@ -46,9 +46,9 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch roles',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Failed to fetch roles'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }

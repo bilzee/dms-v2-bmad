@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Build impact timeline
-    const impactTimeline = [];
+    const impactTimeline: any[] = [];
     const groupedByMonth = new Map<string, {newBeneficiaries: number, deliveries: number}>();
     
     commitments.forEach(commitment => {
@@ -242,6 +242,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
+      data: null,
           message: 'Invalid query parameters',
           errors: error.errors,
         },
@@ -252,6 +253,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
+      data: null,
         message: 'Failed to fetch impact metrics',
       },
       { status: 500 }

@@ -125,6 +125,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
+      data: null,
           message: 'Invalid request parameters',
           errors: error.errors
         },
@@ -135,6 +136,7 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
+      data: null,
         message: 'Failed to generate verification stamp',
       },
       { status: 500 }

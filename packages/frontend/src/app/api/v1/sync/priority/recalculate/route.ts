@@ -186,7 +186,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('Failed to recalculate priorities:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to recalculate priorities' },
+      { success: false, data: null, errors: ['Failed to recalculate priorities'] },
       { status: 500 }
     );
   }

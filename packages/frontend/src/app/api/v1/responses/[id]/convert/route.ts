@@ -43,7 +43,7 @@ export async function PUT(
 
     if (!existingResponse) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -54,7 +54,7 @@ export async function PUT(
     if (response.status !== ResponseStatus.PLANNED) {
       return NextResponse.json(
         {
-          error: 'Response cannot be converted',
+          errors: ['Response cannot be converted'],
           message: `Only planned responses can be converted. Current status: ${response.status}`,
         },
         { status: 400 }
@@ -105,7 +105,7 @@ export async function PUT(
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
-          error: 'Validation failed',
+          errors: ['Validation failed'],
           details: error.errors,
         },
         { status: 400 }
@@ -114,7 +114,7 @@ export async function PUT(
 
     return NextResponse.json(
       {
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: 'Failed to convert response',
       },
       { status: 500 }
@@ -144,7 +144,7 @@ export async function GET(
 
     if (!response) {
       return NextResponse.json(
-        { error: 'Response not found' },
+        { errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -153,7 +153,7 @@ export async function GET(
     if (response.status !== ResponseStatus.PLANNED) {
       return NextResponse.json(
         {
-          error: 'Response not convertible',
+          errors: ['Response not convertible'],
           message: `Response status is ${response.status}, only PLANNED responses can be converted`,
         },
         { status: 400 }
@@ -172,7 +172,7 @@ export async function GET(
   } catch (error) {
     console.error('Get conversion data error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }

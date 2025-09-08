@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
           estimatedCompletionTime: null,
           lastError: 'Service not available during build',
         },
-        error: null,
+        errors: [null],
       });
     }
 
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
         estimatedCompletionTime,
         lastError: null, // Would come from error tracking
       },
-      error: null,
+      errors: [null],
     };
 
     return NextResponse.json(response);
@@ -58,8 +58,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        data: null,
-        error: error instanceof Error ? error.message : 'Failed to get background sync status',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Failed to get background sync status'],
       },
       { status: 500 }
     );

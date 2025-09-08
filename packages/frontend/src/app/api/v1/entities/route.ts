@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Failed to fetch entities:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch entities' },
+      { success: false, errors: ['Failed to fetch entities'] },
       { status: 500 }
     );
   }
@@ -134,7 +134,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Validation failed',
+      data: null,
+          errors: ['Validation failed'],
           details: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Failed to create entity' },
+      { success: false, errors: ['Failed to create entity'] },
       { status: 500 }
     );
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
 import { z } from 'zod';
 import { requireAdminRole, getCurrentUser } from '@/lib/auth-middleware';
+import NotificationService from '@/lib/services/NotificationService';
 
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
@@ -31,10 +32,10 @@ export async function POST(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: 'Invalid request data',
-        details: validationResult.error.errors,
-        timestamp: new Date().toISOString(),
+        details: validationResult.error.errors
       }, { status: 400 });
     }
 
@@ -44,9 +45,9 @@ export async function POST(request: NextRequest) {
     if (userIds.length > 50) {
       return NextResponse.json({
         success: false,
-        error: 'Bulk limit exceeded',
-        message: 'Cannot process more than 50 users in a single bulk operation',
-        timestamp: new Date().toISOString(),
+      data: null,
+        errors: ['Bulk limit exceeded'],
+        message: 'Cannot process more than 50 users in a single bulk operation'
       }, { status: 400 });
     }
 
@@ -73,10 +74,10 @@ export async function POST(request: NextRequest) {
     if (missingUserIds.length > 0) {
       return NextResponse.json({
         success: false,
-        error: 'Users not found',
+      data: null,
+        errors: ['Users not found'],
         message: `The following user IDs were not found: ${missingUserIds.join(', ')}`,
-        details: { missingUserIds },
-        timestamp: new Date().toISOString(),
+        details: { missingUserIds }
       }, { status: 404 });
     }
 
@@ -88,10 +89,10 @@ export async function POST(request: NextRequest) {
     if (missingRoleIds.length > 0) {
       return NextResponse.json({
         success: false,
-        error: 'Roles not found',
+      data: null,
+        errors: ['Roles not found'],
         message: `The following role IDs were not found: ${missingRoleIds.join(', ')}`,
-        details: { missingRoleIds },
-        timestamp: new Date().toISOString(),
+        details: { missingRoleIds }
       }, { status: 404 });
     }
 
@@ -176,8 +177,7 @@ export async function POST(request: NextRequest) {
         },
         operationId: `bulk_role_assignment_${Date.now()}`
       },
-      message: `Bulk role assignment completed. ${successful.length} successful, ${failed.length} failed.`,
-      timestamp: new Date().toISOString(),
+      message: `Bulk role assignment completed. ${successful.length} successful, ${failed.length} failed.`
     });
 
   } catch (error) {
@@ -185,9 +185,9 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to perform bulk role assignment',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Failed to perform bulk role assignment'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }

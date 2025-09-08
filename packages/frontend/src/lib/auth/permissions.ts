@@ -64,7 +64,7 @@ export function hasPermission(
     const resourcePermissions = rolePermissions[resource as keyof typeof rolePermissions];
     if (!resourcePermissions) return false;
     
-    return resourcePermissions.includes(action) || resourcePermissions.includes('*');
+    return (resourcePermissions as readonly string[]).includes(action) || (resourcePermissions as readonly string[]).includes('*');
   });
 }
 

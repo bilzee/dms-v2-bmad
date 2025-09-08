@@ -60,6 +60,7 @@ export default function PartialDeliveryPage() {
           responderName: 'John Doe',
           verificationStatus: VerificationStatus.PENDING,
           syncStatus: SyncStatus.SYNCED,
+          requiresAttention: false,
           data: {
             foodItemsDelivered: [
               { item: 'Rice', quantity: 100, unit: 'kg' },

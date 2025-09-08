@@ -241,6 +241,7 @@ export async function GET(request: NextRequest) {
     
     const errorResponse: VerificationQueueResponse = {
       success: false,
+      data: null,
       data: {
         queue: [],
         queueStats: {
@@ -256,7 +257,7 @@ export async function GET(request: NextRequest) {
           totalCount: 0,
         },
       },
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      errors: [error instanceof Error ? error.message : 'Unknown error occurred'],
     };
     
     return NextResponse.json(errorResponse, { status: 500 });

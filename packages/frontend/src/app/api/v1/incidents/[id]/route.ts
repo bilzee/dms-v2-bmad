@@ -21,7 +21,8 @@ export async function GET(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -33,7 +34,8 @@ export async function GET(
     if (!incidentDetails) {
       return NextResponse.json({
         success: false,
-        error: 'Incident not found',
+      data: null,
+        errors: ['Incident not found'],
         message: `No incident found with ID: ${incidentId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -95,7 +97,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch incident details',
+      data: null,
+      errors: ['Failed to fetch incident details'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -115,7 +118,8 @@ export async function PATCH(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -126,7 +130,8 @@ export async function PATCH(
     if (!existingIncident) {
       return NextResponse.json({
         success: false,
-        error: 'Incident not found',
+      data: null,
+        errors: ['Incident not found'],
         message: `No incident found with ID: ${incidentId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -164,7 +169,8 @@ export async function PATCH(
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -172,7 +178,8 @@ export async function PATCH(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to update incident',
+      data: null,
+      errors: ['Failed to update incident'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -191,7 +198,8 @@ export async function DELETE(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -202,7 +210,8 @@ export async function DELETE(
     if (!existingIncident) {
       return NextResponse.json({
         success: false,
-        error: 'Incident not found',
+      data: null,
+        errors: ['Incident not found'],
         message: `No incident found with ID: ${incidentId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -234,7 +243,8 @@ export async function DELETE(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to delete incident',
+      data: null,
+      errors: ['Failed to delete incident'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

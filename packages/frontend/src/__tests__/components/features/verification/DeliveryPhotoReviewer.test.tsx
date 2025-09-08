@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DeliveryPhotoReviewer from '@/components/features/verification/DeliveryPhotoReviewer';
 import { RapidResponse, MediaAttachment, ResponseType, ResponseStatus, VerificationStatus, SyncStatus, FoodResponseData } from '@dms/shared';
+import { createMockRapidResponse } from '@/__tests__/utils/mockObjects';
 
 // Mock fetch for photo loading
 global.fetch = jest.fn();
@@ -239,8 +240,9 @@ describe('DeliveryPhotoReviewer', () => {
     });
 
     it('validates GPS accuracy and shows warnings', async () => {
-      const responseWithInaccurateGPS = {
-        ...mockResponse,
+      const responseWithInaccurateGPS = createMockRapidResponse({
+        responseType: ResponseType.FOOD,
+        status: ResponseStatus.DELIVERED,
         deliveryEvidence: [
           {
             ...mockPhotos[0],
@@ -256,7 +258,7 @@ describe('DeliveryPhotoReviewer', () => {
             }
           }
         ]
-      };
+      });
 
       render(
         <DeliveryPhotoReviewer
@@ -413,15 +415,16 @@ describe('DeliveryPhotoReviewer', () => {
     });
 
     it('handles missing metadata gracefully', async () => {
-      const responseWithIncompleteMetadata = {
-        ...mockResponse,
+      const responseWithIncompleteMetadata = createMockRapidResponse({
+        responseType: ResponseType.FOOD,
+        status: ResponseStatus.DELIVERED,
         deliveryEvidence: [
           {
             ...mockPhotos[0],
             metadata: null // Missing metadata
           }
         ]
-      };
+      });
 
       render(
         <DeliveryPhotoReviewer

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import QualityThresholdSettings from '@/components/features/verification/QualityThresholdSettings';
 import { QualityThreshold } from '@dms/shared';
 

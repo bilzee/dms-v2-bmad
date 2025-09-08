@@ -60,7 +60,7 @@ describe('DashboardLayout', () => {
       isFieldVisible: jest.fn(),
       getFieldOrder: jest.fn(),
       canPerformQuickAction: jest.fn(),
-    });
+    } as any);
 
     global.fetch = jest.fn();
   });
@@ -74,7 +74,7 @@ describe('DashboardLayout', () => {
       mockUseRoleInterface.mockReturnValue({
         ...mockRoleInterface,
         currentInterface: null,
-      });
+      } as any);
 
       render(<DashboardLayout />);
 

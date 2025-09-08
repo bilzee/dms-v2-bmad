@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import AutoApprovalConfiguration from '@/components/features/verification/AutoApprovalConfiguration';
 import { AutoApprovalConfig, AssessmentType, ResponseType } from '@dms/shared';
 

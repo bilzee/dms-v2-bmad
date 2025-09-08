@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const authResult = await validateApiAccess(request, ['ASSESSOR']);
     if (!authResult.success) {
       return NextResponse.json(
-        { error: 'Unauthorized access' },
+        { errors: ['Unauthorized access'] },
         { status: 401 }
       );
     }
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json(
         { 
-          error: 'Invalid request data',
+          errors: ['Invalid request data'],
           details: validationResult.error.errors
         },
         { status: 400 }
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(
       { 
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: 'Failed to create incident from preliminary assessment'
       },
       { status: 500 }
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   return NextResponse.json(
     { 
-      error: 'Method not allowed',
+      errors: ['Method not allowed'],
       message: 'Use POST to create incidents from assessments'
     },
     { status: 405 }

@@ -119,22 +119,22 @@ describe('HistoricalComparisonChart', () => {
     expect(screen.getByText('+33.3%')).toBeInTheDocument();
   });
 
-  it('handles different chart types', () => {
+  it('handles different metric types', () => {
     const { rerender } = render(
       <HistoricalComparisonChart 
         dataType="assessments" 
         timeRange="30d"
-        chartType="line"
+        metricTypes={["line"]}
         onMetricSelect={jest.fn()}
       />
     );
 
-    // Rerender with area chart
+    // Rerender with different metric types
     rerender(
       <HistoricalComparisonChart 
         dataType="assessments" 
         timeRange="30d"
-        chartType="area"
+        metricTypes={["area"]}
         onMetricSelect={jest.fn()}
       />
     );

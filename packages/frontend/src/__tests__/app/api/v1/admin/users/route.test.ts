@@ -4,6 +4,7 @@ import DatabaseService from '@/lib/services/DatabaseService';
 import { getToken } from 'next-auth/jwt';
 import { PasswordService } from '@/lib/services/PasswordService';
 import { EmailService } from '@/lib/services/EmailService';
+import { createMockUserWithPermissions, createMockPagination } from '@/__tests__/utils/mockObjects';
 
 jest.mock('@/lib/services/DatabaseService');
 jest.mock('next-auth/jwt');
@@ -64,32 +65,54 @@ describe('/api/v1/admin/users', () => {
         email: 'admin@example.com',
         role: 'ADMIN'
       } as any);
+
+      // Mock default user stats
+      mockDatabaseService.getUserStats.mockResolvedValue({
+        totalUsers: 10,
+        activeUsers: 8,
+        inactiveUsers: 2,
+        recentUsers: 3
+      });
+
+      // Mock role-based user queries (for usersByRole calculation)
+      mockDatabaseService.listUsers
+        .mockResolvedValueOnce({ users: [], total: 2 }) // ASSESSOR
+        .mockResolvedValueOnce({ users: [], total: 1 }) // RESPONDER
+        .mockResolvedValueOnce({ users: [], total: 3 }) // COORDINATOR
+        .mockResolvedValueOnce({ users: [], total: 1 }) // DONOR
+        .mockResolvedValueOnce({ users: [], total: 0 }) // VERIFIER
+        .mockResolvedValueOnce({ users: [], total: 1 }); // ADMIN
     });
 
     it('should return paginated users list', async () => {
       const mockUsers = {
         users: [
-          {
+          createMockUserWithPermissions({
             id: '1',
             name: 'John Doe',
             email: 'john@example.com',
             phone: '+1234567890',
-            organization: 'Relief Org',
-            isActive: true,
-            roles: [{ name: 'ASSESSOR' }],
-            createdAt: new Date('2023-01-01'),
-            lastSync: null
-          }
+            organization: 'Relief Org'
+          })
         ],
-        pagination: {
-          total: 1,
-          page: 1,
-          limit: 10,
-          totalPages: 1
-        }
+        total: 1,
+        pagination: createMockPagination()
       };
 
-      mockDatabaseService.listUsers.mockResolvedValue(mockUsers);
+      // Clear previous mocks and set up specific call sequence
+      mockDatabaseService.listUsers.mockReset();
+      
+      // First call: main user list
+      mockDatabaseService.listUsers.mockResolvedValueOnce(mockUsers);
+      
+      // Next 6 calls: role-based counts
+      mockDatabaseService.listUsers
+        .mockResolvedValueOnce({ users: [], total: 2 }) // ASSESSOR
+        .mockResolvedValueOnce({ users: [], total: 1 }) // RESPONDER
+        .mockResolvedValueOnce({ users: [], total: 3 }) // COORDINATOR
+        .mockResolvedValueOnce({ users: [], total: 1 }) // DONOR
+        .mockResolvedValueOnce({ users: [], total: 0 }) // VERIFIER
+        .mockResolvedValueOnce({ users: [], total: 1 }); // ADMIN
 
       const request = new NextRequest('http://localhost/api/v1/admin/users?page=1&limit=10');
       const response = await GET(request);
@@ -108,7 +131,8 @@ describe('/api/v1/admin/users', () => {
       const request = new NextRequest('http://localhost/api/v1/admin/users?search=john&role=ASSESSOR&isActive=true');
       mockDatabaseService.listUsers.mockResolvedValue({
         users: [],
-        pagination: { total: 0, page: 1, limit: 10, totalPages: 0 }
+        total: 0,
+        pagination: createMockPagination({ total: 0, totalPages: 0 })
       });
 
       await GET(request);
@@ -189,13 +213,12 @@ describe('/api/v1/admin/users', () => {
         isActive: true
       };
 
-      const mockCreatedUser = {
+      const mockCreatedUser = createMockUserWithPermissions({
         id: 'user-123',
         ...userData,
-        roles: [{ id: 'role-1', name: 'ASSESSOR' }],
         createdAt: new Date(),
         updatedAt: new Date()
-      };
+      });
 
       mockDatabaseService.createUserWithAdmin.mockResolvedValue(mockCreatedUser);
 

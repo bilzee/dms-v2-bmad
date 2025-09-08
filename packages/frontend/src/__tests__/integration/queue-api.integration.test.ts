@@ -105,7 +105,7 @@ describe('Queue API Integration Tests', () => {
         method: 'PUT',
       });
       
-      const response = await PUT(request, { params: { id: 'test-id' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'test-id' }) });
       const data = await response.json();
       
       expect(response.status).toBe(200);
@@ -120,7 +120,7 @@ describe('Queue API Integration Tests', () => {
         method: 'PUT',
       });
       
-      const response = await PUT(request, { params: { id: '' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: '' }) });
       const data = await response.json();
       
       expect(response.status).toBe(400);
@@ -133,7 +133,7 @@ describe('Queue API Integration Tests', () => {
         method: 'PUT',
       });
       
-      const response = await PUT(request, { params: { id: 'test-id' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'test-id' }) });
       const data = await response.json();
       
       expect(data.retryScheduledIn).toBeGreaterThan(0);
@@ -145,7 +145,7 @@ describe('Queue API Integration Tests', () => {
         method: 'PUT',
       });
       
-      const response = await PUT(request, { params: { id: 'test-id' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'test-id' }) });
       const data = await response.json();
       
       expect(data.data.retryCount).toBeGreaterThan(0);
@@ -160,7 +160,7 @@ describe('Queue API Integration Tests', () => {
         method: 'DELETE',
       });
       
-      const response = await DELETE(request, { params: { id: 'test-id' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'test-id' }) });
       const data = await response.json();
       
       expect(response.status).toBe(200);
@@ -174,7 +174,7 @@ describe('Queue API Integration Tests', () => {
         method: 'DELETE',
       });
       
-      const response = await DELETE(request, { params: { id: '' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: '' }) });
       const data = await response.json();
       
       expect(response.status).toBe(400);

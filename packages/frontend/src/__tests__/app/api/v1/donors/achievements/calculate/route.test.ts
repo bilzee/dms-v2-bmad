@@ -16,7 +16,8 @@ jest.mock('@/lib/services/DatabaseService', () => ({
   }
 }));
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+import type { Session } from 'next-auth';
+const mockAuth = auth as jest.MockedFunction<any>;
 const mockEngine = VerificationAchievementEngine as jest.Mocked<typeof VerificationAchievementEngine>;
 const mockDatabaseService = DatabaseService as jest.Mocked<typeof DatabaseService>;
 

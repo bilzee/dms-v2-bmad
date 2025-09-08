@@ -25,7 +25,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token) {
       return NextResponse.json({
         success: false,
-        error: 'Authentication required',
+      data: null,
+        errors: ['Authentication required'],
         message: 'You must be logged in to access this resource'
       }, { status: 401 });
     }
@@ -34,7 +35,8 @@ async function requireAdminRole(request: NextRequest) {
     if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
       return NextResponse.json({
         success: false,
-        error: 'Access denied',
+      data: null,
+        errors: ['Access denied'],
         message: 'Admin role required to access audit logs'
       }, { status: 403 });
     }
@@ -44,7 +46,8 @@ async function requireAdminRole(request: NextRequest) {
     console.error('Admin role check failed:', error);
     return NextResponse.json({
       success: false,
-      error: 'Authentication error',
+      data: null,
+      errors: ['Authentication error'],
       message: 'Failed to verify user permissions'
     }, { status: 500 });
   }
@@ -54,7 +57,7 @@ async function requireAdminRole(request: NextRequest) {
  * GET /api/v1/admin/audit/activity
  * Retrieve user activity logs with comprehensive filtering and pagination
  */
-export async function GET(request: NextRequest): Promise<NextResponse<AuditActivityResponse>> {
+export async function GET(request: NextRequest): Promise<NextResponse<any>> {
   try {
     // Check admin access
     const authError = await requireAdminRole(request);
@@ -155,8 +158,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<AuditActiv
         },
         aggregations
       },
-      message: `Retrieved ${activities.length} activity log entries`,
-      timestamp: new Date().toISOString()
+      message: `Retrieved ${activities.length} activity log entries`
     };
 
     return NextResponse.json(response);
@@ -164,11 +166,11 @@ export async function GET(request: NextRequest): Promise<NextResponse<AuditActiv
   } catch (error) {
     console.error('Failed to fetch activity logs:', error);
     
-    const response: AuditActivityResponse = {
+    const response = {
       success: false,
-      error: 'Failed to fetch activity logs',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString()
+      data: null,
+      errors: ['Failed to fetch activity logs'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     };
 
     return NextResponse.json(response, { status: 500 });
@@ -239,7 +241,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to export activity logs',
+      data: null,
+      errors: ['Failed to export activity logs'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString()
     }, { status: 500 });

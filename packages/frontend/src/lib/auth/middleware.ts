@@ -23,7 +23,7 @@ export async function withAuth(
       );
     }
 
-    const userRoles = session.user.assignedRoles || [];
+    const userRoles = session.user.roles || [];
 
     // Check role requirements
     if (options.requiredRoles && options.requiredRoles.length > 0) {

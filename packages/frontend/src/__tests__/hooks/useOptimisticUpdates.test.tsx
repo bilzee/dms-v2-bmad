@@ -12,30 +12,30 @@ import { useOptimisticUpdates } from '@/hooks/useOptimisticUpdates';
 
 // Mock dependencies
 const mockOptimisticUIManager = {
-  applyOptimisticUpdate: jest.fn(),
-  retryOptimisticUpdate: jest.fn(),
-  rollbackOptimisticUpdate: jest.fn(),
-  rollbackAllFailed: jest.fn(),
-  getOptimisticUpdate: jest.fn(),
-  getEntityState: jest.fn(),
-  getOptimisticStats: jest.fn(),
+  applyOptimisticUpdate: jest.fn() as jest.MockedFunction<(entityType: string, entityId: string, updates: any, operation?: string) => Promise<string>>,
+  retryOptimisticUpdate: jest.fn() as jest.MockedFunction<(updateId: string) => Promise<void>>,
+  rollbackOptimisticUpdate: jest.fn() as jest.MockedFunction<(updateId: string) => Promise<void>>,
+  rollbackAllFailed: jest.fn() as jest.MockedFunction<() => Promise<number>>,
+  getOptimisticUpdate: jest.fn() as jest.MockedFunction<(updateId: string) => any>,
+  getEntityState: jest.fn() as jest.MockedFunction<(entityType: string, entityId: string) => any>,
+  getOptimisticStats: jest.fn() as jest.MockedFunction<() => any>,
 };
 
 const mockSyncStore = {
   optimisticUpdates: new Map(),
   pendingOperations: new Set(),
   rollbackInProgress: false,
-  retryOptimisticUpdate: jest.fn(),
-  rollbackOptimisticUpdate: jest.fn(),
-  rollbackAllFailed: jest.fn(),
-  getOptimisticEntityState: jest.fn(),
+  retryOptimisticUpdate: jest.fn() as jest.MockedFunction<(updateId: string) => Promise<void>>,
+  rollbackOptimisticUpdate: jest.fn() as jest.MockedFunction<(updateId: string) => Promise<void>>,
+  rollbackAllFailed: jest.fn() as jest.MockedFunction<() => Promise<number>>,
+  getOptimisticEntityState: jest.fn() as jest.MockedFunction<(entityType: string, entityId: string) => any>,
   getOptimisticStats: jest.fn(() => ({
     totalUpdates: 0,
     pendingUpdates: 0,
     confirmedUpdates: 0,
     failedUpdates: 0,
     rolledBackUpdates: 0,
-  })),
+  })) as jest.MockedFunction<() => any>,
 };
 
 jest.mock('@/lib/sync/optimistic', () => ({

@@ -25,7 +25,7 @@ describe('RoleGuard', () => {
       error: null,
       permissions: [],
       canAccess: jest.fn()
-    });
+    } as any);
 
     render(
       <RoleGuard requiredRoles={['COORDINATOR']}>
@@ -50,7 +50,7 @@ describe('RoleGuard', () => {
       error: null,
       permissions: [],
       canAccess: jest.fn()
-    });
+    } as any);
 
     render(
       <RoleGuard requiredRoles={['COORDINATOR']}>
@@ -80,7 +80,7 @@ describe('RoleGuard', () => {
       error: null,
       permissions: [],
       canAccess: jest.fn()
-    });
+    } as any);
 
     render(
       <RoleGuard 
@@ -109,7 +109,7 @@ describe('RoleGuard', () => {
       error: null,
       permissions: [],
       canAccess: jest.fn()
-    });
+    } as any);
 
     render(
       <RoleGuard 
@@ -139,7 +139,7 @@ describe('RoleGuard', () => {
       error: null,
       permissions: [],
       canAccess: jest.fn()
-    });
+    } as any);
 
     const { container } = render(
       <RoleGuard 

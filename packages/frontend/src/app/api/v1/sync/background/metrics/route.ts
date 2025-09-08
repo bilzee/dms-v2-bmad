@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
           },
           currentMetrics: null,
         },
-        error: null,
+        errors: [null],
       });
     }
 
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
           totalCount: allMetrics.length,
         },
       },
-      error: null,
+      errors: [null],
     });
 
   } catch (error) {
@@ -77,8 +77,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        data: null,
-        error: error instanceof Error ? error.message : 'Failed to get background sync metrics',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Failed to get background sync metrics'],
       },
       { status: 500 }
     );

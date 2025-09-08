@@ -1,15 +1,16 @@
-import NextAuth, { NextAuthOptions, User, Session } from "next-auth";
+import NextAuth, { User, Session } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { Adapter } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import { JWT } from "next-auth/jwt";
 import { AdapterUser } from "next-auth/adapters";
 import prisma from "../prisma";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 import type { Role, User as PrismaUser } from "@prisma/client";
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+export const authOptions = {
+  adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     // GitHub provider for development
     GitHubProvider({
@@ -31,7 +32,7 @@ export const authOptions: NextAuthOptions = {
         try {
           // Find user with roles
           const userWithRoles = await prisma.user.findUnique({
-            where: { email: credentials.email },
+            where: { email: credentials.email as string },
             include: {
               roles: true,
               activeRole: true,
@@ -50,19 +51,26 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          // Cast userWithRoles to include the relations
+          const userWithIncludedRoles = userWithRoles as typeof userWithRoles & {
+            roles: Role[];
+            activeRole: Role | null;
+          };
+
           return {
-            id: userWithRoles.id,
-            name: userWithRoles.name,
-            email: userWithRoles.email,
-            image: userWithRoles.image,
-            roles: userWithRoles.roles?.map((role: Role) => ({
+            id: userWithIncludedRoles.id,
+            name: userWithIncludedRoles.name,
+            email: userWithIncludedRoles.email,
+            image: userWithIncludedRoles.image,
+            roles: userWithIncludedRoles.roles?.map((role: Role) => ({
               id: role.id,
               name: role.name,
               isActive: role.isActive
             })) || [],
-            activeRole: userWithRoles.activeRole || (userWithRoles.roles && userWithRoles.roles[0]) || null,
+            activeRole: userWithIncludedRoles.activeRole || (userWithIncludedRoles.roles?.[0] || null),
+            activeRoleId: userWithIncludedRoles.activeRoleId,
             permissions: [], // Will be populated based on role
-          };
+          } as any;
         } catch (error) {
           console.error('Authentication error:', error);
           return null;
@@ -87,10 +95,17 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (dbUser) {
-          token.id = dbUser.id;
-          token.roles = dbUser.roles || [];
-          token.activeRole = dbUser.activeRole || (dbUser.roles?.[0] || null);
-          token.role = dbUser.activeRole?.name || dbUser.roles?.[0]?.name || 'ASSESSOR';
+          // Cast dbUser to include the relations
+          const dbUserWithIncludedRoles = dbUser as typeof dbUser & {
+            roles: Role[];
+            activeRole: Role | null;
+          };
+
+          token.id = dbUserWithIncludedRoles.id;
+          token.roles = dbUserWithIncludedRoles.roles || [];
+          token.activeRole = dbUserWithIncludedRoles.activeRole || (dbUserWithIncludedRoles.roles?.[0] || null);
+          token.activeRoleId = dbUserWithIncludedRoles.activeRoleId;
+          token.role = dbUserWithIncludedRoles.activeRole?.name || (dbUserWithIncludedRoles.roles?.[0]?.name || 'ASSESSOR');
           token.permissions = []; // Will be populated based on role
         }
       }
@@ -98,11 +113,12 @@ export const authOptions: NextAuthOptions = {
     },
     session: async ({ session, token }: { session: Session; token: JWT }) => {
       if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.roles = token.roles;
-        session.user.activeRole = token.activeRole;
-        session.user.permissions = token.permissions;
+        (session.user as any).id = token.id;
+        (session.user as any).role = token.role;
+        (session.user as any).roles = token.roles;
+        (session.user as any).activeRole = token.activeRole;
+        (session.user as any).activeRoleId = token.activeRoleId;
+        (session.user as any).permissions = token.permissions;
       }
       return session;
     },

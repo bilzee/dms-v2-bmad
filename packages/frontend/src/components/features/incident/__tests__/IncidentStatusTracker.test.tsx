@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { IncidentStatusTracker } from '../IncidentStatusTracker';
 import { useIncidentStore } from '@/stores/incident.store';
 import { IncidentStatus, IncidentSeverity } from '@dms/shared';
@@ -184,7 +185,8 @@ describe('IncidentStatusTracker', () => {
     expect(screen.getByText('RESOLVED')).toBeInTheDocument();
 
     // Current status should be highlighted
-    expect(screen.getByText('ACTIVE')).toHaveClass('bg-yellow-100', 'border-yellow-500');
+    expect(screen.getByText('ACTIVE')).toHaveClass('bg-yellow-100');
+    expect(screen.getByText('ACTIVE')).toHaveClass('border-yellow-500');
   });
 
   it('fetches data on mount and when incident changes', () => {

@@ -1,0 +1,42 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img [ref=e8]
+        - button [ref=e11] [cursor=pointer]:
+          - img [ref=e12] [cursor=pointer]
+      - link [ref=e16] [cursor=pointer]:
+        - /url: /help
+        - img [ref=e18] [cursor=pointer]
+    - generic [ref=e21]:
+      - banner [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - button [ref=e25] [cursor=pointer]:
+              - img [ref=e26] [cursor=pointer]
+            - heading "Disaster Management" [level=1] [ref=e28]
+          - generic [ref=e29]:
+            - button [ref=e30] [cursor=pointer]:
+              - img [ref=e31] [cursor=pointer]
+            - button [ref=e35] [cursor=pointer]:
+              - img [ref=e36] [cursor=pointer]
+      - main [ref=e39]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - heading "Sign in to DMS v2" [level=2] [ref=e45]
+            - paragraph [ref=e46]: Disaster Management System
+          - generic [ref=e47]:
+            - button "Sign in with GitHub" [ref=e49] [cursor=pointer]
+            - generic [ref=e50]:
+              - generic [ref=e51]:
+                - textbox "Email address" [ref=e53]
+                - textbox "Password" [ref=e55]
+              - button "Sign in with Credentials" [ref=e56] [cursor=pointer]
+              - paragraph [ref=e57]: "Test credentials: admin@test.com / admin123"
+  - region "Notifications (F8)":
+    - list
+  - alert [ref=e58]
+```

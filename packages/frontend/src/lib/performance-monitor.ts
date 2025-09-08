@@ -92,15 +92,15 @@ export class SystemPerformanceMonitor {
       });
 
       const totalRequests = apiLogs.length;
-      const errorCount = apiLogs.filter(log => (log.statusCode ?? 200) >= 400).length;
+      const errorCount = apiLogs.filter((log: any) => (log.statusCode ?? 200) >= 400).length;
       const errorRate = totalRequests > 0 ? (errorCount / totalRequests) * 100 : 0;
 
       const responseTimes = apiLogs
-        .filter(log => log.responseTime !== null)
-        .map(log => log.responseTime!);
+        .filter((log: any) => log.responseTime !== null)
+        .map((log: any) => log.responseTime!);
       
       const avgResponseTime = responseTimes.length > 0 
-        ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length 
+        ? responseTimes.reduce((sum: any, time: any) => sum + time, 0) / responseTimes.length 
         : 0;
 
       const requestsPerMinute = totalRequests / 60;
@@ -108,7 +108,7 @@ export class SystemPerformanceMonitor {
       // Generate endpoint stats
       const endpointStats: Record<string, { requestCount: number; avgResponseTime: number; errorRate: number }> = {};
       
-      apiLogs.forEach(log => {
+      apiLogs.forEach((log: any) => {
         const endpoint = log.endpoint || 'unknown';
         if (!endpointStats[endpoint]) {
           endpointStats[endpoint] = { requestCount: 0, avgResponseTime: 0, errorRate: 0 };
@@ -193,8 +193,8 @@ export class SystemPerformanceMonitor {
       });
 
       const totalSyncOperations = syncLogs.length;
-      const successfulSyncs = syncLogs.filter(log => !log.errorMessage).length;
-      const conflictSyncs = syncLogs.filter(log => 
+      const successfulSyncs = syncLogs.filter((log: any) => !log.errorMessage).length;
+      const conflictSyncs = syncLogs.filter((log: any) => 
         log.details && 
         typeof log.details === 'object' && 
         'conflict' in log.details
@@ -204,11 +204,11 @@ export class SystemPerformanceMonitor {
       const conflictRate = totalSyncOperations > 0 ? (conflictSyncs / totalSyncOperations) * 100 : 0;
 
       const syncTimes = syncLogs
-        .filter(log => log.responseTime !== null)
-        .map(log => log.responseTime!);
+        .filter((log: any) => log.responseTime !== null)
+        .map((log: any) => log.responseTime!);
       
       const avgSyncTime = syncTimes.length > 0 
-        ? syncTimes.reduce((sum, time) => sum + time, 0) / syncTimes.length 
+        ? syncTimes.reduce((sum: any, time: any) => sum + time, 0) / syncTimes.length 
         : 0;
 
       // Get pending items from queue or sync status
@@ -346,7 +346,7 @@ export class SystemPerformanceMonitor {
       });
 
       // Convert stored metrics to SystemPerformanceMetrics format
-      return historicalMetrics.map(metric => ({
+      return historicalMetrics.map((metric: any) => ({
         timestamp: metric.timestamp,
         database: {
           connectionCount: metric.connectionCount || 0,

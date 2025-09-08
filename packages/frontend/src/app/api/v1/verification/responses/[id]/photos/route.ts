@@ -19,6 +19,7 @@ export async function GET(
     if (!responseId) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Response ID is required',
         data: null,
         errors: ['Response ID parameter is missing'],
@@ -38,6 +39,7 @@ export async function GET(
     if (!mockResponse) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Response not found',
         data: null,
         errors: ['Response does not exist or has been deleted'],
@@ -119,6 +121,7 @@ export async function GET(
     
     const errorResponse: ResponsePhotosResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred while retrieving photos',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -131,21 +134,21 @@ export async function GET(
 // Handle unsupported methods
 export async function POST() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve photos.' },
+    { errors: ['Method not allowed. Use GET to retrieve photos.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve photos.' },
+    { errors: ['Method not allowed. Use GET to retrieve photos.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use GET to retrieve photos.' },
+    { errors: ['Method not allowed. Use GET to retrieve photos.'] },
     { status: 405 }
   );
 }

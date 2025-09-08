@@ -22,7 +22,7 @@ export async function requireAdminRole(request: NextRequest) {
     }
     
     // Check if user has ADMIN role among their roles (multi-role support)
-    const userRoles = (token.roles as string[]) || [token.role as string];
+    const userRoles = (token.roles as any[])?.map(r => r.name || r) || [token.role as string];
     const hasAdminRole = userRoles.includes('ADMIN');
     
     if (!hasAdminRole) {
@@ -65,8 +65,8 @@ export async function getCurrentUser(request: NextRequest) {
     name: token.name as string,
     email: token.email as string,
     role: token.role as string, // Current active role
-    roles: (token.roles as string[]) || [token.role as string], // All available roles
-    activeRole: token.activeRole as string || token.role as string
+    roles: (token.roles as any[])?.map(r => r.name || r) || [token.role as string], // All available roles
+    activeRole: (token.activeRole as any)?.name || token.role as string
   } : null
 }
 
@@ -79,7 +79,7 @@ export async function hasRole(request: NextRequest, role: string) {
   
   if (!token) return false;
   
-  const userRoles = (token.roles as string[]) || [token.role as string];
+  const userRoles = (token.roles as any[])?.map(r => r.name || r) || [token.role as string];
   return userRoles.includes(role);
 }
 
@@ -92,7 +92,7 @@ export async function hasAnyRole(request: NextRequest, roles: string[]) {
   
   if (!token) return false;
   
-  const userRoles = (token.roles as string[]) || [token.role as string];
+  const userRoles = (token.roles as any[])?.map(r => r.name || r) || [token.role as string];
   return roles.some(role => userRoles.includes(role));
 }
 
@@ -105,7 +105,7 @@ export async function hasAllRoles(request: NextRequest, roles: string[]) {
   
   if (!token) return false;
   
-  const userRoles = (token.roles as string[]) || [token.role as string];
+  const userRoles = (token.roles as any[])?.map(r => r.name || r) || [token.role as string];
   return roles.every(role => userRoles.includes(role));
 }
 
@@ -139,7 +139,7 @@ export async function requireRole(request: NextRequest, requiredRole: string) {
       )
     }
     
-    const userRoles = (token.roles as string[]) || [token.role as string];
+    const userRoles = (token.roles as any[])?.map(r => r.name || r) || [token.role as string];
     
     if (!userRoles.includes(requiredRole)) {
       return NextResponse.json(
@@ -188,7 +188,7 @@ export async function requireAnyRole(request: NextRequest, requiredRoles: string
       )
     }
     
-    const userRoles = (token.roles as string[]) || [token.role as string];
+    const userRoles = (token.roles as any[])?.map(r => r.name || r) || [token.role as string];
     const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
     
     if (!hasRequiredRole) {

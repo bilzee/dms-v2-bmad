@@ -324,7 +324,7 @@ export async function GET(
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -333,7 +333,7 @@ export async function GET(
     
     if (!roleId) {
       return NextResponse.json(
-        { error: 'Role ID is required' },
+        { errors: ['Role ID is required'] },
         { status: 400 }
       );
     }
@@ -346,7 +346,7 @@ export async function GET(
 
     if (!hasRoleAccess) {
       return NextResponse.json(
-        { error: 'Access denied for this role' },
+        { errors: ['Access denied for this role'] },
         { status: 403 }
       );
     }
@@ -372,7 +372,7 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching role interface:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }
@@ -387,7 +387,7 @@ export async function PUT(
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { errors: ['Unauthorized'] },
         { status: 401 }
       );
     }
@@ -397,7 +397,7 @@ export async function PUT(
 
     if (!roleId) {
       return NextResponse.json(
-        { error: 'Role ID is required' },
+        { errors: ['Role ID is required'] },
         { status: 400 }
       );
     }
@@ -410,7 +410,7 @@ export async function PUT(
 
     if (!hasRoleAccess) {
       return NextResponse.json(
-        { error: 'Access denied for this role' },
+        { errors: ['Access denied for this role'] },
         { status: 403 }
       );
     }
@@ -421,7 +421,7 @@ export async function PUT(
     
     if (missingFields.length > 0) {
       return NextResponse.json(
-        { error: `Missing required fields: ${missingFields.join(', ')}` },
+        { errors: [`Missing required fields: ${missingFields.join(', ')}`] },
         { status: 400 }
       );
     }
@@ -438,7 +438,7 @@ export async function PUT(
   } catch (error) {
     console.error('Error updating role interface:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { errors: ['Internal server error'] },
       { status: 500 }
     );
   }

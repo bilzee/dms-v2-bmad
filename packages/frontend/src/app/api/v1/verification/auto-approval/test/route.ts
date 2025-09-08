@@ -57,7 +57,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalTestResponse>(
         {
           success: false,
-          error: 'Rules array is required and cannot be empty',
+      data: null,
+          errors: ['Rules array is required and cannot be empty'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -75,7 +76,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
       return NextResponse.json<AutoApprovalTestResponse>(
         {
           success: false,
-          error: 'Sample size must be between 1 and 1000',
+      data: null,
+          errors: ['Sample size must be between 1 and 1000'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
@@ -252,7 +254,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
     return NextResponse.json<AutoApprovalTestResponse>(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Internal server error',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Internal server error'],
         meta: {
           timestamp: new Date().toISOString(),
           version: '1.0.0',

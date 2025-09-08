@@ -271,7 +271,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch donors',
+      data: null,
+      errors: ['Failed to fetch donors'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -287,7 +288,8 @@ export async function POST(request: NextRequest) {
     if (!body.name || !body.organization || !body.email) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required fields',
+      data: null,
+        errors: ['Missing required fields'],
         message: 'Name, organization, and email are required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -298,7 +300,8 @@ export async function POST(request: NextRequest) {
     if (existingDonor) {
       return NextResponse.json({
         success: false,
-        error: 'Donor already exists',
+      data: null,
+        errors: ['Donor already exists'],
         message: `A donor with email ${body.email} already exists`,
         timestamp: new Date().toISOString(),
       }, { status: 409 });
@@ -341,7 +344,8 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -349,7 +353,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to create donor',
+      data: null,
+      errors: ['Failed to create donor'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

@@ -9,8 +9,8 @@ export async function POST(req: NextRequest) {
     if (!backgroundSyncManager) {
       return NextResponse.json({
         success: false,
-        data: null,
-        error: 'Background sync service not available during build',
+      data: null,
+        errors: ['Background sync service not available during build'],
       }, { status: 503 });
     }
 
@@ -23,8 +23,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          data: null,
-          error: 'Background sync is already running',
+      data: null,
+          errors: ['Background sync is already running'],
         },
         { status: 409 }
       );
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          data: null,
-          error: 'Current conditions are not suitable for background sync',
+      data: null,
+          errors: ['Current conditions are not suitable for background sync'],
         },
         { status: 400 }
       );
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         triggeredAt: new Date().toISOString(),
         reason,
       },
-      error: null,
+      errors: [null],
     });
 
   } catch (error) {
@@ -61,8 +61,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        data: null,
-        error: error instanceof Error ? error.message : 'Failed to start background sync',
+      data: null,
+        errors: [error instanceof Error ? error.message : 'Failed to start background sync'],
       },
       { status: 500 }
     );

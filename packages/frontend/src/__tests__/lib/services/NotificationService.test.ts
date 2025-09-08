@@ -1,5 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import NotificationService from '../NotificationService';
+import NotificationService from '@/lib/services/NotificationService';
 
 // Mock DatabaseService
 jest.mock('../DatabaseService', () => ({
@@ -13,20 +13,25 @@ jest.mock('../DatabaseService', () => ({
   }
 }));
 
-import DatabaseService from '../DatabaseService';
+import DatabaseService from '@/lib/services/DatabaseService';
 
 const mockDatabaseService = DatabaseService as jest.Mocked<typeof DatabaseService>;
+const mockNotificationCreate = mockDatabaseService.prisma.notification.create as jest.MockedFunction<typeof DatabaseService.prisma.notification.create>;
 
 // Mock data
 const mockUser = {
   id: 'user-1',
   name: 'John Doe',
-  email: 'john@example.com'
+  email: 'john@example.com',
+  requirePasswordReset: false,
+  lastSync: null
 };
 
 const mockAdmin = {
   id: 'admin-1',
-  name: 'Admin User'
+  name: 'Admin User',
+  requirePasswordReset: false,
+  lastSync: null
 };
 
 const mockRoles = [
@@ -36,7 +41,9 @@ const mockRoles = [
     description: 'Emergency response role',
     permissions: [],
     userCount: 10,
-    isActive: true
+    isActive: true,
+    createdAt: new Date('2023-01-01'),
+    updatedAt: new Date('2023-01-01')
   },
   {
     id: 'role-2', 
@@ -44,7 +51,9 @@ const mockRoles = [
     description: 'Coordination role',
     permissions: [],
     userCount: 5,
-    isActive: true
+    isActive: true,
+    createdAt: new Date('2023-01-01'),
+    updatedAt: new Date('2023-01-01')
   }
 ];
 
@@ -52,7 +61,7 @@ describe('NotificationService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock successful database operations
-    (mockDatabaseService.prisma.notification.create as jest.Mock).mockResolvedValue({
+    mockNotificationCreate.mockResolvedValue({
       id: 'notification-1',
       status: 'PENDING'
     });
@@ -158,7 +167,7 @@ describe('NotificationService', () => {
     });
 
     it('does not fail when database operation fails', async () => {
-      (mockDatabaseService.prisma.notification.create as jest.Mock).mockRejectedValue(
+      mockNotificationCreate.mockRejectedValue(
         new Error('Database error')
       );
 
@@ -200,7 +209,7 @@ describe('NotificationService', () => {
       );
 
       // Check admin summary notification
-      const adminSummaryCall = (mockDatabaseService.prisma.notification.create as jest.Mock).mock.calls
+      const adminSummaryCall = mockNotificationCreate.mock.calls
         .find(call => call[0].data.targetRoles.includes('ADMIN'));
 
       expect(adminSummaryCall[0].data).toEqual(

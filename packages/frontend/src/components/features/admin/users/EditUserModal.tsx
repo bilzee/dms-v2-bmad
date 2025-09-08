@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AdminUser, UpdateUserRequest } from '../../../../../../../shared/types/admin';
+import { AdminUser, UpdateUserRequest } from '@dms/shared/types/admin';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';

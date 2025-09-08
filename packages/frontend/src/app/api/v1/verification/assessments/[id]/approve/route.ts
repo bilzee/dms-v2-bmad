@@ -18,6 +18,7 @@ export async function POST(
     if (!assessmentId) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Assessment ID is required',
         data: null,
         errors: ['Assessment ID parameter is missing'],
@@ -30,6 +31,7 @@ export async function POST(
     if (!body.coordinatorId || !body.coordinatorName) {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Coordinator information is required',
         data: null,
         errors: ['coordinatorId and coordinatorName are required'],
@@ -50,6 +52,7 @@ export async function POST(
     if (!mockAssessment || mockAssessment.verificationStatus !== 'PENDING') {
       return NextResponse.json({
         success: false,
+      data: null,
         message: 'Assessment not found or not in pending status',
         data: null,
         errors: ['Assessment must be in PENDING status to be approved'],
@@ -118,6 +121,7 @@ export async function POST(
     
     const errorResponse: AssessmentApprovalResponse = {
       success: false,
+      data: null,
       message: 'Internal server error occurred while approving assessment',
       data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
@@ -130,21 +134,21 @@ export async function POST(
 // Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to approve assessments.' },
+    { errors: ['Method not allowed. Use POST to approve assessments.'] },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to approve assessments.' },
+    { errors: ['Method not allowed. Use POST to approve assessments.'] },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { error: 'Method not allowed. Use POST to approve assessments.' },
+    { errors: ['Method not allowed. Use POST to approve assessments.'] },
     { status: 405 }
   );
 }

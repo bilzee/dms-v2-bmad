@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { AssessmentVerificationQueue } from '@/components/features/verification/AssessmentVerificationQueue';
 import { useVerificationStore } from '@/stores/verification.store';
 import { AssessmentType, VerificationStatus, SyncStatus } from '@dms/shared';

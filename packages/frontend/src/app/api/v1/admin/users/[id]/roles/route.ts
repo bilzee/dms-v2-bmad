@@ -31,7 +31,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: 'Invalid request data',
         details: validationResult.error.errors,
         timestamp: new Date().toISOString(),
@@ -129,7 +130,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (error instanceof Error && error.message === 'User not found') {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: 'User with the specified ID does not exist',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -137,7 +139,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({
       success: false,
-      error: 'Failed to assign user roles',
+      data: null,
+      errors: ['Failed to assign user roles'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -159,7 +162,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: 'Invalid request data',
         details: validationResult.error.errors,
         timestamp: new Date().toISOString(),
@@ -277,7 +281,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (error instanceof Error && error.message === 'User not found') {
       return NextResponse.json({
         success: false,
-        error: 'User not found',
+      data: null,
+        errors: ['User not found'],
         message: 'User with the specified ID does not exist',
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -285,7 +290,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({
       success: false,
-      error: 'Failed to update user roles',
+      data: null,
+      errors: ['Failed to update user roles'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -307,7 +313,8 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     if (!roleId || roleId === 'roles') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid request',
+      data: null,
+        errors: ['Invalid request'],
         message: 'Role ID is required',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -332,7 +339,8 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     if (!currentRoleIds.includes(roleId)) {
       return NextResponse.json({
         success: false,
-        error: 'Role not assigned',
+      data: null,
+        errors: ['Role not assigned'],
         message: 'User does not have the specified role',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -375,7 +383,8 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to remove user role',
+      data: null,
+      errors: ['Failed to remove user role'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

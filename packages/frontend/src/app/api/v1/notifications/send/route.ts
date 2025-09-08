@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json(
         { 
-          error: 'Invalid notification request',
+          errors: ['Invalid notification request'],
           details: validationResult.error.errors
         },
         { status: 400 }
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(
       { 
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: 'Failed to send notification'
       },
       { status: 500 }
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   return NextResponse.json(
     { 
-      error: 'Method not allowed',
+      errors: ['Method not allowed'],
       message: 'Use POST to send notifications'
     },
     { status: 405 }

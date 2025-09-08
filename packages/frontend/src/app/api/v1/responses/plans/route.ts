@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json(
         {
-          error: 'Invalid query parameters',
+          errors: ['Invalid query parameters'],
           details: validationResult.error.issues,
         },
         { status: 400 }
@@ -209,7 +209,7 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching response plans:', error);
     return NextResponse.json(
       {
-        error: 'Internal server error',
+        errors: ['Internal server error'],
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

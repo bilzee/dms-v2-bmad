@@ -37,8 +37,7 @@ const mockAssessment: RapidAssessment = {
   },
   mediaAttachments: [],
   createdAt: new Date('2024-01-01T10:00:00Z'),
-  updatedAt: new Date('2024-01-01T10:00:00Z'),
-  lastSyncAttempt: new Date('2024-01-01T10:00:00Z')
+  updatedAt: new Date('2024-01-01T10:00:00Z')
 };
 
 const mockResponse: RapidResponse = {
@@ -67,7 +66,6 @@ const mockResponse: RapidResponse = {
   createdAt: new Date('2024-01-01T10:00:00Z'),
   updatedAt: new Date('2024-01-01T10:00:00Z'),
   requiresAttention: false,
-  lastSyncAttempt: new Date('2024-01-01T10:00:00Z'),
   deliveryEvidence: []
 };
 

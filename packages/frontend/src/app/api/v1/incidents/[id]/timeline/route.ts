@@ -284,7 +284,8 @@ export async function GET(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -303,7 +304,8 @@ export async function GET(
     if (!timelineData) {
       return NextResponse.json({
         success: false,
-        error: 'Incident not found',
+      data: null,
+        errors: ['Incident not found'],
         message: `No incident found with ID: ${incidentId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -390,7 +392,8 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to get incident timeline',
+      data: null,
+      errors: ['Failed to get incident timeline'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
@@ -410,7 +413,8 @@ export async function POST(
     if (!incidentId || typeof incidentId !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Invalid incident ID',
+      data: null,
+        errors: ['Invalid incident ID'],
         message: 'Incident ID is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -420,7 +424,8 @@ export async function POST(
     if (!body.description || typeof body.description !== 'string') {
       return NextResponse.json({
         success: false,
-        error: 'Missing required field',
+      data: null,
+        errors: ['Missing required field'],
         message: 'description is required and must be a string',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -431,7 +436,8 @@ export async function POST(
     if (!timelineData) {
       return NextResponse.json({
         success: false,
-        error: 'Incident not found',
+      data: null,
+        errors: ['Incident not found'],
         message: `No incident found with ID: ${incidentId}`,
         timestamp: new Date().toISOString(),
       }, { status: 404 });
@@ -475,7 +481,8 @@ export async function POST(
     if (error instanceof SyntaxError) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid JSON in request body',
+      data: null,
+        errors: ['Invalid JSON in request body'],
         message: 'Please check your request format',
         timestamp: new Date().toISOString(),
       }, { status: 400 });
@@ -483,7 +490,8 @@ export async function POST(
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to add timeline event',
+      data: null,
+      errors: ['Failed to add timeline event'],
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

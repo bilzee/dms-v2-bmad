@@ -45,14 +45,14 @@ export async function POST(
     
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized - session required' },
+        { success: false, errors: ['Unauthorized - session required'] },
         { status: 401 }
       );
     }
 
     if (session.user.role !== UserRoleType.COORDINATOR) {
       return NextResponse.json(
-        { success: false, error: 'Access denied - coordinator role required' },
+        { success: false, errors: ['Access denied - coordinator role required'] },
         { status: 403 }
       );
     }
@@ -83,7 +83,7 @@ export async function POST(
 
     if (!response) {
       return NextResponse.json(
-        { success: false, error: 'Response not found' },
+        { success: false, errors: ['Response not found'] },
         { status: 404 }
       );
     }
@@ -251,7 +251,7 @@ export async function POST(
   } catch (error) {
     console.error('Error validating response metrics:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to validate response metrics' },
+      { success: false, errors: ['Failed to validate response metrics'] },
       { status: 500 }
     );
   }

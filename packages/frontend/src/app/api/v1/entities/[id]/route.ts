@@ -26,7 +26,7 @@ export async function GET(
 
     if (!entity) {
       return NextResponse.json(
-        { success: false, error: 'Entity not found' },
+        { success: false, errors: ['Entity not found'] },
         { status: 404 }
       );
     }
@@ -38,7 +38,7 @@ export async function GET(
   } catch (error) {
     console.error('Failed to fetch entity:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch entity' },
+      { success: false, errors: ['Failed to fetch entity'] },
       { status: 500 }
     );
   }
@@ -65,7 +65,7 @@ export async function PUT(
   } catch (error) {
     console.error('Failed to update entity:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update entity' },
+      { success: false, errors: ['Failed to update entity'] },
       { status: 500 }
     );
   }

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import DatabaseService from '@/lib/services/DatabaseService';
 import { z } from 'zod';
 import { requireAdminRole, getCurrentUser } from '@/lib/auth-middleware';
+import PasswordService from '@/lib/services/PasswordService';
+import EmailService from '@/lib/services/EmailService';
+import { UserListFilters } from '@dms/shared/types/admin';
 
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
@@ -101,8 +104,7 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      message: 'Users retrieved successfully',
-      timestamp: new Date().toISOString()
+      message: 'Users retrieved successfully'
     };
 
     return NextResponse.json(response);
@@ -112,9 +114,9 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch users',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Failed to fetch users'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }
@@ -133,10 +135,10 @@ export async function POST(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-        error: 'Validation failed',
+      data: null,
+        errors: ['Validation failed'],
         message: 'Invalid request data',
-        details: validationResult.error.errors,
-        timestamp: new Date().toISOString(),
+        details: validationResult.error.errors
       }, { status: 400 });
     }
 
@@ -147,9 +149,9 @@ export async function POST(request: NextRequest) {
     if (existingUser.users.length > 0) {
       return NextResponse.json({
         success: false,
-        error: 'Email already exists',
-        message: 'A user with this email address already exists',
-        timestamp: new Date().toISOString(),
+      data: null,
+        errors: ['Email already exists'],
+        message: 'A user with this email address already exists'
       }, { status: 409 });
     }
 
@@ -158,9 +160,9 @@ export async function POST(request: NextRequest) {
     if (!currentUser) {
       return NextResponse.json({
         success: false,
-        error: 'Authentication required',
-        message: 'Unable to identify current user',
-        timestamp: new Date().toISOString(),
+      data: null,
+        errors: ['Authentication required'],
+        message: 'Unable to identify current user'
       }, { status: 401 });
     }
 
@@ -217,8 +219,7 @@ export async function POST(request: NextRequest) {
           hasTemporaryPassword: true // Indicate temporary credentials were generated
         }
       },
-      message: 'User created successfully. Welcome email sent with temporary credentials.',
-      timestamp: new Date().toISOString(),
+      message: 'User created successfully. Welcome email sent with temporary credentials.'
     }, { status: 201 });
 
   } catch (error) {
@@ -226,9 +227,9 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Failed to create user',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString(),
+      data: null,
+      errors: ['Failed to create user'],
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     }, { status: 500 });
   }
 }

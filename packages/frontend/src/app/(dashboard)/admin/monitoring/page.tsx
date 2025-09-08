@@ -15,7 +15,7 @@ import {
   TrendingUp,
   Database,
   Globe,
-  Queue,
+  List,
   Cpu
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -251,7 +251,7 @@ export default function MonitoringPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Queue Status</CardTitle>
-            <Queue className="h-4 w-4 text-purple-500" />
+            <List className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -275,16 +275,16 @@ export default function MonitoringPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {currentMetrics.system.cpuUsage.toFixed(1)}%
+              {currentMetrics.system.cpuUsage?.toFixed(1) || '0.0'}%
             </div>
             <p className="text-xs text-muted-foreground">CPU Usage</p>
             <div className="mt-2 text-xs">
               <div className="flex justify-between">
                 <span>Memory:</span>
                 <span className={
-                  currentMetrics.system.memoryUsage > 80 ? 'text-red-500' : 'text-green-600'
+                  (currentMetrics.system.memoryUsage || 0) > 80 ? 'text-red-500' : 'text-green-600'
                 }>
-                  {currentMetrics.system.memoryUsage.toFixed(1)}%
+                  {currentMetrics.system.memoryUsage?.toFixed(1) || '0.0'}%
                 </span>
               </div>
             </div>
@@ -304,7 +304,16 @@ export default function MonitoringPage() {
           <SystemMetricsDisplay 
             metrics={currentMetrics}
             historicalData={historicalData}
-            alerts={alerts}
+            alerts={alerts?.filter(alert => 
+              alert.severity === 'CRITICAL' || alert.severity === 'WARNING'
+            ).map(alert => ({
+              type: alert.type as 'HIGH_ERROR_RATE' | 'SLOW_RESPONSE' | 'HIGH_QUEUE_SIZE' | 'SYNC_FAILURE',
+              severity: alert.severity as 'CRITICAL' | 'WARNING',
+              message: alert.message,
+              value: alert.value || 0,
+              threshold: alert.threshold || 0,
+              timestamp: alert.timestamp
+            }))}
             showDetailedView={true}
           />
         </CardContent>

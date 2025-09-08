@@ -197,7 +197,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     console.error('Error fetching assessment status:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch assessment status' },
+      { errors: ['Failed to fetch assessment status'] },
       { status: 500 }
     );
   }
@@ -206,21 +206,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 // Handle unsupported methods
 export async function POST(): Promise<NextResponse> {
   return NextResponse.json(
-    { error: 'Method not allowed' },
+    { errors: ['Method not allowed'] },
     { status: 405 }
   );
 }
 
 export async function PUT(): Promise<NextResponse> {
   return NextResponse.json(
-    { error: 'Method not allowed' },
+    { errors: ['Method not allowed'] },
     { status: 405 }
   );
 }
 
 export async function DELETE(): Promise<NextResponse> {
   return NextResponse.json(
-    { error: 'Method not allowed' },
+    { errors: ['Method not allowed'] },
     { status: 405 }
   );
 }
