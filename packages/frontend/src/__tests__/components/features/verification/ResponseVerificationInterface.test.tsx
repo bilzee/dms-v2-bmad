@@ -2,9 +2,10 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 import { ResponseVerificationInterface } from '@/components/features/verification/ResponseVerificationInterface';
 import { useVerificationStore } from '@/stores/verification.store';
-import { RapidResponse, RapidAssessment, ResponseType, ResponseStatus, VerificationStatus, AssessmentType } from '@dms/shared';
+import { RapidResponse, RapidAssessment, ResponseType, ResponseStatus, VerificationStatus, AssessmentType, SyncStatus } from '@dms/shared';
 
 // Mock the verification store
 jest.mock('@/stores/verification.store', () => ({
@@ -112,7 +113,7 @@ describe('ResponseVerificationInterface', () => {
     donorId: 'donor-1',
     donorName: 'Red Cross',
     verificationStatus: VerificationStatus.PENDING,
-    syncStatus: 'SYNCED',
+    syncStatus: SyncStatus.SYNCED,
     data: { items: ['rice', 'beans'], quantity: 100 },
     requiresAttention: false,
     otherItemsDelivered: [],
@@ -123,7 +124,7 @@ describe('ResponseVerificationInterface', () => {
 
   const mockAssessment: RapidAssessment = {
     id: 'assessment-1',
-    type: AssessmentType.NEEDS_ASSESSMENT,
+    type: AssessmentType.PRELIMINARY,
     date: new Date('2025-01-14T12:00:00Z'),
     location: { latitude: 12.345, longitude: 67.890 },
     assessorId: 'assessor-1',
@@ -131,7 +132,7 @@ describe('ResponseVerificationInterface', () => {
     coordinatorId: 'coord-1',
     affectedEntityId: 'entity-1',
     verificationStatus: VerificationStatus.VERIFIED,
-    syncStatus: 'SYNCED',
+    syncStatus: SyncStatus.SYNCED,
     data: { needsIdentified: ['food', 'water'], urgency: 'high' },
     createdAt: new Date('2025-01-14T12:00:00Z'),
     updatedAt: new Date('2025-01-14T12:00:00Z')

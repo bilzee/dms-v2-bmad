@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import '@testing-library/jest-dom';
 import { SyncStatusIndicator } from '@/components/shared/SyncStatusIndicator';
 
 // Mock the sync store
@@ -16,8 +17,8 @@ const mockSyncStore = {
   pendingOperations: new Set(),
   rollbackInProgress: false,
   connectivityStatus: { isOnline: true },
-  backgroundSyncProgress: null,
-  queueSummary: null,
+  backgroundSyncProgress: null as any,
+  queueSummary: null as any,
   isRefreshing: false,
   getOptimisticStats: jest.fn(() => ({
     totalUpdates: 0,

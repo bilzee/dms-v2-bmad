@@ -1,9 +1,12 @@
-import { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions, User, Session } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
+import { JWT } from "next-auth/jwt";
+import { AdapterUser } from "next-auth/adapters";
 import prisma from "../prisma";
 import bcrypt from "bcryptjs";
+import type { Role, User as PrismaUser } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -27,7 +30,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // Find user with roles
-          const user = await prisma.user.findUnique({
+          const userWithRoles = await prisma.user.findUnique({
             where: { email: credentials.email },
             include: {
               roles: true,
@@ -35,7 +38,7 @@ export const authOptions: NextAuthOptions = {
             },
           });
 
-          if (!user || !user.isActive) {
+          if (!userWithRoles || !userWithRoles.isActive) {
             return null;
           }
 
@@ -48,16 +51,16 @@ export const authOptions: NextAuthOptions = {
           }
 
           return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            image: user.image,
-            roles: user.roles.map(role => ({
+            id: userWithRoles.id,
+            name: userWithRoles.name,
+            email: userWithRoles.email,
+            image: userWithRoles.image,
+            roles: userWithRoles.roles?.map((role: Role) => ({
               id: role.id,
               name: role.name,
               isActive: role.isActive
-            })),
-            activeRole: user.activeRole || user.roles[0] || null,
+            })) || [],
+            activeRole: userWithRoles.activeRole || (userWithRoles.roles && userWithRoles.roles[0]) || null,
             permissions: [], // Will be populated based on role
           };
         } catch (error) {
@@ -72,65 +75,35 @@ export const authOptions: NextAuthOptions = {
     maxAge: 24 * 60 * 60, // 24 hours
   },
   callbacks: {
-    jwt: async ({ token, user, account }) => {
-      // Initial sign in
+    jwt: async ({ token, user }: { token: JWT; user?: User | AdapterUser }) => {
+      // Initial sign in - fetch user data from database
       if (user) {
-        token.id = user.id;
-        token.roles = user.roles || [];
-        token.activeRole = user.activeRole || null;
-        token.permissions = user.permissions || [];
-      }
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          include: {
+            roles: true,
+            activeRole: true,
+          },
+        });
 
-      // For GitHub OAuth, ensure user has roles
-      if (account?.provider === 'github' && user) {
-        try {
-          const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
-            include: {
-              roles: true,
-              activeRole: true,
-            },
-          });
-
-          if (dbUser) {
-            token.roles = dbUser.roles;
-            token.activeRole = dbUser.activeRole || dbUser.roles[0] || null;
-          } else {
-            // Assign default role for new GitHub users
-            const defaultRole = await prisma.role.findUnique({
-              where: { name: 'ASSESSOR' }
-            });
-
-            if (defaultRole) {
-              await prisma.user.update({
-                where: { id: user.id },
-                data: {
-                  roles: {
-                    connect: { id: defaultRole.id }
-                  },
-                  activeRoleId: defaultRole.id
-                }
-              });
-              token.roles = [defaultRole];
-              token.activeRole = defaultRole;
-            }
-          }
-        } catch (error) {
-          console.error('Error setting up user roles:', error);
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.roles = dbUser.roles || [];
+          token.activeRole = dbUser.activeRole || (dbUser.roles?.[0] || null);
+          token.role = dbUser.activeRole?.name || dbUser.roles?.[0]?.name || 'ASSESSOR';
+          token.permissions = []; // Will be populated based on role
         }
       }
-
       return token;
     },
-    session: async ({ session, token }) => {
+    session: async ({ session, token }: { session: Session; token: JWT }) => {
       if (token) {
-        session.user.id = token.id as string;
-        session.user.role = (token.activeRole as any)?.name || 'ASSESSOR';
-        session.user.roles = token.roles as any[] || [];
-        session.user.activeRole = token.activeRole as any;
-        session.user.permissions = token.permissions as any[] || [];
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.roles = token.roles;
+        session.user.activeRole = token.activeRole;
+        session.user.permissions = token.permissions;
       }
-
       return session;
     },
   },

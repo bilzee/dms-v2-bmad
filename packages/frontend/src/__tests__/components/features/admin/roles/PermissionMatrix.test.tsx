@@ -1,6 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import PermissionMatrix from '../PermissionMatrix';
+import '@testing-library/jest-dom';
+import { PermissionMatrix } from '@/components/features/admin/roles/PermissionMatrix';
+import { createMockAdminRole } from '@/__tests__/utils/mockObjects';
 
 // Mock data
 const mockPermissions = [
@@ -42,14 +44,49 @@ const mockPermissions = [
 ];
 
 const mockRoles = [
-  { id: 'role-1', name: 'RESPONDER' },
-  { id: 'role-2', name: 'COORDINATOR' },
-  { id: 'role-3', name: 'ADMIN' }
+  createMockAdminRole({
+    id: 'role-1',
+    name: 'RESPONDER',
+    permissions: [
+      { id: 'perm-1', name: 'VIEW_INCIDENTS', resource: 'incidents', action: 'read', isActive: true }
+    ],
+    userCount: 5,
+    description: 'First responder role'
+  }),
+  createMockAdminRole({
+    id: 'role-2',
+    name: 'COORDINATOR',
+    permissions: [
+      { id: 'perm-1', name: 'VIEW_INCIDENTS', resource: 'incidents', action: 'read', isActive: true },
+      { id: 'perm-2', name: 'MANAGE_RESOURCES', resource: 'resources', action: 'write', isActive: true }
+    ],
+    userCount: 3,
+    description: 'Coordination role'
+  }),
+  createMockAdminRole({
+    id: 'role-3',
+    name: 'ADMIN',
+    permissions: [
+      { id: 'perm-1', name: 'VIEW_INCIDENTS', resource: 'incidents', action: 'read', isActive: true },
+      { id: 'perm-2', name: 'MANAGE_RESOURCES', resource: 'resources', action: 'write', isActive: true },
+      { id: 'perm-3', name: 'DELETE_USERS', resource: 'users', action: 'delete', isActive: true }
+    ],
+    userCount: 1,
+    description: 'Administrator role'
+  })
 ];
 
 const defaultProps = {
-  permissions: mockPermissions,
-  roles: mockRoles,
+  matrix: {
+    roles: mockRoles,
+    permissions: mockPermissions,
+    matrix: {
+      'role-1': { 'perm-1': true, 'perm-2': false, 'perm-3': false },
+      'role-2': { 'perm-1': true, 'perm-2': true, 'perm-3': false },
+      'role-3': { 'perm-1': true, 'perm-2': true, 'perm-3': true }
+    }
+  },
+  onRefresh: jest.fn(),
   isLoading: false
 };
 

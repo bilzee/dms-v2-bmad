@@ -1,51 +1,50 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { RoleAssignmentModal } from '../RoleAssignmentModal';
+import '@testing-library/jest-dom';
+import { RoleAssignmentModal } from '@/components/features/admin/roles/RoleAssignmentModal';
+import { createMockAdminUser, createMockAdminRole } from '@/__tests__/utils/mockObjects';
 
 // Mock fetch
 const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 global.fetch = mockFetch;
 
 // Mock data
-const mockUser = {
+const mockUser = createMockAdminUser({
   id: 'user-1',
   name: 'John Doe',
   email: 'john@example.com',
   roles: [
-    { id: 'role-1', name: 'RESPONDER' }
+    { id: 'role-1', name: 'RESPONDER', isActive: true, createdAt: new Date(), updatedAt: new Date(), permissions: [] }
   ]
-};
+});
 
 const mockRoles = [
-  {
+  createMockAdminRole({
     id: 'role-1',
     name: 'RESPONDER',
     description: 'Emergency response role',
     permissions: [
-      { id: 'perm-1', name: 'VIEW_INCIDENTS', resource: 'INCIDENT', action: 'READ' }
+      { id: 'perm-1', name: 'VIEW_INCIDENTS', resource: 'incidents', action: 'read', isActive: true }
     ],
-    userCount: 10,
-    isActive: true
-  },
-  {
+    userCount: 10
+  }),
+  createMockAdminRole({
     id: 'role-2',
     name: 'COORDINATOR',
     description: 'Coordination role',
     permissions: [
-      { id: 'perm-2', name: 'MANAGE_RESOURCES', resource: 'RESOURCE', action: 'WRITE' }
+      { id: 'perm-2', name: 'MANAGE_RESOURCES', resource: 'resources', action: 'write', isActive: true }
     ],
-    userCount: 5,
-    isActive: true
-  }
+    userCount: 5
+  })
 ];
 
 const defaultProps = {
   isOpen: true,
   onClose: jest.fn(),
-  onAssign: jest.fn(),
+  onRoleAssignment: jest.fn(),
   user: mockUser,
-  availableRoles: mockRoles,
-  isLoading: false
+  availableRoles: mockRoles
 };
 
 describe('RoleAssignmentModal', () => {
