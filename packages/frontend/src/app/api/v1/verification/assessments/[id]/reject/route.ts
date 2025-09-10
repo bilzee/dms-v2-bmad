@@ -18,11 +18,9 @@ export async function POST(
     if (!assessmentId) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Assessment ID is required',
-        data: null,
         errors: ['Assessment ID parameter is missing'],
-      } as AssessmentRejectionResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     const body: AssessmentRejectionRequest = await request.json();
@@ -31,11 +29,9 @@ export async function POST(
     if (!body.coordinatorId || !body.coordinatorName || !body.rejectionComments?.trim()) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Required rejection information is missing',
-        data: null,
         errors: ['coordinatorId, coordinatorName, and rejectionComments are required'],
-      } as AssessmentRejectionResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Validate rejection reason
@@ -43,11 +39,9 @@ export async function POST(
     if (!validRejectionReasons.includes(body.rejectionReason)) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Invalid rejection reason',
-        data: null,
         errors: [`rejectionReason must be one of: ${validRejectionReasons.join(', ')}`],
-      } as AssessmentRejectionResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Validate priority level
@@ -55,11 +49,9 @@ export async function POST(
     if (!validPriorities.includes(body.priority)) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Invalid priority level',
-        data: null,
         errors: [`priority must be one of: ${validPriorities.join(', ')}`],
-      } as AssessmentRejectionResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify coordinator role
@@ -67,7 +59,7 @@ export async function POST(
     // Mock: Check if assessment exists and is in PENDING status
     const mockAssessment: Partial<RapidAssessment> = {
       id: assessmentId,
-      verificationStatus: 'PENDING',
+      verificationStatus: 'PENDING' as any,
       assessorId: 'mock-assessor-id',
       assessorName: 'Mock Assessor',
     };
@@ -75,11 +67,9 @@ export async function POST(
     if (!mockAssessment || mockAssessment.verificationStatus !== 'PENDING') {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Assessment not found or not in pending status',
-        data: null,
         errors: ['Assessment must be in PENDING status to be rejected'],
-      } as AssessmentRejectionResponse, { status: 404 });
+      } as any, { status: 404 });
     }
 
     const rejectionTimestamp = new Date();
@@ -141,15 +131,13 @@ export async function POST(
   } catch (error) {
     console.error('Error rejecting assessment:', error);
     
-    const errorResponse: AssessmentRejectionResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred while rejecting assessment',
-      data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 

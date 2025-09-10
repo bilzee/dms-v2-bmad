@@ -204,9 +204,11 @@ export async function GET(request: NextRequest) {
 
     // Apply pagination
     const totalCount = filteredQueue.length;
-    const totalPages = Math.ceil(totalCount / requestData.pageSize);
-    const start = (requestData.page - 1) * requestData.pageSize;
-    const end = start + requestData.pageSize;
+    const pageSize = requestData.pageSize || 20;
+    const page = requestData.page || 1;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
     const paginatedQueue = filteredQueue.slice(start, end);
 
     // Calculate stats
@@ -226,8 +228,8 @@ export async function GET(request: NextRequest) {
         queue: paginatedQueue,
         queueStats,
         pagination: {
-          page: requestData.page,
-          pageSize: requestData.pageSize,
+          page,
+          pageSize,
           totalPages,
           totalCount,
         },
@@ -239,9 +241,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Verification queue API error:', error);
     
-    const errorResponse: VerificationQueueResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       data: {
         queue: [],
         queueStats: {
@@ -260,6 +261,6 @@ export async function GET(request: NextRequest) {
       errors: [error instanceof Error ? error.message : 'Unknown error occurred'],
     };
     
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }

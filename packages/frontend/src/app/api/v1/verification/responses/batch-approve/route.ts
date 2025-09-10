@@ -18,21 +18,17 @@ export async function POST(
     if (!body.responseIds || !Array.isArray(body.responseIds) || body.responseIds.length === 0) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Response IDs are required',
-        data: null,
-        errors: ['responseIds must be a non-empty array'],
-      } as BatchResponseApprovalResponse, { status: 400 });
+        error: 'responseIds must be a non-empty array',
+      } as any, { status: 400 });
     }
 
     if (!body.coordinatorId || !body.coordinatorName) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Coordinator information is required',
-        data: null,
-        errors: ['coordinatorId and coordinatorName are required'],
-      } as BatchResponseApprovalResponse, { status: 400 });
+        error: 'coordinatorId and coordinatorName are required',
+      } as any, { status: 400 });
     }
 
     // Limit batch size for performance
@@ -40,11 +36,9 @@ export async function POST(
     if (body.responseIds.length > maxBatchSize) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: `Batch size too large. Maximum ${maxBatchSize} responses allowed.`,
-        data: null,
-        errors: [`Maximum batch size is ${maxBatchSize} responses`],
-      } as BatchResponseApprovalResponse, { status: 400 });
+        error: `Maximum batch size is ${maxBatchSize} responses`,
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify coordinator role
@@ -61,17 +55,17 @@ export async function POST(
         // Mock: Check if response exists and is in PENDING status
         const mockResponse: Partial<RapidResponse> = {
           id: responseId,
-          verificationStatus: 'PENDING',
+          verificationStatus: 'PENDING' as any,
           responderId: 'mock-responder-id',
           responderName: 'Mock Responder',
-          responseType: 'HEALTH',
+          responseType: 'HEALTH' as any,
         };
 
         if (!mockResponse) {
           results.push({
             responseId,
             status: 'FAILED',
-            errors: ['Response not found'],
+            error: 'Response not found',
           });
           failed++;
           continue;
@@ -81,7 +75,7 @@ export async function POST(
           results.push({
             responseId,
             status: 'FAILED',
-            errors: ['Response not in pending status'],
+            error: 'Response not in pending status',
           });
           failed++;
           continue;
@@ -134,7 +128,7 @@ export async function POST(
         results.push({
           responseId,
           status: 'FAILED',
-          errors: ['Processing error occurred'],
+          error: 'Processing error occurred',
         });
         failed++;
       }
@@ -157,36 +151,34 @@ export async function POST(
   } catch (error) {
     console.error('Error in batch response approval:', error);
     
-    const errorResponse: BatchResponseApprovalResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred during batch approval',
-      data: null,
-      errors: ['An unexpected error occurred. Please try again later.'],
+      error: 'An unexpected error occurred. Please try again later.',
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 
 // Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { errors: ['Method not allowed. Use POST for batch approval.'] },
+    { error: 'Method not allowed. Use POST for batch approval.' },
     { status: 405 }
   );
 }
 
 export async function PUT() {
   return NextResponse.json(
-    { errors: ['Method not allowed. Use POST for batch approval.'] },
+    { error: 'Method not allowed. Use POST for batch approval.' },
     { status: 405 }
   );
 }
 
 export async function DELETE() {
   return NextResponse.json(
-    { errors: ['Method not allowed. Use POST for batch approval.'] },
+    { error: 'Method not allowed. Use POST for batch approval.' },
     { status: 405 }
   );
 }

@@ -26,11 +26,9 @@ export async function POST(
     if (!photoId) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Photo ID is required',
-        data: null,
         errors: ['Photo ID parameter is missing'],
-      } as PhotoAnnotationResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     const body: PhotoAnnotationRequest = await request.json();
@@ -39,21 +37,17 @@ export async function POST(
     if (body.qualityScore !== undefined && (body.qualityScore < 1 || body.qualityScore > 10)) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Quality score must be between 1 and 10',
-        data: null,
         errors: ['qualityScore must be a number between 1 and 10'],
-      } as PhotoAnnotationResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     if (body.relevanceScore !== undefined && (body.relevanceScore < 1 || body.relevanceScore > 10)) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Relevance score must be between 1 and 10',
-        data: null,
         errors: ['relevanceScore must be a number between 1 and 10'],
-      } as PhotoAnnotationResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify coordinator role
@@ -99,15 +93,13 @@ export async function POST(
   } catch (error) {
     console.error('Error updating photo annotation:', error);
     
-    const errorResponse: PhotoAnnotationResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred while updating photo annotation',
-      data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 

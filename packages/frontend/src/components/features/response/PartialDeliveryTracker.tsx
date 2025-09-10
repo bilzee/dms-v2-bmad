@@ -113,8 +113,8 @@ export function PartialDeliveryTracker({
   };
 
   const getStatusBadge = (percentage: number) => {
-    if (percentage >= 100) return <Badge variant="success">Complete</Badge>;
-    if (percentage > 0) return <Badge variant="warning">Partial</Badge>;
+    if (percentage >= 100) return <Badge variant="default">Complete</Badge>;
+    if (percentage > 0) return <Badge variant="secondary">Partial</Badge>;
     return <Badge variant="destructive">Pending</Badge>;
   };
 

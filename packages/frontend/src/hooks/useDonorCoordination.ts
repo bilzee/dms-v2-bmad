@@ -5,7 +5,8 @@ import {
   ResourceAvailability,
   CoordinationWorkspaceItem,
   DonorStats,
-  ResourceAllocationRequest
+  ResourceAllocationRequest,
+  ResponseType
 } from '@dms/shared';
 
 interface DonorCoordinationState {
@@ -95,7 +96,7 @@ export function useDonorCoordination() {
           donorName: 'ActionAid Nigeria',
           affectedEntityId: 'entity-1',
           affectedEntityName: 'Maiduguri IDP Camp',
-          responseType: 'FOOD',
+          responseType: ResponseType.FOOD,
           quantity: 500,
           unit: 'kg',
           dueDate: new Date('2024-09-15'),
@@ -131,7 +132,7 @@ export function useDonorCoordination() {
           conflictDescription: 'Both donors scheduled for same delivery window',
           affectedEntityId: 'entity-1',
           affectedEntityName: 'Maiduguri IDP Camp',
-          responseType: 'WASH',
+          responseType: ResponseType.WASH,
           createdAt: new Date('2024-08-24'),
           updatedAt: new Date('2024-08-25'),
           actions: [

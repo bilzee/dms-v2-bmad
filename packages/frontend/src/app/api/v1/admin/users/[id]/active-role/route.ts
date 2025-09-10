@@ -153,9 +153,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
           id: user.activeRole.id,
           name: user.activeRole.name,
           description: `Active system role`,
-          permissions: user.roles
-            .find(r => r.id === user.activeRole?.id)
-            ?.permissions?.map(rp => ({
+          permissions: (user.roles
+            .find(r => r.id === user.activeRole?.id) as any)
+            ?.permissions?.map((rp: any) => ({
               id: rp.permission.id,
               name: rp.permission.name,
               description: rp.permission.description,
@@ -167,9 +167,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
         availableRoles: user.roles.map(role => ({
           id: role.id,
           name: role.name,
-          description: `System role with ${role.permissions?.length || 0} permissions`,
+          description: `System role with ${(role as any).permissions?.length || 0} permissions`,
           userCount: 0, // Not relevant in this context
-          permissions: role.permissions?.map(rp => ({
+          permissions: (role as any).permissions?.map((rp: any) => ({
             id: rp.permission.id,
             name: rp.permission.name,
             description: rp.permission.description,

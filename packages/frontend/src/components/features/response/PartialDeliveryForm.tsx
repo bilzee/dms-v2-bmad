@@ -255,12 +255,12 @@ export function PartialDeliveryForm({
             </span>
             <div className="flex items-center gap-2">
               {completionStats.overallPercentage >= 100 ? (
-                <Badge variant="success" className="flex items-center gap-1">
+                <Badge variant="default" className="flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
                   Complete
                 </Badge>
               ) : (
-                <Badge variant="warning" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {completionStats.overallPercentage.toFixed(1)}% Complete
                 </Badge>

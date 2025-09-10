@@ -102,7 +102,7 @@ export async function GET(
       'X-Data-Source': 'mock-tile-server',
     });
     
-    return new NextResponse(tileData, { headers });
+    return new NextResponse(tileData as any, { headers });
     
   } catch (error) {
     console.error('Failed to serve map tile:', error);

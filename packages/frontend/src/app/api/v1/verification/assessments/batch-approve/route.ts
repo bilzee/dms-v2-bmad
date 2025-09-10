@@ -18,21 +18,17 @@ export async function POST(
     if (!body.assessmentIds || !Array.isArray(body.assessmentIds) || body.assessmentIds.length === 0) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Assessment IDs are required',
-        data: null,
         errors: ['assessmentIds must be a non-empty array'],
-      } as BatchApprovalResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     if (!body.coordinatorId || !body.coordinatorName) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Coordinator information is required',
-        data: null,
         errors: ['coordinatorId and coordinatorName are required'],
-      } as BatchApprovalResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Limit batch size for performance
@@ -40,11 +36,9 @@ export async function POST(
     if (body.assessmentIds.length > maxBatchSize) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: `Batch size too large. Maximum ${maxBatchSize} assessments allowed.`,
-        data: null,
         errors: [`Maximum batch size is ${maxBatchSize} assessments`],
-      } as BatchApprovalResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify coordinator role
@@ -61,7 +55,7 @@ export async function POST(
         // Mock: Check if assessment exists and is in PENDING status
         const mockAssessment: Partial<RapidAssessment> = {
           id: assessmentId,
-          verificationStatus: 'PENDING',
+          verificationStatus: 'PENDING' as any,
           assessorId: 'mock-assessor-id',
           assessorName: 'Mock Assessor',
         };
@@ -70,7 +64,7 @@ export async function POST(
           results.push({
             assessmentId,
             status: 'FAILED',
-            errors: ['Assessment not found'],
+            error: 'Assessment not found',
           });
           failed++;
           continue;
@@ -80,7 +74,7 @@ export async function POST(
           results.push({
             assessmentId,
             status: 'FAILED',
-            errors: ['Assessment not in pending status'],
+            error: 'Assessment not in pending status',
           });
           failed++;
           continue;
@@ -133,7 +127,7 @@ export async function POST(
         results.push({
           assessmentId,
           status: 'FAILED',
-          errors: [error instanceof Error ? error.message : 'Unknown error'],
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
         failed++;
       }
@@ -160,15 +154,13 @@ export async function POST(
   } catch (error) {
     console.error('Error in batch approval:', error);
     
-    const errorResponse: BatchApprovalResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred during batch approval',
-      data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 

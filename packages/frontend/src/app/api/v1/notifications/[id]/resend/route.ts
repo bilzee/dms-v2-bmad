@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DatabaseService from '@/lib/services/DatabaseService';
+import prisma from '@/lib/prisma';
 import NotificationService from '@/lib/services/NotificationService';
 import { requireAuth } from '@/lib/auth-middleware';
 // Force this route to be dynamic
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { id: notificationId } = await context.params;
 
     // Get notification details
-    const notification = await DatabaseService.prisma.notification.findUnique({
+    const notification = await prisma.notification.findUnique({
       where: {
         id: notificationId
       }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       await (NotificationService as any).sendInAppNotification(roleChangeNotification);
 
       // Update notification status
-      await DatabaseService.prisma.notification.update({
+      await prisma.notification.update({
         where: {
           id: notificationId
         },
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       console.error('Failed to resend notification:', resendError);
 
       // Mark as failed again
-      await DatabaseService.prisma.notification.update({
+      await prisma.notification.update({
         where: {
           id: notificationId
         },

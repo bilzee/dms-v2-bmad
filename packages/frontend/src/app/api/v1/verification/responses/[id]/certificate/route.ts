@@ -45,7 +45,7 @@ export async function POST(
       includeAchievements
     });
 
-    return new NextResponse(certificateBuffer, {
+    return new NextResponse(certificateBuffer as any, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="verification-certificate-${params.id}.pdf"`

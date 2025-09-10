@@ -18,7 +18,7 @@ import {
   Key
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
-import { AdminRole, MultiRoleUserSession } from '../../../../../../shared/types/admin';
+import { AdminRole, MultiRoleUserSession } from '@dms/shared/types/admin';
 import { toast } from '@/components/ui/use-toast';
 
 interface EnhancedRoleSwitcherProps {
@@ -111,7 +111,7 @@ export function EnhancedRoleSwitcher({
   const ActiveRoleIcon = roleIcons[activeRole.name as keyof typeof roleIcons] || User;
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

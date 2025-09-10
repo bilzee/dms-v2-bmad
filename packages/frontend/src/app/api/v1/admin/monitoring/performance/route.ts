@@ -28,7 +28,7 @@ async function requireAdminRole(request: NextRequest) {
     }
 
     // Check if user has admin role
-    if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
+    if (!token.roles || !Array.isArray(token.roles) || !token.roles.some((role: any) => role.name === 'ADMIN')) {
       return NextResponse.json({
         success: false,
       data: null,
@@ -53,7 +53,7 @@ async function requireAdminRole(request: NextRequest) {
  * GET /api/v1/admin/monitoring/performance
  * Get current system performance metrics with optional historical data
  */
-export async function GET(request: NextRequest): Promise<NextResponse<SystemPerformanceResponse>> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Check admin access
     const authError = await requireAdminRole(request);
@@ -101,15 +101,11 @@ export async function GET(request: NextRequest): Promise<NextResponse<SystemPerf
   } catch (error) {
     console.error('Failed to fetch performance metrics:', error);
     
-    const response: SystemPerformanceResponse = {
+    return NextResponse.json({
       success: false,
-      data: null,
       errors: ['Failed to fetch performance metrics'],
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString()
-    };
-
-    return NextResponse.json(response, { status: 500 });
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
+    }, { status: 500 });
   }
 }
 

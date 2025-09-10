@@ -133,7 +133,7 @@ export function ResponseAttentionIndicators({
   // Compact display for navigation bar
   if (showCompact) {
     return (
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="icon" className="relative">
             {getAttentionIcon(attentionLevel)}

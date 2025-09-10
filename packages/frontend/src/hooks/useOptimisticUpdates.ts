@@ -172,6 +172,19 @@ export function useOptimisticUpdates({
     return updates.filter(update => update.status === 'FAILED');
   }, [getRelevantUpdates]);
 
+  const rollbackAllFailedWrapper = useCallback(async (): Promise<number> => {
+    try {
+      const failedUpdates = getFailedUpdates();
+      const failedCount = failedUpdates.length;
+      await rollbackAllFailed();
+      return failedCount;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to rollback failed updates';
+      console.error('Rollback all failed error:', error);
+      throw new Error(errorMessage);
+    }
+  }, [rollbackAllFailed, getFailedUpdates]);
+
   // Calculate derived state
   const isPending = entityId ? pendingOperations.has(entityId) : getRelevantUpdates().some(u => u.status === 'PENDING');
   const entityState = entityId ? getOptimisticEntityState(entityId, entityType) : null;
@@ -190,7 +203,7 @@ export function useOptimisticUpdates({
     applyOptimisticUpdate,
     retryUpdate,
     rollbackUpdate,
-    rollbackAllFailed,
+    rollbackAllFailed: rollbackAllFailedWrapper,
 
     // Helpers
     getUpdateStatus,
@@ -271,7 +284,11 @@ export function useRollback() {
 
   const rollbackAll = useCallback(async (): Promise<number> => {
     try {
-      return await rollbackAllFailed();
+      // Get count of failed updates before rollback
+      const { optimisticUpdates } = useSyncStore.getState();
+      const failedCount = Array.from(optimisticUpdates.values()).filter(u => u.status === 'FAILED').length;
+      await rollbackAllFailed();
+      return failedCount;
     } catch (error) {
       console.error('Failed to rollback all:', error);
       throw error;

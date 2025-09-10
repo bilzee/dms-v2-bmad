@@ -25,11 +25,9 @@ export async function POST(
     if (!photoId) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Photo ID is required',
-        data: null,
         errors: ['Photo ID parameter is missing'],
-      } as PhotoValidationResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify coordinator role
@@ -57,11 +55,9 @@ export async function POST(
     if (!mockPhoto) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Photo not found',
-        data: null,
         errors: ['Photo does not exist or has been deleted'],
-      } as PhotoValidationResponse, { status: 404 });
+      } as any, { status: 404 });
     }
 
     // Validate GPS accuracy
@@ -161,15 +157,13 @@ export async function POST(
   } catch (error) {
     console.error('Error validating photo metadata:', error);
     
-    const errorResponse: PhotoValidationResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred while validating photo metadata',
-      data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 

@@ -100,10 +100,9 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      data: null,
+      data: fallbackData,
       errors: ['Failed to fetch situation overview'],
       message: error instanceof Error ? error.message : 'Database connection error',
-      data: fallbackData,
       meta: {
         refreshInterval: 60, // Slower refresh during errors
         connectionStatus: 'offline',

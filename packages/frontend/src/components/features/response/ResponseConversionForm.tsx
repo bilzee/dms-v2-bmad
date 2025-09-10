@@ -225,7 +225,7 @@ export function ResponseConversionForm({
             >
               {response.status}
             </Badge>
-            <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave} />
+            <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave || undefined} />
           </div>
         </div>
 

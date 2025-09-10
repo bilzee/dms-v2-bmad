@@ -74,7 +74,7 @@ export async function PUT(
       ...validatedData,
     };
 
-    priorityRules[ruleIndex] = updatedRule;
+    priorityRules[ruleIndex] = updatedRule as any;
 
     return NextResponse.json({
       success: true,

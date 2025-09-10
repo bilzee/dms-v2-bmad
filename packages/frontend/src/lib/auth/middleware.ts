@@ -23,7 +23,12 @@ export async function withAuth(
       );
     }
 
-    const userRoles = session.user.roles || [];
+    const userRoles: any[] = (session.user.roles || []).map(role => ({
+      id: role.id,
+      name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+      permissions: [], // Initialize empty permissions
+      isActive: role.isActive
+    }));
 
     // Check role requirements
     if (options.requiredRoles && options.requiredRoles.length > 0) {

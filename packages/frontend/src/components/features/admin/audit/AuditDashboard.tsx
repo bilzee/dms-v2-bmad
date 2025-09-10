@@ -13,13 +13,120 @@ import { UserActivityTable } from './UserActivityTable';
 import { SecurityEventsPanel } from './SecurityEventsPanel';
 import { SystemMetricsDisplay } from './SystemMetricsDisplay';
 import { AuditExportControls } from './AuditExportControls';
-import { 
-  AuditActivityResponse, 
-  SecurityEventResponse, 
-  SystemPerformanceResponse,
-  SystemActivityLog,
-  SecurityEvent
-} from '@dms/shared/types/admin';
+// Mock types for audit dashboard (shared types not available)
+interface AuditActivityResponse {
+  success: boolean;
+  data?: {
+    activities: SystemActivityLog[];
+    totalCount: number;
+  };
+}
+
+interface SecurityEventResponse {
+  success: boolean;
+  data?: {
+    events: SecurityEvent[];
+    totalCount: number;
+    stats?: {
+      criticalEvents: number;
+    };
+  };
+}
+
+interface SystemPerformanceMetrics {
+  timestamp: Date;
+  database: {
+    connectionCount: number;
+    activeQueries: number;
+    avgQueryTime: number;
+    slowQueries: number;
+    errorRate: number;
+  };
+  api: {
+    requestsPerMinute: number;
+    avgResponseTime: number;
+    errorRate: number;
+    endpointStats: Record<string, {
+      requestCount: number;
+      avgResponseTime: number;
+      errorRate: number;
+    }>;
+  };
+  queue: {
+    activeJobs: number;
+    waitingJobs: number;
+    completedJobs: number;
+    failedJobs: number;
+    delayedJobs: number;
+    processingRate: number;
+    avgJobDuration: number;
+    errorRate: number;
+  };
+  system: {
+    cpuUsage: number;
+    memoryUsage: number;
+    diskUsage: number;
+    networkLatency: number;
+  };
+  sync: {
+    successRate: number;
+    conflictRate: number;
+    avgSyncTime: number;
+    pendingItems: number;
+    lastSyncAt: Date;
+  };
+}
+
+interface SystemPerformanceResponse {
+  success: boolean;
+  data?: {
+    healthStatus: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+    metrics: SystemPerformanceMetrics;
+    currentMetrics?: SystemPerformanceMetrics;
+    historicalData?: SystemPerformanceMetrics[];
+    alerts?: Array<{
+      type: 'HIGH_ERROR_RATE' | 'SLOW_RESPONSE' | 'HIGH_QUEUE_SIZE' | 'SYNC_FAILURE';
+      severity: 'WARNING' | 'CRITICAL';
+      message: string;
+      value: number;
+      threshold: number;
+      timestamp: Date;
+    }>;
+  };
+}
+
+interface SystemActivityLog {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  action: string;
+  resource: string;
+  eventType: 'USER_ACTION' | 'SYSTEM_EVENT' | 'SECURITY_EVENT' | 'API_ACCESS' | 'DATA_CHANGE';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  module: string;
+  details: string;
+  timestamp: Date;
+  ipAddress: string;
+  userAgent: string;
+}
+
+interface SecurityEvent {
+  id: string;
+  type: string;
+  eventType: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  detectedAt: string;
+  investigationStatus: 'PENDING' | 'INVESTIGATING' | 'RESOLVED' | 'DISMISSED';
+  description: string;
+  source: string;
+  affectedResource: string;
+  userId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  details?: string;
+  investigatorNotes?: string;
+}
 
 interface AuditDashboardProps {
   className?: string;
@@ -77,15 +184,15 @@ export function AuditDashboard({ className }: AuditDashboardProps) {
       const securityData: SecurityEventResponse = await securityResponse.json();
       const performanceData: SystemPerformanceResponse = await performanceResponse.json();
 
-      if (activitiesData.success) {
+      if (activitiesData.success && activitiesData.data) {
         setRecentActivities(activitiesData.data.activities);
       }
 
-      if (securityData.success) {
+      if (securityData.success && securityData.data) {
         setSecurityEvents(securityData.data.events);
       }
 
-      if (performanceData.success) {
+      if (performanceData.success && performanceData.data) {
         setPerformanceData(performanceData.data);
       }
 
@@ -264,8 +371,8 @@ export function AuditDashboard({ className }: AuditDashboardProps) {
               </CardHeader>
               <CardContent>
                 <SystemMetricsDisplay 
-                  metrics={performanceData.currentMetrics}
-                  alerts={performanceData.alerts}
+                  metrics={performanceData.currentMetrics || performanceData.metrics}
+                  alerts={performanceData.alerts || []}
                   showDetailedView={false}
                 />
               </CardContent>
@@ -311,9 +418,9 @@ export function AuditDashboard({ className }: AuditDashboardProps) {
         <TabsContent value="performance" className="space-y-6">
           {performanceData ? (
             <SystemMetricsDisplay 
-              metrics={performanceData.currentMetrics}
-              historicalData={performanceData.historicalData}
-              alerts={performanceData.alerts}
+              metrics={performanceData.currentMetrics || performanceData.metrics}
+              historicalData={performanceData.historicalData || []}
+              alerts={performanceData.alerts || []}
               showDetailedView={true}
             />
           ) : (

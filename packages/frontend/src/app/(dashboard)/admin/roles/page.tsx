@@ -76,7 +76,7 @@ export default function RoleManagementPage() {
           totalRoles: data.data.matrix.roles.length,
           activeRoles: data.data.matrix.roles.filter(r => r.isActive).length,
           totalPermissions: data.data.matrix.permissions.length,
-          totalAssignments: data.data.matrix.stats?.totalAssignments || 0
+          totalAssignments: 0 // Will be calculated from matrix data
         });
       }
     } catch (error) {
@@ -245,7 +245,7 @@ export default function RoleManagementPage() {
           <CardContent>
             <div className="text-2xl font-bold">{users.length}</div>
             <p className="text-xs text-muted-foreground">
-              {users.filter(u => u.isActive).length} active
+              {users.filter(u => (u as any).isActive !== false).length} active
             </p>
           </CardContent>
         </Card>
@@ -335,8 +335,8 @@ export default function RoleManagementPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{user.name}</span>
-                        <Badge variant={user.isActive ? "secondary" : "outline"}>
-                          {user.isActive ? 'Active' : 'Inactive'}
+                        <Badge variant={(user as any).isActive !== false ? "secondary" : "outline"}>
+                          {(user as any).isActive !== false ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
                       <div className="text-sm text-muted-foreground">

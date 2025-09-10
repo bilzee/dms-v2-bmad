@@ -210,7 +210,7 @@ export function BulkRoleAssignment({
           <Checkbox
             id="bulk-notify-users"
             checked={notifyUsers}
-            onCheckedChange={setNotifyUsers}
+            onCheckedChange={(checked) => setNotifyUsers(checked === true)}
           />
           <Label htmlFor="bulk-notify-users" className="text-sm">
             Send notifications to all affected users

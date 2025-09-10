@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
+import { formatRolePermissions, handleMissingTable, createApiResponse } from '@/lib/type-helpers';
 
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
@@ -58,57 +59,28 @@ export async function GET(request: NextRequest): Promise<NextResponse<{ success:
     const activeRole = user.roles.find(role => role.id === user.activeRoleId);
     const activePermissions = activeRole?.permissions || [];
 
+    // TODO: Implement user role preferences when schema is available
     let rolePreferences = {};
-    if (activeRole) {
-      try {
-        const preferences = await prisma.userRolePreferences.findUnique({
-          where: {
-            userId_roleId: {
-              userId: session.user.id,
-              roleId: activeRole.id
-            }
-          }
-        });
-        rolePreferences = preferences?.preferences || {};
-      } catch (prefError) {
-        console.warn('Failed to load role preferences:', prefError);
-      }
-    }
 
     const context: RoleContext = {
       activeRole: activeRole ? {
         id: activeRole.id,
         name: activeRole.name,
-        permissions: activePermissions.map(p => ({
-          id: p.id,
-          name: p.name,
-          resource: p.resource,
-          action: p.action
-        }))
+        permissions: formatRolePermissions(activePermissions)
       } : null,
       availableRoles: user.roles.map(role => ({
         id: role.id,
         name: role.name,
-        permissions: role.permissions.map(p => ({
-          id: p.id,
-          name: p.name,
-          resource: p.resource,
-          action: p.action
-        }))
+        permissions: formatRolePermissions(role.permissions)
       })),
-      permissions: activePermissions.map(p => ({
-        id: p.id,
-        name: p.name,
-        resource: p.resource,
-        action: p.action
-      })),
+      permissions: formatRolePermissions(activePermissions),
       sessionData: {
         preferences: rolePreferences,
         workflowState: {},
         offlineData: true
       },
       canSwitchRoles: user.roles.length > 1,
-      lastRoleSwitch: user.lastRoleSwitch?.toISOString()
+      lastRoleSwitch: (user as any).lastRoleSwitch?.toISOString() || null
     };
 
     return NextResponse.json({

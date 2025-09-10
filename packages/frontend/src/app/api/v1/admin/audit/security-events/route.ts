@@ -32,7 +32,7 @@ async function requireAdminRole(request: NextRequest) {
     }
 
     // Check if user has admin role
-    if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
+    if (!token.roles || !Array.isArray(token.roles) || !token.roles.some((role: any) => role.name === 'ADMIN')) {
       return NextResponse.json({
         success: false,
       data: null,
@@ -57,7 +57,7 @@ async function requireAdminRole(request: NextRequest) {
  * GET /api/v1/admin/audit/security-events
  * Retrieve security events with filtering and pagination
  */
-export async function GET(request: NextRequest): Promise<NextResponse<SecurityEventResponse>> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Check admin access
     const authError = await requireAdminRole(request);
@@ -151,8 +151,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<SecurityEv
         },
         stats
       },
-      message: `Retrieved ${events.length} security event entries`,
-      timestamp: new Date().toISOString()
+      message: `Retrieved ${events.length} security event entries`
     };
 
     return NextResponse.json(response);
@@ -160,15 +159,11 @@ export async function GET(request: NextRequest): Promise<NextResponse<SecurityEv
   } catch (error) {
     console.error('Failed to fetch security events:', error);
     
-    const response: SecurityEventResponse = {
+    return NextResponse.json({
       success: false,
-      data: null,
       errors: ['Failed to fetch security events'],
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
-      timestamp: new Date().toISOString()
-    };
-
-    return NextResponse.json(response, { status: 500 });
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
+    }, { status: 500 });
   }
 }
 

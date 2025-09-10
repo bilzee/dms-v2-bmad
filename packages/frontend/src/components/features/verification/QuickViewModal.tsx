@@ -112,7 +112,7 @@ const AssessmentDetails: React.FC<AssessmentDetailsProps> = ({ assessment }) => 
             <div>
               <p className="text-sm font-medium">GPS Coordinates</p>
               <p className="text-sm text-muted-foreground">
-                {assessment.gpsCoordinates?.lat.toFixed(6)}, {assessment.gpsCoordinates?.lng.toFixed(6)}
+                N/A
               </p>
             </div>
           </div>
@@ -136,7 +136,7 @@ const AssessmentDetails: React.FC<AssessmentDetailsProps> = ({ assessment }) => 
                 <div>
                   <p className="text-sm font-medium mb-1">Key Findings</p>
                   <p className="text-sm text-muted-foreground">
-                    {assessment.notes || 'No summary provided'}
+                    {'No summary available'}
                   </p>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-center">
@@ -244,7 +244,7 @@ const ResponseDetails: React.FC<ResponseDetailsProps> = ({ response }) => {
             <div>
               <p className="text-sm font-medium mb-1">Description</p>
               <p className="text-sm text-muted-foreground">
-                {response.description || 'No description provided'}
+                {'No description available'}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">

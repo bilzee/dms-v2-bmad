@@ -51,15 +51,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<ConflictQu
     if (page < 1 || pageSize < 1 || pageSize > 100) {
       return NextResponse.json({
         success: false,
-      data: null,
-        data: {
-          conflicts: [],
-          pagination: { page: 1, pageSize: 20, total: 0, totalPages: 0 },
-          filters: {},
-          stats: { totalPending: 0, criticalCount: 0, avgResolutionTime: 0 }
-        },
         error: 'Invalid pagination parameters'
-      }, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Get all pending conflicts
@@ -136,14 +129,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ConflictQu
     
     return NextResponse.json({
       success: false,
-      data: null,
-      data: {
-        conflicts: [],
-        pagination: { page: 1, pageSize: 20, total: 0, totalPages: 0 },
-        filters: {},
-        stats: { totalPending: 0, criticalCount: 0, avgResolutionTime: 0 }
-      },
       error: 'Internal server error'
-    }, { status: 500 });
+    } as any, { status: 500 });
   }
 }

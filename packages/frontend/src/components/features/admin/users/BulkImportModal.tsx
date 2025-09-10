@@ -1,7 +1,23 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { BulkImportData, BulkImportError } from '../../../../../../../shared/types/admin';
+// Mock types for bulk import (shared types not available)
+interface BulkImportData {
+  users: any[];
+  totalCount: number;
+  validCount: number;
+  errorCount: number;
+  successfulRows: number;
+  failedRows: number;
+}
+
+interface BulkImportError {
+  row: number;
+  field: string;
+  value: string;
+  message: string;
+  error: string;
+}
 import {
   Dialog,
   DialogContent,

@@ -261,7 +261,7 @@ export default function AdminUsersPage() {
 
         <TabsContent value="active" className="space-y-4">
           <UserList
-            users={users.filter(u => u.isActive)}
+            users={users.filter(u => (u as any).isActive !== false)}
             loading={loading}
             totalCount={stats?.activeUsers || 0}
             filters={{ ...filters, isActive: true }}
@@ -273,7 +273,7 @@ export default function AdminUsersPage() {
 
         <TabsContent value="inactive" className="space-y-4">
           <UserList
-            users={users.filter(u => !u.isActive)}
+            users={users.filter(u => (u as any).isActive === false)}
             loading={loading}
             totalCount={stats?.inactiveUsers || 0}
             filters={{ ...filters, isActive: false }}

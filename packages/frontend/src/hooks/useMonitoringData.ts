@@ -173,37 +173,37 @@ export function useMonitoringData() {
 
     return {
       database: {
-        connectionCount: currentMetrics.database.connectionCount,
-        avgQueryTime: currentMetrics.database.avgQueryTime,
-        isHealthy: currentMetrics.database.avgQueryTime < 100 && currentMetrics.database.errorRate < 2
+        connectionCount: currentMetrics.database?.connectionCount,
+        avgQueryTime: currentMetrics.database?.avgQueryTime,
+        isHealthy: (currentMetrics.database?.avgQueryTime ?? 999) < 100 && (currentMetrics.database?.errorRate ?? 100) < 2
       },
       api: {
-        requestsPerMinute: currentMetrics.api.requestsPerMinute,
-        avgResponseTime: currentMetrics.api.avgResponseTime,
-        errorRate: currentMetrics.api.errorRate,
-        isHealthy: currentMetrics.api.errorRate < 5 && currentMetrics.api.avgResponseTime < 1000
+        requestsPerMinute: currentMetrics.api?.requestsPerMinute,
+        avgResponseTime: currentMetrics.api?.avgResponseTime,
+        errorRate: currentMetrics.api?.errorRate,
+        isHealthy: (currentMetrics.api?.errorRate ?? 100) < 5 && (currentMetrics.api?.avgResponseTime ?? 9999) < 1000
       },
       queue: {
-        totalJobs: currentMetrics.queue.activeJobs + currentMetrics.queue.waitingJobs,
-        activeJobs: currentMetrics.queue.activeJobs,
-        waitingJobs: currentMetrics.queue.waitingJobs,
-        processingRate: currentMetrics.queue.processingRate,
-        isHealthy: currentMetrics.queue.waitingJobs < 50 && currentMetrics.queue.errorRate < 5
+        totalJobs: (currentMetrics.queue?.activeJobs ?? 0) + (currentMetrics.queue?.waitingJobs ?? 0),
+        activeJobs: currentMetrics.queue?.activeJobs,
+        waitingJobs: currentMetrics.queue?.waitingJobs,
+        processingRate: currentMetrics.queue?.processingRate,
+        isHealthy: (currentMetrics.queue?.waitingJobs ?? 999) < 50 && (currentMetrics.queue?.errorRate ?? 100) < 5
       },
       system: {
-        cpuUsage: currentMetrics.system.cpuUsage,
-        memoryUsage: currentMetrics.system.memoryUsage,
-        diskUsage: currentMetrics.system.diskUsage,
-        networkLatency: currentMetrics.system.networkLatency,
-        isHealthy: currentMetrics.system.cpuUsage < 80 && currentMetrics.system.memoryUsage < 85
+        cpuUsage: currentMetrics.system?.cpuUsage,
+        memoryUsage: currentMetrics.system?.memoryUsage,
+        diskUsage: currentMetrics.system?.diskUsage,
+        networkLatency: currentMetrics.system?.networkLatency,
+        isHealthy: (currentMetrics.system?.cpuUsage ?? 100) < 80 && (currentMetrics.system?.memoryUsage ?? 100) < 85
       },
       sync: {
-        successRate: currentMetrics.sync.successRate,
-        conflictRate: currentMetrics.sync.conflictRate,
-        avgSyncTime: currentMetrics.sync.avgSyncTime,
-        pendingItems: currentMetrics.sync.pendingItems,
-        lastSyncAt: currentMetrics.sync.lastSyncAt,
-        isHealthy: currentMetrics.sync.successRate > 95 && currentMetrics.sync.conflictRate < 5
+        successRate: currentMetrics.sync?.successRate,
+        conflictRate: currentMetrics.sync?.conflictRate,
+        avgSyncTime: currentMetrics.sync?.avgSyncTime,
+        pendingItems: currentMetrics.sync?.pendingItems,
+        lastSyncAt: currentMetrics.sync?.lastSyncAt,
+        isHealthy: (currentMetrics.sync?.successRate ?? 0) > 95 && (currentMetrics.sync?.conflictRate ?? 100) < 5
       }
     };
   }, [currentMetrics]);
@@ -217,24 +217,24 @@ export function useMonitoringData() {
 
     return {
       cpu: {
-        current: latest.system.cpuUsage,
-        change: latest.system.cpuUsage - previous.system.cpuUsage,
-        trend: latest.system.cpuUsage > previous.system.cpuUsage ? 'up' : 'down'
+        current: latest.system?.cpuUsage,
+        change: (latest.system?.cpuUsage ?? 0) - (previous.system?.cpuUsage ?? 0),
+        trend: (latest.system?.cpuUsage ?? 0) > (previous.system?.cpuUsage ?? 0) ? 'up' : 'down'
       },
       memory: {
-        current: latest.system.memoryUsage,
-        change: latest.system.memoryUsage - previous.system.memoryUsage,
-        trend: latest.system.memoryUsage > previous.system.memoryUsage ? 'up' : 'down'
+        current: latest.system?.memoryUsage,
+        change: (latest.system?.memoryUsage ?? 0) - (previous.system?.memoryUsage ?? 0),
+        trend: (latest.system?.memoryUsage ?? 0) > (previous.system?.memoryUsage ?? 0) ? 'up' : 'down'
       },
       responseTime: {
-        current: latest.api.avgResponseTime,
-        change: latest.api.avgResponseTime - previous.api.avgResponseTime,
-        trend: latest.api.avgResponseTime > previous.api.avgResponseTime ? 'up' : 'down'
+        current: latest.api?.avgResponseTime,
+        change: (latest.api?.avgResponseTime ?? 0) - (previous.api?.avgResponseTime ?? 0),
+        trend: (latest.api?.avgResponseTime ?? 0) > (previous.api?.avgResponseTime ?? 0) ? 'up' : 'down'
       },
       errorRate: {
-        current: latest.api.errorRate,
-        change: latest.api.errorRate - previous.api.errorRate,
-        trend: latest.api.errorRate > previous.api.errorRate ? 'up' : 'down'
+        current: latest.api?.errorRate,
+        change: (latest.api?.errorRate ?? 0) - (previous.api?.errorRate ?? 0),
+        trend: (latest.api?.errorRate ?? 0) > (previous.api?.errorRate ?? 0) ? 'up' : 'down'
       }
     };
   }, [historicalData]);
@@ -289,34 +289,34 @@ export function useSystemHealth() {
 
     return {
       cpu: {
-        value: currentMetrics.system.cpuUsage,
+        value: currentMetrics.system?.cpuUsage,
         threshold: alertThresholds.cpu,
-        exceeded: currentMetrics.system.cpuUsage > alertThresholds.cpu
+        exceeded: (currentMetrics.system?.cpuUsage ?? 0) > alertThresholds.cpu
       },
       memory: {
-        value: currentMetrics.system.memoryUsage,
+        value: currentMetrics.system?.memoryUsage,
         threshold: alertThresholds.memory,
-        exceeded: currentMetrics.system.memoryUsage > alertThresholds.memory
+        exceeded: (currentMetrics.system?.memoryUsage ?? 0) > alertThresholds.memory
       },
       disk: {
-        value: currentMetrics.system.diskUsage,
+        value: currentMetrics.system?.diskUsage,
         threshold: alertThresholds.disk,
-        exceeded: currentMetrics.system.diskUsage > alertThresholds.disk
+        exceeded: (currentMetrics.system?.diskUsage ?? 0) > alertThresholds.disk
       },
       apiErrorRate: {
-        value: currentMetrics.api.errorRate,
+        value: currentMetrics.api?.errorRate,
         threshold: alertThresholds.apiErrorRate,
-        exceeded: currentMetrics.api.errorRate > alertThresholds.apiErrorRate
+        exceeded: (currentMetrics.api?.errorRate ?? 0) > alertThresholds.apiErrorRate
       },
       responseTime: {
-        value: currentMetrics.api.avgResponseTime,
+        value: currentMetrics.api?.avgResponseTime,
         threshold: alertThresholds.responseTime,
-        exceeded: currentMetrics.api.avgResponseTime > alertThresholds.responseTime
+        exceeded: (currentMetrics.api?.avgResponseTime ?? 0) > alertThresholds.responseTime
       },
       queueSize: {
-        value: currentMetrics.queue.waitingJobs,
+        value: currentMetrics.queue?.waitingJobs,
         threshold: alertThresholds.queueSize,
-        exceeded: currentMetrics.queue.waitingJobs > alertThresholds.queueSize
+        exceeded: (currentMetrics.queue?.waitingJobs ?? 0) > alertThresholds.queueSize
       }
     };
   }, [currentMetrics, settings]);

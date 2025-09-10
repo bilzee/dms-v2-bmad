@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
           assessmentCount: incident.preliminaryAssessmentIds?.length || 0,
           responseCount: 0, // TODO: Count from relationships
           lastUpdated: incident.updatedAt
-        })),
+        })) as any,
         totalCount,
         pagination: {
           page,
@@ -130,7 +130,6 @@ export async function GET(request: NextRequest) {
         },
       },
       message: `Found ${totalCount} incidents`,
-      timestamp: new Date().toISOString(),
     };
 
     return NextResponse.json(response);

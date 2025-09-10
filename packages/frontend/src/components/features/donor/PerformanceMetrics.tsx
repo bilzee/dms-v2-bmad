@@ -166,7 +166,7 @@ export function PerformanceMetrics({ metrics, trends, className }: PerformanceMe
               />
               <Bar 
                 dataKey="value" 
-                fill={(entry: any) => entry.color}
+                fill="#3B82F6"
                 radius={[4, 4, 0, 0]}
               >
                 {performanceData.map((entry, index) => (

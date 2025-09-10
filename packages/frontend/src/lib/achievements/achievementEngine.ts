@@ -9,7 +9,7 @@ export interface AchievementRule {
   conditions: {
     deliveryCount?: number;
     verificationRate?: number;
-    responseTypes?: ResponseType[];
+    responseTypes?: string[];
     beneficiariesHelped?: number;
     timeframe?: number;
   };

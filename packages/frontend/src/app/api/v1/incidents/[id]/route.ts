@@ -54,13 +54,13 @@ export async function GET(
       severity: incidentDetails.severity,
       status: incidentDetails.status,
       date: incidentDetails.date,
-      description: incidentDetails.description || '',
-      coordinates: incidentDetails.coordinates ? {
-        latitude: incidentDetails.coordinates.latitude || 0,
-        longitude: incidentDetails.coordinates.longitude || 0,
+      description: (incidentDetails as any).description || '',
+      coordinates: (incidentDetails as any).coordinates ? {
+        latitude: (incidentDetails as any).coordinates.latitude || 0,
+        longitude: (incidentDetails as any).coordinates.longitude || 0,
       } : null,
-      affectedEntityIds: incidentDetails.affectedEntities?.map(entity => entity.id) || [],
-      affectedEntities: incidentDetails.affectedEntities?.map(entity => ({
+      affectedEntityIds: (incidentDetails as any).affectedEntities?.map((entity: any) => entity.id) || [],
+      affectedEntities: (incidentDetails as any).affectedEntities?.map((entity: any) => ({
         id: entity.id,
         type: entity.type,
         name: entity.name,
@@ -84,10 +84,9 @@ export async function GET(
     const response: IncidentDetailResponse = {
       success: true,
       data: {
-        incident: transformedIncident,
+        incident: transformedIncident as any,
       },
       message: 'Incident details retrieved successfully',
-      timestamp: new Date().toISOString(),
     };
 
     return NextResponse.json(response);

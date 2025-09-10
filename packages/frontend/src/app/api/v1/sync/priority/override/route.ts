@@ -116,11 +116,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false,
-      data: null,
-          data: null,
           errors: ['Invalid request data'],
           details: error.errors 
-        },
+        } as any,
         { status: 400 }
       );
     }

@@ -32,7 +32,7 @@ async function requireAdminRole(request: NextRequest) {
     }
 
     // Check if user has admin role
-    if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
+    if (!token.roles || !Array.isArray(token.roles) || !token.roles.some((role: any) => role.name === 'ADMIN')) {
       return NextResponse.json({
         success: false,
       data: null,

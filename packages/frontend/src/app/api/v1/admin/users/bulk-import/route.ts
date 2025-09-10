@@ -222,12 +222,11 @@ export async function POST(request: NextRequest) {
     if (errors.length > 0) {
       return NextResponse.json({
         success: false,
-      data: null,
-        errors: ['Validation failed'],
-        message: `Found ${errors.length} validation errors`,
         data: {
           errors: errors.slice(0, 50) // Limit error response size
         },
+        errors: ['Validation failed'],
+        message: `Found ${errors.length} validation errors`,
         timestamp: new Date().toISOString(),
       }, { status: 400 });
     }

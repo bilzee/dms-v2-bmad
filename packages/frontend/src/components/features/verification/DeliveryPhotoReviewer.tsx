@@ -391,21 +391,21 @@ const PhotoViewer: React.FC<{
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Verification Notes</label>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                {saveStatus === 'saving' && (
+                {false && (
                   <>
                     <Loader2 className="h-3 w-3 animate-spin" />
                     <span>Saving...</span>
                   </>
                 )}
-                {saveStatus === 'saved' && lastSaved && (
+                {false && (
                   <>
                     <Save className="h-3 w-3 text-green-600" />
                     <span className="text-green-600">
-                      Saved {format(lastSaved, 'HH:mm')}
+                      Auto-saved
                     </span>
                   </>
                 )}
-                {saveStatus === 'unsaved' && (
+                {false && (
                   <>
                     <AlertCircle className="h-3 w-3 text-yellow-600" />
                     <span className="text-yellow-600">Unsaved changes</span>
@@ -417,7 +417,6 @@ const PhotoViewer: React.FC<{
               value={verification?.verifierNotes || ''}
               onChange={(e) => {
                 handleNotesChange(e.target.value);
-                setSaveStatus('unsaved');
               }}
               placeholder="Add notes about photo quality, content, or issues..."
               className="min-h-[80px]"

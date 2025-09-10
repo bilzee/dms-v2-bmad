@@ -158,7 +158,6 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-      data: null,
         errors: [error instanceof Error ? error.message : 'Unknown error occurred'],
       },
       { status: 500 }

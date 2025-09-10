@@ -49,8 +49,18 @@ export const useMultiRole = (): UseMultiRoleReturn => {
   const [performanceMs, setPerformanceMs] = useState<number | null>(null);
   const rollbackInfoRef = useRef<{ previousRoleId: string; timestamp: string } | null>(null);
 
-  const assignedRoles = session?.user?.assignedRoles || [];
-  const activeRole = session?.user?.activeRole || null;
+  const assignedRoles: UserRole[] = (session?.user?.roles || []).map(role => ({
+    id: role.id,
+    name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+    permissions: [], // Initialize empty permissions - should be populated from API
+    isActive: role.isActive
+  }));
+  const activeRole: UserRole | null = session?.user?.activeRole ? {
+    id: session.user.activeRole.id,
+    name: session.user.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+    permissions: [], // Initialize empty - will be populated from API
+    isActive: session.user.activeRole.isActive
+  } : null;
   const isMultiRole = assignedRoles.length > 1;
 
   const getRoleContext = useCallback(async (): Promise<RoleContext | null> => {
@@ -60,8 +70,18 @@ export const useMultiRole = (): UseMultiRoleReturn => {
       
       if (result.success) {
         const context = {
-          activeRole: result.data.activeRole,
-          availableRoles: result.data.availableRoles,
+          activeRole: result.data.activeRole ? {
+            id: result.data.activeRole.id,
+            name: result.data.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+            permissions: result.data.activeRole.permissions || [],
+            isActive: result.data.activeRole.isActive
+          } : null,
+          availableRoles: (result.data.availableRoles || []).map((role: any) => ({
+            id: role.id,
+            name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+            permissions: role.permissions || [],
+            isActive: role.isActive
+          })),
           permissions: result.data.activeRole?.permissions || [],
           sessionData: {
             preferences: {},
@@ -122,8 +142,18 @@ export const useMultiRole = (): UseMultiRoleReturn => {
 
         // Update context with new role data
         const newContext = {
-          activeRole: result.data.activeRole,
-          availableRoles: result.data.availableRoles,
+          activeRole: result.data.activeRole ? {
+            id: result.data.activeRole.id,
+            name: result.data.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+            permissions: result.data.activeRole.permissions || [],
+            isActive: result.data.activeRole.isActive
+          } : null,
+          availableRoles: (result.data.availableRoles || []).map((role: any) => ({
+            id: role.id,
+            name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+            permissions: role.permissions || [],
+            isActive: role.isActive
+          })),
           permissions: result.data.activeRole?.permissions || [],
           sessionData: {
             preferences: currentContext?.preferences || {},

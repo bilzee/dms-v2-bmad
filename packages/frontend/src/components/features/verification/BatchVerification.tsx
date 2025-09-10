@@ -137,7 +137,7 @@ export const BatchVerification: React.FC<BatchVerificationProps> = ({
             setComments={setComments}
             priority={priority}
             setPriority={setPriority}
-            isFormValid={isFormValid()}
+            isFormValid={!!isFormValid()}
             onSubmit={handleSubmit}
             onCancel={onClose}
           />

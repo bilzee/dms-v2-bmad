@@ -5,12 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Sync, AlertTriangle, CheckCircle, Clock, TrendingUp, Queue } from 'lucide-react';
+import { RefreshCw, RotateCcw, AlertTriangle, CheckCircle, Clock, TrendingUp, List } from 'lucide-react';
 
-interface SyncStatistics {
-  totalSyncRequests: number;
-  successfulSyncs: number;
-  failedSyncs: number;
+interface RotateCcwStatistics {
+  totalRotateCcwRequests: number;
+  successfulRotateCcws: number;
+  failedRotateCcws: number;
   conflictCount: number;
   averageProcessingTime: number;
   queueSize: number;
@@ -48,28 +48,28 @@ interface QueueInfo {
   avgProcessingTime: number;
 }
 
-interface SyncMonitoringPanelProps {
+interface RotateCcwMonitoringPanelProps {
   refreshInterval?: number;
   showDetailedMetrics?: boolean;
 }
 
-export function SyncMonitoringPanel({
+export function RotateCcwMonitoringPanel({
   refreshInterval = 25000,
   showDetailedMetrics = false
-}: SyncMonitoringPanelProps) {
-  const [syncStats, setSyncStats] = useState<SyncStatistics | null>(null);
+}: RotateCcwMonitoringPanelProps) {
+  const [syncStats, setRotateCcwStats] = useState<RotateCcwStatistics | null>(null);
   const [queueMetrics, setQueueMetrics] = useState<QueueMetrics | null>(null);
   const [healthIndicators, setHealthIndicators] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  const fetchSyncStats = async () => {
+  const fetchRotateCcwStats = async () => {
     try {
       const response = await fetch('/api/v1/system/performance/sync-stats?includeQueue=true&includeHistory=false');
       const data = await response.json();
       
       if (data.success) {
-        setSyncStats(data.data.syncStatistics);
+        setRotateCcwStats(data.data.syncStatistics);
         setQueueMetrics(data.data.queueMetrics);
         setHealthIndicators(data.data.healthIndicators);
         setLastUpdated(new Date());
@@ -82,9 +82,9 @@ export function SyncMonitoringPanel({
   };
 
   useEffect(() => {
-    fetchSyncStats();
+    fetchRotateCcwStats();
     
-    const interval = setInterval(fetchSyncStats, refreshInterval);
+    const interval = setInterval(fetchRotateCcwStats, refreshInterval);
     return () => clearInterval(interval);
   }, [refreshInterval]);
 
@@ -112,8 +112,8 @@ export function SyncMonitoringPanel({
   };
 
   const calculateSuccessRate = () => {
-    if (!syncStats || syncStats.totalSyncRequests === 0) return 0;
-    return (syncStats.successfulSyncs / syncStats.totalSyncRequests) * 100;
+    if (!syncStats || syncStats.totalRotateCcwRequests === 0) return 0;
+    return (syncStats.successfulRotateCcws / syncStats.totalRotateCcwRequests) * 100;
   };
 
   if (isLoading) {
@@ -121,8 +121,8 @@ export function SyncMonitoringPanel({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sync className="h-5 w-5" />
-            Sync Monitoring
+            <RotateCcw className="h-5 w-5" />
+            RotateCcw Monitoring
           </CardTitle>
           <CardDescription>Loading sync performance data...</CardDescription>
         </CardHeader>
@@ -145,8 +145,8 @@ export function SyncMonitoringPanel({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sync className="h-5 w-5" />
-            Sync Monitoring
+            <RotateCcw className="h-5 w-5" />
+            RotateCcw Monitoring
           </CardTitle>
           <CardDescription>Unable to load sync performance data</CardDescription>
         </CardHeader>
@@ -161,20 +161,20 @@ export function SyncMonitoringPanel({
 
   return (
     <div className="space-y-4">
-      {/* Sync Health Overview */}
+      {/* RotateCcw Health Overview */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sync className="h-5 w-5" />
-              <CardTitle>Sync Performance Overview</CardTitle>
+              <RotateCcw className="h-5 w-5" />
+              <CardTitle>RotateCcw Performance Overview</CardTitle>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant={getHealthBadgeVariant(healthIndicators.overall)} className="flex items-center gap-1">
                 {getHealthIcon(healthIndicators.overall)}
                 {healthIndicators.overall}
               </Badge>
-              <Button variant="outline" size="sm" onClick={fetchSyncStats} disabled={isLoading}>
+              <Button variant="outline" size="sm" onClick={fetchRotateCcwStats} disabled={isLoading}>
                 <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
@@ -211,30 +211,30 @@ export function SyncMonitoringPanel({
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Sync Statistics */}
+        {/* RotateCcw Statistics */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Sync Statistics
+              RotateCcw Statistics
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium">Total Requests</p>
-                <p className="text-2xl font-bold">{syncStats.totalSyncRequests}</p>
+                <p className="text-2xl font-bold">{syncStats.totalRotateCcwRequests}</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Successful</p>
-                <p className="text-2xl font-bold text-green-600">{syncStats.successfulSyncs}</p>
+                <p className="text-2xl font-bold text-green-600">{syncStats.successfulRotateCcws}</p>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium">Failed</p>
-                <p className="text-2xl font-bold text-red-600">{syncStats.failedSyncs}</p>
+                <p className="text-2xl font-bold text-red-600">{syncStats.failedRotateCcws}</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Conflicts</p>
@@ -264,16 +264,16 @@ export function SyncMonitoringPanel({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Queue className="h-4 w-4" />
+              <List className="h-4 w-4" />
               Queue Status
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              {/* Sync Queue */}
+              {/* RotateCcw Queue */}
               <div className="border rounded p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Sync Queue</span>
+                  <span className="text-sm font-medium">RotateCcw Queue</span>
                   <Badge variant={queueMetrics.syncQueue.completedRate > 95 ? 'default' : 'secondary'}>
                     {queueMetrics.syncQueue.completedRate.toFixed(1)}%
                   </Badge>
@@ -394,7 +394,7 @@ export function SyncMonitoringPanel({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="flex items-center justify-between p-3 border rounded">
                   <div>
-                    <p className="text-sm font-medium">Sync Engine</p>
+                    <p className="text-sm font-medium">RotateCcw Engine</p>
                     <p className="text-xs text-muted-foreground">Core sync operations</p>
                   </div>
                   <Badge variant={getHealthBadgeVariant(healthIndicators.syncEngine)}>

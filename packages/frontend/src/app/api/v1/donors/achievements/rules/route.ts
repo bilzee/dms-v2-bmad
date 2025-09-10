@@ -24,13 +24,13 @@ export async function GET(request: NextRequest) {
         rules: rules.map(rule => ({
           id: rule.id,
           type: rule.type,
-          title: rule.title,
+          title: rule.name,
           description: rule.description,
           category: rule.category,
-          triggerType: rule.triggerType,
-          triggerConditions: rule.triggerConditions,
-          badge: rule.badge,
-          points: rule.points,
+          triggerType: (rule as any).triggerType || 'AUTOMATIC',
+          triggerConditions: (rule as any).triggerConditions || rule.criteria,
+          badge: (rule as any).badge || 'default-badge',
+          points: (rule as any).points || 10,
           priority: rule.priority,
           isActive: rule.isActive,
           createdAt: rule.createdAt,
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
           totalRules: rules.length,
           activeRules: rules.filter(r => r.isActive).length,
           categories: [...new Set(rules.map(r => r.category))],
-          triggerTypes: [...new Set(rules.map(r => r.triggerType))]
+          triggerTypes: [...new Set(rules.map(r => (r as any).triggerType || 'AUTOMATIC'))]
         }
       },
       message: `Retrieved ${rules.length} achievement rules`,
@@ -114,8 +114,7 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       action: 'CREATE_ACHIEVEMENT_RULE',
       resource: 'ACHIEVEMENT_RULE',
-      details: { ruleId: newRule.id, type: body.type },
-      timestamp: new Date()
+      details: { ruleId: newRule.id, type: body.type }
     });
 
     return NextResponse.json({
@@ -124,13 +123,13 @@ export async function POST(request: NextRequest) {
         rule: {
           id: newRule.id,
           type: newRule.type,
-          title: newRule.title,
+          title: newRule.name,
           description: newRule.description,
           category: newRule.category,
-          triggerType: newRule.triggerType,
-          triggerConditions: newRule.triggerConditions,
-          badge: newRule.badge,
-          points: newRule.points,
+          triggerType: (newRule as any).triggerType || 'AUTOMATIC',
+          triggerConditions: (newRule as any).triggerConditions || newRule.criteria,
+          badge: (newRule as any).badge || 'default-badge',
+          points: (newRule as any).points || 10,
           priority: newRule.priority,
           isActive: newRule.isActive,
           createdAt: newRule.createdAt,

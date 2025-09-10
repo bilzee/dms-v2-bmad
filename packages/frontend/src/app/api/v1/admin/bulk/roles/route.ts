@@ -64,14 +64,18 @@ export async function POST(request: NextRequest) {
     const assignedRoles = allRoles.filter(role => roleIds.includes(role.id));
 
     // Send notifications if requested
-    if (notifyUsers && results.successful.length > 0) {
+    const successfulResults = results.filter(r => r.success);
+    if (notifyUsers && successfulResults.length > 0) {
       try {
-        const usersData = await DatabaseService.listUsers({ 
-          userIds: results.successful.map(r => r.userId) 
-        });
+        // Fetch user details for notifications
+        const userPromises = successfulResults.map(r => 
+          DatabaseService.getUserWithRoles(r.userId)
+        );
+        const usersData = await Promise.all(userPromises);
+        const validUsers = usersData.filter(user => user !== null);
         
         await NotificationService.sendBulkAssignmentNotification(
-          usersData.users as any[],
+          validUsers as any[],
           assignedRoles as any[],
           { id: adminUserId, name: adminUserName },
           reason
@@ -82,15 +86,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const failedResults = results.filter(r => !r.success);
+    
     return NextResponse.json({
       success: true,
       data: {
         totalUsers: userIds.length,
-        successfulAssignments: results.successful.length,
-        failedAssignments: results.failed.length,
-        successful: results.successful.map(result => ({
+        successfulAssignments: successfulResults.length,
+        failedAssignments: failedResults.length,
+        successful: successfulResults.map(result => ({
           userId: result.userId,
-          userName: result.userName,
+          userName: result.user?.name || 'Unknown',
           assignedRoles: assignedRoles.map(role => ({
             id: role.id,
             name: role.name,
@@ -107,14 +113,14 @@ export async function POST(request: NextRequest) {
             isActive: role.isActive
           }))
         })),
-        failed: results.failed,
+        failed: failedResults,
         assignedRoles: assignedRoles.map(role => ({
           id: role.id,
           name: role.name
         })),
         changeId: `bulk_assignment_${Date.now()}`
       },
-      message: `Bulk role assignment completed: ${results.successful.length} successful, ${results.failed.length} failed`,
+      message: `Bulk role assignment completed: ${successfulResults.length} successful, ${failedResults.length} failed`,
       timestamp: new Date().toISOString(),
     });
 

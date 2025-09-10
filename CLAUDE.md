@@ -5,7 +5,7 @@ The test strategy located in docs/qa/test-strategy.md and the following agents s
   - PM Agent: Reference quality gates for timeline planning
   - Architect: Validate against testing architecture framework
 
-Test Mocking - Avoid hardcoding mock values at the component level, instead frontend components should point to api endpoints where the mocking should happen. This makes all tests integration-ready by simply connecting the api endpoint to the backend. 
+Test Mocking - Avoid hardcoding mock values at the component level, if the backend is not ready, frontend components should point to api endpoints where the mocking should happen. This makes all tests integration-ready by simply connecting the api endpoint to the backend. If backend is ready ready then the mocking should happen on the backend. 
 
 ## Use of MCP Tools by BMad Agents
 BMad agents should utilise available MCPs tools in their tasks. Below are list of BMad agents and recommended MCP tools to use.  

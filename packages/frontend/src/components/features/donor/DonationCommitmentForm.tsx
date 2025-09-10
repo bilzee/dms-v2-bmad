@@ -209,7 +209,7 @@ export function DonationCommitmentForm({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs value={selectedResponseType} onValueChange={handleResponseTypeChange}>
+            <Tabs value={selectedResponseType} onValueChange={(value: string) => handleResponseTypeChange(value as any)}>
               <TabsList className="grid w-full grid-cols-6">
                 {RESPONSE_TYPES.map(({ type, label, icon }) => (
                   <TabsTrigger key={type} value={type} className="text-xs">
@@ -443,7 +443,7 @@ export function DonationCommitmentForm({
         </div>
         
         {/* Auto-save indicator */}
-        <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave} />
+        <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave || undefined} />
       </form>
     </div>
   );

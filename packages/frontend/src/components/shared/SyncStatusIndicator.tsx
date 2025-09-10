@@ -151,12 +151,12 @@ export const SyncStatusIndicator: React.FC<SyncStatusIndicatorProps> = ({
             <div
               className="h-full bg-blue-500 transition-all duration-300"
               style={{
-                width: `${(backgroundSyncProgress.processedItems / backgroundSyncProgress.totalItems) * 100}%`,
+                width: `${(backgroundSyncProgress.completedItems / backgroundSyncProgress.totalItems) * 100}%`,
               }}
             />
           </div>
           <span className="text-xs text-gray-500">
-            {backgroundSyncProgress.processedItems}/{backgroundSyncProgress.totalItems}
+            {backgroundSyncProgress.completedItems}/{backgroundSyncProgress.totalItems}
           </span>
         </div>
       )}

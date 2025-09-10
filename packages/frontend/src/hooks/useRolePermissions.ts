@@ -19,25 +19,40 @@ interface UseRolePermissionsReturn {
 export const useRolePermissions = (): UseRolePermissionsReturn => {
   const { data: session } = useSession();
 
-  const permissions = session?.user?.permissions || [];
+  const permissions: Permission[] = session?.user?.permissions?.map(p => 
+    typeof p === 'string' 
+      ? { id: p, name: p, resource: p.split(':')[0], action: p.split(':')[1] }
+      : p
+  ) || [];
   const activeRoleName = session?.user?.activeRole?.name || null;
-  const assignedRoles = session?.user?.assignedRoles || [];
+  const userRoles = session?.user?.roles || [];
 
   const hasPermission = useMemo(() => {
     return (resource: string, action: string): boolean => {
-      return permissions.some(
-        permission => permission.resource === resource && permission.action === action
-      );
+      if (!session?.user?.permissions) return false;
+      
+      // Handle both string and Permission object formats
+      return session.user.permissions.some(permission => {
+        if (typeof permission === 'string') {
+          return permission === `${resource}:${action}`;
+        }
+        // Handle Permission object format with explicit type casting
+        if (permission && typeof permission === 'object') {
+          const perm = permission as { resource?: string; action?: string };
+          return perm.resource === resource && perm.action === action;
+        }
+        return false;
+      });
     };
-  }, [permissions]);
+  }, [session?.user?.permissions]);
 
   const hasAnyRole = useMemo(() => {
     return (roles: string[]): boolean => {
       return roles.some(role => 
-        assignedRoles.some(userRole => userRole.name === role)
+        userRoles.some((userRole: any) => userRole.name === role)
       );
     };
-  }, [assignedRoles]);
+  }, [userRoles]);
 
   const canAccess = useMemo(() => {
     return (resource: string): boolean => {

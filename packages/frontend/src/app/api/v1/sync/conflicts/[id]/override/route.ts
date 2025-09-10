@@ -44,9 +44,8 @@ export async function PUT(
     if (!conflictId) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Conflict ID is required'
-      }, { status: 400 });
+      } as any, { status: 400 });
     }
 
     const body = await request.json();
@@ -56,9 +55,8 @@ export async function PUT(
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: `Validation error: ${validationResult.error.issues.map(i => i.message).join(', ')}`
-      }, { status: 400 });
+      } as any, { status: 400 });
     }
 
     const {
@@ -75,18 +73,16 @@ export async function PUT(
     if (!conflict) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Conflict not found'
-      }, { status: 404 });
+      } as any, { status: 404 });
     }
 
     // Check if conflict can be overridden
     if (conflict.status === 'RESOLVED') {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Cannot override a resolved conflict'
-      }, { status: 409 });
+      } as any, { status: 409 });
     }
 
     // Determine escalation level based on conflict severity and coordinator role
@@ -104,17 +100,15 @@ export async function PUT(
     if (escalationLevel === 'emergency' && coordinatorRole !== 'admin') {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Emergency override requires admin privileges'
-      }, { status: 403 });
+      } as any, { status: 403 });
     }
 
     if (conflict.severity === 'CRITICAL' && coordinatorRole === 'coordinator' && !emergencyOverride) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Critical conflicts require supervisor or admin privileges'
-      }, { status: 403 });
+      } as any, { status: 403 });
     }
 
     // Prepare override justification
@@ -193,8 +187,7 @@ export async function PUT(
     
     return NextResponse.json({
       success: false,
-      data: null,
       error: error instanceof Error ? error.message : 'Internal server error'
-    }, { status: 500 });
+    } as any, { status: 500 });
   }
 }

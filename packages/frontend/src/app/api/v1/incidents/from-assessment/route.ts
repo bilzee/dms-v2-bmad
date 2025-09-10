@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
           name: incident.name,
           type: incident.type,
           subType: incident.subType,
-          source: incident.source || undefined,
+          source: incident.source || '',
           severity: incident.severity,
           status: incident.status,
           date: incident.date,

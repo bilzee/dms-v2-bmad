@@ -25,11 +25,9 @@ export async function GET(
     if (!assessmentId) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Assessment ID is required',
-        data: null,
         errors: ['Assessment ID parameter is missing'],
-      } as FeedbackHistoryResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify user permissions
@@ -103,15 +101,13 @@ export async function GET(
   } catch (error) {
     console.error('Error retrieving feedback history:', error);
     
-    const errorResponse: FeedbackHistoryResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred while retrieving feedback',
-      data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 

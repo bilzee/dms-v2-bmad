@@ -27,8 +27,21 @@ export const authConfig = {
             id: "test-user-id",
             name: "Test Admin",
             email: "admin@test.com",
-            roles: [{ id: "admin-role", name: "ADMIN", isActive: true }],
-            activeRole: { id: "admin-role", name: "ADMIN", isActive: true },
+            role: "ADMIN",
+            roles: [{ 
+              id: "admin-role", 
+              name: "ADMIN", 
+              isActive: true,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }],
+            activeRole: { 
+              id: "admin-role", 
+              name: "ADMIN", 
+              isActive: true,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            },
             permissions: [],
           };
         }

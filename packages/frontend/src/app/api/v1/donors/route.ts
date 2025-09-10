@@ -83,7 +83,7 @@ const mockCommitments: DonorCommitment[] = [
     quantity: 500,
     unit: 'kg',
     targetDate: new Date('2024-09-15'),
-    status: 'PLANNED',
+    status: 'PLANNED' as any,
     createdAt: new Date('2024-08-20'),
     updatedAt: new Date('2024-08-20'),
   },
@@ -95,7 +95,7 @@ const mockCommitments: DonorCommitment[] = [
     quantity: 200,
     unit: 'units',
     targetDate: new Date('2024-09-10'),
-    status: 'PLANNED',
+    status: 'PLANNED' as any,
     createdAt: new Date('2024-08-18'),
     updatedAt: new Date('2024-08-18'),
   },
@@ -107,7 +107,7 @@ const mockCommitments: DonorCommitment[] = [
     quantity: 100,
     unit: 'kits',
     targetDate: new Date('2024-09-20'),
-    status: 'DELIVERED',
+    status: 'DELIVERED' as any,
     createdAt: new Date('2024-08-10'),
     updatedAt: new Date('2024-08-25'),
   },
@@ -119,7 +119,7 @@ const mockCommitments: DonorCommitment[] = [
     quantity: 300,
     unit: 'tarpaulins',
     targetDate: new Date('2024-09-12'),
-    status: 'PLANNED',
+    status: 'PLANNED' as any,
     createdAt: new Date('2024-08-22'),
     updatedAt: new Date('2024-08-22'),
   }
@@ -133,7 +133,7 @@ mockDonors.forEach(donor => {
       // Remove circular reference - exclude donor property
       const { donor: _, ...commitmentWithoutDonor } = commitment;
       return commitmentWithoutDonor;
-    });
+    }) as any;
 });
 
 // GET /api/v1/donors - List donors with optional filtering
@@ -245,7 +245,7 @@ export async function GET(request: NextRequest) {
     const response: DonorListResponse = {
       success: true,
       data: {
-        donors: paginatedDonors,
+        donors: paginatedDonors as any,
         totalCount,
         pagination: {
           page,
@@ -262,7 +262,6 @@ export async function GET(request: NextRequest) {
         },
       },
       message: `Found ${totalCount} donors`,
-      timestamp: new Date().toISOString(),
     };
 
     return NextResponse.json(response);

@@ -78,7 +78,7 @@ function ProgressMetric({ label, value, max = 100, unit = '%', thresholds }: Pro
           {value.toFixed(1)}{unit}
         </span>
       </div>
-      <Progress value={percentage} className="h-2" indicatorClassName={color} />
+      <Progress value={percentage} className="h-2" />
     </div>
   );
 }
@@ -118,9 +118,64 @@ export function SystemMetricsDisplay({
   showDetailedView = false,
   className
 }: SystemMetricsDisplayProps) {
+  // Provide default values for metrics to avoid undefined errors
+  const safeMetrics = {
+    timestamp: metrics?.timestamp || new Date(),
+    database: {
+      ...{
+        connectionCount: 0,
+        activeQueries: 0,
+        avgQueryTime: 0,
+        slowQueries: 0,
+        errorRate: 0,
+      },
+      ...metrics?.database
+    },
+    api: {
+      ...{
+        requestsPerMinute: 0,
+        avgResponseTime: 0,
+        errorRate: 0,
+        endpointStats: {},
+      },
+      ...metrics?.api
+    },
+    queue: {
+      ...{
+        activeJobs: 0,
+        waitingJobs: 0,
+        completedJobs: 0,
+        failedJobs: 0,
+        delayedJobs: 0,
+        processingRate: 0,
+        avgJobDuration: 0,
+        errorRate: 0,
+      },
+      ...metrics?.queue
+    },
+    system: {
+      ...{
+        cpuUsage: 0,
+        memoryUsage: 0,
+        diskUsage: 0,
+        networkLatency: 0,
+      },
+      ...metrics?.system
+    },
+    sync: {
+      ...{
+        successRate: 100,
+        conflictRate: 0,
+        avgSyncTime: 0,
+        pendingItems: 0,
+        lastSyncAt: new Date(),
+      },
+      ...metrics?.sync
+    }
+  };
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Get previous metrics for trends
+  // Get previous safeMetrics for trends
   const previousMetrics = historicalData.length > 0 ? historicalData[0] : undefined;
 
   // Categorize alerts by severity
@@ -145,11 +200,11 @@ export function SystemMetricsDisplay({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Connections:</span>
-              <span className="font-medium">{metrics.database.connectionCount}</span>
+              <span className="font-medium">{safeMetrics.database?.connectionCount || 0}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Avg Query Time:</span>
-              <span className="font-medium">{metrics.database.avgQueryTime.toFixed(0)}ms</span>
+              <span className="font-medium">{safeMetrics.database?.avgQueryTime?.toFixed(0) || 0}ms</span>
             </div>
           </div>
         </MetricCard>
@@ -163,12 +218,12 @@ export function SystemMetricsDisplay({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Requests/min:</span>
-              <span className="font-medium">{metrics.api.requestsPerMinute.toFixed(1)}</span>
+              <span className="font-medium">{safeMetrics.api?.requestsPerMinute?.toFixed(1) || 0}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Error Rate:</span>
-              <span className={`font-medium ${metrics.api.errorRate > 5 ? 'text-red-500' : ''}`}>
-                {metrics.api.errorRate.toFixed(1)}%
+              <span className={`font-medium ${(safeMetrics.api?.errorRate || 0) > 5 ? 'text-red-500' : ''}`}>
+                {safeMetrics.api?.errorRate?.toFixed(1) || 0}%
               </span>
             </div>
           </div>
@@ -183,11 +238,11 @@ export function SystemMetricsDisplay({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Active Jobs:</span>
-              <span className="font-medium">{metrics.queue.activeJobs}</span>
+              <span className="font-medium">{safeMetrics.queue?.activeJobs || 0}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Waiting:</span>
-              <span className="font-medium">{metrics.queue.waitingJobs}</span>
+              <span className="font-medium">{safeMetrics.queue?.waitingJobs || 0}</span>
             </div>
           </div>
         </MetricCard>
@@ -201,11 +256,11 @@ export function SystemMetricsDisplay({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>CPU:</span>
-              <span className="font-medium">{metrics.system.cpuUsage.toFixed(1)}%</span>
+              <span className="font-medium">{safeMetrics.system?.cpuUsage?.toFixed(1) || 0}%</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Memory:</span>
-              <span className="font-medium">{metrics.system.memoryUsage.toFixed(1)}%</span>
+              <span className="font-medium">{safeMetrics.system?.memoryUsage?.toFixed(1) || 0}%</span>
             </div>
           </div>
         </MetricCard>
@@ -261,7 +316,7 @@ export function SystemMetricsDisplay({
             <MetricCard title="Database Health" icon={<Database className="h-4 w-4" />}>
               <ProgressMetric 
                 label="Connection Pool" 
-                value={metrics.database.connectionCount} 
+                value={safeMetrics.database.connectionCount} 
                 max={100}
                 unit=""
                 thresholds={{ warning: 80, critical: 95 }}
@@ -271,7 +326,7 @@ export function SystemMetricsDisplay({
             <MetricCard title="API Performance" icon={<Globe className="h-4 w-4" />}>
               <ProgressMetric 
                 label="Error Rate" 
-                value={metrics.api.errorRate} 
+                value={safeMetrics.api.errorRate} 
                 max={10}
                 unit="%"
                 thresholds={{ warning: 5, critical: 10 }}
@@ -281,7 +336,7 @@ export function SystemMetricsDisplay({
             <MetricCard title="Queue Load" icon={<Queue className="h-4 w-4" />}>
               <ProgressMetric 
                 label="Waiting Jobs" 
-                value={metrics.queue.waitingJobs} 
+                value={safeMetrics.queue.waitingJobs} 
                 max={100}
                 unit=""
                 thresholds={{ warning: 50, critical: 80 }}
@@ -291,7 +346,7 @@ export function SystemMetricsDisplay({
             <MetricCard title="System Load" icon={<Cpu className="h-4 w-4" />}>
               <ProgressMetric 
                 label="CPU Usage" 
-                value={metrics.system.cpuUsage} 
+                value={safeMetrics.system?.cpuUsage || 0} 
                 max={100}
                 unit="%"
                 thresholds={{ warning: 70, critical: 90 }}
@@ -311,7 +366,7 @@ export function SystemMetricsDisplay({
                 <div className="space-y-4">
                   <div className="text-2xl font-bold">
                     <TrendIndicator 
-                      current={metrics.database.connectionCount} 
+                      current={safeMetrics.database.connectionCount} 
                       previous={previousMetrics?.database.connectionCount}
                       formatter={(v) => v.toString()}
                     />
@@ -320,7 +375,7 @@ export function SystemMetricsDisplay({
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm">Active Queries</span>
-                      <span className="text-sm font-medium">{metrics.database.activeQueries}</span>
+                      <span className="text-sm font-medium">{safeMetrics.database.activeQueries}</span>
                     </div>
                   </div>
                 </div>
@@ -335,7 +390,7 @@ export function SystemMetricsDisplay({
                 <div className="space-y-4">
                   <div className="text-2xl font-bold">
                     <TrendIndicator 
-                      current={metrics.database.avgQueryTime} 
+                      current={safeMetrics.database.avgQueryTime} 
                       previous={previousMetrics?.database.avgQueryTime}
                       formatter={(v) => `${v.toFixed(0)}ms`}
                     />
@@ -344,7 +399,7 @@ export function SystemMetricsDisplay({
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm">Slow Queries</span>
-                      <span className="text-sm font-medium">{metrics.database.slowQueries}</span>
+                      <span className="text-sm font-medium">{safeMetrics.database.slowQueries}</span>
                     </div>
                   </div>
                 </div>
@@ -358,12 +413,12 @@ export function SystemMetricsDisplay({
               <CardContent>
                 <div className="space-y-4">
                   <div className="text-2xl font-bold text-green-600">
-                    {metrics.database.errorRate.toFixed(2)}%
+                    {safeMetrics.database.errorRate.toFixed(2)}%
                   </div>
                   <div className="text-sm text-muted-foreground">Database Error Rate</div>
                   <ProgressMetric 
                     label="Error Rate" 
-                    value={metrics.database.errorRate} 
+                    value={safeMetrics.database.errorRate} 
                     max={5}
                     unit="%"
                     thresholds={{ warning: 2, critical: 5 }}
@@ -385,7 +440,7 @@ export function SystemMetricsDisplay({
                 <div className="space-y-4">
                   <div className="text-2xl font-bold">
                     <TrendIndicator 
-                      current={metrics.api.requestsPerMinute} 
+                      current={safeMetrics.api.requestsPerMinute} 
                       previous={previousMetrics?.api.requestsPerMinute}
                       formatter={(v) => v.toFixed(1)}
                     />
@@ -403,7 +458,7 @@ export function SystemMetricsDisplay({
                 <div className="space-y-4">
                   <div className="text-2xl font-bold">
                     <TrendIndicator 
-                      current={metrics.api.avgResponseTime} 
+                      current={safeMetrics.api.avgResponseTime} 
                       previous={previousMetrics?.api.avgResponseTime}
                       formatter={(v) => `${v.toFixed(0)}ms`}
                     />
@@ -411,7 +466,7 @@ export function SystemMetricsDisplay({
                   <div className="text-sm text-muted-foreground">Average Response Time</div>
                   <ProgressMetric 
                     label="Response Time" 
-                    value={metrics.api.avgResponseTime} 
+                    value={safeMetrics.api.avgResponseTime} 
                     max={1000}
                     unit="ms"
                     thresholds={{ warning: 500, critical: 1000 }}
@@ -428,7 +483,7 @@ export function SystemMetricsDisplay({
                 <div className="space-y-4">
                   <div className="text-2xl font-bold">
                     <TrendIndicator 
-                      current={metrics.api.errorRate} 
+                      current={safeMetrics.api.errorRate} 
                       previous={previousMetrics?.api.errorRate}
                       formatter={(v) => `${v.toFixed(1)}%`}
                     />
@@ -436,7 +491,7 @@ export function SystemMetricsDisplay({
                   <div className="text-sm text-muted-foreground">Error Rate</div>
                   <ProgressMetric 
                     label="Error Rate" 
-                    value={metrics.api.errorRate} 
+                    value={safeMetrics.api.errorRate} 
                     max={10}
                     unit="%"
                     thresholds={{ warning: 5, critical: 10 }}
@@ -447,14 +502,14 @@ export function SystemMetricsDisplay({
           </div>
 
           {/* Endpoint Statistics */}
-          {Object.keys(metrics.api.endpointStats).length > 0 && (
+          {Object.keys(safeMetrics.api.endpointStats).length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Endpoint Performance</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {Object.entries(metrics.api.endpointStats).map(([endpoint, stats]) => (
+                  {Object.entries(safeMetrics.api.endpointStats).map(([endpoint, stats]) => (
                     <div key={endpoint} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span className="font-mono text-sm">{endpoint}</span>
                       <div className="flex items-center gap-4 text-sm">
@@ -481,7 +536,7 @@ export function SystemMetricsDisplay({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-600">
-                  {metrics.queue.activeJobs}
+                  {safeMetrics.queue.activeJobs}
                 </div>
                 <div className="text-sm text-muted-foreground">Currently Processing</div>
               </CardContent>
@@ -493,7 +548,7 @@ export function SystemMetricsDisplay({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-yellow-600">
-                  {metrics.queue.waitingJobs}
+                  {safeMetrics.queue.waitingJobs}
                 </div>
                 <div className="text-sm text-muted-foreground">In Queue</div>
               </CardContent>
@@ -505,7 +560,7 @@ export function SystemMetricsDisplay({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {metrics.queue.completedJobs}
+                  {safeMetrics.queue.completedJobs}
                 </div>
                 <div className="text-sm text-muted-foreground">Total Completed</div>
               </CardContent>
@@ -517,7 +572,7 @@ export function SystemMetricsDisplay({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">
-                  {metrics.queue.failedJobs}
+                  {safeMetrics.queue.failedJobs}
                 </div>
                 <div className="text-sm text-muted-foreground">Total Failed</div>
               </CardContent>
@@ -531,7 +586,7 @@ export function SystemMetricsDisplay({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {metrics.queue.processingRate.toFixed(1)} jobs/min
+                  {safeMetrics.queue.processingRate.toFixed(1)} jobs/min
                 </div>
                 <div className="text-sm text-muted-foreground">Average Processing Rate</div>
               </CardContent>
@@ -543,7 +598,7 @@ export function SystemMetricsDisplay({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {(metrics.queue.avgJobDuration / 1000).toFixed(1)}s
+                  {(safeMetrics.queue.avgJobDuration / 1000).toFixed(1)}s
                 </div>
                 <div className="text-sm text-muted-foreground">Average Job Duration</div>
               </CardContent>
@@ -564,7 +619,7 @@ export function SystemMetricsDisplay({
               <CardContent>
                 <ProgressMetric 
                   label="CPU Usage" 
-                  value={metrics.system.cpuUsage} 
+                  value={safeMetrics.system.cpuUsage} 
                   max={100}
                   unit="%"
                   thresholds={{ warning: 70, critical: 90 }}
@@ -582,7 +637,7 @@ export function SystemMetricsDisplay({
               <CardContent>
                 <ProgressMetric 
                   label="Memory Usage" 
-                  value={metrics.system.memoryUsage} 
+                  value={safeMetrics.system.memoryUsage} 
                   max={100}
                   unit="%"
                   thresholds={{ warning: 80, critical: 95 }}
@@ -600,7 +655,7 @@ export function SystemMetricsDisplay({
               <CardContent>
                 <ProgressMetric 
                   label="Disk Usage" 
-                  value={metrics.system.diskUsage} 
+                  value={safeMetrics.system.diskUsage} 
                   max={100}
                   unit="%"
                   thresholds={{ warning: 85, critical: 95 }}
@@ -617,7 +672,7 @@ export function SystemMetricsDisplay({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {metrics.system.networkLatency.toFixed(0)}ms
+                  {safeMetrics.system.networkLatency.toFixed(0)}ms
                 </div>
                 <div className="text-sm text-muted-foreground">Average Network Latency</div>
               </CardContent>
@@ -636,31 +691,31 @@ export function SystemMetricsDisplay({
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <div className="text-2xl font-bold text-green-600">
-                    {metrics.sync.successRate.toFixed(1)}%
+                    {safeMetrics.sync.successRate.toFixed(1)}%
                   </div>
                   <div className="text-sm text-muted-foreground">Success Rate</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-yellow-600">
-                    {metrics.sync.conflictRate.toFixed(1)}%
+                    {safeMetrics.sync.conflictRate.toFixed(1)}%
                   </div>
                   <div className="text-sm text-muted-foreground">Conflict Rate</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold">
-                    {metrics.sync.avgSyncTime.toFixed(0)}ms
+                    {safeMetrics.sync.avgSyncTime.toFixed(0)}ms
                   </div>
                   <div className="text-sm text-muted-foreground">Avg Sync Time</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-blue-600">
-                    {metrics.sync.pendingItems}
+                    {safeMetrics.sync.pendingItems}
                   </div>
                   <div className="text-sm text-muted-foreground">Pending Items</div>
                 </div>
               </div>
               <div className="mt-4 text-sm text-muted-foreground">
-                Last sync: {new Date(metrics.sync.lastSyncAt).toLocaleString()}
+                Last sync: {new Date(safeMetrics.sync.lastSyncAt).toLocaleString()}
               </div>
             </CardContent>
           </Card>

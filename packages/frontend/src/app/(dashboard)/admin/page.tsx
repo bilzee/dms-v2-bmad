@@ -160,30 +160,30 @@ export default function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/admin/audit">
+            <Link href="/admin/audit">
+              <Button variant="outline" size="sm">
                 <Shield className="h-4 w-4 mr-2" />
                 View Security Events
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/admin/monitoring">
+              </Button>
+            </Link>
+            <Link href="/admin/monitoring">
+              <Button variant="outline" size="sm">
                 <Activity className="h-4 w-4 mr-2" />
                 Check System Status
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/admin/users">
+              </Button>
+            </Link>
+            <Link href="/admin/users">
+              <Button variant="outline" size="sm">
                 <Users className="h-4 w-4 mr-2" />
                 Manage Users
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/admin/reports">
+              </Button>
+            </Link>
+            <Link href="/admin/reports">
+              <Button variant="outline" size="sm">
                 <FileText className="h-4 w-4 mr-2" />
                 Generate Report
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
@@ -225,11 +225,11 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-4">
-            <Button variant="ghost" size="sm" className="w-full" asChild>
-              <Link href="/admin/audit">
+            <Link href="/admin/audit" className="w-full">
+              <Button variant="ghost" size="sm" className="w-full">
                 View All Activity →
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

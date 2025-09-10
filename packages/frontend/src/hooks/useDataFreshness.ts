@@ -31,6 +31,7 @@ export const useDataFreshness = (options: DataFreshnessOptions = {}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [connectionStatus, setConnectionStatus] = useState<'online' | 'offline' | 'poor'>('online');
   const [summaryStats, setSummaryStats] = useState({
     totalItems: 0,
     totalRealTime: 0,

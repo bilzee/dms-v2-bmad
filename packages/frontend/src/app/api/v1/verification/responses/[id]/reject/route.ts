@@ -18,11 +18,9 @@ export async function POST(
     if (!responseId) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Response ID is required',
-        data: null,
         errors: ['Response ID parameter is missing'],
-      } as ResponseRejectionResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     const body: ResponseRejectionRequest = await request.json();
@@ -31,11 +29,9 @@ export async function POST(
     if (!body.coordinatorId || !body.coordinatorName || !body.rejectionComments?.trim()) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Required rejection information is missing',
-        data: null,
         errors: ['coordinatorId, coordinatorName, and rejectionComments are required'],
-      } as ResponseRejectionResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Validate rejection reason
@@ -43,11 +39,9 @@ export async function POST(
     if (!validRejectionReasons.includes(body.rejectionReason)) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Invalid rejection reason',
-        data: null,
         errors: [`rejectionReason must be one of: ${validRejectionReasons.join(', ')}`],
-      } as ResponseRejectionResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Validate priority level
@@ -55,11 +49,9 @@ export async function POST(
     if (!validPriorities.includes(body.priority)) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Invalid priority level',
-        data: null,
         errors: [`priority must be one of: ${validPriorities.join(', ')}`],
-      } as ResponseRejectionResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify coordinator role
@@ -67,20 +59,18 @@ export async function POST(
     // Mock: Check if response exists and is in PENDING status
     const mockResponse: Partial<RapidResponse> = {
       id: responseId,
-      verificationStatus: 'PENDING',
+      verificationStatus: 'PENDING' as any,
       responderId: 'mock-responder-id',
       responderName: 'Mock Responder',
-      responseType: 'HEALTH',
+      responseType: 'HEALTH' as any,
     };
 
     if (!mockResponse || mockResponse.verificationStatus !== 'PENDING') {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Response not found or not in pending status',
-        data: null,
         errors: ['Response must be in PENDING status to be rejected'],
-      } as ResponseRejectionResponse, { status: 404 });
+      } as any, { status: 404 });
     }
 
     const rejectionTimestamp = new Date();
@@ -142,15 +132,13 @@ export async function POST(
   } catch (error) {
     console.error('Error rejecting response:', error);
     
-    const errorResponse: ResponseRejectionResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred while rejecting response',
-      data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 

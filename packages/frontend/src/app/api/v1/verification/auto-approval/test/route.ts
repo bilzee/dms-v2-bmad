@@ -54,16 +54,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
 
     // Validate request body
     if (!body.rules || !Array.isArray(body.rules) || body.rules.length === 0) {
-      return NextResponse.json<AutoApprovalTestResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: ['Rules array is required and cannot be empty'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
@@ -73,16 +72,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
     const useHistoricalData = body.useHistoricalData !== false;
 
     if (sampleSize < 1 || sampleSize > 1000) {
-      return NextResponse.json<AutoApprovalTestResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: ['Sample size must be between 1 and 1000'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
@@ -105,7 +103,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
         qualifiedHealthWorkers: Math.floor(Math.random() * 10),
         completeness: Math.random() * 100,
       } as any,
-      mediaAttachments: Math.random() > 0.5 ? [{ id: 'photo1', url: 'mock.jpg' }] : [],
+      mediaAttachments: Math.random() > 0.5 ? [{ id: 'photo1', url: 'mock.jpg', mimeType: 'image/jpeg', size: 1024 }] as any : [],
     });
 
     const generateMockResponse = (id: string): Partial<RapidResponse> => ({
@@ -117,7 +115,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
         completeness: Math.random() * 100,
         verified: Math.random() > 0.2,
       } as any,
-      deliveryEvidence: Math.random() > 0.4 ? [{ id: 'evidence1', url: 'mock.jpg' }] : [],
+      deliveryEvidence: Math.random() > 0.4 ? [{ id: 'evidence1', url: 'mock.jpg', mimeType: 'image/jpeg', size: 1024 }] as any : [],
     });
 
     // Generate sample data
@@ -238,29 +236,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
         },
         recommendations,
       },
-      meta: {
-        timestamp: new Date().toISOString(),
-        version: '1.0.0',
-        testParameters: {
-          sampleSize,
-          targetType,
-          useHistoricalData,
-        },
-      },
-    });
+    } as any);
 
   } catch (error) {
     console.error('Failed to test auto-approval rules:', error);
-    return NextResponse.json<AutoApprovalTestResponse>(
+    return NextResponse.json(
       {
         success: false,
-      data: null,
         errors: [error instanceof Error ? error.message : 'Internal server error'],
         meta: {
           timestamp: new Date().toISOString(),
           version: '1.0.0',
         },
-      },
+      } as any,
       { status: 500 }
     );
   }

@@ -1,7 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { AdminUser, UserListFilters } from '../../../../../../../shared/types/admin';
+// Using types from shared package
+import { AdminUser } from '@dms/shared/types/admin';
+
+// Mock UserListFilters (shared types not fully available)
+interface UserListFilters {
+  search?: string;
+  role?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+  offset?: number;
+  sortBy?: "name" | "email" | "createdAt" | "lastSync";
+  sortOrder?: "asc" | "desc";
+  isActive?: boolean;
+  organization?: string;
+}
 import { EditUserModal } from './EditUserModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -268,7 +283,7 @@ export function UserList({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                      <Badge variant={user.accountStatus === 'ACTIVE' ? 'default' : 'secondary'}>
                         {user.accountStatus}
                       </Badge>
                     </TableCell>
@@ -291,7 +306,7 @@ export function UserList({
                             Edit User
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          {user.isActive ? (
+                          {user.accountStatus === 'ACTIVE' ? (
                             <DropdownMenuItem
                               onClick={() => handleStatusToggle(user, 'deactivate')}
                               className="text-red-600"

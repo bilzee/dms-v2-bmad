@@ -27,7 +27,38 @@ import {
   Calendar
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { SecurityEvent, SecurityEventResponse } from '@dms/shared/types/admin';
+// Mock types for security events (shared types not available)
+interface SecurityEvent {
+  id: string;
+  type: string;
+  eventType: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  detectedAt: string;
+  investigationStatus: 'PENDING' | 'INVESTIGATING' | 'RESOLVED' | 'DISMISSED';
+  description: string;
+  source: string;
+  affectedResource: string;
+  userId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  details?: string;
+  investigatorNotes?: string;
+  metadata?: Record<string, any>;
+}
+
+interface SecurityEventResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    events: SecurityEvent[];
+    totalCount: number;
+    pagination: {
+      page: number;
+      pageSize: number;
+      totalPages: number;
+    };
+  };
+}
 
 interface SecurityEventsPanelProps {
   events?: SecurityEvent[];

@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         id: role.id,
         name: role.name,
         description: `System role with permissions`,
-        permissions: role.permissions?.map(rp => ({
+        permissions: (role as any).permissions?.map((rp: any) => ({
           id: rp.permission.id,
           name: rp.permission.name,
           description: rp.permission.description,
@@ -60,9 +60,9 @@ export async function GET(request: NextRequest) {
         id: user.activeRole.id,
         name: user.activeRole.name,
         description: `Active system role`,
-        permissions: user.roles
-          .find(r => r.id === user.activeRole?.id)
-          ?.permissions?.map(rp => ({
+        permissions: (user.roles
+          .find(r => r.id === user.activeRole?.id) as any)
+          ?.permissions?.map((rp: any) => ({
             id: rp.permission.id,
             name: rp.permission.name,
             description: rp.permission.description,
@@ -149,9 +149,9 @@ export async function PUT(request: NextRequest) {
         id: updatedUser.activeRole.id,
         name: updatedUser.activeRole.name,
         description: `Active system role`,
-        permissions: updatedUser.roles
-          .find(r => r.id === updatedUser.activeRole?.id)
-          ?.permissions?.map(rp => ({
+        permissions: (updatedUser.roles
+          .find(r => r.id === updatedUser.activeRole?.id) as any)
+          ?.permissions?.map((rp: any) => ({
             id: rp.permission.id,
             name: rp.permission.name,
             description: rp.permission.description,
@@ -165,7 +165,7 @@ export async function PUT(request: NextRequest) {
         id: role.id,
         name: role.name,
         description: `System role`,
-        permissions: role.permissions?.map(rp => ({
+        permissions: (role as any).permissions?.map((rp: any) => ({
           id: rp.permission.id,
           name: rp.permission.name,
           description: rp.permission.description,

@@ -19,11 +19,9 @@ export async function GET(
     if (!responseId) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Response ID is required',
-        data: null,
         errors: ['Response ID parameter is missing'],
-      } as ResponsePhotosResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify coordinator role
@@ -32,18 +30,16 @@ export async function GET(
     // Mock: Check if response exists
     const mockResponse: Partial<RapidResponse> = {
       id: responseId,
-      verificationStatus: 'PENDING',
-      responseType: 'HEALTH',
+      verificationStatus: 'PENDING' as any,
+      responseType: 'HEALTH' as any,
     };
 
     if (!mockResponse) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Response not found',
-        data: null,
         errors: ['Response does not exist or has been deleted'],
-      } as ResponsePhotosResponse, { status: 404 });
+      } as any, { status: 404 });
     }
 
     // Mock delivery photos with GPS metadata
@@ -119,15 +115,13 @@ export async function GET(
   } catch (error) {
     console.error('Error retrieving response photos:', error);
     
-    const errorResponse: ResponsePhotosResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred while retrieving photos',
-      data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 

@@ -41,7 +41,7 @@ export async function POST(
     const validationResult = DeliveryDocumentationRequestSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { errors: ['Invalid delivery documentation data'], details: validationResult.error.errors },
+        { errors: ['Invalid delivery documentation data'], details: validationResult.error.errors } as any,
         { status: 400 }
       );
     }
@@ -52,7 +52,7 @@ export async function POST(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { errors: ['Response not found'] },
+        { errors: ['Response not found'] } as any,
         { status: 404 }
       );
     }
@@ -63,7 +63,7 @@ export async function POST(
         {
           errors: ['Response cannot be documented'],
           message: `Response status ${existingResponse.status} does not allow delivery documentation`,
-        },
+        } as any,
         { status: 400 }
       );
     }
@@ -117,7 +117,7 @@ export async function POST(
   } catch (error) {
     console.error('Delivery documentation creation error:', error);
     return NextResponse.json(
-      { errors: ['Failed to create delivery documentation'] },
+      { errors: ['Failed to create delivery documentation'] } as any,
       { status: 500 }
     );
   }
@@ -152,7 +152,7 @@ export async function PATCH(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { errors: ['Response not found'] },
+        { errors: ['Response not found'] } as any,
         { status: 404 }
       );
     }
@@ -250,7 +250,7 @@ export async function GET(
     const response = mockResponses[responseId];
     if (!response) {
       return NextResponse.json(
-        { errors: ['Response not found'] },
+        { errors: ['Response not found'] } as any,
         { status: 404 }
       );
     }
@@ -291,7 +291,7 @@ export async function DELETE(
     const existingResponse = mockResponses[responseId];
     if (!existingResponse) {
       return NextResponse.json(
-        { errors: ['Response not found'] },
+        { errors: ['Response not found'] } as any,
         { status: 404 }
       );
     }

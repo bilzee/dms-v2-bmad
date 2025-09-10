@@ -52,9 +52,8 @@ export async function GET(
     if (!entityId) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Entity ID is required'
-      }, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Parse query parameters
@@ -147,8 +146,7 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      data: null,
       error: 'Internal server error'
-    }, { status: 500 });
+    } as any, { status: 500 });
   }
 }

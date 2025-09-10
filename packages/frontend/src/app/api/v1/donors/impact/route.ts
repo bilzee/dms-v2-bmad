@@ -84,10 +84,7 @@ export async function GET(request: NextRequest) {
       where: whereClause,
       include: {
         rapidResponse: {
-          where: { verificationStatus: 'VERIFIED' },
-          include: {
-            affectedEntity: true
-          }
+          where: { verificationStatus: 'VERIFIED' }
         }
       },
       orderBy: { deliveredDate: 'asc' }
@@ -116,12 +113,12 @@ export async function GET(request: NextRequest) {
         }
         beneficiariesByResponseType[commitment.responseType] += beneficiaries;
 
-        // Track geographic impact
-        if (commitment.rapidResponse.affectedEntity) {
-          const location = `${commitment.rapidResponse.affectedEntity.lga}-${commitment.rapidResponse.affectedEntity.ward}`;
+        // Track geographic impact (using simplified location data)
+        if (responseData.location || responseData.lga) {
+          const region = responseData.lga || responseData.location || 'Unknown';
+          const location = `${region}-${responseData.ward || 'Unknown'}`;
           locationsServed.add(location);
 
-          const region = commitment.rapidResponse.affectedEntity.lga;
           if (!regionData[region]) {
             regionData[region] = { beneficiaries: 0, deliveries: 0, responseTypes: new Set() };
           }

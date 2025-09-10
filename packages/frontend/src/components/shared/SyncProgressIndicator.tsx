@@ -46,7 +46,7 @@ export interface SyncProgressIndicatorProps {
 interface SyncIndicatorState {
   connectivity: ConnectivityStatus | null;
   progress: BackgroundSyncProgress | null;
-  syncStatus: ReturnType<typeof backgroundSyncManager.getStatus>;
+  syncStatus: any;
   isVisible: boolean;
   lastToastId: string | number | null;
 }
@@ -63,7 +63,7 @@ export function SyncProgressIndicator({
   const [state, setState] = useState<SyncIndicatorState>({
     connectivity: null,
     progress: null,
-    syncStatus: backgroundSyncManager.getStatus(),
+    syncStatus: backgroundSyncManager?.getStatus() || null,
     isVisible: false,
     lastToastId: null,
   });
@@ -130,7 +130,7 @@ export function SyncProgressIndicator({
       duration: 5000,
       action: {
         label: 'Retry',
-        onClick: () => backgroundSyncManager.triggerImmediateSync('manual_retry'),
+        onClick: () => backgroundSyncManager?.triggerImmediateSync('manual_retry'),
       },
     });
   }, []);
@@ -138,7 +138,7 @@ export function SyncProgressIndicator({
   // Initialize subscriptions
   useEffect(() => {
     const unsubscribeConnectivity = connectivityDetector.onConnectivityChange(updateConnectivity);
-    const unsubscribeSync = backgroundSyncManager.subscribe({
+    const unsubscribeSync = backgroundSyncManager?.subscribe({
       onProgress: updateProgress,
       onComplete: handleSyncComplete,
       onError: handleSyncError,
@@ -148,28 +148,28 @@ export function SyncProgressIndicator({
     const statusInterval = setInterval(() => {
       setState(prev => ({
         ...prev,
-        syncStatus: backgroundSyncManager.getStatus(),
+        syncStatus: backgroundSyncManager?.getStatus() || null,
       }));
     }, 1000);
 
     return () => {
       unsubscribeConnectivity();
-      unsubscribeSync();
+      unsubscribeSync?.();
       clearInterval(statusInterval);
     };
   }, [updateConnectivity, updateProgress, handleSyncComplete, handleSyncError]);
 
   // Handle manual sync trigger
   const handleManualSync = useCallback(() => {
-    backgroundSyncManager.triggerImmediateSync('manual_trigger');
+    backgroundSyncManager?.triggerImmediateSync('manual_trigger');
   }, []);
 
   // Handle pause/resume
   const handlePauseResume = useCallback(() => {
     if (state.syncStatus.isPaused) {
-      backgroundSyncManager.resume();
+      backgroundSyncManager?.resume();
     } else {
-      backgroundSyncManager.pause();
+      backgroundSyncManager?.pause();
     }
   }, [state.syncStatus.isPaused]);
 

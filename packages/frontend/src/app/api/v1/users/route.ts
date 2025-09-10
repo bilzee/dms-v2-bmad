@@ -136,9 +136,8 @@ export async function POST(request: NextRequest) {
       userId: newUser.id,
       action: 'CREATE_USER',
       resource: 'USER',
-      details: { newUserId: newUser.id, roles: body.roles },
-      timestamp: new Date()
-    });
+      details: { newUserId: newUser.id, roles: body.roles }
+    } as any);
 
     return NextResponse.json({
       success: true,

@@ -47,11 +47,9 @@ export async function GET(
     if (!responseId) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Response ID is required',
-        data: null,
         errors: ['Response ID parameter is missing'],
-      } as DeliveryComparisonResponse, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // TODO: Add authentication middleware to verify coordinator role
@@ -61,7 +59,7 @@ export async function GET(
     const mockResponse: Partial<RapidResponse> = {
       id: responseId,
       responseType: ResponseType.HEALTH,
-      verificationStatus: 'PENDING',
+      verificationStatus: 'PENDING' as any,
       plannedDate: new Date('2024-01-15T09:00:00Z'),
       deliveredDate: new Date('2024-01-15T10:30:00Z'),
       assessmentId: 'assessment-123',
@@ -69,7 +67,7 @@ export async function GET(
 
     const mockAssessment: Partial<RapidAssessment> = {
       id: 'assessment-123',
-      type: 'HEALTH',
+      type: 'HEALTH' as any,
       date: new Date('2024-01-14T14:00:00Z'),
       data: {
         // Mock health assessment data
@@ -88,11 +86,9 @@ export async function GET(
     if (!mockResponse || !mockAssessment) {
       return NextResponse.json({
         success: false,
-      data: null,
         message: 'Response or related assessment not found',
-        data: null,
         errors: ['Response or assessment data is missing'],
-      } as DeliveryComparisonResponse, { status: 404 });
+      } as any, { status: 404 });
     }
 
     // Mock planned items based on assessment needs
@@ -224,15 +220,13 @@ export async function GET(
   } catch (error) {
     console.error('Error retrieving delivery comparison:', error);
     
-    const errorResponse: DeliveryComparisonResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       message: 'Internal server error occurred while retrieving delivery comparison',
-      data: null,
       errors: ['An unexpected error occurred. Please try again later.'],
     };
 
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }
 

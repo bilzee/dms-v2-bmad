@@ -140,7 +140,7 @@ export function useHistoricalComparison(
     data: data ? [...data.historical, data.current].map((item, index) => ({
       ...item,
       index,
-    })) as T[] : [],
+    })) as any[] : [],
     aggregations: {
       trends: data?.trends || [],
       analytics: data?.analytics || {},

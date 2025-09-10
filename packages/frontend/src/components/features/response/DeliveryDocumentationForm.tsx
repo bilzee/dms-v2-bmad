@@ -235,7 +235,7 @@ export function DeliveryDocumentationForm({
             </div>
             <AutoSaveIndicator 
               isSaving={isAutoSaving}
-              lastSaved={lastAutoSave}
+              lastSaved={lastAutoSave || undefined}
             />
           </div>
         </CardHeader>

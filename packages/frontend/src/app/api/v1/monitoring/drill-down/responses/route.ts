@@ -138,14 +138,14 @@ export async function GET(request: NextRequest) {
     
     // Generate aggregations
     const aggregations = {
-      byType: responseTypes.reduce((acc, type) => {
+      byType: responseTypes?.reduce((acc, type) => {
         acc[type] = allResponses.filter(r => r.responseType === type).length;
         return acc;
-      }, {} as Record<string, number>),
-      byStatus: responseStatuses.reduce((acc, status) => {
+      }, {} as Record<string, number>) || {},
+      byStatus: responseStatuses?.reduce((acc, status) => {
         acc[status] = allResponses.filter(r => r.status === status).length;
         return acc;
-      }, {} as Record<string, number>),
+      }, {} as Record<string, number>) || {},
       byEntity: allResponses.reduce((acc, response) => {
         acc[response.entityName] = (acc[response.entityName] || 0) + 1;
         return acc;

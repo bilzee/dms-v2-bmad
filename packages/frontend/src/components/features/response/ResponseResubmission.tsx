@@ -295,7 +295,7 @@ export function ResponseResubmission({
                           key={item.id}
                           control={form.control}
                           name="addressedFeedbackIds"
-                          render={({ field }) => (
+                          render={({ field }: { field: any }) => (
                             <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                               <FormControl>
                                 <Checkbox
@@ -304,7 +304,7 @@ export function ResponseResubmission({
                                     return checked
                                       ? field.onChange([...field.value, item.id])
                                       : field.onChange(
-                                          field.value?.filter((value) => value !== item.id)
+                                          field.value?.filter((value: any) => value !== item.id)
                                         );
                                   }}
                                 />
@@ -334,7 +334,7 @@ export function ResponseResubmission({
               <FormField
                 control={form.control}
                 name="changesDescription"
-                render={({ field }) => (
+                render={({ field }: { field: any }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold">
                       Description of Changes *

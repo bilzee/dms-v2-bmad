@@ -49,8 +49,8 @@ export async function auditMiddleware(
   });
 
   const auditContext: AuditContext = {
-    userId: token?.sub,
-    userName: token?.name,
+    userId: token?.sub || undefined,
+    userName: token?.name || undefined,
     sessionId: token?.sessionId as string,
     userRole: token?.role as string,
     ipAddress: getClientIP(request),

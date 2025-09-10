@@ -5,6 +5,8 @@ import {
   AutoApprovalConfig,
   AutoApprovalRule 
 } from '@dms/shared';
+import { AssessmentType } from '@dms/shared/types/entities';
+import { createApiResponse } from '@/lib/type-helpers';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +21,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
         {
           id: 'rule-health-basic',
           type: 'ASSESSMENT',
-          assessmentType: 'HEALTH',
+          assessmentType: AssessmentType.HEALTH,
           enabled: true,
           qualityThresholds: {
             dataCompletenessPercentage: 85,
@@ -65,24 +67,24 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
         configId: 'config-1',
         config: mockConfig,
       },
-      meta: {
-        timestamp: new Date().toISOString(),
-        version: '1.0.0',
-      },
     });
 
   } catch (error) {
     console.error('Failed to fetch auto-approval rules:', error);
-    return NextResponse.json<AutoApprovalRulesResponse>(
+    const errorResponse = createApiResponse<any>(
+      false, 
       {
-        success: false,
-      data: null,
-        errors: ['Failed to fetch auto-approval configuration'],
-        meta: {
-          timestamp: new Date().toISOString(),
-          version: '1.0.0',
-        },
+        rulesCreated: 0,
+        rulesUpdated: 0,
+        configId: '',
+        validationErrors: [error instanceof Error ? error.message : 'Unknown error']
       },
+      'Failed to fetch auto-approval configuration',
+      ['Internal server error']
+    );
+    
+    return NextResponse.json<AutoApprovalRulesResponse>(
+      errorResponse,
       { status: 500 }
     );
   }
@@ -95,16 +97,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
 
     // Validate request body
     if (!body.rules || !Array.isArray(body.rules)) {
-      return NextResponse.json<AutoApprovalRulesResponse>(
+      const errorResponse = createApiResponse<any>(
+        false, 
         {
-          success: false,
-      data: null,
-          errors: ['Invalid request body: rules array is required'],
-          meta: {
-            timestamp: new Date().toISOString(),
-            version: '1.0.0',
-          },
+          rulesCreated: 0,
+          rulesUpdated: 0,
+          configId: '',
+          validationErrors: ['Invalid request body: rules array is required']
         },
+        'Invalid request body: rules array is required',
+        ['Validation failed']
+      );
+      
+      return NextResponse.json<AutoApprovalRulesResponse>(
+        errorResponse,
         { status: 400 }
       );
     }
@@ -126,21 +132,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
 
     if (validationErrors.length > 0) {
       return NextResponse.json<AutoApprovalRulesResponse>(
-        {
-          success: false,
-      data: null,
-          errors: ['Validation failed'],
-          data: {
+        createApiResponse<any>(
+          false, 
+          {
             rulesCreated: 0,
             rulesUpdated: 0,
             configId: '',
             validationErrors,
           },
-          meta: {
-            timestamp: new Date().toISOString(),
-            version: '1.0.0',
-          },
-        },
+          'Validation failed',
+          ['Validation errors found']
+        ),
         { status: 400 }
       );
     }
@@ -166,24 +168,22 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
         rulesUpdated,
         configId: `config-${Date.now()}`,
       },
-      meta: {
-        timestamp: new Date().toISOString(),
-        version: '1.0.0',
-      },
     });
 
   } catch (error) {
     console.error('Failed to create/update auto-approval rules:', error);
     return NextResponse.json<AutoApprovalRulesResponse>(
-      {
-        success: false,
-      data: null,
-        errors: [error instanceof Error ? error.message : 'Internal server error'],
-        meta: {
-          timestamp: new Date().toISOString(),
-          version: '1.0.0',
+      createApiResponse<any>(
+        false,
+        {
+          rulesCreated: 0,
+          rulesUpdated: 0,
+          configId: '',
+          validationErrors: [error instanceof Error ? error.message : 'Internal server error']
         },
-      },
+        'Failed to create/update auto-approval rules',
+        ['Internal server error']
+      ),
       { status: 500 }
     );
   }

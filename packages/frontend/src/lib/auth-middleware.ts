@@ -116,7 +116,10 @@ export async function getActiveRole(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET 
   })
   
-  return token?.activeRole as string || token?.role as string || null;
+  const roleString = token?.activeRole 
+    ? (token.activeRole as unknown as string)
+    : (token?.role as string) || null;
+  return roleString;
 }
 
 // Middleware to require specific role

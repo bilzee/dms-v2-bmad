@@ -14,16 +14,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
     // Validate time range parameter
     const validTimeRanges = ['1h', '24h', '7d', '30d', 'custom'];
     if (!validTimeRanges.includes(timeRange)) {
-      return NextResponse.json<AutoApprovalStatsResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: [`Invalid time range. Must be one of: ${validTimeRanges.join(', ')}`],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
@@ -31,16 +30,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
     // For custom time range, validate dates
     if (timeRange === 'custom') {
       if (!startDate || !endDate) {
-        return NextResponse.json<AutoApprovalStatsResponse>(
+        return NextResponse.json(
           {
             success: false,
-      data: null,
             errors: ['Start date and end date are required for custom time range'],
             meta: {
               timestamp: new Date().toISOString(),
               version: '1.0.0',
             },
-          },
+          } as any,
           { status: 400 }
         );
       }
@@ -49,31 +47,29 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
       const end = new Date(endDate);
 
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        return NextResponse.json<AutoApprovalStatsResponse>(
+        return NextResponse.json(
           {
             success: false,
-      data: null,
             errors: ['Invalid date format. Use ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)'],
             meta: {
               timestamp: new Date().toISOString(),
               version: '1.0.0',
             },
-          },
+          } as any,
           { status: 400 }
         );
       }
 
       if (start >= end) {
-        return NextResponse.json<AutoApprovalStatsResponse>(
+        return NextResponse.json(
           {
             success: false,
-      data: null,
             errors: ['Start date must be before end date'],
             meta: {
               timestamp: new Date().toISOString(),
               version: '1.0.0',
             },
-          },
+          } as any,
           { status: 400 }
         );
       }
@@ -172,30 +168,19 @@ export async function GET(request: NextRequest): Promise<NextResponse<AutoApprov
         overridesCount: baseStats.overridesCount,
         timeRange: displayTimeRange,
       },
-      meta: {
-        timestamp: new Date().toISOString(),
-        version: '1.0.0',
-        totalItemsProcessed: baseStats.totalItems,
-        queryParameters: {
-          timeRange,
-          startDate: timeRange === 'custom' ? startDate : null,
-          endDate: timeRange === 'custom' ? endDate : null,
-        },
-      },
-    });
+    } as any);
 
   } catch (error) {
     console.error('Failed to fetch auto-approval statistics:', error);
-    return NextResponse.json<AutoApprovalStatsResponse>(
+    return NextResponse.json(
       {
         success: false,
-      data: null,
         errors: [error instanceof Error ? error.message : 'Internal server error'],
         meta: {
           timestamp: new Date().toISOString(),
           version: '1.0.0',
         },
-      },
+      } as any,
       { status: 500 }
     );
   }

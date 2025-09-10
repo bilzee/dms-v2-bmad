@@ -17,7 +17,7 @@ async function getBullMQQueueData() {
       const stats = await getPriorityQueueStats();
       
       // Convert BullMQ jobs to PriorityQueueItem format
-      const queueItems: PriorityQueueItem[] = jobs.map(job => ({
+      const queueItems: PriorityQueueItem[] = jobs.map((job: any) => ({
         id: job.data.id || job.id?.toString() || '',
         type: job.data.type || 'ASSESSMENT',
         action: job.data.action || 'CREATE',
@@ -105,7 +105,7 @@ const mockQueue: PriorityQueueItem[] = [
     priorityReason: 'Shelter assessment; Moderate beneficiary count',
     createdAt: new Date('2025-08-27T08:00:00Z'),
     estimatedSyncTime: new Date(Date.now() + 30 * 60 * 1000),
-    errors: ['Network timeout'],
+    error: 'Network timeout',
     lastAttempt: new Date('2025-08-27T12:00:00Z'),
   },
 ];

@@ -268,7 +268,7 @@ export function PerformanceDashboard({ className }: PerformanceDashboardProps) {
         
         {activeTab === 'trends' && (
           <PerformanceTrends 
-            period={selectedPeriod}
+            period={selectedPeriod === 'all' ? '365' : selectedPeriod as any}
             responseType={selectedResponseType}
           />
         )}

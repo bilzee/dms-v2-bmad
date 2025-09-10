@@ -25,91 +25,85 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
 
     // Validate request body
     if (!body.targetType || !['ASSESSMENT', 'RESPONSE'].includes(body.targetType)) {
-      return NextResponse.json<AutoApprovalOverrideResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: ['Invalid target type. Must be ASSESSMENT or RESPONSE'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
 
     if (!body.targetIds || !Array.isArray(body.targetIds) || body.targetIds.length === 0) {
-      return NextResponse.json<AutoApprovalOverrideResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: ['Target IDs array is required and cannot be empty'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
 
     if (!body.newStatus || !['PENDING', 'REJECTED'].includes(body.newStatus)) {
-      return NextResponse.json<AutoApprovalOverrideResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: ['Invalid new status. Must be PENDING or REJECTED'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
 
     if (!body.reason || body.reason.trim().length === 0) {
-      return NextResponse.json<AutoApprovalOverrideResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: ['Override reason is required'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
 
     if (!body.reasonDetails || body.reasonDetails.trim().length < 10) {
-      return NextResponse.json<AutoApprovalOverrideResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: ['Detailed reason must be at least 10 characters'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
 
     if (!body.coordinatorId || body.coordinatorId.trim().length === 0) {
-      return NextResponse.json<AutoApprovalOverrideResponse>(
+      return NextResponse.json(
         {
           success: false,
-      data: null,
           errors: ['Coordinator ID is required'],
           meta: {
             timestamp: new Date().toISOString(),
             version: '1.0.0',
           },
-        },
+        } as any,
         { status: 400 }
       );
     }
@@ -165,25 +159,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<AutoAppro
         failedCount,
         results,
       },
-      meta: {
-        timestamp: new Date().toISOString(),
-        version: '1.0.0',
-        message: `Successfully overrode ${processedCount} items. ${failedCount} items failed to process.`,
-      },
-    });
+    } as any);
 
   } catch (error) {
     console.error('Failed to process auto-approval override:', error);
-    return NextResponse.json<AutoApprovalOverrideResponse>(
+    return NextResponse.json(
       {
         success: false,
-      data: null,
         errors: [error instanceof Error ? error.message : 'Internal server error'],
         meta: {
           timestamp: new Date().toISOString(),
           version: '1.0.0',
         },
-      },
+      } as any,
       { status: 500 }
     );
   }

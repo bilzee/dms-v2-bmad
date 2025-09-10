@@ -142,9 +142,8 @@ export async function PATCH(
       userId: userId,
       action: 'UPDATE_USER',
       resource: 'USER',
-      details: { updates, targetUserId: userId },
-      timestamp: new Date()
-    });
+      details: { updates, targetUserId: userId }
+    } as any);
 
     return NextResponse.json({
       success: true,
@@ -249,8 +248,7 @@ export async function DELETE(
       action: 'DELETE_USER',
       resource: 'USER',
       details: { deletedUserId: userId },
-      timestamp: new Date()
-    });
+    } as any);
 
     return NextResponse.json({
       success: true,

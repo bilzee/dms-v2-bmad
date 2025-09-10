@@ -31,43 +31,39 @@ export async function POST(
     const assessmentId = params.id;
     
     if (!assessmentId) {
-      const errorResponse: VerifyAssessmentResponse = {
+      const errorResponse = {
         success: false,
-      data: null,
         errors: ['Assessment ID is required'],
       };
-      return NextResponse.json(errorResponse, { status: 400 });
+      return NextResponse.json(errorResponse as any, { status: 400 });
     }
 
     const body = await request.json() as VerifyAssessmentRequest;
     
     // Validate request
     if (!['APPROVE', 'REJECT'].includes(body.action)) {
-      const errorResponse: VerifyAssessmentResponse = {
+      const errorResponse = {
         success: false,
-      data: null,
         errors: ['Invalid action. Must be APPROVE or REJECT'],
       };
-      return NextResponse.json(errorResponse, { status: 400 });
+      return NextResponse.json(errorResponse as any, { status: 400 });
     }
 
     // Validate feedback for rejection
     if (body.action === 'REJECT' && !body.feedback) {
-      const errorResponse: VerifyAssessmentResponse = {
+      const errorResponse = {
         success: false,
-      data: null,
         errors: ['Feedback is required for rejection'],
       };
-      return NextResponse.json(errorResponse, { status: 400 });
+      return NextResponse.json(errorResponse as any, { status: 400 });
     }
 
     if (body.action === 'REJECT' && body.feedback && !body.feedback.comments.trim()) {
-      const errorResponse: VerifyAssessmentResponse = {
+      const errorResponse = {
         success: false,
-      data: null,
         errors: ['Comments are required for rejection feedback'],
       };
-      return NextResponse.json(errorResponse, { status: 400 });
+      return NextResponse.json(errorResponse as any, { status: 400 });
     }
 
     // Simulate processing
@@ -107,12 +103,11 @@ export async function POST(
   } catch (error) {
     console.error('Verify assessment API error:', error);
     
-    const errorResponse: VerifyAssessmentResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       errors: [error instanceof Error ? error.message : 'Unknown error occurred'],
     };
     
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }

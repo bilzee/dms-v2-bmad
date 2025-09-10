@@ -65,7 +65,7 @@ export function EditUserModal({ user, open, onClose, onSuccess }: EditUserModalP
       phone: user.phone || '',
       organization: user.organization || '',
       roleIds: user.roles.map(role => role.id),
-      isActive: user.isActive
+      isActive: true
     }
   });
 
@@ -106,7 +106,7 @@ export function EditUserModal({ user, open, onClose, onSuccess }: EditUserModalP
         phone: user.phone || '',
         organization: user.organization || '',
         roleIds: user.roles.map(role => role.id),
-        isActive: user.isActive
+        isActive: true
       });
     }
   }, [open, user, form]);
@@ -196,7 +196,7 @@ export function EditUserModal({ user, open, onClose, onSuccess }: EditUserModalP
             </div>
             <div>
               <span className="font-medium">Status:</span>{' '}
-              <Badge variant={user.isActive ? 'default' : 'secondary'}>
+              <Badge variant={user.accountStatus === 'ACTIVE' ? 'default' : 'secondary'}>
                 {user.accountStatus}
               </Badge>
             </div>
@@ -229,7 +229,7 @@ export function EditUserModal({ user, open, onClose, onSuccess }: EditUserModalP
               <FormField
                 control={form.control}
                 name="name"
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
@@ -249,7 +249,7 @@ export function EditUserModal({ user, open, onClose, onSuccess }: EditUserModalP
               <FormField
                 control={form.control}
                 name="phone"
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
@@ -263,7 +263,7 @@ export function EditUserModal({ user, open, onClose, onSuccess }: EditUserModalP
               <FormField
                 control={form.control}
                 name="organization"
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Organization</FormLabel>
                     <FormControl>
@@ -298,7 +298,7 @@ export function EditUserModal({ user, open, onClose, onSuccess }: EditUserModalP
                           key={role.id}
                           control={form.control}
                           name="roleIds"
-                          render={({ field }) => {
+                          render={({ field }: any) => {
                             const isChecked = field.value?.includes(role.id) || false;
                             const isCurrentActive = role.id === user.activeRole?.id;
                             
@@ -343,7 +343,7 @@ export function EditUserModal({ user, open, onClose, onSuccess }: EditUserModalP
             <FormField
               control={form.control}
               name="isActive"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-3">
                   <FormControl>
                     <Checkbox

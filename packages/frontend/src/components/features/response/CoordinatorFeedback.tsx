@@ -46,11 +46,11 @@ export function CoordinatorFeedback({
         if (isOffline) {
           // Load from offline storage
           const { useOfflineStore } = await import("@/stores/offline.store");
-          const offlineData = useOfflineStore.getState().getCachedData("feedback", responseId);
-          if (offlineData) {
-            setFeedback(offlineData.feedback || []);
-            setResubmissionHistory(offlineData.resubmissionHistory || []);
-          }
+          // const offlineData = useOfflineStore.getState().getCachedData("feedback", responseId);
+          // if (offlineData) {
+          //   setFeedback(offlineData.feedback || []);
+          //   setResubmissionHistory(offlineData.resubmissionHistory || []);
+          // }
         } else {
           // Load from API
           const response = await fetch(`/api/v1/responses/${responseId}/feedback`);

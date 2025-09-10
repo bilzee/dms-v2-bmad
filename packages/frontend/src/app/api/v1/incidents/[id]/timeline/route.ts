@@ -356,7 +356,6 @@ export async function GET(
         statusHistory: includeStatusHistory ? timelineData.statusHistory : [],
       },
       message: `Retrieved ${paginatedTimeline.length} timeline events`,
-      timestamp: new Date().toISOString(),
     };
 
     // Add metadata

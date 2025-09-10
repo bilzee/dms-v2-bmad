@@ -359,7 +359,7 @@ export function RoleAssignmentModal({
             <Checkbox
               id="notify-user"
               checked={notifyUser}
-              onCheckedChange={setNotifyUser}
+              onCheckedChange={(checked) => setNotifyUser(checked === true)}
             />
             <Label htmlFor="notify-user" className="text-sm">
               Send notification to user about role changes

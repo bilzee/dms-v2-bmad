@@ -9,9 +9,8 @@ export async function POST(request: NextRequest) {
     
     // Validate request
     if (!body.assessmentIds || !Array.isArray(body.assessmentIds) || body.assessmentIds.length === 0) {
-      const errorResponse: BatchVerificationResponse = {
+      const errorResponse = {
         success: false,
-      data: null,
         data: {
           processed: 0,
           successful: 0,
@@ -20,13 +19,12 @@ export async function POST(request: NextRequest) {
         },
         errors: ['No assessment IDs provided'],
       };
-      return NextResponse.json(errorResponse, { status: 400 });
+      return NextResponse.json(errorResponse as any, { status: 400 });
     }
 
     if (!['APPROVE', 'REJECT'].includes(body.action)) {
-      const errorResponse: BatchVerificationResponse = {
+      const errorResponse = {
         success: false,
-      data: null,
         data: {
           processed: 0,
           successful: 0,
@@ -35,14 +33,13 @@ export async function POST(request: NextRequest) {
         },
         errors: ['Invalid action. Must be APPROVE or REJECT'],
       };
-      return NextResponse.json(errorResponse, { status: 400 });
+      return NextResponse.json(errorResponse as any, { status: 400 });
     }
 
     // Validate feedback for rejection
     if (body.action === 'REJECT' && !body.feedback) {
-      const errorResponse: BatchVerificationResponse = {
+      const errorResponse = {
         success: false,
-      data: null,
         data: {
           processed: 0,
           successful: 0,
@@ -51,7 +48,7 @@ export async function POST(request: NextRequest) {
         },
         errors: ['Feedback is required for rejection'],
       };
-      return NextResponse.json(errorResponse, { status: 400 });
+      return NextResponse.json(errorResponse as any, { status: 400 });
     }
 
     // Simulate batch processing
@@ -67,7 +64,7 @@ export async function POST(request: NextRequest) {
         if (Math.random() < 0.05) {
           errors.push({
             assessmentId,
-            errors: ['Simulated processing error'],
+            error: 'Simulated processing error',
           });
           continue;
         }
@@ -89,7 +86,7 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         errors.push({
           assessmentId,
-          errors: [error instanceof Error ? error.message : 'Unknown processing error'],
+          error: error instanceof Error ? error.message : 'Unknown processing error',
         });
       }
     }
@@ -116,9 +113,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Batch verification API error:', error);
     
-    const errorResponse: BatchVerificationResponse = {
+    const errorResponse = {
       success: false,
-      data: null,
       data: {
         processed: 0,
         successful: 0,
@@ -128,6 +124,6 @@ export async function POST(request: NextRequest) {
       errors: [error instanceof Error ? error.message : 'Unknown error occurred'],
     };
     
-    return NextResponse.json(errorResponse, { status: 500 });
+    return NextResponse.json(errorResponse as any, { status: 500 });
   }
 }

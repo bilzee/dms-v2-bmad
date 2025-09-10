@@ -2,6 +2,13 @@
   "name": "@dms/frontend",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss",
+    "**/polyfills.ts",
+    "**/sw.js",
+    "**/register.js"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -74,6 +81,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.1.2",
+    "@next/bundle-analyzer": "^15.5.2",
     "@playwright/test": "^1.40.0",
     "@quramy/jest-prisma": "^1.8.1",
     "@testing-library/jest-dom": "^6.8.0",
@@ -100,6 +108,7 @@
     "postcss": "^8.0.0",
     "prisma": "^6.15.0",
     "tailwindcss": "^3.4.0",
+    "terser-webpack-plugin": "^5.3.14",
     "typescript": "^5.0.0",
     "undici": "^7.15.0",
     "whatwg-fetch": "^3.6.20"

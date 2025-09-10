@@ -7,11 +7,9 @@ import { useResponseQueueSelection, useVerificationStore } from '@/stores/verifi
 import { toast } from '@/hooks/use-toast';
 
 export default function ResponseVerificationQueuePage() {
-  const [batchAction, setBatchAction] = React.useState<'APPROVE' | 'REJECT' | null>(null);
-  const [showBatchDialog, setShowBatchDialog] = React.useState(false);
   
   const { selectedResponseIds, clearResponseSelection } = useResponseQueueSelection();
-  const { responseQueue, verifyResponse, batchVerifyResponses } = useVerificationStore();
+  const { responseQueue, approveResponse, rejectResponse, batchApproveResponses, batchRejectResponses } = useVerificationStore();
 
   const handlePreviewResponse = (responseId: string) => {
     // Preview functionality is handled by the store and ResponsePreview component
@@ -19,13 +17,17 @@ export default function ResponseVerificationQueuePage() {
   };
 
   const handleBatchAction = (action: 'APPROVE' | 'REJECT', responseIds: string[]) => {
-    setBatchAction(action);
-    setShowBatchDialog(true);
+    // Batch actions are now handled by the BatchResponseApprovalRejection component
+    console.log('Batch action requested:', action, responseIds);
   };
 
   const handleSingleVerification = async (responseId: string, action: 'APPROVE' | 'REJECT') => {
     try {
-      await verifyResponse(responseId, action);
+      if (action === 'APPROVE') {
+        await approveResponse(responseId, {});
+      } else {
+        await rejectResponse(responseId, {});
+      }
       
       toast({
         title: 'Response Verified',
@@ -50,30 +52,10 @@ export default function ResponseVerificationQueuePage() {
     });
   };
 
-  const closeBatchDialog = () => {
-    setShowBatchDialog(false);
-    setBatchAction(null);
+  const handleBatchComplete = () => {
+    // Called when batch operations complete successfully
+    clearResponseSelection();
   };
-
-  // Get selected responses for batch operations
-  const selectedResponses = selectedResponseIds.map(id => {
-    const queueItem = responseQueue.find(item => item.response.id === id);
-    if (!queueItem) return null;
-    
-    return {
-      id: queueItem.response.id,
-      responseType: queueItem.response.responseType,
-      responderName: queueItem.responderName,
-      affectedEntityName: queueItem.affectedEntity.name,
-      plannedDate: queueItem.response.plannedDate,
-    };
-  }).filter(Boolean) as Array<{
-    id: string;
-    responseType: string;
-    responderName: string;
-    affectedEntityName: string;
-    plannedDate: Date;
-  }>;
 
   return (
     <div className="container mx-auto p-6">
@@ -84,13 +66,13 @@ export default function ResponseVerificationQueuePage() {
         className="mb-6"
       />
 
-      {/* Batch Verification Dialog */}
-      {showBatchDialog && batchAction && (
+      {/* Batch Operations Component - shows when responses are selected */}
+      {selectedResponseIds.length > 0 && (
         <BatchResponseApprovalRejection
-          isOpen={showBatchDialog}
-          onClose={closeBatchDialog}
-          action={batchAction}
-          selectedResponses={selectedResponses}
+          selectedResponseIds={selectedResponseIds}
+          onBatchComplete={handleBatchComplete}
+          onClearSelection={clearResponseSelection}
+          className="mt-6"
         />
       )}
     </div>

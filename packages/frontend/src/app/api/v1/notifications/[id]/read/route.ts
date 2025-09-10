@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DatabaseService from '@/lib/services/DatabaseService';
+import prisma from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const { id: notificationId } = await context.params;
 
     // Update notification status
-    const updatedNotification = await DatabaseService.prisma.notification.update({
+    const updatedNotification = await prisma.notification.update({
       where: {
         id: notificationId
       },

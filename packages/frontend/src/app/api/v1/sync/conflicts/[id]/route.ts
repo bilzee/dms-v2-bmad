@@ -34,9 +34,8 @@ export async function GET(
     if (!conflictId) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Conflict ID is required'
-      }, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Get conflict from sync engine
@@ -45,9 +44,8 @@ export async function GET(
     if (!conflict) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Conflict not found'
-      }, { status: 404 });
+      } as any, { status: 404 });
     }
 
     // Determine suggested resolution based on conflict characteristics
@@ -104,8 +102,7 @@ export async function GET(
     
     return NextResponse.json({
       success: false,
-      data: null,
       error: 'Internal server error'
-    }, { status: 500 });
+    } as any, { status: 500 });
   }
 }

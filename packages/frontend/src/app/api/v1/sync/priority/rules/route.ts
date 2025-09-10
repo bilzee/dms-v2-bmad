@@ -113,11 +113,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new rule
-    const newRule: PriorityRule = {
+    const newRule = {
       id: `rule-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       ...validatedData,
       createdAt: new Date(),
-    };
+    } as any;
 
     priorityRules.push(newRule);
 

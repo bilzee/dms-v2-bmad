@@ -4,11 +4,36 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
+import { ArrowLeft, BarChart3, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { ConnectionStatusHeader } from '@/components/shared/ConnectionStatusHeader';
-import { ResponseVerificationInterface } from '@/components/features/verification/ResponseVerificationInterface';
-import { VerificationStamp } from '@/components/features/verification/VerificationStamp';
+
+// Epic 10: Dynamic imports for performance optimization - Heavy verification components
+const ResponseVerificationInterface = dynamic(
+  () => import('@/components/features/verification/ResponseVerificationInterface').then(mod => ({ default: mod.ResponseVerificationInterface })),
+  { 
+    loading: () => (
+      <Card>
+        <CardContent className="p-8">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            <span>Loading verification interface...</span>
+          </div>
+        </CardContent>
+      </Card>
+    ),
+    ssr: false 
+  }
+);
+
+const VerificationStamp = dynamic(
+  () => import('@/components/features/verification/VerificationStamp').then(mod => ({ default: mod.VerificationStamp })),
+  { 
+    loading: () => <div className="h-32 bg-gray-100 rounded animate-pulse" />,
+    ssr: false 
+  }
+);
 
 export default function ResponseDetailsPage() {
   const params = useParams();

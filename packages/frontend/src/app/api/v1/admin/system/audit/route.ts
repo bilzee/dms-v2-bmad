@@ -55,9 +55,9 @@ export async function GET(request: NextRequest) {
         auditLogs: auditLogs.map(log => ({
           id: log.id,
           userId: log.userId,
-          user: log.user ? {
-            name: log.user.name,
-            email: log.user.email
+          user: log.userName ? {
+            name: log.userName,
+            email: null
           } : null,
           action: log.action,
           resource: log.resource,

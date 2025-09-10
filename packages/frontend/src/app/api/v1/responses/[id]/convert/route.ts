@@ -136,7 +136,7 @@ export async function GET(
     if (!response && process.env.NODE_ENV === 'development') {
       // Use seed data for development
       const { seedResponses } = await import('../../../../../../lib/dev-data/seed-responses');
-      response = seedResponses.find(r => r.id === responseId) || null;
+      response = (seedResponses.find(r => r.id === responseId) || null) as any;
       if (response) {
         mockResponses[responseId] = response;
       }

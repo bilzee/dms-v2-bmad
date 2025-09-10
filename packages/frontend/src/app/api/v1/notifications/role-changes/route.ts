@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DatabaseService from '@/lib/services/DatabaseService';
+import prisma from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth-middleware';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch notifications
-    const notifications = await DatabaseService.prisma.notification.findMany({
+    const notifications = await prisma.notification.findMany({
       where: whereConditions,
       orderBy: {
         createdAt: 'desc'
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get total count for pagination
-    const totalCount = await DatabaseService.prisma.notification.count({
+    const totalCount = await prisma.notification.count({
       where: whereConditions
     });
 

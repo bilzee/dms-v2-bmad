@@ -21,7 +21,7 @@ const mockResourceAvailability: ResourceAvailability[] = [
         donorName: 'ActionAid Nigeria',
         quantity: 500,
         targetDate: new Date('2024-09-15'),
-        status: 'PLANNED',
+        status: 'PLANNED' as any,
         incidentId: '1',
       },
       {
@@ -29,7 +29,7 @@ const mockResourceAvailability: ResourceAvailability[] = [
         donorName: 'World Food Programme',
         quantity: 700,
         targetDate: new Date('2024-09-12'),
-        status: 'PLANNED',
+        status: 'PLANNED' as any,
         incidentId: '1',
       }
     ],
@@ -65,7 +65,7 @@ const mockResourceAvailability: ResourceAvailability[] = [
         donorName: 'Oxfam International',
         quantity: 200,
         targetDate: new Date('2024-09-10'),
-        status: 'PLANNED',
+        status: 'PLANNED' as any,
         incidentId: '1',
       },
       {
@@ -117,7 +117,7 @@ const mockResourceAvailability: ResourceAvailability[] = [
         donorName: 'UNICEF Nigeria',
         quantity: 50,
         targetDate: new Date('2024-09-18'),
-        status: 'PLANNED',
+        status: 'PLANNED' as any,
         incidentId: '1',
       }
     ],
@@ -153,7 +153,7 @@ const mockResourceAvailability: ResourceAvailability[] = [
         donorName: 'UNICEF Nigeria',
         quantity: 300,
         targetDate: new Date('2024-09-12'),
-        status: 'PLANNED',
+        status: 'PLANNED' as any,
         incidentId: '1',
       }
     ],

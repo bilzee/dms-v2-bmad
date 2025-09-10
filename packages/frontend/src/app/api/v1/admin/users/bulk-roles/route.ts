@@ -126,8 +126,8 @@ export async function POST(request: NextRequest) {
             const admin = { id: adminUserId, name: adminUserName };
             
             return NotificationService.sendRoleAssignmentNotification(
-              user,
-              assignedRoles,
+              user as any,
+              assignedRoles as any[],
               [], // No removed roles in bulk assignment
               admin,
               reason

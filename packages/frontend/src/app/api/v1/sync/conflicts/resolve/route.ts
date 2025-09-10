@@ -44,9 +44,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<ConflictR
     if (!validationResult.success) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: `Validation error: ${validationResult.error.issues.map(i => i.message).join(', ')}`
-      }, { status: 400 });
+      } as any, { status: 400 });
     }
 
     const { conflictId, resolutionStrategy, mergedData, justification, coordinatorId } = validationResult.data;
@@ -56,27 +55,24 @@ export async function POST(request: NextRequest): Promise<NextResponse<ConflictR
     if (!conflict) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Conflict not found'
-      }, { status: 404 });
+      } as any, { status: 404 });
     }
 
     // Validate that conflict is still pending
     if (conflict.status !== 'PENDING') {
       return NextResponse.json({
         success: false,
-      data: null,
         error: `Conflict is already ${conflict.status.toLowerCase()}`
-      }, { status: 409 });
+      } as any, { status: 409 });
     }
 
     // Validate merged data for MANUAL resolution
     if (resolutionStrategy === 'MANUAL' && !mergedData) {
       return NextResponse.json({
         success: false,
-      data: null,
         error: 'Merged data is required for MANUAL resolution strategy'
-      }, { status: 400 });
+      } as any, { status: 400 });
     }
 
     // Perform conflict resolution
@@ -139,8 +135,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ConflictR
     
     return NextResponse.json({
       success: false,
-      data: null,
       error: error instanceof Error ? error.message : 'Internal server error'
-    }, { status: 500 });
+    } as any, { status: 500 });
   }
 }

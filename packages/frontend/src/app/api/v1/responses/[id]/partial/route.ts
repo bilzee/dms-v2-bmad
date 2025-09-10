@@ -91,6 +91,7 @@ async function getResponseById(id: string): Promise<RapidResponse | null> {
     responderName: 'John Doe',
     verificationStatus: VerificationStatus.PENDING,
     syncStatus: SyncStatus.SYNCED,
+    requiresAttention: false,
     data: {
       foodItemsDelivered: [
         { item: 'Rice', quantity: 100, unit: 'kg' },

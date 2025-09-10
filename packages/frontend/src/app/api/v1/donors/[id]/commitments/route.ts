@@ -481,7 +481,7 @@ export async function DELETE(
       updatedAt: new Date(),
     };
 
-    mockCommitments[commitmentIndex] = cancelledCommitment;
+    mockCommitments[commitmentIndex] = cancelledCommitment as any;
 
     return NextResponse.json({
       success: true,

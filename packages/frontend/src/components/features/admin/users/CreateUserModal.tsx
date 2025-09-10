@@ -170,7 +170,7 @@ export function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalPro
               <FormField
                 control={form.control}
                 name="name"
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
@@ -184,7 +184,7 @@ export function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalPro
               <FormField
                 control={form.control}
                 name="email"
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
@@ -198,7 +198,7 @@ export function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalPro
               <FormField
                 control={form.control}
                 name="phone"
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Phone Number (Optional)</FormLabel>
                     <FormControl>
@@ -212,7 +212,7 @@ export function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalPro
               <FormField
                 control={form.control}
                 name="organization"
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Organization (Optional)</FormLabel>
                     <FormControl>
@@ -247,7 +247,7 @@ export function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalPro
                           key={role.id}
                           control={form.control}
                           name="roleIds"
-                          render={({ field }) => {
+                          render={({ field }: any) => {
                             return (
                               <FormItem
                                 key={role.id}
@@ -284,7 +284,7 @@ export function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalPro
             <FormField
               control={form.control}
               name="isActive"
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-3">
                   <FormControl>
                     <Checkbox

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import DatabaseService from '@/lib/services/DatabaseService';
+import { formatRolePermissions, createApiResponse } from '@/lib/type-helpers';
 
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
@@ -43,9 +44,11 @@ interface RoleSwitchResponse {
 export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitchResponse>> {
   const startTime = Date.now();
   let rollbackInfo: { previousRoleId: string; timestamp: string } | null = null;
+  let session: any = null;
+  let targetRoleId: string = '';
 
   try {
-    const session = await auth();
+    session = await auth();
     
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -54,7 +57,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
       );
     }
 
-    const { targetRoleId, targetRoleName, currentContext } = await request.json() as RoleSwitchRequest;
+    const { targetRoleId: roleId, targetRoleName, currentContext } = await request.json() as RoleSwitchRequest;
+    targetRoleId = roleId;
 
     if (!targetRoleId || !targetRoleName) {
       return NextResponse.json(
@@ -104,7 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
     const updatedUser = await DatabaseService.switchUserRole(session.user.id, targetRoleId);
 
     const activeRole = updatedUser.roles.find(role => role.id === targetRoleId);
-    const permissions = activeRole?.permissions || [];
+    const permissions = (activeRole as any)?.permissions || [];
 
     try {
       await DatabaseService.logUserAction({
@@ -131,19 +135,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
       newRole: {
         id: activeRole?.id || targetRoleId,
         name: targetRoleName,
-        permissions: permissions.map(p => ({
-          id: p.id,
-          name: p.name,
-          resource: p.resource,
-          action: p.action
-        }))
+        permissions: formatRolePermissions(permissions)
       },
-      updatedPermissions: permissions.map(p => ({
-        id: p.id,
-        name: p.name,
-        resource: p.resource,
-        action: p.action
-      })),
+      updatedPermissions: formatRolePermissions(permissions),
       sessionContext: {
         activeRole: activeRole,
         availableRoles: updatedUser.roles,
@@ -190,7 +184,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<RoleSwitc
       { 
         success: false, 
         errors: ['Internal server error during role switch'],
-        rollbackInfo: rollbackInfo
+        rollbackInfo: rollbackInfo || undefined
       },
       { status: 500 }
     );

@@ -24,17 +24,15 @@ async function requireAdminRole(request: NextRequest) {
     if (!token) {
       return NextResponse.json({
         success: false,
-      data: null,
         errors: ['Authentication required'],
         message: 'You must be logged in to access this resource'
       }, { status: 401 });
     }
 
     // Check if user has admin role
-    if (!token.roles || !Array.isArray(token.roles) || !token.roles.includes('ADMIN')) {
+    if (!token.roles || !Array.isArray(token.roles) || !token.roles.some((role: any) => role.name === 'ADMIN')) {
       return NextResponse.json({
         success: false,
-      data: null,
         errors: ['Access denied'],
         message: 'Admin role required to export audit data'
       }, { status: 403 });
@@ -45,7 +43,6 @@ async function requireAdminRole(request: NextRequest) {
     console.error('Admin role check failed:', error);
     return NextResponse.json({
       success: false,
-      data: null,
       errors: ['Authentication error'],
       message: 'Failed to verify user permissions'
     }, { status: 500 });
@@ -77,13 +74,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<any>> {
     // Validate request
     const validationError = validateExportRequest(body);
     if (validationError) {
-      const response: AuditDataExportResponse = {
+      return NextResponse.json({
         success: false,
-      data: null,
         errors: ['Invalid export request'],
         message: validationError
-      };
-      return NextResponse.json(response, { status: 400 });
+      }, { status: 400 });
     }
 
     // Create export
@@ -104,14 +99,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<any>> {
   } catch (error) {
     console.error('Failed to create audit export:', error);
     
-    const response: AuditDataExportResponse = {
+    return NextResponse.json({
       success: false,
-      data: null,
       errors: ['Failed to create export'],
       message: error instanceof Error ? error.message : 'Unknown error occurred'
-    };
-
-    return NextResponse.json(response, { status: 500 });
+    }, { status: 500 });
   }
 }
 
@@ -129,26 +121,22 @@ export async function GET(request: NextRequest): Promise<NextResponse<any>> {
     const exportId = searchParams.get('exportId');
 
     if (!exportId) {
-      const response: AuditDataExportResponse = {
+      return NextResponse.json({
         success: false,
-      data: null,
         errors: ['Missing export ID'],
         message: 'Export ID parameter is required'
-      };
-      return NextResponse.json(response, { status: 400 });
+      }, { status: 400 });
     }
 
     // Get export status
     const exportData = await auditExportService.getExportStatus(exportId);
 
     if (!exportData) {
-      const response: AuditDataExportResponse = {
+      return NextResponse.json({
         success: false,
-      data: null,
         errors: ['Export not found'],
         message: 'The specified export ID does not exist'
-      };
-      return NextResponse.json(response, { status: 404 });
+      }, { status: 404 });
     }
 
     const response: AuditDataExportResponse = {
@@ -162,14 +150,11 @@ export async function GET(request: NextRequest): Promise<NextResponse<any>> {
   } catch (error) {
     console.error('Failed to get export status:', error);
     
-    const response: AuditDataExportResponse = {
+    return NextResponse.json({
       success: false,
-      data: null,
       errors: ['Failed to get export status'],
       message: error instanceof Error ? error.message : 'Unknown error occurred'
-    };
-
-    return NextResponse.json(response, { status: 500 });
+    }, { status: 500 });
   }
 }
 

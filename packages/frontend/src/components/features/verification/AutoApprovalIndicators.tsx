@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   CheckCircle2, 
   Clock, 
@@ -339,19 +338,10 @@ export const AutoApprovalStatusBadge: React.FC<AutoApprovalStatusBadgeProps> = (
   );
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge variant={config.variant} className={cn('flex items-center gap-1', className)}>
-            <IconComponent className="w-3 h-3" />
-            {config.label}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent>
-          {tooltipContent}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Badge variant={config.variant} className={cn('flex items-center gap-1', className)}>
+      <IconComponent className="w-3 h-3" />
+      {config.label}
+    </Badge>
   );
 };
 

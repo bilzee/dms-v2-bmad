@@ -76,7 +76,7 @@ export function AchievementNotifications({
       setNotifications(prev => [...newNotifications, ...prev].slice(0, maxVisible));
       
       // Trigger confetti for major achievements
-      const majorAchievement = newNotifications.find(n => n.showConfetti);
+      const majorAchievement = newNotifications.find((n: any) => n.showConfetti);
       if (majorAchievement) {
         setConfettiActive(majorAchievement.id);
         setTimeout(() => setConfettiActive(null), 3000);

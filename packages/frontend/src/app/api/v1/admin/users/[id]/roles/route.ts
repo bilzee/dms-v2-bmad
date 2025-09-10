@@ -3,6 +3,7 @@ import DatabaseService from '@/lib/services/DatabaseService';
 import NotificationService from '@/lib/services/NotificationService';
 import { z } from 'zod';
 import { requireAdminRole, getCurrentUser } from '@/lib/auth-middleware';
+import { formatAdminRole, createApiResponse } from '@/lib/type-helpers';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         
         await NotificationService.sendRoleAssignmentNotification(
           user,
-          assignedRoles,
+          assignedRoles as any[],
           [],
           admin,
           reason
@@ -94,21 +95,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       success: true,
       data: {
         userId,
-        assignedRoles: assignedRoles.map(role => ({
-          id: role.id,
-          name: role.name,
-          description: `System role with ${role.permissions?.length || 0} permissions`,
-          userCount: role._count?.users || 0,
-          permissions: role.permissions?.map(rp => ({
-            id: rp.permission.id,
-            name: rp.permission.name,
-            description: rp.permission.description,
-            resource: rp.permission.resource,
-            action: rp.permission.action,
-            isActive: rp.permission.isActive
-          })) || [],
-          isActive: role.isActive
-        })),
+        assignedRoles: assignedRoles.map(role => formatAdminRole(role)),
         removedRoles: [], // Will be populated in PUT request
         activeRole: updatedUser.activeRole ? {
           id: updatedUser.activeRole.id,
@@ -216,8 +203,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         
         await NotificationService.sendRoleAssignmentNotification(
           user,
-          assignedRoles,
-          removedRoles,
+          assignedRoles as any[],
+          removedRoles as any[],
           admin,
           reason
         );
@@ -231,36 +218,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       success: true,
       data: {
         userId,
-        assignedRoles: assignedRoles.map(role => ({
-          id: role.id,
-          name: role.name,
-          description: `System role with ${role.permissions?.length || 0} permissions`,
-          userCount: role._count?.users || 0,
-          permissions: role.permissions?.map(rp => ({
-            id: rp.permission.id,
-            name: rp.permission.name,
-            description: rp.permission.description,
-            resource: rp.permission.resource,
-            action: rp.permission.action,
-            isActive: rp.permission.isActive
-          })) || [],
-          isActive: role.isActive
-        })),
-        removedRoles: removedRoles.map(role => ({
-          id: role.id,
-          name: role.name,
-          description: `System role with ${role.permissions?.length || 0} permissions`,
-          userCount: role._count?.users || 0,
-          permissions: role.permissions?.map(rp => ({
-            id: rp.permission.id,
-            name: rp.permission.name,
-            description: rp.permission.description,
-            resource: rp.permission.resource,
-            action: rp.permission.action,
-            isActive: rp.permission.isActive
-          })) || [],
-          isActive: role.isActive
-        })),
+        assignedRoles: assignedRoles.map(role => formatAdminRole(role)),
+        removedRoles: removedRoles.map(role => formatAdminRole(role)),
         activeRole: updatedUser.activeRole ? {
           id: updatedUser.activeRole.id,
           name: updatedUser.activeRole.name,

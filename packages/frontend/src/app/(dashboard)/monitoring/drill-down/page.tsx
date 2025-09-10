@@ -1,19 +1,70 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, BarChart3, Download } from 'lucide-react';
+import { ArrowLeft, BarChart3, Download, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { DetailedAssessmentView } from '@/components/features/monitoring/DetailedAssessmentView';
-import { DetailedResponseView } from '@/components/features/monitoring/DetailedResponseView';
-import { DetailedIncidentView } from '@/components/features/monitoring/DetailedIncidentView';
-import { DetailedEntityView } from '@/components/features/monitoring/DetailedEntityView';
-import { DrillDownFilters } from '@/components/features/monitoring/DrillDownFilters';
-import { HistoricalComparisonChart } from '@/components/features/monitoring/HistoricalComparisonChart';
-import { DataExportModal } from '@/components/features/monitoring/DataExportModal';
+import dynamic from 'next/dynamic';
 import { useDrillDownFilters } from '@/hooks/useDrillDownFilters';
+
+// Epic 10: Dynamic imports for performance optimization - Lazy load heavy monitoring components
+const DetailedAssessmentView = dynamic(
+  () => import('@/components/features/monitoring/DetailedAssessmentView').then(mod => ({ default: mod.DetailedAssessmentView })),
+  { 
+    loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /></div>,
+    ssr: false 
+  }
+);
+
+const DetailedResponseView = dynamic(
+  () => import('@/components/features/monitoring/DetailedResponseView').then(mod => ({ default: mod.DetailedResponseView })),
+  { 
+    loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /></div>,
+    ssr: false 
+  }
+);
+
+const DetailedIncidentView = dynamic(
+  () => import('@/components/features/monitoring/DetailedIncidentView').then(mod => ({ default: mod.DetailedIncidentView })),
+  { 
+    loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /></div>,
+    ssr: false 
+  }
+);
+
+const DetailedEntityView = dynamic(
+  () => import('@/components/features/monitoring/DetailedEntityView').then(mod => ({ default: mod.DetailedEntityView })),
+  { 
+    loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /></div>,
+    ssr: false 
+  }
+);
+
+const DrillDownFilters = dynamic(
+  () => import('@/components/features/monitoring/DrillDownFilters').then(mod => ({ default: mod.DrillDownFilters })),
+  { 
+    loading: () => <div className="h-16 bg-gray-100 rounded animate-pulse" />,
+    ssr: false 
+  }
+);
+
+const HistoricalComparisonChart = dynamic(
+  () => import('@/components/features/monitoring/HistoricalComparisonChart').then(mod => ({ default: mod.HistoricalComparisonChart })),
+  { 
+    loading: () => <div className="h-64 bg-gray-100 rounded animate-pulse" />,
+    ssr: false 
+  }
+);
+
+const DataExportModal = dynamic(
+  () => import('@/components/features/monitoring/DataExportModal').then(mod => ({ default: mod.DataExportModal })),
+  { 
+    loading: () => null,
+    ssr: false 
+  }
+);
 
 export default function DrillDownPage() {
   const router = useRouter();

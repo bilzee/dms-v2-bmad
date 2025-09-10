@@ -251,11 +251,12 @@ export function DataExportModal({
               )}
               
               {exportStatus.status === 'completed' && exportStatus.downloadUrl && (
-                <Button asChild className="w-full">
-                  <a href={exportStatus.downloadUrl} download>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Export
-                  </a>
+                <Button 
+                  className="w-full" 
+                  onClick={() => window.open(exportStatus.downloadUrl, '_blank')}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Export
                 </Button>
               )}
             </div>
@@ -276,10 +277,12 @@ export function DataExportModal({
                       </Badge>
                     </div>
                     {export_item.downloadUrl && (
-                      <Button asChild variant="outline" size="sm">
-                        <a href={export_item.downloadUrl} download>
-                          <Download className="h-3 w-3" />
-                        </a>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.open(export_item.downloadUrl, '_blank')}
+                      >
+                        <Download className="h-3 w-3" />
                       </Button>
                     )}
                   </div>

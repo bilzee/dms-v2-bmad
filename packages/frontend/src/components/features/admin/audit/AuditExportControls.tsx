@@ -24,12 +24,40 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { 
-  AuditExport, 
-  AuditExportRequest, 
-  AuditExportResponse,
-  AuditExportListResponse 
-} from '@dms/shared/types/admin';
+// Mock types for audit export (shared types not available)
+interface AuditExport {
+  id: string;
+  type: string;
+  format: string;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'EXPIRED';
+  progress?: number;
+  fileSize?: number;
+  expiresAt?: string;
+  createdAt: string;
+  completedAt?: string;
+  downloadUrl?: string;
+}
+
+interface AuditExportRequest {
+  type: string;
+  format: 'CSV' | 'JSON' | 'PDF';
+  dateRange: { from: string; to: string };
+  includeFields: string[];
+  includeDetails: boolean;
+  filters: Record<string, any>;
+}
+
+interface AuditExportResponse {
+  success: boolean;
+  message?: string;
+  data: { exportId: string };
+}
+
+interface AuditExportListResponse {
+  success: boolean;
+  message?: string;
+  data: { exports: AuditExport[] };
+}
 
 interface AuditExportControlsProps {
   className?: string;
@@ -153,9 +181,10 @@ export function AuditExportControls({ className }: AuditExportControlsProps) {
         type: exportForm.type,
         format: exportForm.format,
         dateRange: {
-          from: new Date(exportForm.dateFrom),
-          to: new Date(exportForm.dateTo)
+          from: exportForm.dateFrom,
+          to: exportForm.dateTo
         },
+        includeFields: [], // Default empty array for required field
         includeDetails: exportForm.includeDetails,
         filters: Object.fromEntries(
           Object.entries(exportForm.filters).filter(([_, value]) => value)

@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { 
-  AutoApprovalOverride, 
+  AutoApprovalOverride as AutoApprovalOverrideType, 
   AutoApprovalOverrideRequest,
   VerificationStatus 
 } from '@dms/shared';
@@ -44,7 +44,7 @@ interface AutoApprovalOverrideProps {
   coordinatorName: string;
   onOverride?: (request: AutoApprovalOverrideRequest) => Promise<void>;
   onCancel?: () => void;
-  recentOverrides?: AutoApprovalOverride[];
+  recentOverrides?: AutoApprovalOverrideType[];
 }
 
 export const AutoApprovalOverride: React.FC<AutoApprovalOverrideProps> = ({

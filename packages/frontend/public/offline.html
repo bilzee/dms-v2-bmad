@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DMS - Offline Mode</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .offline-container {
+      text-align: center;
+      max-width: 500px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    
+    .offline-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+    }
+    
+    h1 {
+      font-size: 28px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    
+    p {
+      font-size: 16px;
+      margin-bottom: 24px;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+    
+    .offline-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background: white;
+      color: #dc2626;
+    }
+    
+    .btn-primary:hover {
+      background: #f9f9f9;
+      transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .offline-tips {
+      margin-top: 24px;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    .offline-tips h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    
+    .offline-tips ul {
+      list-style: none;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .offline-tips li {
+      margin-bottom: 4px;
+      padding-left: 16px;
+      position: relative;
+    }
+    
+    .offline-tips li:before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .connection-status {
+      margin-top: 16px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .status-offline {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fef2f2;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .status-online {
+      background: rgba(34, 197, 94, 0.2);
+      color: #f0fdf4;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">📶</div>
+    <h1>You're Working Offline</h1>
+    <p>No internet connection detected. You can still access cached data and create new entries that will sync when connection is restored.</p>
+    
+    <div class="offline-actions">
+      <button class="btn btn-primary" onclick="window.location.reload()">
+        Try Again
+      </button>
+      <a href="/dashboard" class="btn btn-secondary">
+        Go to Dashboard
+      </a>
+    </div>
+    
+    <div class="offline-tips">
+      <h3>Available Offline:</h3>
+      <ul>
+        <li>View cached assessments and responses</li>
+        <li>Create new assessments (will sync later)</li>
+        <li>Access entity data and incident reports</li>
+        <li>View your sync queue status</li>
+      </ul>
+    </div>
+    
+    <div class="connection-status status-offline" id="connectionStatus">
+      🔴 Offline Mode
+    </div>
+  </div>
+
+  <script>
+    // Monitor connection status
+    function updateConnectionStatus() {
+      const statusEl = document.getElementById('connectionStatus');
+      if (navigator.onLine) {
+        statusEl.className = 'connection-status status-online';
+        statusEl.innerHTML = '🟢 Back Online - Reloading...';
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        statusEl.className = 'connection-status status-offline';
+        statusEl.innerHTML = '🔴 Offline Mode';
+      }
+    }
+    
+    // Listen for online/offline events
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    
+    // Initial status check
+    updateConnectionStatus();
+    
+    // Periodic connection check
+    setInterval(() => {
+      // Try to fetch a small resource to verify real connectivity
+      fetch('/manifest.json', { 
+        method: 'HEAD',
+        cache: 'no-cache'
+      }).then(() => {
+        if (!navigator.onLine) {
+          // Browser thinks we're offline but we can actually fetch
+          window.location.reload();
+        }
+      }).catch(() => {
+        // Fetch failed, we're truly offline
+      });
+    }, 10000);
+  </script>
+</body>
+</html>

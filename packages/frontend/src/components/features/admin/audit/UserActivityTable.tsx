@@ -23,7 +23,39 @@ import {
   XCircle
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { SystemActivityLog, AuditActivityResponse } from '@dms/shared/types/admin';
+// Mock types for user activity (shared types not available)
+interface SystemActivityLog {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail?: string;
+  action: string;
+  resource: string;
+  eventType: 'USER_ACTION' | 'SYSTEM_EVENT' | 'SECURITY_EVENT' | 'API_ACCESS' | 'DATA_CHANGE';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  module: string;
+  details: string;
+  timestamp: Date;
+  ipAddress: string;
+  userAgent: string;
+  statusCode?: number;
+  endpoint?: string;
+  responseTime?: number;
+}
+
+interface AuditActivityResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    activities: SystemActivityLog[];
+    totalCount: number;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+    };
+  };
+}
 
 interface UserActivityTableProps {
   activities?: SystemActivityLog[];
@@ -101,11 +133,11 @@ export function UserActivityTable({
       const response = await fetch(`/api/v1/admin/audit/activity?${searchParams}`);
       const data: AuditActivityResponse = await response.json();
 
-      if (data.success) {
+      if (data.success && data.data) {
         setActivities(data.data.activities);
         setPagination(prev => ({
           ...prev,
-          total: data.data.totalCount
+          total: data.data?.totalCount || 0
         }));
       } else {
         throw new Error(data.message || 'Failed to load activities');

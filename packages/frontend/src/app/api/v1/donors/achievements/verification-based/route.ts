@@ -49,14 +49,14 @@ export async function GET(request: NextRequest) {
     
     // Filter for verification-based achievements
     const verificationAchievements = achievements.filter(achievement => {
-      let match = achievement.verificationId !== null;
+      let match = (achievement as any).verificationId !== null;
       
       if (validatedParams.responseId) {
-        match = match && achievement.responseId === validatedParams.responseId;
+        match = match && (achievement as any).responseId === validatedParams.responseId;
       }
       
       if (validatedParams.verificationId) {
-        match = match && achievement.verificationId === validatedParams.verificationId;
+        match = match && (achievement as any).verificationId === validatedParams.verificationId;
       }
       
       return match;
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
           totalVerificationAchievements: verificationAchievements.length,
           verifiedResponses: verificationStamps.length,
           achievementsEarnedThisMonth: verificationAchievements.filter(a => 
-            a.unlockedAt && a.unlockedAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            (a as any).unlockedAt && (a as any).unlockedAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
           ).length
         }
       },

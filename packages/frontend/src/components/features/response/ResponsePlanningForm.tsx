@@ -117,7 +117,10 @@ export function ResponsePlanningForm({
     if (isDirty && currentDraft) {
       setIsAutoSaving(true);
       const formData = getValues();
-      updateDraft(currentDraft.id, formData);
+      updateDraft(currentDraft.id, {
+        ...formData,
+        responseType: formData.responseType as ResponseType
+      });
       setLastAutoSave(new Date());
       setTimeout(() => setIsAutoSaving(false), 1000);
     }
@@ -149,7 +152,7 @@ export function ResponsePlanningForm({
     // Update form values with controlled options to prevent cascades
     const defaultData = getDefaultResponseData(newType);
     setValue('responseType', newType, { shouldValidate: false, shouldDirty: true, shouldTouch: false });
-    setValue('data', defaultData, { shouldValidate: false, shouldDirty: true, shouldTouch: false });
+    setValue('data', defaultData as any, { shouldValidate: false, shouldDirty: true, shouldTouch: false });
     
     // Create or update draft in store
     if (currentDraft) {
@@ -216,6 +219,7 @@ export function ResponsePlanningForm({
       // Update draft with final form data
       updateDraft(currentDraft.id, {
         ...data,
+        responseType: data.responseType as ResponseType,
         plannedDate: new Date(data.plannedDate),
       });
 
@@ -275,11 +279,11 @@ export function ResponsePlanningForm({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Response Planning</h2>
-          <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave} />
+          <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave || undefined} />
         </div>
 
         {/* Response Type Tabs */}
-        <Tabs value={activeResponseType} onValueChange={handleResponseTypeChange}>
+        <Tabs value={activeResponseType} onValueChange={(value) => handleResponseTypeChange(value as ResponseType)}>
           <TabsList className="grid w-full grid-cols-6">
             {RESPONSE_TYPES.map(({ type, label, icon }) => (
               <TabsTrigger key={type} value={type} className="text-xs">
@@ -402,7 +406,7 @@ export function ResponsePlanningForm({
           </div>
           
           {/* Auto-save indicator at bottom */}
-          <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave} />
+          <AutoSaveIndicator isSaving={isAutoSaving} lastSaved={lastAutoSave || undefined} />
         </form>
       </FormProvider>
     </div>
