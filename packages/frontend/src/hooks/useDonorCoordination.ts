@@ -57,9 +57,10 @@ export function useDonorCoordination() {
     
     try {
       // Fetch all donor coordination data in parallel
-      const [donorsResponse, resourcesResponse] = await Promise.all([
+      const [donorsResponse, resourcesResponse, allocationsResponse] = await Promise.all([
         fetch('/api/v1/donors'),
         fetch('/api/v1/coordinator/resources/available'),
+        fetch('/api/v1/coordinator/resources/allocate?coordinatorId=current-coordinator-id&status=PENDING'),
       ]);
 
       if (!donorsResponse.ok) {
@@ -70,8 +71,13 @@ export function useDonorCoordination() {
         throw new Error(`Failed to fetch resources: ${resourcesResponse.statusText}`);
       }
 
+      if (!allocationsResponse.ok) {
+        throw new Error(`Failed to fetch allocations: ${allocationsResponse.statusText}`);
+      }
+
       const donorsData: DonorListResponse = await donorsResponse.json();
       const resourcesData = await resourcesResponse.json();
+      const allocationsData = await allocationsResponse.json();
 
       if (!donorsData.success) {
         throw new Error(donorsData.message || 'Failed to fetch donors');
@@ -81,83 +87,52 @@ export function useDonorCoordination() {
         throw new Error(resourcesData.message || 'Failed to fetch resources');
       }
 
-      // Mock coordination workspace items - would come from actual API
-      const mockWorkspaceItems: CoordinationWorkspaceItem[] = [
-        {
-          id: 'ws-1',
-          type: 'RESOURCE_ALLOCATION',
-          title: 'Food allocation for Maiduguri IDP Camp',
-          description: 'Coordinate 500kg rice delivery from ActionAid Nigeria',
-          priority: 'HIGH',
-          status: 'PENDING',
-          assignedTo: 'current-coordinator',
-          assignedToName: 'Current Coordinator',
-          donorId: '1',
-          donorName: 'ActionAid Nigeria',
-          affectedEntityId: 'entity-1',
-          affectedEntityName: 'Maiduguri IDP Camp',
-          responseType: ResponseType.FOOD,
-          quantity: 500,
-          unit: 'kg',
-          dueDate: new Date('2024-09-15'),
-          createdAt: new Date('2024-08-25'),
-          updatedAt: new Date('2024-08-25'),
-          actions: [
-            {
-              id: 'action-1',
-              type: 'CONFIRM_WITH_DONOR',
-              description: 'Confirm availability and delivery schedule',
-              completed: false,
-              dueDate: new Date('2024-09-01'),
-            },
-            {
-              id: 'action-2',
-              type: 'COORDINATE_LOGISTICS',
-              description: 'Arrange transportation and delivery point',
-              completed: false,
-              dueDate: new Date('2024-09-05'),
-            }
-          ]
-        },
-        {
-          id: 'ws-2',
-          type: 'CONFLICT_RESOLUTION',
-          title: 'WASH resource conflict resolution',
-          description: 'Resolve timing conflict between Oxfam and ActionAid deliveries',
-          priority: 'MEDIUM',
-          status: 'IN_PROGRESS',
-          assignedTo: 'current-coordinator',
-          assignedToName: 'Current Coordinator',
-          conflictType: 'TIMING_CONFLICT',
-          conflictDescription: 'Both donors scheduled for same delivery window',
-          affectedEntityId: 'entity-1',
-          affectedEntityName: 'Maiduguri IDP Camp',
-          responseType: ResponseType.WASH,
-          createdAt: new Date('2024-08-24'),
-          updatedAt: new Date('2024-08-25'),
-          actions: [
-            {
-              id: 'action-3',
-              type: 'CONTACT_DONORS',
-              description: 'Contact both donors to discuss alternative schedules',
-              completed: true,
-              completedAt: new Date('2024-08-24'),
-            },
-            {
-              id: 'action-4',
-              type: 'UPDATE_SCHEDULE',
-              description: 'Update delivery schedule in system',
-              completed: false,
-              dueDate: new Date('2024-08-26'),
-            }
-          ]
-        }
-      ];
+      if (!allocationsData.success) {
+        throw new Error(allocationsData.message || 'Failed to fetch allocations');
+      }
+
+      // Transform allocations into coordination workspace items
+      const workspaceItems: CoordinationWorkspaceItem[] = allocationsData.data.allocations.map((allocation: any) => ({
+        id: `ws-${allocation.id}`,
+        type: 'RESOURCE_ALLOCATION',
+        title: `${allocation.responseType} allocation for ${allocation.affectedEntityName}`,
+        description: `Coordinate ${allocation.quantity} ${allocation.unit} delivery ${allocation.donorName ? `from ${allocation.donorName}` : '(donor TBD)'}`,
+        priority: allocation.priority,
+        status: allocation.status,
+        assignedTo: allocation.coordinatorId,
+        assignedToName: allocation.coordinatorName,
+        donorId: allocation.donorCommitmentId?.split('_')[1] || undefined,
+        donorName: allocation.donorName,
+        affectedEntityId: allocation.affectedEntityId,
+        affectedEntityName: allocation.affectedEntityName,
+        responseType: allocation.responseType,
+        quantity: allocation.quantity,
+        unit: allocation.unit,
+        dueDate: new Date(allocation.targetDate),
+        createdAt: new Date(allocation.createdAt),
+        updatedAt: new Date(allocation.updatedAt),
+        actions: [
+          {
+            id: `action-${allocation.id}-1`,
+            type: 'CONFIRM_WITH_DONOR',
+            description: 'Confirm availability and delivery schedule',
+            completed: false,
+            dueDate: new Date(allocation.targetDate),
+          },
+          {
+            id: `action-${allocation.id}-2`,
+            type: 'COORDINATE_LOGISTICS',
+            description: 'Arrange transportation and delivery point',
+            completed: false,
+            dueDate: new Date(allocation.targetDate),
+          }
+        ]
+      }));
 
       setState({
         donors: donorsData.data.donors,
         resourceAvailability: resourcesData.data,
-        coordinationWorkspace: mockWorkspaceItems,
+        coordinationWorkspace: workspaceItems,
         stats: donorsData.data.stats,
         loading: false,
         error: null,

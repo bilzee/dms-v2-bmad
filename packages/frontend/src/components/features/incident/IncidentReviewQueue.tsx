@@ -70,41 +70,40 @@ export const IncidentReviewQueue: React.FC<IncidentReviewQueueProps> = ({
     try {
       setLoading(true);
       
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/v1/incidents?status=ACTIVE&assignedTo=' + coordinatorId);
-      // const data = await response.json();
+      // Build query parameters for filtering
+      const params = new URLSearchParams({
+        status: 'ACTIVE', // Only show active incidents in review queue
+        sortBy: 'date',
+        sortOrder: 'desc',
+        pageSize: '50' // Get more incidents for the queue
+      });
       
-      // Mock data for now
-      const mockIncidents: Incident[] = [
-        {
-          id: crypto.randomUUID(),
-          name: 'FLOOD - SEVERE',
-          type: 'FLOOD',
-          severity: 'SEVERE',
-          status: 'ACTIVE',
-          date: new Date().toISOString(),
-          preliminaryAssessmentIds: [crypto.randomUUID()],
-          source: 'Preliminary Assessment by John Doe',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'FIRE - MODERATE',
-          type: 'FIRE',
-          severity: 'MODERATE',
-          status: 'ACTIVE',
-          date: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
-          preliminaryAssessmentIds: [crypto.randomUUID()],
-          source: 'Preliminary Assessment by Jane Smith',
-          createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-          updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-        },
-      ];
-
-      setIncidents(mockIncidents);
+      const response = await fetch(`/api/v1/incidents?${params}`);
+      const data = await response.json();
+      
+      if (data.success && data.data?.incidents) {
+        // Map API response to component's expected format
+        const apiIncidents = data.data.incidents.map((incident: any) => ({
+          id: incident.id,
+          name: incident.name,
+          type: incident.type,
+          severity: incident.severity,
+          status: incident.status,
+          date: incident.date,
+          preliminaryAssessmentIds: incident.preliminaryAssessmentIds || [],
+          source: incident.source || 'Unknown Source',
+          createdAt: incident.createdAt,
+          updatedAt: incident.updatedAt,
+        }));
+        
+        setIncidents(apiIncidents);
+      } else {
+        console.warn('Invalid response format or no incidents found');
+        setIncidents([]);
+      }
     } catch (error) {
       console.error('Failed to load incidents:', error);
+      setIncidents([]);
     } finally {
       setLoading(false);
     }

@@ -1,20 +1,65 @@
 import { OfflineQueueService } from './OfflineQueueService';
 import type { OfflineQueueItem } from '@dms/shared';
 
+export interface SampleDataConfig {
+  enabled: boolean;
+  environment: 'development' | 'testing' | 'production';
+  autoPopulate: boolean;
+  itemCount?: number;
+}
+
 /**
- * Service to populate IndexedDB with sample queue data for testing
+ * Enhanced service for queue data management with configuration support
+ * Following CLAUDE.md principles - API-level service abstraction for mock data
+ * 
+ * Features:
+ * - Environment-based configuration
+ * - Mock vs real data configuration flags
+ * - Backward compatibility for testing
+ * - Client-side IndexedDB integration (since API endpoint deprecated to client-side)
  */
 export class SampleDataService {
   private queueService: OfflineQueueService;
+  private config: SampleDataConfig;
 
-  constructor() {
+  constructor(config: SampleDataConfig = {
+    enabled: process.env.NODE_ENV === 'development',
+    environment: process.env.NODE_ENV as any || 'development',
+    autoPopulate: false,
+  }) {
     this.queueService = new OfflineQueueService();
+    this.config = config;
+  }
+
+  /**
+   * Get current service configuration
+   */
+  getConfig(): SampleDataConfig {
+    return { ...this.config };
+  }
+
+  /**
+   * Update service configuration
+   */
+  updateConfig(updates: Partial<SampleDataConfig>): void {
+    this.config = { ...this.config, ...updates };
   }
 
   /**
    * Add sample queue items to the database for testing
+   * Respects configuration settings for environment and enabled state
    */
   async addSampleQueueData(): Promise<void> {
+    if (!this.config.enabled) {
+      console.log('Sample data service is disabled');
+      return;
+    }
+
+    if (this.config.environment === 'production') {
+      console.warn('Sample data generation attempted in production environment - skipping');
+      return;
+    }
+
     try {
       console.log('Adding sample queue data...');
       
@@ -171,9 +216,54 @@ export class SampleDataService {
   }
 
   /**
+   * Check if the service should use mock data or real data
+   * In this case, since the queue is client-side IndexedDB, we always use "real" client-side data
+   */
+  shouldUseMockData(): boolean {
+    return this.config.enabled && this.config.environment !== 'production';
+  }
+
+  /**
+   * Get queue items (enhanced method that respects configuration)
+   */
+  async getQueueItems(options?: { status?: string }): Promise<OfflineQueueItem[]> {
+    try {
+      const items = await this.queueService.getQueueItems(options as any);
+      
+      // Auto-populate sample data if configured and no items exist
+      if (this.config.autoPopulate && items.length === 0 && this.shouldUseMockData()) {
+        await this.addSampleQueueData();
+        return await this.queueService.getQueueItems(options as any);
+      }
+      
+      return items;
+    } catch (error) {
+      console.error('Failed to get queue items:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get queue summary with configuration awareness
+   */
+  async getQueueSummary(): Promise<any> {
+    try {
+      return await this.queueService.getQueueSummary();
+    } catch (error) {
+      console.error('Failed to get queue summary:', error);
+      return { total: 0, pending: 0, failed: 0, processing: 0 };
+    }
+  }
+
+  /**
    * Simulate some queue processing for demo purposes
    */
   async simulateQueueProcessing(): Promise<void> {
+    if (!this.shouldUseMockData()) {
+      console.log('Queue simulation skipped - not in mock data mode');
+      return;
+    }
+
     try {
       console.log('Simulating queue processing...');
       
