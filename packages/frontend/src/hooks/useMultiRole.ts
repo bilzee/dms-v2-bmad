@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface UserRole {
   id: string;
-  name: 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN';
+  name: 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER';
   permissions: Permission[];
   isActive: boolean;
 }
@@ -51,13 +51,13 @@ export const useMultiRole = (): UseMultiRoleReturn => {
 
   const assignedRoles: UserRole[] = (session?.user?.roles || []).map(role => ({
     id: role.id,
-    name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+    name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER',
     permissions: [], // Initialize empty permissions - should be populated from API
     isActive: role.isActive
   }));
   const activeRole: UserRole | null = session?.user?.activeRole ? {
     id: session.user.activeRole.id,
-    name: session.user.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+    name: session.user.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER', // Add VERIFIER
     permissions: [], // Initialize empty - will be populated from API
     isActive: session.user.activeRole.isActive
   } : null;
@@ -72,13 +72,13 @@ export const useMultiRole = (): UseMultiRoleReturn => {
         const context = {
           activeRole: result.data.activeRole ? {
             id: result.data.activeRole.id,
-            name: result.data.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+            name: result.data.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER',
             permissions: result.data.activeRole.permissions || [],
             isActive: result.data.activeRole.isActive
           } : null,
           availableRoles: (result.data.availableRoles || []).map((role: any) => ({
             id: role.id,
-            name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+            name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER',
             permissions: role.permissions || [],
             isActive: role.isActive
           })),
@@ -119,6 +119,15 @@ export const useMultiRole = (): UseMultiRoleReturn => {
     setError(null);
 
     try {
+      console.log('Role switching debug:', {
+        sessionUserId: session?.user?.id,
+        sessionUserName: session?.user?.name,
+        targetRole: { roleId, roleName }
+      });
+      
+      // Single unified approach: Use API endpoint for ALL users
+      console.log('Using unified API endpoint method for role switching');
+      
       const response = await fetch('/api/v1/session/role', {
         method: 'PUT',
         headers: {
@@ -130,6 +139,8 @@ export const useMultiRole = (): UseMultiRoleReturn => {
       });
 
       const result = await response.json();
+      
+      console.log('API role switch response:', result);
 
       if (result.success) {
         // Store rollback info
@@ -144,13 +155,13 @@ export const useMultiRole = (): UseMultiRoleReturn => {
         const newContext = {
           activeRole: result.data.activeRole ? {
             id: result.data.activeRole.id,
-            name: result.data.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+            name: result.data.activeRole.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER',
             permissions: result.data.activeRole.permissions || [],
             isActive: result.data.activeRole.isActive
           } : null,
           availableRoles: (result.data.availableRoles || []).map((role: any) => ({
             id: role.id,
-            name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN',
+            name: role.name as 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER',
             permissions: role.permissions || [],
             isActive: role.isActive
           })),
@@ -167,22 +178,51 @@ export const useMultiRole = (): UseMultiRoleReturn => {
         setRoleContext(newContext);
         setPerformanceMs(Date.now() - startTime);
         
-        // Update NextAuth session
+        // Update NextAuth session with complete role information
         await update({
-          ...session,
           user: {
             ...session?.user,
-            activeRole: result.data.activeRole?.name,
-            role: result.data.activeRole?.name
+            activeRole: {
+              id: result.data.activeRole.id,
+              name: result.data.activeRole.name,
+              isActive: true,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            },
+            role: result.data.activeRole.name,
+            roles: result.data.availableRoles.map((role: any) => ({
+              id: role.id,
+              name: role.name,
+              isActive: role.isActive,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            })),
+            permissions: result.data.activeRole.permissions || [],
+            allRoles: result.data.availableRoles.map((r: any) => r.name)
           }
         });
+
+        // Force page refresh to ensure all components re-render with new role
+        if (typeof window !== 'undefined') {
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        }
         
         return true;
       } else {
-        setError(result.error || 'Failed to switch role');
+        console.error('API role switch failed:', result);
+        
+        // Better error messaging
+        if (result.error?.includes('authentication layer')) {
+          setError('Authentication system error - please sign out and sign in again');
+        } else {
+          setError(result.error || 'Failed to switch role');
+        }
         return false;
       }
     } catch (err) {
+      console.error('Role switch error:', err);
       setError('Network error while switching role');
       return false;
     } finally {

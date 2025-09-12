@@ -6,7 +6,7 @@ import { useRolePermissions } from '@/hooks/useRolePermissions'
 
 interface UserRole {
   id: string;
-  name: 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN';
+  name: 'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER';
   permissions: any[];
   isActive: boolean;
 }

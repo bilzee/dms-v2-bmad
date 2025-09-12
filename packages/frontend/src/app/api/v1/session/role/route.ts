@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DatabaseService from '@/lib/services/DatabaseService';
+import { auth } from '@/auth';
+import prisma from '@/lib/prisma';
+import { formatRolePermissions } from '@/lib/type-helpers';
 import { z } from 'zod';
-import { requireAuth, getCurrentUser } from '@/lib/auth-middleware';
-// Force this route to be dynamic
+
 export const dynamic = 'force-dynamic';
+
+console.log('API route registered: /api/v1/session/role');
 
 const switchRoleSchema = z.object({
   roleId: z.string().min(1, 'Role ID is required')
@@ -11,205 +14,171 @@ const switchRoleSchema = z.object({
 
 // GET /api/v1/session/role - Get current user's role session information
 export async function GET(request: NextRequest) {
+  console.log('GET /api/v1/session/role - Route handler called');
+  
   try {
-    // Check authentication
-    const authError = await requireAuth(request);
-    if (authError) return authError;
-
-    const currentUser = await getCurrentUser(request);
-    if (!currentUser) {
-      return NextResponse.json({
-        success: false,
-      data: null,
-        errors: ['User not found'],
-        message: 'Unable to find current user session'
-      }, { status: 404 });
+    const session = await auth();
+    console.log('Session result:', session ? 'Found' : 'Not found');
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
+
+    console.log('Querying database for user ID:', session.user.id);
 
     // Get user with roles from database
-    const userData = await DatabaseService.listUsers({ search: currentUser.id });
-    const user = userData.users.find(u => u.id === currentUser.id);
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { 
+        roles: {
+          include: { permissions: true }
+        }
+      },
+    });
+
+    console.log('Database user query result:', user ? 'User found' : 'User NOT found');
 
     if (!user) {
-      return NextResponse.json({
-        success: false,
-      data: null,
-        errors: ['User not found'],
-        message: 'User data not found in database'
-      }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: 'User not found - authentication layer issue' },
+        { status: 404 }
+      );
     }
 
-    // Format response
+    const activeRole = user.roles.find(role => role.id === user.activeRoleId);
+    const activePermissions = activeRole?.permissions || [];
+
     const sessionData = {
-      userId: user.id,
+      activeRole: activeRole ? {
+        id: activeRole.id,
+        name: activeRole.name,
+        permissions: formatRolePermissions(activePermissions),
+        isActive: true
+      } : null,
       availableRoles: user.roles.map(role => ({
         id: role.id,
         name: role.name,
-        description: `System role with permissions`,
-        permissions: (role as any).permissions?.map((rp: any) => ({
-          id: rp.permission.id,
-          name: rp.permission.name,
-          description: rp.permission.description,
-          resource: rp.permission.resource,
-          action: rp.permission.action
-        })) || [],
-        isActive: role.id === user.activeRoleId,
-        userCount: 0
+        permissions: formatRolePermissions(role.permissions),
+        isActive: role.id === user.activeRoleId
       })),
-      activeRole: user.activeRole ? {
-        id: user.activeRole.id,
-        name: user.activeRole.name,
-        description: `Active system role`,
-        permissions: (user.roles
-          .find(r => r.id === user.activeRole?.id) as any)
-          ?.permissions?.map((rp: any) => ({
-            id: rp.permission.id,
-            name: rp.permission.name,
-            description: rp.permission.description,
-            resource: rp.permission.resource,
-            action: rp.permission.action
-          })) || [],
-        isActive: true,
-        userCount: 0
-      } : null,
-      canSwitchRoles: user.roles.length > 1
+      canSwitchRoles: user.roles.length > 1,
+      lastRoleSwitch: (user as any).lastRoleSwitch?.toISOString()
     };
 
     return NextResponse.json({
       success: true,
-      data: sessionData,
-      message: 'User session data retrieved successfully'
+      data: sessionData
     });
 
   } catch (error) {
     console.error('Failed to fetch user session:', error);
-    
     return NextResponse.json({
       success: false,
-      data: null,
-      errors: ['Failed to fetch user session'],
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: 'Internal server error'
     }, { status: 500 });
   }
 }
 
 // PUT /api/v1/session/role - Switch active role for current user
 export async function PUT(request: NextRequest) {
+  console.log('PUT /api/v1/session/role - Route handler called');
+  
   try {
-    // Check authentication
-    const authError = await requireAuth(request);
-    if (authError) return authError;
-
-    const currentUser = await getCurrentUser(request);
-    if (!currentUser) {
-      return NextResponse.json({
-        success: false,
-      data: null,
-        errors: ['User not found'],
-        message: 'Unable to find current user session'
-      }, { status: 404 });
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
-
-    // Validate request data
     const validationResult = switchRoleSchema.safeParse(body);
+    
     if (!validationResult.success) {
-      return NextResponse.json({
-        success: false,
-      data: null,
-        errors: ['Validation failed'],
-        message: 'Invalid request data',
-        details: validationResult.error.errors
-      }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Invalid request data' },
+        { status: 400 }
+      );
     }
 
     const { roleId } = validationResult.data;
+    console.log('Switching to role ID:', roleId);
 
-    // Get request metadata
-    const ipAddress = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
+    // Get user and verify role access
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { 
+        roles: {
+          include: { permissions: true }
+        }
+      },
+    });
 
-    // Switch active role (self-service)
-    const updatedUser = await DatabaseService.setActiveRole(
-      currentUser.id,
-      roleId,
-      currentUser.id, // User is switching their own role
-      currentUser.name,
-      ipAddress,
-      userAgent
-    );
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'User not found - authentication layer issue' },
+        { status: 404 }
+      );
+    }
 
-    // Format response
+    const targetRole = user.roles.find(role => role.id === roleId);
+    if (!targetRole) {
+      console.log('Available role IDs:', user.roles.map(r => r.id));
+      console.log('Requested role ID:', roleId);
+      return NextResponse.json(
+        { success: false, error: 'Role not available for this user' },
+        { status: 403 }
+      );
+    }
+
+    // Update user's active role
+    const updatedUser = await prisma.user.update({
+      where: { id: session.user.id },
+      data: { 
+        activeRoleId: roleId,
+        lastRoleSwitch: new Date()
+      },
+      include: { 
+        roles: {
+          include: { permissions: true }
+        }
+      }
+    });
+
+    // Return updated role data
+    const newActiveRole = updatedUser.roles.find(role => role.id === roleId);
     const responseData = {
-      userId: updatedUser.id,
-      activeRole: updatedUser.activeRole ? {
-        id: updatedUser.activeRole.id,
-        name: updatedUser.activeRole.name,
-        description: `Active system role`,
-        permissions: (updatedUser.roles
-          .find(r => r.id === updatedUser.activeRole?.id) as any)
-          ?.permissions?.map((rp: any) => ({
-            id: rp.permission.id,
-            name: rp.permission.name,
-            description: rp.permission.description,
-            resource: rp.permission.resource,
-            action: rp.permission.action
-          })) || [],
-        isActive: true,
-        userCount: 0
+      activeRole: newActiveRole ? {
+        id: newActiveRole.id,
+        name: newActiveRole.name,
+        permissions: formatRolePermissions(newActiveRole.permissions),
+        isActive: true
       } : null,
       availableRoles: updatedUser.roles.map(role => ({
         id: role.id,
         name: role.name,
-        description: `System role`,
-        permissions: (role as any).permissions?.map((rp: any) => ({
-          id: rp.permission.id,
-          name: rp.permission.name,
-          description: rp.permission.description,
-          resource: rp.permission.resource,
-          action: rp.permission.action
-        })) || [],
-        isActive: role.id === updatedUser.activeRoleId,
-        userCount: 0
+        permissions: formatRolePermissions(role.permissions),
+        isActive: role.id === roleId
       })),
-      previousRole: currentUser.activeRole
+      canSwitchRoles: updatedUser.roles.length > 1,
+      lastRoleSwitch: new Date().toISOString()
     };
 
     return NextResponse.json({
       success: true,
-      data: responseData,
-      message: 'Active role switched successfully'
+      data: responseData
     });
 
   } catch (error) {
     console.error('Failed to switch role:', error);
-    
-    if (error instanceof Error && error.message === 'User not found') {
-      return NextResponse.json({
-        success: false,
-      data: null,
-        errors: ['User not found'],
-        message: 'User with the specified ID does not exist'
-      }, { status: 404 });
-    }
-
-    if (error instanceof Error && error.message === 'User does not have the specified role') {
-      return NextResponse.json({
-        success: false,
-      data: null,
-        errors: ['Invalid role'],
-        message: 'You do not have the specified role assigned'
-      }, { status: 400 });
-    }
-
-    return NextResponse.json({
-      success: false,
-      data: null,
-      errors: ['Failed to switch role'],
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
-    }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
