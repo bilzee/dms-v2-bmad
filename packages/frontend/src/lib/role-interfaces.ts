@@ -346,14 +346,14 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { 
             icon: 'BarChart3', 
             label: 'Donation Planning', 
-            href: '/donor/planning', 
+            href: '/donor?tab=new-commitment', 
             badge: 0,
             requiredPermissions: ['donations:plan']
           },
           { 
             icon: 'ClipboardList', 
             label: 'Commitments', 
-            href: '/donor/commitments', 
+            href: '/donor?tab=commitments', 
             badge: 1,
             requiredPermissions: ['donations:commit']
           },
@@ -367,14 +367,14 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { 
             icon: 'Award', 
             label: 'Achievements', 
-            href: '/dashboard/donor/achievements', 
+            href: '/donor/achievements', 
             badge: 0,
             requiredPermissions: ['donations:track']
           },
           { 
             icon: 'Trophy', 
             label: 'Leaderboard', 
-            href: '/dashboard/donor/leaderboard', 
+            href: '/donor/leaderboard', 
             badge: 0,
             requiredPermissions: ['donations:track']
           }
@@ -390,8 +390,8 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         borderColor: 'border-pink-200',
         iconColor: 'text-pink-600',
         actions: [
-          { label: 'Plan New Donation', href: '/donor/planning' },
-          { label: 'View Commitments', href: '/donor/commitments', variant: 'outline' },
+          { label: 'Plan New Donation', href: '/donor?tab=new-commitment' },
+          { label: 'View Commitments', href: '/donor?tab=commitments', variant: 'outline' },
           { label: 'Track Performance', href: '/donor/performance', variant: 'ghost' }
         ],
         stats: { count: 2, label: 'active commitments' }
@@ -404,8 +404,8 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         borderColor: 'border-yellow-200',
         iconColor: 'text-yellow-600',
         actions: [
-          { label: 'View Achievements', href: '/dashboard/donor/achievements' },
-          { label: 'Leaderboard', href: '/dashboard/donor/leaderboard', variant: 'outline' }
+          { label: 'View Achievements', href: '/donor/achievements' },
+          { label: 'Leaderboard', href: '/donor/leaderboard', variant: 'outline' }
         ],
         stats: { count: 5, label: 'achievements unlocked' }
       },
@@ -418,7 +418,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         iconColor: 'text-blue-600',
         actions: [
           { label: 'Performance Dashboard', href: '/donor/performance' },
-          { label: 'Impact Report', href: '/donor/impact', variant: 'outline' }
+          { label: 'Impact Report', href: '/donor/performance', variant: 'outline' }
         ],
         stats: { count: 85, label: '% score' }
       }
@@ -581,7 +581,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { 
             icon: 'Archive', 
             label: 'All Responses', 
-            href: '/responses', 
+            href: '/responses/status-review', 
             badge: 1,
             requiredPermissions: ['responses:read']
           },
@@ -605,8 +605,8 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         iconColor: 'text-green-600',
         actions: [
           { label: 'Plan New Response', href: '/responses/plan' },
-          { label: 'Track Deliveries', href: '/responses/tracking', variant: 'outline' },
-          { label: 'Planned to Actual', href: '/responses/conversion', variant: 'ghost' }
+          { label: 'Track Deliveries', href: '/responses/status-review', variant: 'outline' },
+          { label: 'Status Review', href: '/responses/status-review', variant: 'ghost' }
         ],
         stats: { count: 3, label: 'planned' }
       }
@@ -631,7 +631,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { 
             icon: 'ClipboardList', 
             label: 'Assessment Verification', 
-            href: '/verification/assessments', 
+            href: '/verification', 
             badge: 2,
             requiredPermissions: ['verification:approve']
           },
@@ -645,7 +645,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { 
             icon: 'Archive', 
             label: 'Verification Dashboard', 
-            href: '/verification/dashboard', 
+            href: '/verification', 
             badge: 0,
             requiredPermissions: ['verification:read']
           }
@@ -662,7 +662,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         iconColor: 'text-teal-600',
         actions: [
           { label: 'Verification Queue', href: '/verification/queue' },
-          { label: 'Assessment Review', href: '/verification/assessments', variant: 'outline' },
+          { label: 'Assessment Review', href: '/verification', variant: 'outline' },
           { label: 'Response Review', href: '/verification/responses', variant: 'ghost' }
         ],
         stats: { count: 6, label: 'pending verification' }
@@ -675,8 +675,8 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         borderColor: 'border-green-200',
         iconColor: 'text-green-600',
         actions: [
-          { label: 'Verification Dashboard', href: '/verification/dashboard' },
-          { label: 'Approval History', href: '/verification/history', variant: 'outline' }
+          { label: 'Verification Dashboard', href: '/verification' },
+          { label: 'Approval History', href: '/verification', variant: 'outline' }
         ],
         stats: { count: 15, label: 'verified today' }
       }
