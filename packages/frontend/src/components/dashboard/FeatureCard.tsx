@@ -43,7 +43,7 @@ export function FeatureCard({
               {icon}
             </div>
             {/* Floating dot accent */}
-            <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${color.replace('text-', 'bg-')} opacity-80 animate-pulse`}></div>
+            <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${color ? color.replace('text-', 'bg-') : 'bg-gray-600'} opacity-80 animate-pulse`}></div>
           </div>
           
           {/* Content */}

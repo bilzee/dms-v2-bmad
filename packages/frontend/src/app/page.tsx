@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import React, { useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,140 +10,83 @@ import {
   FileText, Heart, Droplet, Home, Utensils, Shield, Users,
   Wifi, AlertTriangle, Clock, XCircle, FileEdit, Zap, 
   CheckCircle, HelpCircle, Activity, MapPin, BarChart3,
-  ClipboardList, Building, UserCheck, Archive
+  ClipboardList, Building, UserCheck, Archive, Award
 } from "lucide-react"
 import { useOffline } from '@/hooks/useOffline'
 import { useOfflineStore } from '@/stores/offline.store'
 import { useRoleContext } from '@/components/providers/RoleContextProvider'
 import { useRoleNavigation } from '@/hooks/useRoleNavigation'
+import { useSession } from 'next-auth/react'
 import { FeatureCard } from '@/components/dashboard/FeatureCard'
 import { AssessmentTypeCard } from '@/components/dashboard/AssessmentTypeCard'
 import { QuickStatsCard } from '@/components/dashboard/QuickStatsCard'
 import { assessmentTypeColors, featureColors, statusColors } from '@/lib/constants/colors'
+import { getRoleInterface } from '@/lib/role-interfaces'
 
 export default function HomePage() {
   const { isOffline } = useOffline();
   const queue = useOfflineStore(state => state.queue);
   const { activeRole, hasPermission } = useRoleContext();
   const { hasAccessToSection } = useRoleNavigation();
-  
-  const currentRole = activeRole?.name || 'ASSESSOR';
-  
-  const allMainFeatures = [
-    {
-      title: 'Assessments',
-      description: 'Create and manage rapid assessments for disaster situations',
-      icon: <ClipboardList className="w-6 h-6" />,
-      ...featureColors.assessments,
-      roleRestriction: ['ASSESSOR', 'COORDINATOR'],
-      requiredPermissions: ['assessments:read'],
-      actions: [
-        { label: 'View All Assessments', href: '/assessments' },
-        { label: 'Create New Assessment', href: '/assessments/new', variant: 'outline' as const },
-        { label: 'View Status Dashboard', href: '/assessments/status', variant: 'ghost' as const }
-      ],
-      stats: { count: 12, label: 'active' }
-    },
-    {
-      title: 'Response Management',
-      description: 'Plan responses and track delivery progress',
-      icon: <BarChart3 className="w-6 h-6" />,
-      ...featureColors.responses,
-      roleRestriction: ['RESPONDER', 'COORDINATOR'],
-      requiredPermissions: ['responses:read'],
-      actions: [
-        { label: 'Plan New Response', href: '/responses/plan' },
-        { label: 'Track Deliveries', href: '/responses/tracking', variant: 'outline' as const },
-        { label: 'Planned to Actual', href: '/responses/conversion', variant: 'ghost' as const }
-      ],
-      stats: { count: 3, label: 'planned' }
-    },
-    {
-      title: 'Entity Management',
-      description: 'Manage affected entities, camps, and communities',
-      icon: <Building className="w-6 h-6" />,
-      ...featureColors.entities,
-      roleRestriction: ['ASSESSOR', 'COORDINATOR'],
-      requiredPermissions: ['entities:read'],
-      actions: [
-        { label: 'View All Entities', href: '/entities' }
-      ],
-      stats: { count: 28, label: 'locations' }
-    },
-    {
-      title: 'Coordinator Tools',
-      description: 'Verification dashboard and approval management',
-      icon: <UserCheck className="w-6 h-6" />,
-      ...featureColors.queue,
-      roleRestriction: ['COORDINATOR'],
-      requiredPermissions: ['verification:read'],
-      actions: [
-        { label: 'Verification Dashboard', href: '/coordinator/dashboard' },
-        { label: 'Donor Coordination', href: '/coordinator/donors', variant: 'outline' as const },
-        { label: 'System Monitoring', href: '/coordinator/monitoring', variant: 'outline' as const },
-        { label: 'Assessment Approvals', href: '/coordinator/assessments/review', variant: 'ghost' as const },
-        { label: 'Response Approvals', href: '/coordinator/responses/review', variant: 'ghost' as const }
-      ],
-      stats: { count: 8, label: 'pending review' }
-    },
-    {
-      title: 'Monitoring Tools',
-      description: 'Real-time monitoring and geographic visualization',
-      icon: <Activity className="w-6 h-6" />,
-      ...featureColors.assessments,
-      roleRestriction: ['COORDINATOR', 'ADMIN'],
-      requiredPermissions: ['monitoring:read'],
-      actions: [
-        { label: 'Situation Display', href: '/monitoring' },
-        { label: 'Interactive Map', href: '/monitoring/map', variant: 'outline' as const }
-      ],
-      stats: { count: 4, label: 'active alerts' }
-    },
-    {
-      title: 'Incident Management',
-      description: 'Manage and track disaster incidents and responses',
-      icon: <AlertTriangle className="w-6 h-6" />,
-      ...featureColors.responses,
-      roleRestriction: ['COORDINATOR'],
-      requiredPermissions: ['incidents:manage'],
-      actions: [
-        { label: 'Manage Incidents', href: '/coordinator/incidents' }
-      ],
-      stats: { count: 0, label: 'active incidents' }
-    },
-    {
-      title: 'System Configuration',
-      description: 'Configure system settings and automation rules',
-      icon: <UserCheck className="w-6 h-6" />,
-      ...featureColors.queue,
-      roleRestriction: ['COORDINATOR', 'ADMIN'],
-      requiredPermissions: ['config:manage'],
-      actions: [
-        { label: 'Auto-Approval Config', href: '/coordinator/auto-approval' },
-        { label: 'Priority Sync Config', href: '/queue', variant: 'outline' as const },
-        { label: 'Conflict Resolution', href: '/coordinator/conflicts', variant: 'ghost' as const }
-      ],
-      stats: { count: 3, label: 'configurations' }
-    }
-  ]
+  const { data: session, status, update } = useSession();
 
-  // Filter features based on role and permissions
-  const mainFeatures = allMainFeatures.filter(feature => {
-    // Check role restriction
-    if (feature.roleRestriction && !feature.roleRestriction.includes(currentRole)) {
-      return false;
+  // Handle post-authentication session refresh
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('authSuccess') === 'true') {
+      // Clean URL first
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+      
+      // Force session update instead of page reload
+      if (status !== 'loading') {
+        update().then(() => {
+          console.log('Session updated after authentication');
+        }).catch((error) => {
+          console.error('Session update failed:', error);
+        });
+      }
     }
-    
-    // Check permissions
-    if (feature.requiredPermissions) {
-      return feature.requiredPermissions.every(permission => {
-        const [resource, action] = permission.split(':');
-        return hasPermission(resource, action);
+  }, [status, update]); // Remove session from dependencies to avoid infinite loops
+
+  // Force session refresh if authenticated but showing unauthenticated content
+  useEffect(() => {
+    // If we have a session but the status is still loading, or we have partial session data
+    if (session && (status === 'loading' || !session?.user?.role)) {
+      console.log('Detected incomplete session, forcing refresh...');
+      update().then(() => {
+        console.log('Session refresh completed');
+      }).catch((error) => {
+        console.error('Failed to refresh session:', error);
       });
     }
-    
-    return true;
-  })
+  }, [session, status, update]);
+  
+  // Show loading state while session is being loaded
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const currentRole = activeRole?.name || session?.user?.role || session?.user?.activeRole?.name || 'ASSESSOR';
+  
+  // Use unified role interface system - ensures identical functionality regardless of authentication type
+  const roleInterface = getRoleInterface(currentRole);
+  const mainFeatures = roleInterface?.featureCards?.map(card => ({
+    title: card.title,
+    description: card.description,
+    icon: React.createElement(card.icon, { className: "w-6 h-6" }),
+    color: card.iconColor,
+    bgColor: card.bgColor,
+    actions: card.actions,
+    stats: card.stats
+  })) || []
 
   const assessmentTypes = [
     { 
@@ -193,8 +137,22 @@ export default function HomePage() {
     <>
       {/* Welcome Section */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome back, Field Worker</h2>
-        <p className="text-gray-600">Here&apos;s your current operational overview</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          {session ? `Welcome back, ${session.user?.name || 'User'}` : 'Welcome to DMS v2'}
+        </h2>
+        <p className="text-gray-600">
+          {session 
+            ? `Here's your operational overview for ${currentRole} role` 
+            : 'Disaster Management System - Sign in to access field operations'
+          }
+        </p>
+        {!session && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800 text-sm">
+              <strong>Note:</strong> Most features require authentication. Please sign in using the button in the top-right corner to access assessments, responses, and other tools.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Quick Stats Grid */}
@@ -227,18 +185,33 @@ export default function HomePage() {
         />
       </div>
       {/* Main Features Grid */}
-      <div className="mb-8">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">Main Features</h3>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-          {mainFeatures.map(feature => (
-            <FeatureCard key={feature.title} {...feature} />
-          ))}
+      {session && (
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-gray-800 mb-6">
+            Features for {currentRole}
+          </h3>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+            {mainFeatures.map(feature => (
+              <FeatureCard key={feature.title} {...feature} />
+            ))}
+          </div>
+          {mainFeatures.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <p>No features available for role: {currentRole}</p>
+              <p className="text-sm mt-2">
+                {!roleInterface 
+                  ? 'Role configuration not found. Please contact your system administrator.'
+                  : 'Feature configuration is being loaded. Please refresh if this message persists.'
+                }
+              </p>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Assessment Types Grid */}
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">Quick Assessment Creation</h3>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {assessmentTypes.map(type => (
             <AssessmentTypeCard key={type.id} {...type} />
