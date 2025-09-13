@@ -2,11 +2,12 @@
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Menu, Wifi, WifiOff, Bell, User } from 'lucide-react'
+import { Menu, Wifi, WifiOff, Bell, User, LogIn, LogOut } from 'lucide-react'
 import { useOffline } from '@/hooks/useOffline'
 import { useOfflineStore } from '@/stores/offline.store'
 import { RoleIndicator } from './RoleIndicator'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
+import Link from 'next/link'
 
 interface HeaderProps {
   onSidebarToggle: () => void
@@ -60,20 +61,45 @@ export function Header({ onSidebarToggle, sidebarOpen }: HeaderProps) {
             {queue.length} queued
           </Badge>
 
-          {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell className="w-5 h-5" />
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-          </Button>
+          {session ? (
+            <>
+              {/* Notifications */}
+              <Button variant="ghost" size="sm" className="relative">
+                <Bell className="w-5 h-5" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+              </Button>
 
-          {/* Role Indicator */}
-          <RoleIndicator />
+              {/* Role Indicator - KEEP THIS ONE */}
+              <RoleIndicator />
 
-          {/* User Profile */}
-          <Button variant="ghost" size="sm" className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            <span className="hidden sm:block text-sm">{session?.user?.name || 'User'}</span>
-          </Button>
+              {/* User Profile */}
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  <span className="hidden sm:block text-sm">{session?.user?.name || 'User'}</span>
+                </Button>
+                
+                {/* Sign Out Button */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="flex items-center gap-2 text-gray-700 hover:text-red-600"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:block text-sm">Sign Out</span>
+                </Button>
+              </div>
+            </>
+          ) : (
+            /* Sign In Button for unauthenticated users */
+            <Link href="/auth/signin">
+              <Button size="sm" className="flex items-center gap-2">
+                <LogIn className="w-4 h-4" />
+                <span className="hidden sm:block">Sign In</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>

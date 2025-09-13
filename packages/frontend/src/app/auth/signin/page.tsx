@@ -4,13 +4,13 @@ import { redirect } from "next/navigation";
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: { callbackUrl?: string; error?: string };
+  searchParams: { callbackUrl?: string; error?: string; email?: string };
 }) {
   const session = await auth();
   
   // Redirect if already authenticated
   if (session) {
-    redirect(searchParams.callbackUrl || '/dashboard');
+    redirect(searchParams.callbackUrl || '/');
   }
 
   return (
@@ -27,7 +27,13 @@ export default async function SignInPage({
         <div className="mt-8 space-y-6">
           {searchParams.error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              <p>Authentication error: {searchParams.error}</p>
+              <p className="font-medium">Sign In Failed</p>
+              <p className="text-sm mt-1">
+                {searchParams.error === 'CredentialsSignin' 
+                  ? 'Invalid email or password. Please check your credentials and try again.'
+                  : searchParams.error
+                }
+              </p>
             </div>
           )}
           
@@ -35,7 +41,7 @@ export default async function SignInPage({
             action={async (formData) => {
               "use server";
               await signIn("github", {
-                redirectTo: searchParams.callbackUrl || '/dashboard',
+                redirectTo: searchParams.callbackUrl || '/',
               });
             }}
             className="mt-8 space-y-6"
@@ -51,11 +57,35 @@ export default async function SignInPage({
           <form
             action={async (formData) => {
               "use server";
-              await signIn("credentials", {
-                email: formData.get("email") as string,
-                password: formData.get("password") as string,
-                redirectTo: searchParams.callbackUrl || '/dashboard',
-              });
+              let result;
+              
+              try {
+                result = await signIn("credentials", {
+                  email: formData.get("email") as string,
+                  password: formData.get("password") as string,
+                  redirectTo: searchParams.callbackUrl || '/',
+                  redirect: false,
+                });
+              } catch (error) {
+                // Handle NEXT_REDIRECT specifically - DON'T CATCH IT
+                if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+                  throw error; // Re-throw to let Next.js handle the redirect
+                }
+                
+                // Only catch actual authentication errors - redirect outside try-catch
+              }
+              
+              // Handle authentication result outside try-catch to avoid NEXT_REDIRECT issues
+              if (!result || result?.error) {
+                const errorMessage = result?.error || 'Authentication failed. Please try again.';
+                const email = formData.get("email") as string;
+                redirect(`/auth/signin?error=${encodeURIComponent(errorMessage)}&email=${encodeURIComponent(email)}`);
+                return;
+              }
+              
+              // Success case - redirect WITHOUT try-catch wrapper
+              const redirectUrl = searchParams.callbackUrl || '/';
+              redirect(`${redirectUrl}?authSuccess=true`);
             }}
             className="mt-8 space-y-6"
           >
@@ -66,6 +96,7 @@ export default async function SignInPage({
                   name="email"
                   type="email"
                   required
+                  defaultValue={searchParams.email || ''} // Preserve email on error
                   className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                   placeholder="Email address"
                 />
@@ -89,9 +120,18 @@ export default async function SignInPage({
               Sign in with Credentials
             </button>
             
-            <p className="text-xs text-gray-600 text-center">
-              Test credentials: admin@test.com / admin123
-            </p>
+            <div className="text-xs text-gray-600 text-center space-y-1">
+              <p className="font-medium">Available Test Credentials:</p>
+              <div className="grid grid-cols-1 gap-1 text-left bg-gray-50 p-3 rounded-md">
+                <p><strong>Admin:</strong> admin@test.com / admin123</p>
+                <p><strong>Assessor:</strong> assessor@test.com / assessor123</p>
+                <p><strong>Responder:</strong> responder@test.com / responder123</p>
+                <p><strong>Coordinator:</strong> coordinator@test.com / coordinator123</p>
+                <p><strong>Verifier:</strong> verifier@test.com / verifier123</p>
+                <p><strong>Donor:</strong> donor@test.com / donor123</p>
+                <p><strong>Super User (All Roles):</strong> superuser@test.com / superuser123</p>
+              </div>
+            </div>
           </form>
         </div>
       </div>

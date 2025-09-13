@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useDonorStore } from '@/stores/donor.store';
 import { ConnectionStatusHeader } from '@/components/shared/ConnectionStatusHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Heart, Package, Calendar, Award } from 'lucide-react';
 
 export default function DonorDashboard() {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState('commitments');
+  
   const {
     currentDonor,
     commitments,
@@ -28,6 +33,13 @@ export default function DonorDashboard() {
     loadDonorProfile();
     loadCommitments();
   }, [loadDonorProfile, loadCommitments]);
+
+  useEffect(() => {
+    // Set tab based on URL parameter
+    if (tabParam && ['commitments', 'achievements', 'performance', 'new-commitment', 'profile'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   if (loading) {
     return (
@@ -125,7 +137,7 @@ export default function DonorDashboard() {
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="commitments" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="commitments">My Commitments</TabsTrigger>
           <TabsTrigger value="achievements">Achievements</TabsTrigger>
@@ -138,10 +150,7 @@ export default function DonorDashboard() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">My Commitments</h2>
             <Button
-              onClick={() => {
-                const tabs = document.querySelector('[value="new-commitment"]') as HTMLElement;
-                tabs?.click();
-              }}
+              onClick={() => setActiveTab('new-commitment')}
               className="flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
@@ -198,12 +207,10 @@ export default function DonorDashboard() {
             <DonationCommitmentForm
               onSuccess={() => {
                 loadCommitments();
-                const tabs = document.querySelector('[value="commitments"]') as HTMLElement;
-                tabs?.click();
+                setActiveTab('commitments');
               }}
               onCancel={() => {
-                const tabs = document.querySelector('[value="commitments"]') as HTMLElement;
-                tabs?.click();
+                setActiveTab('commitments');
               }}
             />
           </div>

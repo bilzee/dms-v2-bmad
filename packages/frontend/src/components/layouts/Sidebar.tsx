@@ -11,7 +11,7 @@ import {
   ClipboardList, BarChart3, Building, Archive, AlertTriangle,
   HelpCircle, Settings, ChevronLeft, ChevronRight, User,
   Heart, Droplet, Home, Utensils, Shield, Users, Zap, HandHeart,
-  Award, Trophy
+  Award, Trophy, CheckCircle, UserCheck, Activity
 } from 'lucide-react'
 
 const iconMap = {
@@ -32,7 +32,10 @@ const iconMap = {
   HandHeart,
   HelpCircle,
   Award,
-  Trophy
+  Trophy,
+  CheckCircle,
+  UserCheck,
+  Activity
 };
 
 interface SidebarProps {

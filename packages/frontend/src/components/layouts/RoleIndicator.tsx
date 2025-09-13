@@ -29,6 +29,7 @@ const roleIcons = {
   ASSESSOR: UserCheck,
   RESPONDER: Heart,
   COORDINATOR: Shield,
+  VERIFIER: CheckCircle,
   DONOR: User,
   ADMIN: Settings,
 } as const;
@@ -37,6 +38,7 @@ const roleColors = {
   ASSESSOR: 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200',
   RESPONDER: 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200',
   COORDINATOR: 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200',
+  VERIFIER: 'bg-teal-100 text-teal-800 border-teal-200 hover:bg-teal-200',
   DONOR: 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200',
   ADMIN: 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200',
 } as const;
@@ -45,6 +47,7 @@ const roleDarkColors = {
   ASSESSOR: 'bg-blue-500 text-white border-blue-600',
   RESPONDER: 'bg-green-500 text-white border-green-600',
   COORDINATOR: 'bg-purple-500 text-white border-purple-600',
+  VERIFIER: 'bg-teal-500 text-white border-teal-600',
   DONOR: 'bg-orange-500 text-white border-orange-600',
   ADMIN: 'bg-red-500 text-white border-red-600',
 } as const;

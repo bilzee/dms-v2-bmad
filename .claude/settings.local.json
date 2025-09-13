@@ -127,7 +127,10 @@
       "Bash(pnpm --filter @dms/frontend test PerformanceMetrics.test.tsx)",
       "Bash(pnpm --filter @dms/frontend test UserActivityMonitor.test.tsx)",
       "Bash(pnpm --filter @dms/frontend test monitoring)",
-      "Bash(pnpm --filter @dms/frontend test PerformanceMetrics.test.tsx UserActivityMonitor.test.tsx)"
+      "Bash(pnpm --filter @dms/frontend test PerformanceMetrics.test.tsx UserActivityMonitor.test.tsx)",
+      "Bash(netstat:*)",
+      "Bash(ss:*)",
+      "Bash(kill:*)"
     ],
     "deny": [],
     "additionalDirectories": [

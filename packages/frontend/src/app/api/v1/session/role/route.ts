@@ -34,7 +34,11 @@ export async function GET(request: NextRequest) {
       where: { id: session.user.id },
       include: { 
         roles: {
-          include: { permissions: true }
+          include: { 
+            permissions: {
+              include: { permission: true }
+            }
+          }
         }
       },
     });
@@ -64,8 +68,7 @@ export async function GET(request: NextRequest) {
         permissions: formatRolePermissions(role.permissions),
         isActive: role.id === user.activeRoleId
       })),
-      canSwitchRoles: user.roles.length > 1,
-      lastRoleSwitch: (user as any).lastRoleSwitch?.toISOString()
+      canSwitchRoles: user.roles.length > 1
     };
 
     return NextResponse.json({
@@ -114,7 +117,11 @@ export async function PUT(request: NextRequest) {
       where: { id: session.user.id },
       include: { 
         roles: {
-          include: { permissions: true }
+          include: { 
+            permissions: {
+              include: { permission: true }
+            }
+          }
         }
       },
     });
@@ -140,12 +147,17 @@ export async function PUT(request: NextRequest) {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: { 
-        activeRoleId: roleId,
-        lastRoleSwitch: new Date()
+        activeRole: {
+          connect: { id: roleId }
+        }
       },
       include: { 
         roles: {
-          include: { permissions: true }
+          include: { 
+            permissions: {
+              include: { permission: true }
+            }
+          }
         }
       }
     });
@@ -165,8 +177,7 @@ export async function PUT(request: NextRequest) {
         permissions: formatRolePermissions(role.permissions),
         isActive: role.id === roleId
       })),
-      canSwitchRoles: updatedUser.roles.length > 1,
-      lastRoleSwitch: new Date().toISOString()
+      canSwitchRoles: updatedUser.roles.length > 1
     };
 
     return NextResponse.json({
