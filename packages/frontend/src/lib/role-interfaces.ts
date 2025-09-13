@@ -6,14 +6,17 @@
  */
 
 export interface NavigationSection {
-  name: string;
+  title: string;
   items: NavigationItem[];
 }
 
 export interface NavigationItem {
-  name: string;
-  url: string;
-  description?: string;
+  icon: string;
+  label: string;
+  href: string;
+  badge?: number;
+  badgeVariant?: 'default' | 'secondary' | 'destructive';
+  requiredPermissions?: string[];
 }
 
 export interface FeatureCard {
@@ -42,64 +45,189 @@ export interface RoleInterface {
 // Import icons from the same place as page.tsx
 import {
   ClipboardList, BarChart3, Building, UserCheck, Activity, 
-  AlertTriangle, Heart, Award, CheckCircle
+  AlertTriangle, Heart, Award, CheckCircle, HandHeart, Droplet,
+  Home, Utensils, Shield, Users, Zap, Trophy, Settings, Archive
 } from "lucide-react";
 
 export const ROLE_INTERFACES: Record<string, RoleInterface> = {
   COORDINATOR: {
     navigationSections: [
       {
-        name: 'Assessment Management',
+        title: 'Assessment Management',
         items: [
-          { name: 'View All Assessments', url: '/assessments' },
-          { name: 'Create New Assessment', url: '/assessments/new' },
-          { name: 'Assessment Approvals', url: '/coordinator/assessments/review' }
+          { 
+            icon: 'ClipboardList', 
+            label: 'All Assessments', 
+            href: '/assessments', 
+            badge: 0,
+            requiredPermissions: ['assessments:read']
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'Emergency Reports', 
+            href: '/assessments/new?type=PRELIMINARY', 
+            badge: 0,
+            requiredPermissions: ['assessments:create']
+          },
+          { 
+            icon: 'Archive', 
+            label: 'Assessment Status', 
+            href: '/assessments/status', 
+            badge: 0,
+            requiredPermissions: ['assessments:read']
+          },
+          { 
+            icon: 'Building', 
+            label: 'Affected Entities', 
+            href: '/entities', 
+            badge: 0,
+            requiredPermissions: ['entities:read']
+          },
+          { 
+            icon: 'Archive', 
+            label: 'Sync Queue', 
+            href: '/queue', 
+            badge: 0,
+            requiredPermissions: ['queue:read']
+          }
         ]
       },
       {
-        name: 'Verification Dashboard', 
+        title: 'Verification Dashboard',
         items: [
-          { name: 'Verification Dashboard', url: '/coordinator/dashboard' },
-          { name: 'Donor Coordination', url: '/coordinator/donors' },
-          { name: 'System Monitoring', url: '/coordinator/monitoring' }
+          { 
+            icon: 'ClipboardList', 
+            label: 'Assessment Queue', 
+            href: '/verification/queue', 
+            badge: 5,
+            requiredPermissions: ['verification:read']
+          },
+          { 
+            icon: 'BarChart3', 
+            label: 'Response Queue', 
+            href: '/verification/responses/queue', 
+            badge: 3,
+            requiredPermissions: ['verification:read']
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'Verification Dashboard', 
+            href: '/verification/dashboard', 
+            badge: 0,
+            requiredPermissions: ['verification:read']
+          }
         ]
       },
       {
-        name: 'Response Management',
+        title: 'Review Management',
         items: [
-          { name: 'Plan New Response', url: '/responses/plan' },
-          { name: 'Track Deliveries', url: '/responses/tracking' },
-          { name: 'Response Approvals', url: '/coordinator/responses/review' }
+          { 
+            icon: 'ClipboardList', 
+            label: 'Assessment Reviews', 
+            href: '/verification/assessments', 
+            badge: 2,
+            requiredPermissions: ['verification:approve']
+          },
+          { 
+            icon: 'BarChart3', 
+            label: 'Response Reviews', 
+            href: '/responses/status-review', 
+            badge: 1,
+            requiredPermissions: ['responses:review']
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'All Responses', 
+            href: '/verification/responses', 
+            badge: 0,
+            requiredPermissions: ['responses:read']
+          }
         ]
       },
       {
-        name: 'Incident Management',
+        title: 'Incident Management',
         items: [
-          { name: 'Manage Incidents', url: '/coordinator/incidents' },
-          { name: 'Active Incidents', url: '/coordinator/incidents/active' }
+          { 
+            icon: 'AlertTriangle', 
+            label: 'Incident Management', 
+            href: '/coordinator/incidents', 
+            badge: 4, 
+            badgeVariant: 'destructive',
+            requiredPermissions: ['incidents:manage']
+          }
         ]
       },
       {
-        name: 'Donor Coordination',
+        title: 'Donor Coordination',
         items: [
-          { name: 'Donor Management', url: '/coordinator/donors' },
-          { name: 'Resource Requests', url: '/coordinator/donors/requests' }
+          { 
+            icon: 'HandHeart', 
+            label: 'Donor Dashboard', 
+            href: '/coordinator/donors', 
+            badge: 2,
+            requiredPermissions: ['donors:coordinate']
+          },
+          { 
+            icon: 'Users', 
+            label: 'Resource Planning', 
+            href: '/coordinator/donors?tab=resources', 
+            badge: 1,
+            requiredPermissions: ['resources:plan']
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'Coordination Workspace', 
+            href: '/coordinator/donors?tab=workspace', 
+            badge: 3, 
+            badgeVariant: 'destructive',
+            requiredPermissions: ['donors:coordinate']
+          }
         ]
       },
       {
-        name: 'System Configuration',
+        title: 'System Configuration',
         items: [
-          { name: 'Auto-Approval Config', url: '/coordinator/auto-approval' },
-          { name: 'Priority Sync Config', url: '/queue' },
-          { name: 'Conflict Resolution', url: '/coordinator/conflicts' }
+          { 
+            icon: 'Zap', 
+            label: 'Auto-Approval Config', 
+            href: '/coordinator/auto-approval', 
+            badge: 0,
+            requiredPermissions: ['config:manage']
+          },
+          { 
+            icon: 'BarChart3', 
+            label: 'Priority Sync Config', 
+            href: '/coordinator/priority-sync', 
+            badge: 0,
+            requiredPermissions: ['sync:configure']
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'Conflict Resolution', 
+            href: '/coordinator/conflicts', 
+            badge: 3, 
+            badgeVariant: 'destructive',
+            requiredPermissions: ['conflicts:resolve']
+          }
         ]
       },
       {
-        name: 'Monitoring Tools',
+        title: 'Monitoring Tools',
         items: [
-          { name: 'Situation Display', url: '/monitoring' },
-          { name: 'Interactive Map', url: '/monitoring/map' },
-          { name: 'Performance Dashboard', url: '/coordinator/monitoring' }
+          { 
+            icon: 'BarChart3', 
+            label: 'Situation Display', 
+            href: '/monitoring', 
+            badge: 0,
+            requiredPermissions: ['monitoring:read']
+          },
+          { 
+            icon: 'ClipboardList', 
+            label: 'Interactive Map', 
+            href: '/monitoring/map', 
+            badge: 0,
+            requiredPermissions: ['monitoring:read']
+          }
         ]
       }
     ],
@@ -213,19 +341,43 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
   DONOR: {
     navigationSections: [
       {
-        name: 'Donation Management',
+        title: 'Contribution Tracking',
         items: [
-          { name: 'My Commitments', url: '/donor/commitments' },
-          { name: 'Performance Dashboard', url: '/donor/performance' },
-          { name: 'Achievement Tracker', url: '/donor/achievements' }
-        ]
-      },
-      {
-        name: 'Resource Coordination',
-        items: [
-          { name: 'Available Requests', url: '/donor/requests' },
-          { name: 'Active Deliveries', url: '/donor/deliveries' },
-          { name: 'Planning Tools', url: '/donor/planning' }
+          { 
+            icon: 'BarChart3', 
+            label: 'Donation Planning', 
+            href: '/donor/planning', 
+            badge: 0,
+            requiredPermissions: ['donations:plan']
+          },
+          { 
+            icon: 'ClipboardList', 
+            label: 'Commitments', 
+            href: '/donor/commitments', 
+            badge: 1,
+            requiredPermissions: ['donations:commit']
+          },
+          { 
+            icon: 'Archive', 
+            label: 'Performance', 
+            href: '/donor/performance', 
+            badge: 0,
+            requiredPermissions: ['donations:track']
+          },
+          { 
+            icon: 'Award', 
+            label: 'Achievements', 
+            href: '/dashboard/donor/achievements', 
+            badge: 0,
+            requiredPermissions: ['donations:track']
+          },
+          { 
+            icon: 'Trophy', 
+            label: 'Leaderboard', 
+            href: '/dashboard/donor/leaderboard', 
+            badge: 0,
+            requiredPermissions: ['donations:track']
+          }
         ]
       }
     ],
@@ -272,7 +424,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
       }
     ],
     permissions: [
-      'donations:plan', 'donations:track', 'donations:view',
+      'donations:plan', 'donations:commit', 'donations:track', 'donations:view',
       'commitments:read', 'commitments:write',
       'achievements:read', 'performance:read'
     ]
@@ -281,18 +433,90 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
   ASSESSOR: {
     navigationSections: [
       {
-        name: 'Assessment Management',
+        title: 'Assessment Types',
         items: [
-          { name: 'My Assessments', url: '/assessments' },
-          { name: 'Create Assessment', url: '/assessments/new' },
-          { name: 'Draft Assessments', url: '/assessments/drafts' }
+          { 
+            icon: 'Heart', 
+            label: 'Health', 
+            href: '/assessments/new?type=HEALTH', 
+            badge: 3,
+            requiredPermissions: ['assessments:create']
+          },
+          { 
+            icon: 'Droplet', 
+            label: 'WASH', 
+            href: '/assessments/new?type=WASH', 
+            badge: 1,
+            requiredPermissions: ['assessments:create']
+          },
+          { 
+            icon: 'Home', 
+            label: 'Shelter', 
+            href: '/assessments/new?type=SHELTER', 
+            badge: 2,
+            requiredPermissions: ['assessments:create']
+          },
+          { 
+            icon: 'Utensils', 
+            label: 'Food', 
+            href: '/assessments/new?type=FOOD', 
+            badge: 0,
+            requiredPermissions: ['assessments:create']
+          },
+          { 
+            icon: 'Shield', 
+            label: 'Security', 
+            href: '/assessments/new?type=SECURITY', 
+            badge: 1,
+            requiredPermissions: ['assessments:create']
+          },
+          { 
+            icon: 'Users', 
+            label: 'Population', 
+            href: '/assessments/new?type=POPULATION', 
+            badge: 4,
+            requiredPermissions: ['assessments:create']
+          }
         ]
       },
       {
-        name: 'Field Operations',
+        title: 'Assessment Management',
         items: [
-          { name: 'Entity Management', url: '/entities' },
-          { name: 'Quick Actions', url: '/assessments/quick' }
+          { 
+            icon: 'ClipboardList', 
+            label: 'All Assessments', 
+            href: '/assessments', 
+            badge: 0,
+            requiredPermissions: ['assessments:read']
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'Emergency Reports', 
+            href: '/assessments/new?type=PRELIMINARY', 
+            badge: 0,
+            requiredPermissions: ['assessments:create']
+          },
+          { 
+            icon: 'Archive', 
+            label: 'Assessment Status', 
+            href: '/assessments/status', 
+            badge: 0,
+            requiredPermissions: ['assessments:read']
+          },
+          { 
+            icon: 'Building', 
+            label: 'Affected Entities', 
+            href: '/entities', 
+            badge: 0,
+            requiredPermissions: ['entities:read']
+          },
+          { 
+            icon: 'Archive', 
+            label: 'Sync Queue', 
+            href: '/queue', 
+            badge: 0,
+            requiredPermissions: ['queue:read']
+          }
         ]
       }
     ],
@@ -333,11 +557,41 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
   RESPONDER: {
     navigationSections: [
       {
-        name: 'Response Operations',
+        title: 'Response Planning',
         items: [
-          { name: 'My Responses', url: '/responses' },
-          { name: 'Plan Response', url: '/responses/plan' },
-          { name: 'Track Deliveries', url: '/responses/tracking' }
+          { 
+            icon: 'BarChart3', 
+            label: 'Plan Response', 
+            href: '/responses/plan', 
+            badge: 0,
+            requiredPermissions: ['responses:plan']
+          },
+          { 
+            icon: 'ClipboardList', 
+            label: 'Status Review', 
+            href: '/responses/status-review', 
+            badge: 2,
+            requiredPermissions: ['responses:review']
+          }
+        ]
+      },
+      {
+        title: 'Delivery Management',
+        items: [
+          { 
+            icon: 'Archive', 
+            label: 'All Responses', 
+            href: '/responses', 
+            badge: 1,
+            requiredPermissions: ['responses:read']
+          },
+          { 
+            icon: 'ClipboardList', 
+            label: 'Response Tracking', 
+            href: '/responses/status-review', 
+            badge: 0,
+            requiredPermissions: ['responses:track']
+          }
         ]
       }
     ],
@@ -365,18 +619,36 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
   VERIFIER: {
     navigationSections: [
       {
-        name: 'Verification Management',
+        title: 'Verification Management',
         items: [
-          { name: 'Verification Queue', url: '/verification/queue' },
-          { name: 'Assessment Review', url: '/verification/assessments' },
-          { name: 'Response Review', url: '/verification/responses' }
-        ]
-      },
-      {
-        name: 'Verification Dashboard',
-        items: [
-          { name: 'Dashboard', url: '/verification/dashboard' },
-          { name: 'Approval History', url: '/verification/history' }
+          { 
+            icon: 'CheckCircle', 
+            label: 'Verification Queue', 
+            href: '/verification/queue', 
+            badge: 3,
+            requiredPermissions: ['verification:review']
+          },
+          { 
+            icon: 'ClipboardList', 
+            label: 'Assessment Verification', 
+            href: '/verification/assessments', 
+            badge: 2,
+            requiredPermissions: ['verification:approve']
+          },
+          { 
+            icon: 'BarChart3', 
+            label: 'Response Verification', 
+            href: '/verification/responses', 
+            badge: 1,
+            requiredPermissions: ['responses:verify']
+          },
+          { 
+            icon: 'Archive', 
+            label: 'Verification Dashboard', 
+            href: '/verification/dashboard', 
+            badge: 0,
+            requiredPermissions: ['verification:read']
+          }
         ]
       }
     ],
@@ -410,25 +682,89 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
       }
     ],
     permissions: [
-      'verification:read', 'verification:approve'
+      'verification:read', 'verification:review', 'verification:approve', 'responses:verify'
     ]
   },
 
   ADMIN: {
     navigationSections: [
       {
-        name: 'System Administration',
+        title: 'System Administration',
         items: [
-          { name: 'User Management', url: '/admin/users' },
-          { name: 'Role Management', url: '/admin/roles' },
-          { name: 'System Configuration', url: '/admin/config' }
+          { 
+            icon: 'Settings', 
+            label: 'User Management', 
+            href: '/admin/users', 
+            badge: 0,
+            requiredPermissions: ['users:manage']
+          },
+          { 
+            icon: 'Shield', 
+            label: 'Role Management', 
+            href: '/admin/roles', 
+            badge: 0,
+            requiredPermissions: ['roles:manage']
+          },
+          { 
+            icon: 'BarChart3', 
+            label: 'System Monitoring', 
+            href: '/admin/monitoring', 
+            badge: 0,
+            requiredPermissions: ['system:monitor']
+          },
+          { 
+            icon: 'Archive', 
+            label: 'Audit Logs', 
+            href: '/admin/audit', 
+            badge: 0,
+            requiredPermissions: ['audit:read']
+          }
         ]
       },
       {
-        name: 'Monitoring & Analytics',
+        title: 'System Configuration',
         items: [
-          { name: 'System Monitoring', url: '/admin/monitoring' },
-          { name: 'Analytics Dashboard', url: '/admin/analytics' }
+          { 
+            icon: 'Zap', 
+            label: 'Auto-Approval Config', 
+            href: '/coordinator/auto-approval', 
+            badge: 0,
+            requiredPermissions: ['config:manage']
+          },
+          { 
+            icon: 'BarChart3', 
+            label: 'Priority Sync Config', 
+            href: '/coordinator/priority-sync', 
+            badge: 0,
+            requiredPermissions: ['sync:configure']
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'Conflict Resolution', 
+            href: '/coordinator/conflicts', 
+            badge: 3, 
+            badgeVariant: 'destructive',
+            requiredPermissions: ['conflicts:resolve']
+          }
+        ]
+      },
+      {
+        title: 'Monitoring Tools',
+        items: [
+          { 
+            icon: 'BarChart3', 
+            label: 'Situation Display', 
+            href: '/monitoring', 
+            badge: 0,
+            requiredPermissions: ['monitoring:read']
+          },
+          { 
+            icon: 'ClipboardList', 
+            label: 'Interactive Map', 
+            href: '/monitoring/map', 
+            badge: 0,
+            requiredPermissions: ['monitoring:read']
+          }
         ]
       }
     ],
