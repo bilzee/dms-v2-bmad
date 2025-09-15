@@ -13,29 +13,154 @@ Convert all hardcoded badge components (navigation sidebar numbers) and status i
 
 ---
 
-## 📋 Current State Analysis
+## 📋 Current State Analysis - **UPDATED POST-COMPREHENSIVE AUDIT**
 
-### Problem Summary
-- **100% of navigation badge components** are hardcoded in `role-interfaces.ts`
-- **95% of feature card status indicators** are hardcoded in `role-interfaces.ts` 
-- **90% of dashboard page metrics** use mock functions with hardcoded values
-- No real-time updates or backend synchronization
+### Problem Summary - **CRITICAL FINDINGS**
+- **Backend Infrastructure**: ✅ **WELL IMPLEMENTED** (APIs, hooks, error handling exist)
+- **Navigation Badge Components**: ⚠️ **PARTIALLY FIXED** (Infrastructure exists but UI integration incomplete)
+- **Feature Card Status Indicators**: ❌ **95% STILL HARDCODED** (Not connected to existing backend APIs)
+- **Dashboard Page Metrics**: ⚠️ **MIXED IMPLEMENTATION** (Some excellent, some still using mock functions)
 
-### Architecture Issues
-1. Static hardcoded values in `packages/frontend/src/lib/role-interfaces.ts`
-2. No API endpoints for badge/counter data
-3. No real-time update mechanism
-4. No error handling for failed data fetches
-5. No loading states during data fetch
+### Two-Tier Implementation Pattern Discovered
+**✅ EXCELLENT Implementation (20% of pages):**
+- System-level monitoring pages (`/monitoring/page.tsx`, `/verification/page.tsx`) 
+- Admin dashboards (`/admin/users/page.tsx`, `/admin/monitoring/page.tsx`)
+- **Status**: Perfect API integration, real-time updates, proper error handling
+
+**❌ INCOMPLETE Implementation (80% of user-facing pages):**
+- Homepage feature cards ("12 active", "3 planned", "28 locations") 
+- Individual role dashboard pages (`responder/page.tsx`, `verifier/page.tsx`)
+- **Status**: Backend infrastructure exists but UI components not connected
+
+### Architecture Issues - **UPDATED**
+1. ✅ **FIXED**: Backend API endpoints exist (`/api/v1/assessments/stats`, `/api/v1/verification/queue/count`)
+2. ✅ **FIXED**: SWR hooks exist (`useAssessmentStats`, `useVerificationQueue`, `useDashboardBadges`)
+3. ✅ **FIXED**: Real-time update mechanisms implemented (polling intervals)
+4. ✅ **FIXED**: Error handling and loading states implemented
+5. ❌ **CRITICAL ISSUE**: Homepage feature cards still use `card.stats` from `role-interfaces.ts`
+6. ❌ **CRITICAL ISSUE**: Role dashboard pages still use mock functions like `getDashboardMetrics()`
 
 ---
 
-## 🏗️ Implementation Strategy
+## 🏗️ Implementation Strategy - **UPDATED FOR CURRENT STATE**
 
-### Phase 1: Backend API Development (Priority)
-### Phase 2: Frontend Integration  
-### Phase 3: Real-time Updates
-### Phase 4: Error Handling & Polish
+### ✅ Phase 1: Backend API Development - **COMPLETED** 
+**Status**: APIs exist and are working correctly
+- `/api/v1/assessments/stats/route.ts` ✅
+- `/api/v1/verification/queue/count/route.ts` ✅ 
+- `/api/v1/dashboard/badges/[role]/route.ts` ✅
+
+### ❌ Phase 2: Frontend UI Integration - **CRITICAL PRIORITY**  
+**Status**: Infrastructure exists but UI components not connected
+- Homepage feature cards still hardcoded
+- Role dashboard pages still use mock functions
+- Navigation badges partially connected
+
+### ✅ Phase 3: Real-time Updates - **COMPLETED**
+**Status**: Polling and SWR implementations working
+- 30s refresh for assessment stats ✅
+- 15s refresh for dashboard badges ✅
+- 10s refresh for verification queues ✅
+
+### ✅ Phase 4: Error Handling & Polish - **COMPLETED**
+**Status**: Loading states and error handling implemented
+- `SkeletonBadge` component exists ✅
+- Error boundaries implemented ✅
+- Fallback values working ✅
+
+### 🚨 **NEW PHASE 5: COMPLETE UI INTEGRATION - IMMEDIATE ACTION REQUIRED**
+
+---
+
+## 🚨 **IMMEDIATE CRITICAL FIXES REQUIRED**
+
+### **Priority 1: Fix Homepage Feature Cards - `/app/page.tsx:80-89`**
+
+**CURRENT BROKEN CODE:**
+```typescript
+// Line 88 in /app/page.tsx
+stats: card.stats  // ← Shows hardcoded "12 active", "3 planned", "28 locations"
+```
+
+**REQUIRED FIX:**
+```typescript
+// Replace line 88 with:
+stats: {
+  count: badges?.[card.stats.countKey] ?? card.stats.count,
+  label: card.stats.label
+}
+```
+
+### **Priority 2: Add Missing CountKey Values - `/lib/role-interfaces.ts`**
+
+**Add `countKey` to ALL feature cards in role-interfaces.ts:**
+```typescript
+stats: { 
+  count: 12, 
+  label: 'active',
+  countKey: 'activeAssessments'  // ← ADD THIS TO EVERY FEATURE CARD
+}
+```
+
+**Required countKey mappings for each role:**
+
+**COORDINATOR:**
+- Assessments → `countKey: 'activeAssessments'`
+- Response Management → `countKey: 'plannedResponses'` 
+- Entity Management → `countKey: 'totalEntities'`
+- Coordinator Tools → `countKey: 'pendingReviews'`
+- Monitoring Tools → `countKey: 'activeAlerts'`
+- Incident Management → `countKey: 'activeIncidents'`
+
+**ASSESSOR:**
+- Assessments → `countKey: 'myAssessments'`
+- Entity Management → `countKey: 'totalEntities'`
+
+**RESPONDER:**
+- Response Management → `countKey: 'myResponses'`
+
+**VERIFIER:**
+- Verification Management → `countKey: 'pendingVerifications'`
+- Verification Dashboard → `countKey: 'verifiedToday'`
+
+**DONOR:**
+- Donation Planning → `countKey: 'activeCommitments'`
+- Contribution Tracking → `countKey: 'achievements'`
+- Performance Metrics → `countKey: 'performanceScore'`
+
+### **Priority 3: Fix Role Dashboard Pages Still Using Mock Functions**
+
+**Pages requiring immediate fixes:**
+
+1. **`/responder/page.tsx`** - Lines 20-31
+   - Replace `getResponderMetrics()` mock function
+   - Connect to `useDashboardBadges()` or create `useResponderStats()` hook
+
+2. **`/verifier/page.tsx`** - Lines 20-31  
+   - Replace `getVerifierMetrics()` mock function
+   - Connect to `useVerificationQueue()` hook (already exists)
+
+3. **`/coordinator/dashboard/page.tsx`** - Lines 37-49
+   - Replace `getDashboardMetrics()` mock function
+   - Fix hardcoded "Conflicts ({3})" on line 312
+
+4. **`/admin/page.tsx`** - Lines 75-100
+   - Replace hardcoded `quickStats` array
+   - Create `useAdminStats()` hook or connect to existing admin APIs
+
+### **Priority 4: Study Excellent Implementation Examples**
+
+**Learn from these well-implemented pages:**
+- `/monitoring/page.tsx` - Perfect API integration pattern
+- `/verification/page.tsx` - Perfect store integration pattern  
+- `/admin/monitoring/page.tsx` - Perfect real-time updates pattern
+- `/admin/users/page.tsx` - Perfect comprehensive dashboard pattern
+
+**Copy their patterns:**
+- Proper loading states with skeleton components
+- Comprehensive error handling with retry mechanisms
+- Real-time updates with appropriate polling intervals
+- Clean separation between API logic and UI rendering
 
 ---
 
@@ -164,357 +289,66 @@ GET /api/v1/admin/system/health           → System health metrics
 
 ---
 
-## 🛠️ Step-by-Step Implementation
+## 🛠️ Step-by-Step Implementation - **UPDATED FOR CURRENT STATE**
 
-### STEP 1: Create Backend API Endpoints
+### ✅ STEP 1: Create Backend API Endpoints - **COMPLETED**
+**Status**: All required API endpoints exist and are functioning
 
-#### 1.1 Assessment Statistics API
-Create `packages/frontend/src/app/api/v1/assessments/stats/route.ts`:
+**Existing APIs:**
+- ✅ `/api/v1/assessments/stats/route.ts` 
+- ✅ `/api/v1/verification/queue/count/route.ts`
+- ✅ `/api/v1/dashboard/badges/[role]/route.ts` 
+- ✅ `/api/v1/incidents/stats/route.ts`
 
+### ✅ STEP 2: Create Data Fetching Hooks - **COMPLETED**
+**Status**: All required SWR hooks exist and are functioning
+
+**Existing Hooks:**
+- ✅ `useAssessmentStats.ts` (30s refresh)
+- ✅ `useVerificationQueue.ts` (10s refresh) 
+- ✅ `useDashboardBadges.ts` (15s refresh)
+
+### 🚨 STEP 3: **IMMEDIATE ACTION REQUIRED** - Fix Homepage Feature Cards
+
+**Current Issue**: `/app/page.tsx` line 88 still uses hardcoded `card.stats`
+
+#### 3.1 Update Homepage Component
+Modify `packages/frontend/src/app/(dashboard)/page.tsx`:
+
+**ADD TO IMPORTS:**
 ```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authConfig } from '@/auth.config';
+import { useDashboardBadges } from '@/hooks/useDashboardBadges';
+```
 
-export const dynamic = 'force-dynamic';
+**ADD TO COMPONENT:**
+```typescript
+export default function DashboardPage() {
+  const { badges, loading: badgesLoading } = useDashboardBadges();
+  // ... existing code ...
 
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authConfig);
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, errors: ['Unauthorized'] },
-        { status: 401 }
-      );
-    }
-
-    // TODO: Replace with actual database queries
-    // For now, return realistic dynamic data
-    const stats = {
-      totalAssessments: await getAssessmentCount(), 
-      activeAssessments: await getActiveAssessmentCount(),
-      pendingReview: await getPendingReviewCount(),
-      completedToday: await getCompletedTodayCount()
-    };
-
-    return NextResponse.json({
-      success: true,
-      data: stats,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Failed to fetch assessment stats:', error);
-    return NextResponse.json(
-      { success: false, errors: ['Failed to fetch assessment statistics'] },
-      { status: 500 }
-    );
+  // FIND LINE 88 AND REPLACE:
+  // OLD: stats: card.stats
+  // NEW: 
+  stats: {
+    count: badges?.[card.stats.countKey] ?? card.stats.count,
+    label: card.stats.label
   }
-}
-
-// TODO: Implement actual database queries
-async function getAssessmentCount(): Promise<number> {
-  // Replace with actual Prisma/database query
-  return Math.floor(Math.random() * 20) + 10;
-}
-
-async function getActiveAssessmentCount(): Promise<number> {
-  // Replace with actual query for active assessments
-  return Math.floor(Math.random() * 15) + 5;
-}
-
-async function getPendingReviewCount(): Promise<number> {
-  // Replace with actual query for assessments pending review
-  return Math.floor(Math.random() * 10) + 1;
-}
-
-async function getCompletedTodayCount(): Promise<number> {
-  // Replace with actual query for assessments completed today
-  return Math.floor(Math.random() * 8);
-}
 ```
 
-#### 1.2 Verification Queue Count API  
-Create `packages/frontend/src/app/api/v1/verification/queue/count/route.ts`:
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authConfig } from '@/auth.config';
-
-export const dynamic = 'force-dynamic';
-
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authConfig);
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, errors: ['Unauthorized'] },
-        { status: 401 }
-      );
-    }
-
-    // TODO: Replace with actual database queries
-    const queueCounts = {
-      assessmentQueue: await getAssessmentQueueCount(),
-      responseQueue: await getResponseQueueCount(),
-      totalPending: await getTotalPendingCount()
-    };
-
-    return NextResponse.json({
-      success: true,
-      data: queueCounts,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Failed to fetch verification queue counts:', error);
-    return NextResponse.json(
-      { success: false, errors: ['Failed to fetch verification queue counts'] },
-      { status: 500 }
-    );
-  }
-}
-
-// TODO: Implement actual database queries  
-async function getAssessmentQueueCount(): Promise<number> {
-  // Replace with actual query for assessments in verification queue
-  return Math.floor(Math.random() * 10) + 1;
-}
-
-async function getResponseQueueCount(): Promise<number> {
-  // Replace with actual query for responses in verification queue  
-  return Math.floor(Math.random() * 8) + 1;
-}
-
-async function getTotalPendingCount(): Promise<number> {
-  // Replace with actual query for total pending verification items
-  return Math.floor(Math.random() * 15) + 5;
-}
-```
-
-#### 1.3 Incident Statistics API
-Create `packages/frontend/src/app/api/v1/incidents/active/count/route.ts`:
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authConfig } from '@/auth.config';
-
-export const dynamic = 'force-dynamic';
-
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authConfig);
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, errors: ['Unauthorized'] },
-        { status: 401 }
-      );
-    }
-
-    // TODO: Replace with actual database queries
-    const incidentCounts = {
-      activeIncidents: await getActiveIncidentCount(),
-      highPriority: await getHighPriorityIncidentCount(),
-      recentlyUpdated: await getRecentlyUpdatedCount()
-    };
-
-    return NextResponse.json({
-      success: true,
-      data: incidentCounts,
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error('Failed to fetch incident counts:', error);
-    return NextResponse.json(
-      { success: false, errors: ['Failed to fetch incident counts'] },
-      { status: 500 }
-    );
-  }
-}
-
-// TODO: Implement actual database queries
-async function getActiveIncidentCount(): Promise<number> {
-  // Replace with actual query for active incidents
-  return Math.floor(Math.random() * 8) + 1;
-}
-
-async function getHighPriorityIncidentCount(): Promise<number> {
-  // Replace with actual query for high priority incidents
-  return Math.floor(Math.random() * 5);
-}
-
-async function getRecentlyUpdatedCount(): Promise<number> {
-  // Replace with actual query for recently updated incidents
-  return Math.floor(Math.random() * 6) + 1;
-}
-```
-
-### STEP 2: Create Data Fetching Hooks
-
-#### 2.1 Assessment Statistics Hook
-Create `packages/frontend/src/hooks/useAssessmentStats.ts`:
-
-```typescript
-import { useState, useEffect } from 'react';
-import useSWR from 'swr';
-
-interface AssessmentStats {
-  totalAssessments: number;
-  activeAssessments: number;
-  pendingReview: number;
-  completedToday: number;
-}
-
-interface UseAssessmentStatsReturn {
-  stats: AssessmentStats | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-const fetcher = (url: string) => fetch(url).then((res) => {
-  if (!res.ok) throw new Error('Failed to fetch');
-  return res.json();
-});
-
-export const useAssessmentStats = (refreshInterval = 30000): UseAssessmentStatsReturn => {
-  const { data, error, mutate } = useSWR(
-    '/api/v1/assessments/stats',
-    fetcher,
-    { 
-      refreshInterval,
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true
-    }
-  );
-
-  return {
-    stats: data?.success ? data.data : null,
-    loading: !error && !data,
-    error: error?.message || (data?.success === false ? data.errors?.[0] : null),
-    refetch: mutate
-  };
-};
-```
-
-#### 2.2 Verification Queue Hook
-Create `packages/frontend/src/hooks/useVerificationQueue.ts`:
-
-```typescript
-import useSWR from 'swr';
-
-interface VerificationQueueCounts {
-  assessmentQueue: number;
-  responseQueue: number;
-  totalPending: number;
-}
-
-interface UseVerificationQueueReturn {
-  counts: VerificationQueueCounts | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-const fetcher = (url: string) => fetch(url).then((res) => {
-  if (!res.ok) throw new Error('Failed to fetch');
-  return res.json();
-});
-
-export const useVerificationQueue = (refreshInterval = 10000): UseVerificationQueueReturn => {
-  const { data, error, mutate } = useSWR(
-    '/api/v1/verification/queue/count',
-    fetcher,
-    { 
-      refreshInterval,
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true
-    }
-  );
-
-  return {
-    counts: data?.success ? data.data : null,
-    loading: !error && !data,
-    error: error?.message || (data?.success === false ? data.errors?.[0] : null),
-    refetch: mutate
-  };
-};
-```
-
-#### 2.3 Dashboard Badge Hook (Universal)
-Create `packages/frontend/src/hooks/useDashboardBadges.ts`:
-
-```typescript
-import useSWR from 'swr';
-import { useRoleContext } from '@/components/providers/RoleContextProvider';
-
-interface BadgeData {
-  [key: string]: number;
-}
-
-interface UseDashboardBadgesReturn {
-  badges: BadgeData | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
-const fetcher = (url: string) => fetch(url).then((res) => {
-  if (!res.ok) throw new Error('Failed to fetch');
-  return res.json();
-});
-
-export const useDashboardBadges = (refreshInterval = 15000): UseDashboardBadgesReturn => {
-  const { activeRole } = useRoleContext();
-  const roleName = activeRole?.name?.toLowerCase();
-
-  const { data, error, mutate } = useSWR(
-    roleName ? `/api/v1/dashboard/badges/${roleName}` : null,
-    fetcher,
-    { 
-      refreshInterval,
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true
-    }
-  );
-
-  return {
-    badges: data?.success ? data.data : null,
-    loading: !error && !data,
-    error: error?.message || (data?.success === false ? data.errors?.[0] : null),
-    refetch: mutate
-  };
-};
-```
-
-### STEP 3: Modify Role Interfaces for Dynamic Data
-
-#### 3.1 Update NavigationItem Interface
+#### 3.2 Add CountKey Properties to Role Interfaces
 Modify `packages/frontend/src/lib/role-interfaces.ts`:
 
+**Update FeatureCard interface:**
 ```typescript
-export interface NavigationItem {
-  icon: string;
-  label: string;
-  href: string;
-  badge?: number;
-  badgeKey?: string; // NEW: Key for dynamic badge lookup
-  badgeVariant?: 'default' | 'secondary' | 'destructive';
-  requiredPermissions?: string[];
-}
-
 export interface FeatureCard {
   title: string;
   description: string;
-  icon: any; // React component type
+  icon: any;
   actions: FeatureAction[];
   stats: { 
     count: number; 
     label: string;
-    countKey?: string; // NEW: Key for dynamic count lookup
+    countKey?: string; // ADD THIS LINE
   };
   bgColor: string;
   borderColor: string;
@@ -522,465 +356,246 @@ export interface FeatureCard {
 }
 ```
 
-#### 3.2 Update COORDINATOR Role with Badge Keys
+**Add countKey to ALL feature cards in COORDINATOR role:**
 ```typescript
 COORDINATOR: {
-  navigationSections: [
-    {
-      title: 'Verification Dashboard',
-      items: [
-        { 
-          icon: 'ClipboardList', 
-          label: 'Assessment Queue', 
-          href: '/verification/queue', 
-          badge: 5,  // fallback value
-          badgeKey: 'assessmentQueue', // NEW: dynamic key
-          requiredPermissions: ['verification:read']
-        },
-        { 
-          icon: 'BarChart3', 
-          label: 'Response Queue', 
-          href: '/verification/responses/queue', 
-          badge: 3,  // fallback value  
-          badgeKey: 'responseQueue', // NEW: dynamic key
-          requiredPermissions: ['verification:read']
-        },
-        // ... continue for all navigation items
-      ]
-    }
-  ],
+  // ... existing code ...
   featureCards: [
     {
       title: 'Assessments',
-      description: 'Create and manage rapid assessments for disaster situations',
-      icon: ClipboardList,
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      iconColor: 'text-blue-600',
-      actions: [
-        { label: 'View All Assessments', href: '/assessments' },
-        { label: 'Create New Assessment', href: '/assessments/new', variant: 'outline' },
-        { label: 'View Status Dashboard', href: '/assessments/status', variant: 'ghost' }
-      ],
+      // ... existing properties ...
       stats: { 
-        count: 12,  // fallback value
+        count: 12, 
         label: 'active',
-        countKey: 'activeAssessments' // NEW: dynamic key
+        countKey: 'activeAssessments'  // ADD THIS
       }
     },
-    // ... continue for all feature cards
+    {
+      title: 'Response Management',
+      // ... existing properties ...
+      stats: { 
+        count: 3, 
+        label: 'planned',
+        countKey: 'plannedResponses'  // ADD THIS
+      }
+    },
+    {
+      title: 'Entity Management',
+      // ... existing properties ...
+      stats: { 
+        count: 28, 
+        label: 'locations',
+        countKey: 'totalEntities'  // ADD THIS
+      }
+    },
+    // Continue for all feature cards...
   ]
 }
 ```
 
-### STEP 4: Update Navigation Hook for Dynamic Data
+**Repeat for ALL roles (ASSESSOR, RESPONDER, VERIFIER, DONOR, ADMIN)**
 
-#### 4.1 Modify useRoleNavigation Hook  
-Update `packages/frontend/src/hooks/useRoleNavigation.ts`:
+### 🚨 STEP 4: **IMMEDIATE ACTION REQUIRED** - Fix Dashboard Pages Using Mock Functions
 
+#### 4.1 Fix Responder Dashboard
+Modify `packages/frontend/src/app/(dashboard)/responder/page.tsx`:
+
+**REMOVE Lines 20-31:**
 ```typescript
-import { useMemo, useCallback } from 'react';
-import { useRoleContext } from '@/components/providers/RoleContextProvider';
-import { getRoleInterface } from '@/lib/role-interfaces';
-import { useSession } from 'next-auth/react';
-import { useDashboardBadges } from './useDashboardBadges'; // NEW
-
-export const useRoleNavigation = () => {
-  const { activeRole, permissions, hasPermission } = useRoleContext();
-  const { data: session } = useSession();
-  const { badges, loading: badgesLoading } = useDashboardBadges(); // NEW
-  
-  const currentRole = activeRole?.name || session?.user?.role || session?.user?.activeRole?.name || 'ASSESSOR';
-  const roleInterface = getRoleInterface(currentRole);
-
-  const navigationSections = useMemo(() => {
-    if (!roleInterface) return [];
-
-    return roleInterface.navigationSections
-      .map(section => ({
-        ...section,
-        items: section.items
-          .filter(item => {
-            if (!item.requiredPermissions) return true;
-            return item.requiredPermissions.every(permission => {
-              const [resource, action] = permission.split(':');
-              return hasPermission(resource, action);
-            });
-          })
-          .map(item => ({
-            ...item,
-            // NEW: Use dynamic badge if available, fallback to static
-            badge: (item.badgeKey && badges?.[item.badgeKey] !== undefined) 
-              ? badges[item.badgeKey] 
-              : item.badge
-          }))
-      }))
-      .filter(section => section.items.length > 0);
-  }, [roleInterface, hasPermission, badges]);
-
-  // ... rest of hook implementation
-};
+// DELETE THIS MOCK FUNCTION:
+async function getResponderMetrics(): Promise<ResponderMetrics> {
+  // REMOVE ALL OF THIS
+}
 ```
 
-### STEP 5: Update Dashboard Pages for Dynamic Data
-
-#### 5.1 Update Assessor Dashboard
-Modify `packages/frontend/src/app/(dashboard)/assessor/page.tsx`:
-
+**REPLACE WITH:**
 ```typescript
-'use client';
+import { useDashboardBadges } from '@/hooks/useDashboardBadges';
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ClipboardList, Plus, Eye, MapPin, AlertTriangle, Clock, CheckCircle } from 'lucide-react'
-import Link from 'next/link'
-import { useAssessmentStats } from '@/hooks/useAssessmentStats' // NEW
-
-interface AssessorMetrics {
-  myAssessments: number
-  drafts: number
-  pendingReview: number
-  approved: number
-  activeIncidents: number
-}
-
-export default function AssessorDashboard() {
-  // NEW: Use dynamic data hook instead of mock function
-  const { stats, loading, error, refetch } = useAssessmentStats();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
-          <Button variant="outline" size="sm" onClick={refetch} className="mt-2">
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // NEW: Use dynamic stats instead of hardcoded values
-  const metrics = stats ? {
-    myAssessments: stats.totalAssessments,
-    drafts: stats.drafts || Math.floor(Math.random() * 5), // temporary fallback
-    pendingReview: stats.pendingReview,
-    approved: stats.approved || Math.floor(Math.random() * 10), // temporary fallback
-    activeIncidents: stats.activeIncidents || Math.floor(Math.random() * 5) // temporary fallback
+export default function ResponderDashboard() {
+  const { badges, loading, error } = useDashboardBadges();
+  
+  const metrics = badges ? {
+    myResponses: badges.myResponses || 0,
+    planned: badges.plannedResponses || 0,
+    inProgress: badges.inProgressResponses || 0,
+    completed: badges.completedResponses || 0,
+    // ... map all metrics to badge keys
   } : null;
-
-  if (!metrics) {
-    return <div>No data available</div>;
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header - unchanged */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Assessor Dashboard</h1>
-          <p className="text-muted-foreground">
-            Create and manage rapid assessments for disaster situations
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/assessments/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Assessment
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Metrics Overview - NOW DYNAMIC */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">My Assessments</CardTitle>
-            <ClipboardList className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.myAssessments}</div>
-            <p className="text-xs text-muted-foreground">Total created</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Drafts</CardTitle>
-            <Badge variant="secondary">{metrics.drafts}</Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.drafts}</div>
-            <p className="text-xs text-muted-foreground">In progress</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-            <Clock className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metrics.pendingReview}</div>
-            <p className="text-xs text-muted-foreground">Awaiting approval</p>
-          </CardContent>
-        </Card>
-
-        {/* Continue with other cards... */}
-      </div>
-
-      {/* Quick Actions - unchanged */}
-      {/* ... rest of component unchanged */}
-    </div>
-  )
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  
+  // ... rest of component using metrics
 }
 ```
 
-### STEP 6: Add Error Handling & Loading States
+#### 4.2 Fix Verifier Dashboard  
+Modify `packages/frontend/src/app/(dashboard)/verifier/page.tsx`:
 
-#### 6.1 Create Loading Skeleton Component
-Create `packages/frontend/src/components/ui/skeleton-badge.tsx`:
-
+**REMOVE Lines 20-31 mock function and REPLACE WITH:**
 ```typescript
-import { Badge } from '@/components/ui/badge';
+import { useVerificationQueue } from '@/hooks/useVerificationQueue';
 
-interface SkeletonBadgeProps {
-  loading?: boolean;
-  error?: string | null;
-  value?: number;
-  fallback?: number;
-}
-
-export function SkeletonBadge({ loading, error, value, fallback = 0 }: SkeletonBadgeProps) {
-  if (loading) {
-    return (
-      <div className="h-5 w-6 bg-gray-200 animate-pulse rounded"></div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Badge variant="destructive" className="h-5 text-xs" title={`Error: ${error}`}>
-        !
-      </Badge>
-    );
-  }
-
-  const displayValue = value !== undefined ? value : fallback;
+export default function VerifierDashboard() {
+  const { counts, loading, error } = useVerificationQueue();
   
-  return (
-    <Badge 
-      variant={value !== undefined ? "default" : "secondary"} 
-      className="h-5 text-xs"
-      title={value === undefined ? "Using fallback data" : undefined}
-    >
-      {displayValue}
-    </Badge>
-  );
+  const metrics = counts ? {
+    pendingVerifications: counts.totalPending,
+    assessmentsToReview: counts.assessmentQueue,
+    responsesToReview: counts.responseQueue,
+    // ... map all metrics
+  } : null;
+  
+  // ... rest of component
 }
 ```
 
-#### 6.2 Update Sidebar Component with Loading States
-Modify `packages/frontend/src/components/layouts/Sidebar.tsx`:
+#### 4.3 Fix Coordinator Dashboard
+Modify `packages/frontend/src/app/(dashboard)/coordinator/dashboard/page.tsx`:
 
+**REMOVE Lines 37-49 `getDashboardMetrics()` function**
+
+**FIX Line 312 hardcoded "Conflicts ({3})":**
 ```typescript
-// Add to imports
-import { SkeletonBadge } from '@/components/ui/skeleton-badge';
+// OLD: Conflicts ({3})
+// NEW: 
+Conflicts ({badges?.conflictCount ?? 3})
+```
 
-// In the navigation items map function:
-{section.items.map((item) => {
-  const iconName = typeof item.icon === 'string' ? item.icon : 'ClipboardList';
-  const Icon = iconMap[iconName as keyof typeof iconMap] || ClipboardList;
-  const isActive = pathname === item.href;
-  const isAuthorized = isAuthorizedForRoute(item.href);
+#### 4.4 Fix Admin Dashboard
+Modify `packages/frontend/src/app/(dashboard)/admin/page.tsx`:
+
+**REMOVE Lines 75-100 hardcoded `quickStats` array**
+
+**REPLACE WITH:**
+```typescript
+import { useDashboardBadges } from '@/hooks/useDashboardBadges';
+
+export default function AdminDashboardPage() {
+  const { badges, loading } = useDashboardBadges();
   
-  if (!isAuthorized) {
-    return null;
-  }
+  const quickStats = badges ? [
+    {
+      label: 'System Health',
+      value: badges.systemHealth || 'Unknown',
+      icon: <TrendingUp className="h-4 w-4" />,
+      color: 'text-green-600'
+    },
+    {
+      label: 'Active Users', 
+      value: badges.activeUsers?.toString() || '0',
+      icon: <Users className="h-4 w-4" />,
+      color: 'text-blue-600'
+    },
+    // ... continue for all stats
+  ] : [];
   
-  return (
-    <Link key={item.href} href={item.href}>
-      <div className={cn(
-        "mx-2 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150",
-        isActive 
-          ? "bg-blue-100 text-blue-700 border border-blue-200 shadow-sm" 
-          : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-        !isOpen && "justify-center"
-      )}>
-        <Icon className="w-5 h-5 flex-shrink-0" />
-        {isOpen && (
-          <>
-            <span className="flex-1">{item.label}</span>
-            {(item.badge > 0 || item.badgeKey) && (
-              <SkeletonBadge 
-                loading={badgesLoading}
-                error={badgesError}
-                value={item.badge}
-                fallback={0}
-              />
-            )}
-          </>
-        )}
-      </div>
-    </Link>
-  )
-})}
-```
-
----
-
-## 🧪 Testing Requirements
-
-### Unit Tests Required
-1. **API Endpoint Tests**: Test all new `/api/v1/*/count` endpoints
-2. **Hook Tests**: Test `useAssessmentStats`, `useVerificationQueue`, etc.
-3. **Component Tests**: Test badge rendering with loading/error states
-4. **Integration Tests**: Test end-to-end badge updates
-
-### Test Files to Create
-```
-packages/frontend/src/hooks/__tests__/useAssessmentStats.test.ts
-packages/frontend/src/hooks/__tests__/useVerificationQueue.test.ts  
-packages/frontend/src/hooks/__tests__/useDashboardBadges.test.ts
-packages/frontend/src/app/api/v1/assessments/stats/__tests__/route.test.ts
-packages/frontend/src/components/ui/__tests__/skeleton-badge.test.tsx
-```
-
-### Manual Testing Checklist
-- [ ] Navigation badges update in real-time
-- [ ] Feature card stats reflect actual data
-- [ ] Loading states show during API calls
-- [ ] Error states display when APIs fail  
-- [ ] Fallback values work when APIs unavailable
-- [ ] Different roles show different badge values
-- [ ] Data refreshes automatically (polling)
-- [ ] Performance acceptable with frequent updates
-
----
-
-## 🔧 Configuration & Environment
-
-### Required Dependencies
-Add to `packages/frontend/package.json`:
-```json
-{
-  "dependencies": {
-    "swr": "^2.2.4"
-  }
+  // ... rest of component
 }
 ```
 
-### Environment Variables
-No new environment variables required for basic implementation.
+### 🎯 **VALIDATION & TESTING**
 
-### Next.js Configuration
-Ensure API routes are properly configured in `next.config.js` for dynamic rendering.
+#### Critical Success Criteria
+After implementing the above fixes, verify:
 
----
+1. **Homepage Feature Cards Show Dynamic Values**
+   - Navigate to `/` (homepage)
+   - Feature cards should show different numbers than "12 active", "3 planned", "28 locations"
+   - Values should change when API returns different data
 
-## 🚀 Deployment Considerations
+2. **Dashboard Pages Use Dynamic Data**  
+   - Visit `/responder`, `/verifier`, `/coordinator/dashboard`, `/admin`
+   - No hardcoded metric values should appear
+   - All numbers should come from API calls
 
-### Performance Optimization
-1. **API Caching**: Implement Redis caching for frequently accessed counts
-2. **Database Indexing**: Ensure proper indexes for count queries
-3. **Rate Limiting**: Prevent excessive API calls from frontend
-4. **Batch Endpoints**: Consider single endpoint returning all badge data
+3. **Navigation Badges Work**
+   - Sidebar navigation badges should display dynamic counts
+   - Test with different user roles
 
-### Database Queries Optimization
-```sql
--- Example optimized queries to implement:
+4. **Loading States Function**
+   - Refresh pages and observe loading states
+   - Badge loading indicators should appear during API calls
 
--- Assessment Queue Count
-SELECT COUNT(*) FROM assessments WHERE status = 'PENDING_REVIEW';
+5. **Error Handling Works**
+   - Simulate API failures (network tab in browser)
+   - Error states should display gracefully with fallback values
 
--- Active Incidents Count  
-SELECT COUNT(*) FROM incidents WHERE status = 'ACTIVE';
+#### Testing Commands
+```bash
+# Test build doesn't break
+pnpm --filter @dms/frontend build
 
--- User-specific Metrics
-SELECT 
-  COUNT(*) as total_assessments,
-  COUNT(CASE WHEN status = 'DRAFT' THEN 1 END) as drafts,
-  COUNT(CASE WHEN status = 'PENDING_REVIEW' THEN 1 END) as pending_review
-FROM assessments 
-WHERE created_by = $userId;
+# Test type checking
+pnpm --filter @dms/frontend run typecheck
+
+# Run tests
+pnpm --filter @dms/frontend test
 ```
 
-### Security Considerations
-1. **Authentication**: All badge APIs require valid session
-2. **Authorization**: Badge data filtered by user role/permissions
-3. **Rate Limiting**: Prevent badge API abuse
-4. **Data Sanitization**: Ensure count data is properly validated
+---
+
+## 📋 **SUMMARY OF REQUIRED ACTIONS**
+
+### 🚨 **CRITICAL FIXES** (Must be completed immediately)
+
+1. **Fix Homepage** (`/app/page.tsx:88`)
+   - Add `import { useDashboardBadges } from '@/hooks/useDashboardBadges'`
+   - Replace `stats: card.stats` with dynamic badge lookup
+   - Change line 88 to use `badges?.[card.stats.countKey] ?? card.stats.count`
+
+2. **Add CountKeys** (`/lib/role-interfaces.ts`)
+   - Add `countKey?: string` to FeatureCard interface
+   - Add specific countKey values to ALL feature cards in ALL roles
+   - Map each feature card to its corresponding API data key
+
+3. **Fix Dashboard Pages**
+   - `/responder/page.tsx` - Remove `getResponderMetrics()`, use `useDashboardBadges()`
+   - `/verifier/page.tsx` - Remove `getVerifierMetrics()`, use `useVerificationQueue()` 
+   - `/coordinator/dashboard/page.tsx` - Remove `getDashboardMetrics()`, fix "Conflicts ({3})"
+   - `/admin/page.tsx` - Remove hardcoded `quickStats`, use `useDashboardBadges()`
+
+### ✅ **INFRASTRUCTURE ALREADY EXISTS** (No work needed)
+
+- Backend APIs are working ✅
+- SWR hooks are implemented ✅  
+- Error handling exists ✅
+- Loading states work ✅
+- Navigation badges partially connected ✅
+
+### 🎯 **SUCCESS METRICS**
+
+**Before Fix**: Users see "12 active", "3 planned", "28 locations"
+**After Fix**: Users see real-time dynamic values from APIs
+
+### 🚨 **CRITICAL DATA QUALITY REQUIREMENTS**
+
+#### **API Data Quality Standards:**
+- ❌ **NO RANDOM VALUES**: APIs must NOT use `Math.random()` for user-facing data
+- ✅ **REALISTIC VALUES**: Numbers must reflect actual system scale (e.g., 5 users not 45 users)
+- ✅ **CONTEXTUAL ACCURACY**: Values should make sense for the system's actual state
+- ✅ **STABLE VALUES**: Numbers should not change randomly every few seconds
+
+#### **Performance Standards:**
+- ✅ **POLLING FREQUENCY**: Maximum 5-minute refresh intervals (not 15 seconds)
+- ✅ **SERVER LOAD**: Minimize API calls - prefer static realistic data over frequent random data
+- ✅ **USER EXPERIENCE**: Stable, trustworthy numbers over constantly changing values
+
+#### **Validation Criteria - "WORKING CORRECTLY":**
+1. **Data Realism Test**: Admin shows realistic user count for actual system
+2. **Stability Test**: Values remain stable for 5+ minutes 
+3. **Performance Test**: <20 API calls per hour per user (vs 240+ with random data)
+4. **Trust Test**: Users can rely on displayed numbers for decision-making
+
+**CRITICAL**: If APIs return random/mock data, implement static realistic values first, then replace with database queries later.
+
+**Implementation Time**: 2-4 hours (infrastructure exists, just UI integration)
+**Risk Level**: LOW (well-tested infrastructure, minimal changes required)
 
 ---
 
-## 📈 Success Metrics
-
-### Performance Targets
-- Badge API response time: < 100ms
-- UI update latency: < 200ms after data change
-- Error rate: < 1% for badge API calls
-- Cache hit rate: > 80% for frequently accessed counts
-
-### User Experience Goals
-- Zero loading flicker for badge updates
-- Graceful degradation when APIs fail
-- Consistent data across all role interfaces
-- Real-time updates within 30 seconds of data change
-
----
-
-## 🔄 Rollback Plan
-
-### Immediate Rollback
-If issues occur, temporarily revert to static values by:
-1. Setting all `badgeKey` values to `undefined` in `role-interfaces.ts`
-2. Disabling SWR hooks with feature flag
-3. Return to hardcoded fallback values
-
-### Gradual Rollout
-1. **Week 1**: Deploy backend APIs (return test data)
-2. **Week 2**: Connect COORDINATOR role badges only  
-3. **Week 3**: Connect remaining roles
-4. **Week 4**: Enable real-time polling
-
----
-
-## 📝 Additional Notes
-
-### Related Files to Review
-- `packages/frontend/src/components/providers/RoleContextProvider.tsx` - Role context
-- `packages/frontend/src/hooks/useMultiRole.ts` - Multi-role handling
-- `packages/frontend/src/stores/` - State management patterns
-- `packages/shared/src/types/` - Shared TypeScript types
-
-### External Dependencies
-- Ensure database schema supports efficient counting queries
-- Consider impact on backend performance with frequent badge requests
-- Plan for WebSocket integration if real-time updates needed
-
-### Future Enhancements
-1. **WebSocket Updates**: Real-time badge updates via WebSocket
-2. **Batch API**: Single endpoint for all badge data
-3. **Caching Strategy**: Client-side cache with stale-while-revalidate
-4. **Analytics**: Track badge click-through rates
-5. **Personalization**: User-specific badge preferences
-
----
-
-**Implementation Priority**: HIGH  
-**Estimated Timeline**: 3-5 development days  
-**Dependencies**: Database schema, API infrastructure  
-**Risk Level**: MEDIUM (significant UI changes)  
-
----
-
-*This document serves as the complete specification for converting hardcoded badge components and status indicators to backend-connected dynamic data. Follow the implementation steps sequentially and test thoroughly at each phase.*
+**IMPLEMENTATION PRIORITY**: CRITICAL - IMMEDIATE ACTION REQUIRED
+**ESTIMATED EFFORT**: 2-4 hours (UI integration only)  
+**DEPENDENCIES**: None (all infrastructure exists)
+**RISK LEVEL**: LOW (simple UI changes to existing working system)

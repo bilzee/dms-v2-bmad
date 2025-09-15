@@ -148,3 +148,13 @@ Dockerfile*
 
 # MCP Servers
 mcp-servers/
+
+# Playwright screenshots and test artifacts
+.playwright-mcp/
+playwright-report/
+test-results/
+
+# Seed files and development scripts
+**/seed-*.js
+seed-*.js
+scripts/
