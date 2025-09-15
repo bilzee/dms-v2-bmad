@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
         incidents: filteredIncidents.map(incident => ({
           ...incident,
           affectedEntityCount: 0, // TODO: Count from relationships
-          assessmentCount: incident.preliminaryAssessmentIds?.length || 0,
+          assessmentCount: 0, // TODO: Count from rapid assessments
           responseCount: 0, // TODO: Count from relationships
           lastUpdated: incident.updatedAt
         })) as any,
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
       severity: body.severity,
       status: 'ACTIVE', // New incidents start as ACTIVE
       date: new Date(body.date),
-      preliminaryAssessmentIds: body.preliminaryAssessmentId ? [body.preliminaryAssessmentId] : [],
+      // Note: preliminaryAssessmentIds field removed from schema
     };
 
     const newIncident = await DatabaseService.createIncident(incidentData);

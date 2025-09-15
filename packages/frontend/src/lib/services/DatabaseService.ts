@@ -67,14 +67,19 @@ interface AffectedEntityFilters {
 }
 
 class DatabaseService {
-  private static prisma = prisma;
+  private static _prisma = prisma;
+
+  // Expose prisma client for advanced queries
+  static get prisma() {
+    return this._prisma;
+  }
 
   // User Management (Epic 9: Multi-role authentication)
   static async createUser(userData: CreateUserData) {
     const hashedPassword = await bcrypt.hash(userData.password, 12);
     
     // Get role records
-    const roleRecords = await this.prisma.role.findMany({
+    const roleRecords = await this._prisma.role.findMany({
       where: {
         name: {
           in: userData.roles
@@ -82,7 +87,7 @@ class DatabaseService {
       }
     });
 
-    const user = await this.prisma.user.create({
+    const user = await this._prisma.user.create({
       data: {
         name: userData.name,
         email: userData.email,
@@ -122,7 +127,7 @@ class DatabaseService {
       where.isActive = filters.isActive;
     }
 
-    const users = await this.prisma.user.findMany({
+    const users = await this._prisma.user.findMany({
       where,
       include: {
         roles: true,
@@ -133,7 +138,7 @@ class DatabaseService {
       orderBy: { createdAt: 'desc' }
     });
 
-    const total = await this.prisma.user.count({ where });
+    const total = await this._prisma.user.count({ where });
 
     return {
       users,
@@ -147,7 +152,7 @@ class DatabaseService {
   }
 
   static async updateUser(id: string, updates: any) {
-    return await this.prisma.user.update({
+    return await this._prisma.user.update({
       where: { id },
       data: {
         ...updates,
@@ -162,7 +167,7 @@ class DatabaseService {
 
   static async deleteUser(id: string) {
     // Soft delete by setting isActive to false
-    return await this.prisma.user.update({
+    return await this._prisma.user.update({
       where: { id },
       data: {
         isActive: false,
@@ -173,7 +178,7 @@ class DatabaseService {
 
   static async assignRole(userId: string, roleId: string) {
     // Connect user to role
-    await this.prisma.user.update({
+    await this._prisma.user.update({
       where: { id: userId },
       data: {
         roles: {
@@ -187,7 +192,7 @@ class DatabaseService {
 
   static async removeRole(userId: string, roleId: string) {
     // Disconnect user from role
-    await this.prisma.user.update({
+    await this._prisma.user.update({
       where: { id: userId },
       data: {
         roles: {
@@ -200,7 +205,7 @@ class DatabaseService {
   }
 
   static async createPermission(permission: CreatePermissionData) {
-    return await this.prisma.permission.create({
+    return await this._prisma.permission.create({
       data: {
         name: permission.name,
         description: permission.description,
@@ -211,13 +216,13 @@ class DatabaseService {
   }
 
   static async listPermissions() {
-    return await this.prisma.permission.findMany({
+    return await this._prisma.permission.findMany({
       orderBy: { name: 'asc' }
     });
   }
 
   static async assignPermissionToRole(roleId: string, permissionId: string) {
-    return await this.prisma.rolePermission.create({
+    return await this._prisma.rolePermission.create({
       data: {
         roleId,
         permissionId
@@ -240,7 +245,7 @@ class DatabaseService {
       };
     }
 
-    return await this.prisma.auditLog.findMany({
+    return await this._prisma.auditLog.findMany({
       where,
       take: filters.limit || 100,
       skip: filters.offset || 0,
@@ -251,7 +256,7 @@ class DatabaseService {
   // Note: Enhanced getUserStats method is implemented below at line ~1112
 
   static async getUserWithRoles(userId: string) {
-    return await this.prisma.user.findUnique({
+    return await this._prisma.user.findUnique({
       where: { id: userId },
       include: {
         roles: true,
@@ -262,7 +267,7 @@ class DatabaseService {
 
   static async switchUserRole(userId: string, roleId: string) {
     // Verify user has this role
-    const user = await this.prisma.user.findUnique({
+    const user = await this._prisma.user.findUnique({
       where: { id: userId },
       include: { roles: true }
     });
@@ -271,7 +276,7 @@ class DatabaseService {
       throw new Error('User does not have access to this role');
     }
 
-    return await this.prisma.user.update({
+    return await this._prisma.user.update({
       where: { id: userId },
       data: { activeRoleId: roleId },
       include: {
@@ -295,7 +300,7 @@ class DatabaseService {
       };
     }
 
-    return await this.prisma.incident.findMany({
+    return await this._prisma.incident.findMany({
       where,
       take: filters.limit || 50,
       skip: filters.offset || 0,
@@ -305,14 +310,14 @@ class DatabaseService {
   }
 
   static async getIncidentWithDetails(id: string) {
-    return await this.prisma.incident.findUnique({
+    return await this._prisma.incident.findUnique({
       where: { id },
       // Note: affectedEntities relation not defined in schema
     });
   }
 
   static async updateIncidentStatus(id: string, status: string, coordinatorId?: string) {
-    return await this.prisma.incident.update({
+    return await this._prisma.incident.update({
       where: { id },
       data: { 
         status,
@@ -334,11 +339,11 @@ class DatabaseService {
       resolvedIncidents,
       severeCriticalIncidents
     ] = await Promise.all([
-      this.prisma.incident.count(),
-      this.prisma.incident.count({ where: { status: 'ACTIVE' } }),
-      this.prisma.incident.count({ where: { status: 'CONTAINED' } }),
-      this.prisma.incident.count({ where: { status: 'RESOLVED' } }),
-      this.prisma.incident.count({ 
+      this._prisma.incident.count(),
+      this._prisma.incident.count({ where: { status: 'ACTIVE' } }),
+      this._prisma.incident.count({ where: { status: 'CONTAINED' } }),
+      this._prisma.incident.count({ where: { status: 'RESOLVED' } }),
+      this._prisma.incident.count({ 
         where: { 
           severity: { in: ['SEVERE', 'CATASTROPHIC'] } 
         } 
@@ -346,17 +351,17 @@ class DatabaseService {
     ]);
 
     // Get counts by type
-    const typeStats = await this.prisma.incident.groupBy({
+    const typeStats = await this._prisma.incident.groupBy({
       by: ['type'],
       _count: { type: true }
     });
 
-    const bySeverity = await this.prisma.incident.groupBy({
+    const bySeverity = await this._prisma.incident.groupBy({
       by: ['severity'], 
       _count: { severity: true }
     });
 
-    const byStatus = await this.prisma.incident.groupBy({
+    const byStatus = await this._prisma.incident.groupBy({
       by: ['status'],
       _count: { status: true }
     });
@@ -382,19 +387,19 @@ class DatabaseService {
   }
 
   static async createIncident(incidentData: any) {
-    return await this.prisma.incident.create({
+    return await this._prisma.incident.create({
       data: incidentData
     });
   }
 
   static async getIncidentById(id: string) {
-    return await this.prisma.incident.findUnique({
+    return await this._prisma.incident.findUnique({
       where: { id }
     });
   }
 
   static async updateIncident(id: string, data: any) {
-    return await this.prisma.incident.update({
+    return await this._prisma.incident.update({
       where: { id },
       data
     });
@@ -408,7 +413,7 @@ class DatabaseService {
     if (filters.lga) where.lga = filters.lga;
     if (filters.ward) where.ward = filters.ward;
 
-    return await this.prisma.affectedEntity.findMany({
+    return await this._prisma.affectedEntity.findMany({
       where,
       take: filters.limit || 50,
       skip: filters.offset || 0,
@@ -423,13 +428,13 @@ class DatabaseService {
   }
 
   static async createAffectedEntity(entityData: any) {
-    return await this.prisma.affectedEntity.create({
+    return await this._prisma.affectedEntity.create({
       data: entityData
     });
   }
 
   static async getAffectedEntityById(id: string) {
-    return await this.prisma.affectedEntity.findUnique({
+    return await this._prisma.affectedEntity.findUnique({
       where: { id },
       include: {
         assessments: {
@@ -441,7 +446,7 @@ class DatabaseService {
 
   // Donor Management (Story 8.3: Achievement System)
   static async getDonors() {
-    return await this.prisma.donor.findMany({
+    return await this._prisma.donor.findMany({
       include: {
         commitments: true,
         achievements: true
@@ -451,7 +456,7 @@ class DatabaseService {
   }
 
   static async getDonorById(id: string) {
-    return await this.prisma.donor.findUnique({
+    return await this._prisma.donor.findUnique({
       where: { id },
       include: {
         commitments: {
@@ -466,7 +471,7 @@ class DatabaseService {
 
   static async calculateAchievements(responseId?: string) {
     // Get all donors or specific donor commitments
-    const commitments = await this.prisma.donorCommitment.findMany({
+    const commitments = await this._prisma.donorCommitment.findMany({
       where: responseId ? { rapidResponseId: responseId } : undefined,
       include: {
         donor: true,
@@ -478,7 +483,7 @@ class DatabaseService {
 
     for (const commitment of commitments) {
       // Achievement: First Delivery
-      const existingFirstDelivery = await this.prisma.donorAchievement.findFirst({
+      const existingFirstDelivery = await this._prisma.donorAchievement.findFirst({
         where: {
           donorId: commitment.donorId,
           type: 'FIRST_DELIVERY'
@@ -486,7 +491,7 @@ class DatabaseService {
       });
 
       if (!existingFirstDelivery && commitment.status === 'DELIVERED') {
-        const achievement = await this.prisma.donorAchievement.create({
+        const achievement = await this._prisma.donorAchievement.create({
           data: {
             donorId: commitment.donorId,
             type: 'FIRST_DELIVERY',
@@ -508,7 +513,7 @@ class DatabaseService {
       }
 
       // Achievement: Milestone deliveries (10, 25, 50, 100)
-      const deliveredCount = await this.prisma.donorCommitment.count({
+      const deliveredCount = await this._prisma.donorCommitment.count({
         where: {
           donorId: commitment.donorId,
           status: 'DELIVERED'
@@ -518,7 +523,7 @@ class DatabaseService {
       const milestones = [10, 25, 50, 100];
       for (const milestone of milestones) {
         if (deliveredCount >= milestone) {
-          const existingMilestone = await this.prisma.donorAchievement.findFirst({
+          const existingMilestone = await this._prisma.donorAchievement.findFirst({
             where: {
               donorId: commitment.donorId,
               type: `MILESTONE_${milestone}`
@@ -526,7 +531,7 @@ class DatabaseService {
           });
 
           if (!existingMilestone) {
-            const achievement = await this.prisma.donorAchievement.create({
+            const achievement = await this._prisma.donorAchievement.create({
               data: {
                 donorId: commitment.donorId,
                 type: `MILESTONE_${milestone}`,
@@ -550,14 +555,14 @@ class DatabaseService {
 
   // Story 8.3: Enhanced Achievement System Methods
   static async getActiveAchievementRules() {
-    return await this.prisma.achievementRule.findMany({
+    return await this._prisma.achievementRule.findMany({
       where: { isActive: true },
       orderBy: { priority: 'desc' }
     });
   }
 
   static async createAchievementRule(ruleData: any) {
-    return await this.prisma.achievementRule.create({
+    return await this._prisma.achievementRule.create({
       data: {
         name: ruleData.name || ruleData.title,
         description: ruleData.description,
@@ -595,7 +600,7 @@ class DatabaseService {
   }
 
   static async createVerificationBasedAchievement(achievementData: any) {
-    return await this.prisma.donorAchievement.create({
+    return await this._prisma.donorAchievement.create({
       data: {
         donorId: achievementData.donorId,
         type: achievementData.type,
@@ -612,7 +617,7 @@ class DatabaseService {
 
   static async onResponseVerified(responseId: string) {
     // Get the response with donor information
-    const response = await this.prisma.rapidResponse.findUnique({
+    const response = await this._prisma.rapidResponse.findUnique({
       where: { id: responseId },
       include: {
         donor: true,
@@ -637,7 +642,7 @@ class DatabaseService {
         
         if (shouldAward) {
           // Check if achievement already exists
-          const existing = await this.prisma.donorAchievement.findFirst({
+          const existing = await this._prisma.donorAchievement.findFirst({
             where: {
               donorId: commitment.donorId,
               type: rule.type
@@ -668,7 +673,7 @@ class DatabaseService {
       whereClause.category = filters.category;
     }
 
-    return await this.prisma.donorAchievement.findMany({
+    return await this._prisma.donorAchievement.findMany({
       where: whereClause,
       orderBy: [
         { isUnlocked: 'desc' },
@@ -679,7 +684,7 @@ class DatabaseService {
   }
 
   static async getDonorCommitmentsStats(donorId: string) {
-    return await this.prisma.donorCommitment.findMany({
+    return await this._prisma.donorCommitment.findMany({
       where: {
         donorId,
         status: 'DELIVERED'
@@ -693,7 +698,7 @@ class DatabaseService {
   }
 
   static async updateAchievementProgress(achievementId: string, progress: number, shouldUnlock?: boolean) {
-    return await this.prisma.donorAchievement.update({
+    return await this._prisma.donorAchievement.update({
       where: { id: achievementId },
       data: {
         progress,
@@ -704,13 +709,13 @@ class DatabaseService {
   }
 
   static async createDonorAchievement(achievementData: any) {
-    return await this.prisma.donorAchievement.create({
+    return await this._prisma.donorAchievement.create({
       data: achievementData
     });
   }
 
   static async getVerificationById(verificationId: string) {
-    return await this.prisma.rapidResponse.findUnique({
+    return await this._prisma.rapidResponse.findUnique({
       where: { id: verificationId },
       include: {
         donor: true,
@@ -722,7 +727,7 @@ class DatabaseService {
   // Achievement Engine support methods
   static async getDonorVerificationStats(donorId: string) {
     // Get all verified responses linked to this donor
-    const verifiedCommitments = await this.prisma.donorCommitment.findMany({
+    const verifiedCommitments = await this._prisma.donorCommitment.findMany({
       where: {
         donorId,
         status: 'DELIVERED'
@@ -757,7 +762,7 @@ class DatabaseService {
 
     // Calculate verification streak
     let currentStreak = 0;
-    const allCommitments = await this.prisma.donorCommitment.findMany({
+    const allCommitments = await this._prisma.donorCommitment.findMany({
       where: { donorId, status: 'DELIVERED' },
       include: { rapidResponse: true },
       orderBy: { deliveredDate: 'desc' }
@@ -784,7 +789,7 @@ class DatabaseService {
   }
 
   static async checkExistingAchievement(donorId: string, ruleId: string) {
-    const existing = await this.prisma.donorAchievement.findFirst({
+    const existing = await this._prisma.donorAchievement.findFirst({
       where: {
         donorId,
         type: ruleId
@@ -794,13 +799,13 @@ class DatabaseService {
   }
 
   static async createVerificationAchievement(achievementData: any) {
-    return await this.prisma.donorAchievement.create({
+    return await this._prisma.donorAchievement.create({
       data: achievementData
     });
   }
 
   static async countDonorAchievements(donorId: string) {
-    return await this.prisma.donorAchievement.count({
+    return await this._prisma.donorAchievement.count({
       where: { donorId, isUnlocked: true }
     });
   }
@@ -817,7 +822,7 @@ class DatabaseService {
     ];
 
     for (const roleName of defaultRoles) {
-      await this.prisma.role.upsert({
+      await this._prisma.role.upsert({
         where: { name: roleName },
         update: {},
         create: {
@@ -836,11 +841,11 @@ class DatabaseService {
       totalCommitments,
       totalAchievements
     ] = await Promise.all([
-      this.prisma.incident.count(),
-      this.prisma.affectedEntity.count(),
-      this.prisma.donor.count(),
-      this.prisma.donorCommitment.count(),
-      this.prisma.donorAchievement.count()
+      this._prisma.incident.count(),
+      this._prisma.affectedEntity.count(),
+      this._prisma.donor.count(),
+      this._prisma.donorCommitment.count(),
+      this._prisma.donorAchievement.count()
     ]);
 
     return {
@@ -864,7 +869,7 @@ class DatabaseService {
     createdByName: string;
   }) {
     // Get role records
-    const roleRecords = await this.prisma.role.findMany({
+    const roleRecords = await this._prisma.role.findMany({
       where: {
         id: {
           in: userData.roleIds
@@ -872,7 +877,7 @@ class DatabaseService {
       }
     });
 
-    const user = await this.prisma.user.create({
+    const user = await this._prisma.user.create({
       data: {
         name: userData.name,
         email: userData.email,
@@ -930,7 +935,7 @@ class DatabaseService {
     updatedBy: string,
     updatedByName: string
   ) {
-    const currentUser = await this.prisma.user.findUnique({
+    const currentUser = await this._prisma.user.findUnique({
       where: { id: userId },
       include: { roles: true }
     });
@@ -947,7 +952,7 @@ class DatabaseService {
 
     // Handle role updates
     if (updates.roleIds) {
-      const roleRecords = await this.prisma.role.findMany({
+      const roleRecords = await this._prisma.role.findMany({
         where: { id: { in: updates.roleIds } }
       });
 
@@ -960,7 +965,7 @@ class DatabaseService {
       }
     }
 
-    const updatedUser = await this.prisma.user.update({
+    const updatedUser = await this._prisma.user.update({
       where: { id: userId },
       data: updateData,
       include: {
@@ -1006,7 +1011,7 @@ class DatabaseService {
     updatedByName: string,
     reason?: string
   ) {
-    const updatedUsers = await this.prisma.user.updateMany({
+    const updatedUsers = await this._prisma.user.updateMany({
       where: { id: { in: userIds } },
       data: { isActive }
     });
@@ -1029,7 +1034,7 @@ class DatabaseService {
   }
 
   static async getAllRoles() {
-    return await this.prisma.role.findMany({
+    return await this._prisma.role.findMany({
       include: {
         permissions: {
           include: {
@@ -1055,24 +1060,24 @@ class DatabaseService {
       adminUsers,
       coordinatorUsers
     ] = await Promise.all([
-      this.prisma.user.count(),
-      this.prisma.user.count({ where: { isActive: true } }),
-      this.prisma.user.count({ where: { isActive: false } }),
-      this.prisma.user.count({
+      this._prisma.user.count(),
+      this._prisma.user.count({ where: { isActive: true } }),
+      this._prisma.user.count({ where: { isActive: false } }),
+      this._prisma.user.count({
         where: {
           createdAt: {
             gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
           }
         }
       }),
-      this.prisma.user.count({
+      this._prisma.user.count({
         where: {
           roles: {
             some: { name: 'ADMIN' }
           }
         }
       }),
-      this.prisma.user.count({
+      this._prisma.user.count({
         where: {
           roles: {
             some: { name: 'COORDINATOR' }
@@ -1103,7 +1108,7 @@ class DatabaseService {
     userAgent?: string;
     sessionId?: string;
   }) {
-    return await this.prisma.auditLog.create({
+    return await this._prisma.auditLog.create({
       data: {
         userId: action.userId,
         userName: action.userName,
@@ -1132,14 +1137,14 @@ class DatabaseService {
       };
     }
 
-    const logs = await this.prisma.auditLog.findMany({
+    const logs = await this._prisma.auditLog.findMany({
       where,
       take: filters.limit || 100,
       skip: filters.offset || 0,
       orderBy: { timestamp: 'desc' }
     });
 
-    const total = await this.prisma.auditLog.count({ where });
+    const total = await this._prisma.auditLog.count({ where });
 
     return {
       logs,
@@ -1160,7 +1165,7 @@ class DatabaseService {
     importedBy: string;
     importedByName: string;
   }) {
-    return await this.prisma.bulkImport.create({
+    return await this._prisma.bulkImport.create({
       data: {
         fileName: data.fileName,
         fileSize: data.fileSize,
@@ -1187,14 +1192,14 @@ class DatabaseService {
       updateData.completedAt = new Date();
     }
 
-    return await this.prisma.bulkImport.update({
+    return await this._prisma.bulkImport.update({
       where: { id: importId },
       data: updateData
     });
   }
 
   static async getBulkImport(importId: string) {
-    return await this.prisma.bulkImport.findUnique({
+    return await this._prisma.bulkImport.findUnique({
       where: { id: importId }
     });
   }
@@ -1210,14 +1215,14 @@ class DatabaseService {
     if (filters.importedBy) where.importedBy = filters.importedBy;
     if (filters.status) where.status = filters.status;
 
-    const imports = await this.prisma.bulkImport.findMany({
+    const imports = await this._prisma.bulkImport.findMany({
       where,
       take: filters.limit || 50,
       skip: filters.offset || 0,
       orderBy: { createdAt: 'desc' }
     });
 
-    const total = await this.prisma.bulkImport.count({ where });
+    const total = await this._prisma.bulkImport.count({ where });
 
     return {
       imports,
@@ -1241,7 +1246,7 @@ class DatabaseService {
     userAgent?: string
   ) {
     // Get current user roles for history tracking
-    const currentUser = await this.prisma.user.findUnique({
+    const currentUser = await this._prisma.user.findUnique({
       where: { id: userId },
       include: { roles: true }
     });
@@ -1258,7 +1263,7 @@ class DatabaseService {
     const removedRoleIds = currentRoleIds.filter(id => !newRoleIds.includes(id));
 
     // Update user roles
-    const updatedUser = await this.prisma.user.update({
+    const updatedUser = await this._prisma.user.update({
       where: { id: userId },
       data: {
         roles: {
@@ -1283,7 +1288,7 @@ class DatabaseService {
 
     // Log role history for added roles
     for (const roleId of addedRoleIds) {
-      await this.prisma.roleHistory.create({
+      await this._prisma.roleHistory.create({
         data: {
           userId,
           roleId,
@@ -1300,7 +1305,7 @@ class DatabaseService {
 
     // Log role history for removed roles
     for (const roleId of removedRoleIds) {
-      await this.prisma.roleHistory.create({
+      await this._prisma.roleHistory.create({
         data: {
           userId,
           roleId,
@@ -1375,14 +1380,14 @@ class DatabaseService {
     limit: number = 50,
     offset: number = 0
   ) {
-    const history = await this.prisma.roleHistory.findMany({
+    const history = await this._prisma.roleHistory.findMany({
       where: { userId },
       take: limit,
       skip: offset,
       orderBy: { createdAt: 'desc' }
     });
 
-    const total = await this.prisma.roleHistory.count({
+    const total = await this._prisma.roleHistory.count({
       where: { userId }
     });
 
@@ -1399,7 +1404,7 @@ class DatabaseService {
 
   static async getPermissionMatrix() {
     const [roles, permissions] = await Promise.all([
-      this.prisma.role.findMany({
+      this._prisma.role.findMany({
         include: {
           permissions: {
             include: {
@@ -1415,7 +1420,7 @@ class DatabaseService {
         where: { isActive: true },
         orderBy: { name: 'asc' }
       }),
-      this.prisma.permission.findMany({
+      this._prisma.permission.findMany({
         where: { isActive: true },
         orderBy: { name: 'asc' }
       })
@@ -1469,7 +1474,7 @@ class DatabaseService {
     ipAddress?: string,
     userAgent?: string
   ) {
-    const historyRecord = await this.prisma.roleHistory.findUnique({
+    const historyRecord = await this._prisma.roleHistory.findUnique({
       where: { id: historyId }
     });
 
@@ -1490,14 +1495,14 @@ class DatabaseService {
       // Fallback: reverse the action
       if (action === 'ADDED') {
         rollbackAction = 'REMOVED';
-        const currentUser = await this.prisma.user.findUnique({
+        const currentUser = await this._prisma.user.findUnique({
           where: { id: userId },
           include: { roles: true }
         });
         newRoleIds = currentUser?.roles.filter(r => r.id !== roleId).map(r => r.id) || [];
       } else if (action === 'REMOVED') {
         rollbackAction = 'ADDED';
-        const currentUser = await this.prisma.user.findUnique({
+        const currentUser = await this._prisma.user.findUnique({
           where: { id: userId },
           include: { roles: true }
         });
@@ -1519,7 +1524,7 @@ class DatabaseService {
     );
 
     // Log rollback action
-    await this.prisma.roleHistory.create({
+    await this._prisma.roleHistory.create({
       data: {
         userId,
         roleId: historyRecord.roleId,
@@ -1548,7 +1553,7 @@ class DatabaseService {
     userAgent?: string
   ) {
     // Verify user has this role
-    const user = await this.prisma.user.findUnique({
+    const user = await this._prisma.user.findUnique({
       where: { id: userId },
       include: { roles: true, activeRole: true }
     });
@@ -1565,7 +1570,7 @@ class DatabaseService {
     const previousActiveRoleId = user.activeRoleId;
 
     // Update active role
-    const updatedUser = await this.prisma.user.update({
+    const updatedUser = await this._prisma.user.update({
       where: { id: userId },
       data: {
         activeRoleId: roleId,
@@ -1587,7 +1592,7 @@ class DatabaseService {
 
     // Log role history
     if (previousActiveRoleId) {
-      await this.prisma.roleHistory.create({
+      await this._prisma.roleHistory.create({
         data: {
           userId,
           roleId: previousActiveRoleId,
@@ -1601,7 +1606,7 @@ class DatabaseService {
       });
     }
 
-    await this.prisma.roleHistory.create({
+    await this._prisma.roleHistory.create({
       data: {
         userId,
         roleId,
@@ -1634,7 +1639,7 @@ class DatabaseService {
 
   // Notification management
   static async createNotification(notificationData: any) {
-    return await this.prisma.notification.create({
+    return await this._prisma.notification.create({
       data: {
         ...notificationData,
         status: 'PENDING'
@@ -1642,8 +1647,94 @@ class DatabaseService {
     });
   }
 
+  static async getPopulationDataByIncident(incidentId: string) {
+    // Get affected entities for the specific incident with all assessment types for comprehensive data
+    const affectedEntities = await this._prisma.affectedEntity.findMany({
+      where: {
+        incidentId: incidentId
+      },
+      include: {
+        rapidAssessments: {
+          include: {
+            populationAssessment: true,
+            shelterAssessment: true,
+            healthAssessment: true,
+            washAssessment: true,
+            foodAssessment: true,
+            securityAssessment: true
+          },
+          orderBy: {
+            rapidAssessmentDate: 'desc'
+          }
+        }
+      }
+    });
+
+    return affectedEntities.map(entity => {
+      // Find the latest population assessment for demographics and casualty data
+      const populationAssessment = entity.rapidAssessments.find(ra => ra.populationAssessment)?.populationAssessment;
+      
+      // Find shelter assessment for infrastructure impact (shelter requirements can indicate housing impact)
+      const shelterAssessment = entity.rapidAssessments.find(ra => ra.shelterAssessment)?.shelterAssessment;
+      
+      if (!populationAssessment) return null;
+      
+      return {
+        id: entity.id,
+        demographics: {
+          totalPopulation: populationAssessment.totalPopulation,
+          households: populationAssessment.totalHouseholds,
+          displacedPersons: 0, // RapidAssessment PopulationAssessment doesn't track displaced - this comes from PreliminaryAssessment
+        },
+        casualties: {
+          deaths: populationAssessment.numberLivesLost,
+          injuries: populationAssessment.numberInjured,
+        },
+        infrastructure: {
+          // Use shelter requirements as proxy for housing impact if available
+          housesAffected: shelterAssessment?.numberSheltersRequired || 0,
+        },
+        entityName: entity.name,
+        severity: 'MEDIUM' // Default severity
+      };
+    }).filter(Boolean);
+  }
+
+  static async getAffectedEntitiesByIncident(incidentId: string) {
+    // Get affected entities for the specific incident
+    const affectedEntities = await this._prisma.affectedEntity.findMany({
+      where: {
+        incidentId: incidentId
+      },
+      include: {
+        rapidAssessments: {
+          take: 1,
+          orderBy: {
+            rapidAssessmentDate: 'desc'
+          }
+        }
+      }
+    });
+
+    return affectedEntities;
+  }
+
+  static async getPreliminaryAssessmentsByIncident(incidentId: string) {
+    // Get preliminary assessments for the specific incident
+    const preliminaryAssessments = await this._prisma.preliminaryAssessment.findMany({
+      where: {
+        incidentId: incidentId
+      },
+      orderBy: {
+        reportingDate: 'desc'
+      }
+    });
+
+    return preliminaryAssessments;
+  }
+
   static async disconnect() {
-    await this.prisma.$disconnect();
+    await this._prisma.$disconnect();
   }
 }
 

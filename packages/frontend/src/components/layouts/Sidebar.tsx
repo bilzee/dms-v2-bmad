@@ -5,8 +5,10 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { SkeletonBadge } from '@/components/ui/skeleton-badge'
 import { useRoleContext } from '@/components/providers/RoleContextProvider'
 import { useRoleNavigation } from '@/hooks/useRoleNavigation'
+import { useDashboardBadges } from '@/hooks/useDashboardBadges'
 import {
   ClipboardList, BarChart3, Building, Archive, AlertTriangle,
   HelpCircle, Settings, ChevronLeft, ChevronRight, User,
@@ -47,6 +49,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname()
   const { activeRole } = useRoleContext()
   const { navigationSections, isAuthorizedForRoute } = useRoleNavigation()
+  const { badges, loading: badgesLoading, error: badgesError } = useDashboardBadges()
 
   return (
     <div className={cn(
@@ -123,15 +126,16 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       {isOpen && (
                         <>
                           <span className="flex-1">{item.label}</span>
-                          {item.badge > 0 && (
-                            <Badge 
+                          {(item.badge > 0 || item.badgeKey) && (
+                            <SkeletonBadge 
+                              loading={badgesLoading}
+                              error={badgesError}
+                              value={item.badgeKey ? badges?.[item.badgeKey] : undefined}
+                              fallback={item.badge}
                               variant={
                                 item.badgeVariant || (isActive ? "default" : "secondary")
-                              } 
-                              className="h-5 text-xs"
-                            >
-                              {item.badge}
-                            </Badge>
+                              }
+                            />
                           )}
                         </>
                       )}

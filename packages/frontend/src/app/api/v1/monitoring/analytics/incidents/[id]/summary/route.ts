@@ -54,21 +54,39 @@ export async function GET(
     // Get real population and assessment data with error handling
     let populationData: any[] = [];
     let affectedEntities: any[] = [];
+    let preliminaryAssessments: any[] = [];
     
     try {
       populationData = await DatabaseService.getPopulationDataByIncident(incidentId) || [];
       affectedEntities = await DatabaseService.getAffectedEntitiesByIncident(incidentId) || [];
+      preliminaryAssessments = await DatabaseService.getPreliminaryAssessmentsByIncident(incidentId) || [];
     } catch (dbError) {
       console.warn('Database query failed, using empty data:', dbError);
       // Continue with empty arrays - graceful degradation
     }
 
-    // Calculate real population impact from assessments with safe defaults
-    const populationImpact = {
+    // Calculate real population impact from both rapid assessments and preliminary assessments
+    const rapidAssessmentImpact = {
       livesLost: Array.isArray(populationData) ? populationData.reduce((sum: number, p: any) => sum + (p.casualties?.deaths || 0), 0) : 0,
       injured: Array.isArray(populationData) ? populationData.reduce((sum: number, p: any) => sum + (p.casualties?.injuries || 0), 0) : 0,
       displaced: Array.isArray(populationData) ? populationData.reduce((sum: number, p: any) => sum + (p.demographics?.displacedPersons || 0), 0) : 0,
       housesAffected: Array.isArray(populationData) ? populationData.reduce((sum: number, p: any) => sum + (p.infrastructure?.housesAffected || 0), 0) : 0,
+    };
+
+    // Add preliminary assessment data
+    const preliminaryImpact = {
+      livesLost: Array.isArray(preliminaryAssessments) ? preliminaryAssessments.reduce((sum: number, p: any) => sum + (p.numberLivesLost || 0), 0) : 0,
+      injured: Array.isArray(preliminaryAssessments) ? preliminaryAssessments.reduce((sum: number, p: any) => sum + (p.numberInjured || 0), 0) : 0,
+      displaced: Array.isArray(preliminaryAssessments) ? preliminaryAssessments.reduce((sum: number, p: any) => sum + (p.numberDisplaced || 0), 0) : 0,
+      housesAffected: Array.isArray(preliminaryAssessments) ? preliminaryAssessments.reduce((sum: number, p: any) => sum + (p.numberHousesAffected || 0), 0) : 0,
+    };
+
+    // Combine both assessment types (sum all values from different sources)
+    const populationImpact = {
+      livesLost: rapidAssessmentImpact.livesLost + preliminaryImpact.livesLost,
+      injured: rapidAssessmentImpact.injured + preliminaryImpact.injured,
+      displaced: rapidAssessmentImpact.displaced + preliminaryImpact.displaced,
+      housesAffected: rapidAssessmentImpact.housesAffected + preliminaryImpact.housesAffected,
     };
 
     // Calculate real aggregate data with safe defaults

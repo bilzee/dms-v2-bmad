@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react'
+import { useDashboardBadges } from '@/hooks/useDashboardBadges'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,30 +18,23 @@ interface ResponderMetrics {
   partialDeliveries: number
 }
 
-// Mock data - replace with actual API call
-async function getResponderMetrics(): Promise<ResponderMetrics> {
-  // Simulate API call
-  return {
-    myResponses: 12,
-    planned: 4,
-    inProgress: 3,
-    completed: 5,
-    deliveries: 8,
-    partialDeliveries: 2
-  }
-}
+// Using dynamic data from API instead of mock function
 
 export default function ResponderDashboard() {
-  const [metrics, setMetrics] = useState<ResponderMetrics | null>(null);
-
-  useEffect(() => {
-    // Load initial metrics
-    getResponderMetrics().then(setMetrics);
-  }, []);
-
-  if (!metrics) {
-    return <div>Loading...</div>;
-  }
+  const { badges, loading, error } = useDashboardBadges();
+  
+  const metrics = badges ? {
+    myResponses: badges.myResponses || 0,
+    planned: badges.planned || 0,
+    inProgress: badges.inProgress || 0,
+    completed: badges.completed || 0,
+    deliveries: badges.deliveries || 0,
+    partialDeliveries: badges.partialDeliveries || 0
+  } : null;
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!metrics) return <div>No data available</div>;
 
   return (
     <div className="space-y-6">

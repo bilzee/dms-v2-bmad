@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-// Force this route to be dynamic
+import { auth } from '@/auth';
+
 export const dynamic = 'force-dynamic';
 
 // Mock data for development - replace with actual database queries in production
@@ -44,6 +45,14 @@ const MOCK_INCIDENTS = [
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, errors: ['Unauthorized'] },
+        { status: 401 }
+      );
+    }
+
     // Calculate statistics from mock data
     const stats = {
       totalIncidents: MOCK_INCIDENTS.length,
@@ -73,7 +82,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         stats
-      }
+      },
+      timestamp: new Date().toISOString()
     }, { status: 200 });
 
   } catch (error) {

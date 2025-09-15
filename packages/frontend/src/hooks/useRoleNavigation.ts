@@ -2,12 +2,14 @@ import { useMemo, useCallback } from 'react';
 import { useRoleContext } from '@/components/providers/RoleContextProvider';
 import { getRoleInterface } from '@/lib/role-interfaces';
 import { useSession } from 'next-auth/react';
+import { useDashboardBadges } from './useDashboardBadges'; // NEW
 
 interface NavigationItem {
   icon: any;
   label: string;
   href: string;
-  badge: number;
+  badge?: number;
+  badgeKey?: string; // NEW: Key for dynamic badge lookup
   badgeVariant?: 'default' | 'secondary' | 'destructive';
   requiredPermissions?: string[];
 }
@@ -28,6 +30,7 @@ interface UseRoleNavigationReturn {
 export const useRoleNavigation = (): UseRoleNavigationReturn => {
   const { activeRole, permissions, hasPermission } = useRoleContext();
   const { data: session } = useSession();
+  const { badges, loading: badgesLoading } = useDashboardBadges(); // NEW
   
   // Use same role resolution as feature cards for consistency
   const currentRole = activeRole?.name || session?.user?.role || session?.user?.activeRole?.name || 'ASSESSOR';
@@ -42,16 +45,24 @@ export const useRoleNavigation = (): UseRoleNavigationReturn => {
     return baseNavigationSections
       .map(section => ({
         ...section,
-        items: section.items.filter(item => {
-          if (!item.requiredPermissions) return true;
-          return item.requiredPermissions.every(permission => {
-            const [resource, action] = permission.split(':');
-            return hasPermission(resource, action);
-          });
-        })
+        items: section.items
+          .filter(item => {
+            if (!item.requiredPermissions) return true;
+            return item.requiredPermissions.every(permission => {
+              const [resource, action] = permission.split(':');
+              return hasPermission(resource, action);
+            });
+          })
+          .map(item => ({
+            ...item,
+            // NEW: Use dynamic badge if available, fallback to static
+            badge: (item.badgeKey && badges?.[item.badgeKey] !== undefined) 
+              ? badges[item.badgeKey] 
+              : item.badge
+          }))
       }))
       .filter(section => section.items.length > 0);
-  }, [baseNavigationSections, hasPermission]);
+  }, [baseNavigationSections, hasPermission, badges]);
 
   const navigationSections = useMemo(() => getFilteredNavigation(), [getFilteredNavigation]);
 

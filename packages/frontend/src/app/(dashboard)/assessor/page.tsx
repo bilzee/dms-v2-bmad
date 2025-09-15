@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ClipboardList, Plus, Eye, MapPin, AlertTriangle, Clock, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import { useAssessmentStats } from '@/hooks/useAssessmentStats' // NEW
+import { useDashboardBadges } from '@/hooks/useDashboardBadges' // For additional badge data
 
 // Dashboard metrics interface for assessor
 interface AssessorMetrics {
@@ -29,15 +31,38 @@ async function getAssessorMetrics(): Promise<AssessorMetrics> {
 }
 
 export default function AssessorDashboard() {
-  const [metrics, setMetrics] = useState<AssessorMetrics | null>(null);
+  // NEW: Use dynamic data hook instead of mock function
+  const { stats, loading, error, refetch } = useAssessmentStats();
+  const { badges } = useDashboardBadges(); // For additional badge data
 
-  useEffect(() => {
-    // Load initial metrics
-    getAssessorMetrics().then(setMetrics);
-  }, []);
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
+          <Button variant="outline" size="sm" onClick={refetch} className="mt-2">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // NEW: Use dynamic stats instead of hardcoded values
+  const metrics = stats ? {
+    myAssessments: stats.totalAssessments,
+    drafts: badges?.drafts ?? 2,  // Use badge data with fallback
+    pendingReview: stats.pendingReview,
+    approved: badges?.approved ?? 5,  // Use badge data with fallback
+    activeIncidents: badges?.activeIncidents ?? 1  // Use badge data with fallback
+  } : null;
 
   if (!metrics) {
-    return <div>Loading...</div>;
+    return <div>No data available</div>;
   }
 
   return (

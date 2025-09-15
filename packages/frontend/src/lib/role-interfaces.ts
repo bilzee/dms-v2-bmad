@@ -15,6 +15,7 @@ export interface NavigationItem {
   label: string;
   href: string;
   badge?: number;
+  badgeKey?: string; // NEW: Key for dynamic badge lookup
   badgeVariant?: 'default' | 'secondary' | 'destructive';
   requiredPermissions?: string[];
 }
@@ -24,7 +25,11 @@ export interface FeatureCard {
   description: string;
   icon: any; // React component type
   actions: FeatureAction[];
-  stats: { count: number; label: string };
+  stats: { 
+    count: number; 
+    label: string;
+    countKey?: string; // NEW: Key for dynamic count lookup
+  };
   bgColor: string;
   borderColor: string;
   iconColor: string;
@@ -99,14 +104,16 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
             icon: 'ClipboardList', 
             label: 'Assessment Queue', 
             href: '/verification/queue', 
-            badge: 5,
+            badge: 5,  // fallback value
+            badgeKey: 'assessmentQueue', // NEW: dynamic key
             requiredPermissions: ['verification:read']
           },
           { 
             icon: 'BarChart3', 
             label: 'Response Queue', 
             href: '/verification/responses/queue', 
-            badge: 3,
+            badge: 3,  // fallback value  
+            badgeKey: 'responseQueue', // NEW: dynamic key
             requiredPermissions: ['verification:read']
           },
           { 
@@ -126,6 +133,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
             label: 'Assessment Reviews', 
             href: '/verification/assessments', 
             badge: 2,
+            badgeKey: 'assessmentReviews',
             requiredPermissions: ['verification:approve']
           },
           { 
@@ -133,6 +141,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
             label: 'Response Reviews', 
             href: '/responses/status-review', 
             badge: 1,
+            badgeKey: 'responseReviews',
             requiredPermissions: ['responses:review']
           },
           { 
@@ -222,6 +231,13 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
             requiredPermissions: ['monitoring:read']
           },
           { 
+            icon: 'Activity', 
+            label: 'Analytics Dashboard', 
+            href: '/analytics-dashboard', 
+            badge: 0,
+            requiredPermissions: ['monitoring:read']
+          },
+          { 
             icon: 'ClipboardList', 
             label: 'Interactive Map', 
             href: '/monitoring/map', 
@@ -244,7 +260,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'Create New Assessment', href: '/assessments/new', variant: 'outline' },
           { label: 'View Status Dashboard', href: '/assessments/status', variant: 'ghost' }
         ],
-        stats: { count: 12, label: 'active' }
+        stats: { count: 12, label: 'active', countKey: 'activeAssessments' }
       },
       {
         title: 'Response Management',
@@ -258,7 +274,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'Track Deliveries', href: '/responses/tracking', variant: 'outline' },
           { label: 'Planned to Actual', href: '/responses/conversion', variant: 'ghost' }
         ],
-        stats: { count: 3, label: 'planned' }
+        stats: { count: 3, label: 'planned', countKey: 'plannedResponses' }
       },
       {
         title: 'Entity Management',
@@ -270,7 +286,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         actions: [
           { label: 'View All Entities', href: '/entities' }
         ],
-        stats: { count: 28, label: 'locations' }
+        stats: { count: 28, label: 'locations', countKey: 'totalLocations' }
       },
       {
         title: 'Coordinator Tools',
@@ -394,7 +410,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'View Commitments', href: '/donor?tab=commitments', variant: 'outline' },
           { label: 'Track Performance', href: '/donor/performance', variant: 'ghost' }
         ],
-        stats: { count: 2, label: 'active commitments' }
+        stats: { count: 2, label: 'active commitments', countKey: 'activeCommitments' }
       },
       {
         title: 'Contribution Tracking',
@@ -407,7 +423,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'View Achievements', href: '/donor/achievements' },
           { label: 'Leaderboard', href: '/donor/leaderboard', variant: 'outline' }
         ],
-        stats: { count: 5, label: 'achievements unlocked' }
+        stats: { count: 5, label: 'achievements unlocked', countKey: 'achievementsUnlocked' }
       },
       {
         title: 'Performance Metrics',
@@ -420,7 +436,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'Performance Dashboard', href: '/donor/performance' },
           { label: 'Impact Report', href: '/donor/performance', variant: 'outline' }
         ],
-        stats: { count: 85, label: '% score' }
+        stats: { count: 85, label: '% score', countKey: 'performanceScore' }
       }
     ],
     permissions: [
@@ -533,7 +549,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'Create New Assessment', href: '/assessments/new', variant: 'outline' },
           { label: 'View Status Dashboard', href: '/assessments/status', variant: 'ghost' }
         ],
-        stats: { count: 12, label: 'active' }
+        stats: { count: 12, label: 'active', countKey: 'totalAssessments' }
       },
       {
         title: 'Entity Management',
@@ -545,7 +561,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         actions: [
           { label: 'View All Entities', href: '/entities' }
         ],
-        stats: { count: 28, label: 'locations' }
+        stats: { count: 28, label: 'locations', countKey: 'totalEntities' }
       }
     ],
     permissions: [
@@ -608,7 +624,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'Track Deliveries', href: '/responses/status-review', variant: 'outline' },
           { label: 'Status Review', href: '/responses/status-review', variant: 'ghost' }
         ],
-        stats: { count: 3, label: 'planned' }
+        stats: { count: 3, label: 'planned', countKey: 'myResponses' }
       }
     ],
     permissions: [
@@ -665,7 +681,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'Assessment Review', href: '/verification', variant: 'outline' },
           { label: 'Response Review', href: '/verification/responses', variant: 'ghost' }
         ],
-        stats: { count: 6, label: 'pending verification' }
+        stats: { count: 6, label: 'pending verification', countKey: 'pendingVerifications' }
       },
       {
         title: 'Verification Dashboard',
@@ -678,7 +694,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'Verification Dashboard', href: '/verification' },
           { label: 'Approval History', href: '/verification', variant: 'outline' }
         ],
-        stats: { count: 15, label: 'verified today' }
+        stats: { count: 15, label: 'verified today', countKey: 'approvedToday' }
       }
     ],
     permissions: [
@@ -759,6 +775,13 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
             requiredPermissions: ['monitoring:read']
           },
           { 
+            icon: 'Activity', 
+            label: 'Analytics Dashboard', 
+            href: '/analytics-dashboard', 
+            badge: 0,
+            requiredPermissions: ['monitoring:read']
+          },
+          { 
             icon: 'ClipboardList', 
             label: 'Interactive Map', 
             href: '/monitoring/map', 
@@ -780,7 +803,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'Manage Users', href: '/admin/users' },
           { label: 'Role Assignment', href: '/admin/roles', variant: 'outline' }
         ],
-        stats: { count: 45, label: 'active users' }
+        stats: { count: 45, label: 'active users', countKey: 'activeUsers' }
       },
       {
         title: 'System Monitoring',
@@ -793,7 +816,7 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
           { label: 'System Dashboard', href: '/admin/monitoring' },
           { label: 'Performance Metrics', href: '/admin/analytics', variant: 'outline' }
         ],
-        stats: { count: 99, label: '% uptime' }
+        stats: { count: 99, label: '% uptime', countKey: 'systemHealth' }
       }
     ],
     permissions: [

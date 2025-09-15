@@ -56,9 +56,14 @@ export function EntitySelector({ onEntityChange, selectedEntityId }: EntitySelec
 
       setEntities(data.data.entities);
       
-      // Auto-select "All Affected Entities" by default
+      // Auto-select "All Affected Entities" by default if no entity is selected
       const allEntitiesOption = data.data.entities.find((entity: Entity) => entity.id === 'all');
       if (allEntitiesOption && !selectedEntityId) {
+        onEntityChange('all');
+      }
+      // If selectedEntityId is already 'all', ensure it's valid
+      else if (selectedEntityId === 'all' && allEntitiesOption) {
+        // Keep the current selection as it's valid
         onEntityChange('all');
       }
       

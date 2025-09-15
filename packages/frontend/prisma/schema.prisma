@@ -8,17 +8,20 @@ datasource db {
 }
 
 model Incident {
-  id                       String   @id @default(cuid())
-  name                     String
-  type                     String
-  subType                  String?
-  source                   String
-  severity                 String
-  status                   String
-  date                     DateTime
-  preliminaryAssessmentIds String[]
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  subType   String?
+  source    String
+  severity  String
+  status    String
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  preliminaryAssessments PreliminaryAssessment[]
+  affectedEntities       AffectedEntity[]
 
   @@map("incidents")
 }
@@ -116,7 +119,7 @@ model Notification {
 }
 
 model AffectedEntity {
-  id                     String                  @id @default(cuid())
+  id                     String            @id @default(cuid())
   type                   String
   name                   String
   lga                    String
@@ -135,35 +138,148 @@ model AffectedEntity {
   contactPersonPhone     String?
   contactPersonRole      String?
   estimatedHouseholds    Int?
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
-  assessments            PreliminaryAssessment[]
+  incidentId             String?  // Foreign key to incident
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  
+  // Relationships
+  rapidAssessments       RapidAssessment[]
+  incident               Incident?         @relation(fields: [incidentId], references: [id])
 
   @@map("affected_entities")
 }
 
 model PreliminaryAssessment {
-  id                         String         @id @default(cuid())
-  assessmentType             String
-  affectedEntityId           String
-  incidentType               String
-  incidentSubType            String?
-  severity                   String
-  affectedPopulationEstimate Int            @default(0)
-  affectedHouseholdsEstimate Int            @default(0)
-  immediateNeedsDescription  String
-  accessibilityStatus        String
-  priorityLevel              String
-  additionalDetails          String?
-  gpsCoordinates             Json?
-  status                     String         @default("DRAFT")
-  assessorId                 String
-  assessorName               String
-  createdAt                  DateTime       @default(now())
-  updatedAt                  DateTime       @updatedAt
-  affectedEntity             AffectedEntity @relation(fields: [affectedEntityId], references: [id])
+  id                              String   @id @default(cuid())
+  reportingDate                   DateTime
+  reportingLatitude               Float
+  reportingLongitude              Float
+  reportingLGA                    String
+  reportingWard                   String
+  numberLivesLost                 Int      @default(0)
+  numberInjured                   Int      @default(0)
+  numberDisplaced                 Int      @default(0)
+  numberHousesAffected            Int      @default(0)
+  schoolsAffected                 String?  // List of affected schools
+  medicalFacilitiesAffected       String?  // List of affected medical facilities
+  estimatedAgriculturalLandsAffected String? // Description/estimate of agricultural impact
+  reportingAgent                  String   // LEMC agent or staff name
+  additionalDetails               Json     @default("{}")
+  incidentId                      String?  // Nullable - preliminary assessments can predate incidents
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @updatedAt
+  
+  // Relationships
+  incident                        Incident? @relation(fields: [incidentId], references: [id])
 
   @@map("preliminary_assessments")
+}
+
+model RapidAssessment {
+  id                    String   @id @default(cuid())
+  rapidAssessmentType   String   // Health, WASH, Shelter, Security, Food, Population, Other
+  rapidAssessmentDate   DateTime
+  affectedEntityId      String
+  assessorName          String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  affectedEntity        AffectedEntity @relation(fields: [affectedEntityId], references: [id])
+  
+  // Related assessment details
+  healthAssessment      HealthAssessment?
+  populationAssessment  PopulationAssessment?
+  foodAssessment        FoodAssessment?
+  washAssessment        WASHAssessment?
+  shelterAssessment     ShelterAssessment?
+  securityAssessment    SecurityAssessment?
+
+  @@map("rapid_assessments")
+}
+
+model HealthAssessment {
+  rapidAssessmentId         String   @id
+  hasFunctionalClinic       Boolean
+  numberHealthFacilities    Int
+  healthFacilityType        String
+  qualifiedHealthWorkers    Int
+  hasMedicineSupply         Boolean
+  hasMedicalSupplies        Boolean
+  hasMaternalChildServices  Boolean
+  commonHealthIssues        String[] // Array of: Diarrhea, Malaria, Respiratory, Malnutrition, Other
+  additionalHealthDetails   Json     @default("{}")
+  rapidAssessment           RapidAssessment @relation(fields: [rapidAssessmentId], references: [id], onDelete: Cascade)
+
+  @@map("health_assessments")
+}
+
+model PopulationAssessment {
+  rapidAssessmentId             String   @id
+  totalHouseholds               Int
+  totalPopulation               Int
+  populationMale                Int
+  populationFemale              Int
+  populationUnder5              Int
+  pregnantWomen                 Int
+  lactatingMothers              Int
+  personWithDisability          Int
+  elderlyPersons                Int
+  separatedChildren             Int
+  numberLivesLost               Int
+  numberInjured                 Int
+  additionalPopulationDetails   Json     @default("{}")
+  rapidAssessment               RapidAssessment @relation(fields: [rapidAssessmentId], references: [id], onDelete: Cascade)
+
+  @@map("population_assessments")
+}
+
+model FoodAssessment {
+  rapidAssessmentId                   String   @id
+  foodSource                          String[] // Array of: Government kitchen, Humanitarian Partners, Community organizations, Individuals, Other
+  availableFoodDurationDays           Int      // How long will available food last
+  additionalFoodRequiredPersons       Int      // Additional food needed in terms of persons
+  additionalFoodRequiredHouseholds    Int      // Additional food needed in terms of households
+  additionalFoodDetails               Json     @default("{}")
+  rapidAssessment                     RapidAssessment @relation(fields: [rapidAssessmentId], references: [id], onDelete: Cascade)
+
+  @@map("food_assessments")
+}
+
+model WASHAssessment {
+  rapidAssessmentId           String   @id
+  waterSource                 String[] // Array of: Borehole, River/Stream, Water trucks, Tap water, Sachet water, Other
+  isWaterSufficient           Boolean  // Is the available water sufficient
+  functionalLatrinesAvailable Int      // How many functional latrines are available
+  areLatrinesSufficient       Boolean
+  hasOpenDefecationConcerns   Boolean
+  additionalWashDetails       Json     @default("{}")
+  rapidAssessment             RapidAssessment @relation(fields: [rapidAssessmentId], references: [id], onDelete: Cascade)
+
+  @@map("wash_assessments")
+}
+
+model ShelterAssessment {
+  rapidAssessmentId         String   @id
+  areSheltersSufficient     Boolean
+  shelterTypes              String[] // Array of: Trampoline, Open space, Local materials, Communal structure, Other
+  requiredShelterType       String[] // Array of: Trampoline, Open space, Local materials, Communal structure, Other
+  numberSheltersRequired    Int      // If shelter insufficient, estimate number required
+  areOvercrowded            Boolean
+  provideWeatherProtection  Boolean
+  additionalShelterDetails  Json     @default("{}")
+  rapidAssessment           RapidAssessment @relation(fields: [rapidAssessmentId], references: [id], onDelete: Cascade)
+
+  @@map("shelter_assessments")
+}
+
+model SecurityAssessment {
+  rapidAssessmentId                 String   @id
+  gbvCasesReported                  Boolean
+  hasProtectionReportingMechanism   Boolean
+  vulnerableGroupsHaveAccess        Boolean
+  additionalSecurityDetails         Json     @default("{}")
+  rapidAssessment                   RapidAssessment @relation(fields: [rapidAssessmentId], references: [id], onDelete: Cascade)
+
+  @@map("security_assessments")
 }
 
 model Donor {

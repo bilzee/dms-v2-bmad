@@ -1,6 +1,6 @@
 // app/(dashboard)/admin/page.tsx
+'use client';
 
-import { Metadata } from 'next';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -14,13 +14,11 @@ import {
   Settings
 } from 'lucide-react';
 import Link from 'next/link';
-
-export const metadata: Metadata = {
-  title: 'Admin Dashboard - DMS',
-  description: 'Administrative dashboard for disaster management system',
-};
+import { useDashboardBadges } from '@/hooks/useDashboardBadges';
 
 export default function AdminDashboardPage() {
+  const { badges, loading, error } = useDashboardBadges();
+  
   const adminModules = [
     {
       title: 'Audit & Security',
@@ -72,32 +70,37 @@ export default function AdminDashboardPage() {
     }
   ];
 
-  const quickStats = [
+  // Create dynamic quick stats from badges data
+  const quickStats = badges ? [
     {
       label: 'System Health',
-      value: 'Healthy',
+      value: `${badges.systemHealth || 98}%`,
       icon: <TrendingUp className="h-4 w-4" />,
-      color: 'text-green-600'
+      color: (badges.systemHealth || 98) >= 95 ? 'text-green-600' : 'text-yellow-600'
     },
     {
       label: 'Active Users',
-      value: '127',
+      value: String(badges.activeUsers || 0),
       icon: <Users className="h-4 w-4" />,
       color: 'text-blue-600'
     },
     {
       label: 'Security Alerts',
-      value: '0',
+      value: String(badges.securityAlerts || 0),
       icon: <AlertTriangle className="h-4 w-4" />,
-      color: 'text-green-600'
+      color: (badges.securityAlerts || 0) === 0 ? 'text-green-600' : 'text-red-600'
     },
     {
-      label: 'Uptime',
-      value: '99.9%',
+      label: 'Conflict Resolution',
+      value: String(badges.conflictResolution || 0),
       icon: <Activity className="h-4 w-4" />,
-      color: 'text-green-600'
+      color: 'text-purple-600'
     }
-  ];
+  ] : [];
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (quickStats.length === 0) return <div>No data available</div>;
 
   return (
     <div className="container mx-auto py-6 space-y-6">

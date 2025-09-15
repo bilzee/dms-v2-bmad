@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { UserCheck, Eye, CheckCircle, XCircle, Clock, AlertTriangle, Archive } from 'lucide-react'
 import Link from 'next/link'
+import { useDashboardBadges } from '@/hooks/useDashboardBadges'
+import { useVerificationQueue } from '@/hooks/useVerificationQueue'
 
 // Dashboard metrics interface for verifier
 interface VerifierMetrics {
@@ -17,30 +18,26 @@ interface VerifierMetrics {
   flaggedItems: number
 }
 
-// Mock data - replace with actual API call
-async function getVerifierMetrics(): Promise<VerifierMetrics> {
-  // Simulate API call
-  return {
-    pendingVerifications: 13,
-    assessmentsToReview: 8,
-    responsesToReview: 5,
-    approvedToday: 7,
-    rejectedToday: 2,
-    flaggedItems: 3
-  }
-}
-
 export default function VerifierDashboard() {
-  const [metrics, setMetrics] = useState<VerifierMetrics | null>(null);
-
-  useEffect(() => {
-    // Load initial metrics
-    getVerifierMetrics().then(setMetrics);
-  }, []);
-
-  if (!metrics) {
-    return <div>Loading...</div>;
-  }
+  const { badges, loading: badgesLoading, error: badgesError } = useDashboardBadges();
+  const { counts, loading: queueLoading, error: queueError } = useVerificationQueue();
+  
+  const loading = badgesLoading || queueLoading;
+  const error = badgesError || queueError;
+  
+  // Combine data from both hooks to create comprehensive metrics
+  const metrics = badges && counts ? {
+    pendingVerifications: counts.totalPending || 0,
+    assessmentsToReview: counts.assessmentQueue || 0,
+    responsesToReview: counts.responseQueue || 0,
+    approvedToday: badges.approvedToday || 0,
+    rejectedToday: badges.rejectedToday || 0,
+    flaggedItems: badges.flaggedItems || 0
+  } : null;
+  
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!metrics) return <div>No data available</div>;
 
   return (
     <div className="space-y-6">

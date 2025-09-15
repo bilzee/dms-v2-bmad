@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { ResponseVerificationQueue } from '@/components/features/verification/Re
 import { QuickViewModal } from '@/components/features/verification/QuickViewModal'
 import { useQueueManagement } from '@/hooks/useQueueManagement'
 import { useVerificationActions } from '@/hooks/useVerificationActions'
+import { useDashboardBadges } from '@/hooks/useDashboardBadges'
 
 // Dashboard metrics interface
 interface DashboardMetrics {
@@ -34,19 +35,6 @@ interface QueueMetrics {
   trendDirection: 'UP' | 'DOWN' | 'STABLE';
 }
 
-// Mock data - replace with actual API call
-async function getDashboardMetrics(): Promise<DashboardMetrics> {
-  // Simulate API call
-  return {
-    pendingAssessments: 8,
-    pendingResponses: 5,
-    recentApprovals: 12,
-    flaggedItems: 3,
-    activeIncidents: 4,
-    highPriorityIncidents: 2,
-    totalIncidents: 15
-  }
-}
 
 // Bottleneck Alerts Component
 interface BottleneckAlertsProps {
@@ -129,7 +117,7 @@ function BottleneckAlerts({ assessmentMetrics, responseMetrics }: BottleneckAler
 // If metadata is needed, convert to server component or use dynamic head management
 
 export default function CoordinatorDashboard() {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const { badges, loading: badgesLoading, error: badgesError } = useDashboardBadges();
   
   // Use custom hooks for queue management and verification actions
   const {
@@ -157,18 +145,16 @@ export default function CoordinatorDashboard() {
     refreshQueues();
   });
 
-  useEffect(() => {
-    // Load initial metrics
-    getDashboardMetrics().then(setMetrics);
-    
-    // Set up real-time updates (< 30 second latency requirement)
-    const interval = setInterval(async () => {
-      const newMetrics = await getDashboardMetrics();
-      setMetrics(newMetrics);
-    }, 25000); // 25 seconds for sub-30 second updates
-
-    return () => clearInterval(interval);
-  }, []);
+  // Create metrics from badges data
+  const metrics = badges ? {
+    pendingAssessments: badges.assessmentQueue || 0,
+    pendingResponses: badges.responseQueue || 0,
+    recentApprovals: badges.assessmentReviews || 0,
+    flaggedItems: badges.conflictResolution || 0,
+    activeIncidents: badges.activeIncidents || 0,
+    highPriorityIncidents: Math.floor((badges.activeIncidents || 0) / 2),
+    totalIncidents: badges.incidentManagement || 0
+  } : null;
 
   // Handle preview actions
   const handlePreviewAssessment = (assessmentId: string) => {
@@ -200,9 +186,12 @@ export default function CoordinatorDashboard() {
     }
   };
 
-  if (!metrics) {
-    return <div>Loading...</div>;
-  }
+  const loading = badgesLoading || isLoading;
+  const allError = badgesError || error;
+  
+  if (loading) return <div>Loading...</div>;
+  if (allError) return <div>Error: {allError}</div>;
+  if (!metrics) return <div>No data available</div>;
 
   return (
     <div className="space-y-6">
@@ -309,7 +298,7 @@ export default function CoordinatorDashboard() {
             <Link href="/coordinator/conflicts">
               <Button variant="outline" size="sm">
                 <AlertTriangle className="h-4 w-4 mr-2" />
-                Conflicts ({3})
+                Conflicts ({badges?.conflictResolution || 0})
               </Button>
             </Link>
           </div>

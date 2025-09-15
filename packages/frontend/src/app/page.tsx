@@ -17,6 +17,7 @@ import { useOfflineStore } from '@/stores/offline.store'
 import { useRoleContext } from '@/components/providers/RoleContextProvider'
 import { useRoleNavigation } from '@/hooks/useRoleNavigation'
 import { useSession } from 'next-auth/react'
+import { useDashboardBadges } from '@/hooks/useDashboardBadges'
 import { FeatureCard } from '@/components/dashboard/FeatureCard'
 import { AssessmentTypeCard } from '@/components/dashboard/AssessmentTypeCard'
 import { QuickStatsCard } from '@/components/dashboard/QuickStatsCard'
@@ -28,6 +29,7 @@ export default function HomePage() {
   const queue = useOfflineStore(state => state.queue);
   const { activeRole, hasPermission } = useRoleContext();
   const { hasAccessToSection } = useRoleNavigation();
+  const { badges, loading: badgesLoading } = useDashboardBadges();
   const { data: session, status, update } = useSession();
 
   // Handle post-authentication session refresh
@@ -51,8 +53,8 @@ export default function HomePage() {
 
   // Force session refresh if authenticated but showing unauthenticated content
   useEffect(() => {
-    // If we have a session but the status is still loading, or we have partial session data
-    if (session && (status === 'loading' || !session?.user?.role)) {
+    // If we have a session but incomplete user data
+    if (session && status === 'authenticated' && !session?.user?.role) {
       console.log('Detected incomplete session, forcing refresh...');
       update().then(() => {
         console.log('Session refresh completed');
@@ -85,7 +87,10 @@ export default function HomePage() {
     color: card.iconColor,
     bgColor: card.bgColor,
     actions: card.actions,
-    stats: card.stats
+    stats: {
+      count: badges?.[card.stats.countKey] ?? card.stats.count,
+      label: card.stats.label
+    }
   })) || []
 
   const assessmentTypes = [
@@ -93,42 +98,42 @@ export default function HomePage() {
       id: 'HEALTH', 
       name: 'Health', 
       icon: <Heart className="w-8 h-8" />, 
-      pending: 3,
+      pending: badges?.healthAssessments ?? 3,
       ...assessmentTypeColors.HEALTH
     },
     { 
       id: 'WASH', 
       name: 'WASH', 
       icon: <Droplet className="w-8 h-8" />, 
-      pending: 1,
+      pending: badges?.washAssessments ?? 1,
       ...assessmentTypeColors.WASH
     },
     { 
       id: 'SHELTER', 
       name: 'Shelter', 
       icon: <Home className="w-8 h-8" />, 
-      pending: 2,
+      pending: badges?.shelterAssessments ?? 2,
       ...assessmentTypeColors.SHELTER
     },
     { 
       id: 'FOOD', 
       name: 'Food', 
       icon: <Utensils className="w-8 h-8" />, 
-      pending: 0,
+      pending: badges?.foodAssessments ?? 0,
       ...assessmentTypeColors.FOOD
     },
     { 
       id: 'SECURITY', 
       name: 'Security', 
       icon: <Shield className="w-8 h-8" />, 
-      pending: 1,
+      pending: badges?.securityAssessments ?? 1,
       ...assessmentTypeColors.SECURITY
     },
     { 
       id: 'POPULATION', 
       name: 'Population', 
       icon: <Users className="w-8 h-8" />, 
-      pending: 4,
+      pending: badges?.populationAssessments ?? 4,
       ...assessmentTypeColors.POPULATION
     }
   ]
@@ -159,27 +164,27 @@ export default function HomePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <QuickStatsCard
           title="Active Assessments"
-          value={12}
+          value={badges?.activeAssessments ?? 12}
           icon={<ClipboardList className="w-6 h-6 text-blue-600" />}
           {...statusColors.online}
           trend={{ value: 15, label: 'from yesterday', isPositive: true }}
         />
         <QuickStatsCard
           title="Completed Today"
-          value={8}
+          value={badges?.approvedToday ?? 8}
           icon={<CheckCircle className="w-6 h-6 text-green-600" />}
           {...statusColors.online}
           trend={{ value: 25, label: 'above target', isPositive: true }}
         />
         <QuickStatsCard
           title="Pending Sync"
-          value={3}
+          value={queue.length}
           icon={<Clock className="w-6 h-6 text-orange-600" />}
           {...statusColors.offline}
         />
         <QuickStatsCard
           title="Critical Issues"
-          value={1}
+          value={badges?.activeAlerts ?? 1}
           icon={<AlertTriangle className="w-6 h-6 text-red-600" />}
           {...statusColors.error}
         />
@@ -325,7 +330,7 @@ export default function HomePage() {
                       View Drafts
                     </Link>
                   </div>
-                  <Badge variant="outline">2</Badge>
+                  <Badge variant="outline">{badges?.drafts ?? 2}</Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50">
@@ -335,7 +340,7 @@ export default function HomePage() {
                       Review Queue
                     </Link>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">5</Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">{badges?.verificationQueue ?? 5}</Badge>
                 </div>
 
                 <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50">
@@ -345,7 +350,7 @@ export default function HomePage() {
                       Sync Queue
                     </Link>
                   </div>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">0</Badge>
+                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">{queue.length}</Badge>
                 </div>
               </div>
             </CardContent>

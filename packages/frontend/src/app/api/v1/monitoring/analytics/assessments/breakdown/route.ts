@@ -367,11 +367,11 @@ function formatRapidAssessmentData(assessment: any, area: string) {
       if (assessment.washAssessment) {
         const wash = assessment.washAssessment;
         data = [
-          `Water Sources: ${wash.waterSource.join(', ')}`
+          `Water Sources: ${wash.waterSource.join(', ')}`,
+          `Functional Latrines Available: ${wash.functionalLatrinesAvailable}`
         ];
         gapData = [
           `Water Sufficient: ${wash.isWaterSufficient ? 'Yes' : 'No'}`,
-          `Functional Latrines Available: ${wash.functionalLatrinesAvailable}`,
           `Latrines Sufficient: ${wash.areLatrinesSufficient ? 'Yes' : 'No'}`,
           `Open Defecation Concerns: ${wash.hasOpenDefecationConcerns ? 'Yes' : 'No'}`
         ];

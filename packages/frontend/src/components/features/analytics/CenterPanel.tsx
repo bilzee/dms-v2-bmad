@@ -53,9 +53,14 @@ export function CenterPanel({}: CenterPanelProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, [selectedAreas]);
 
-  // Reset selected entity when incident changes
+  // Reset selected entity when incident changes and set to "all" as default
   useEffect(() => {
-    setSelectedEntityId(null);
+    if (selectedIncident) {
+      // Set to "all" immediately to show aggregated data by default
+      setSelectedEntityId('all');
+    } else {
+      setSelectedEntityId(null);
+    }
   }, [selectedIncident]);
 
   const handleEntityChange = (entityId: string | null) => {
