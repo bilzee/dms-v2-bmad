@@ -1,77 +1,98 @@
 import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
-// Mock geographic data for responses - would be replaced with actual database queries
-const generateMapResponses = () => {
-  const responseTypes = ['FOOD_DISTRIBUTION', 'WATER_SUPPLY', 'SHELTER_SETUP', 'MEDICAL_AID', 'SECURITY_PATROL', 'LOGISTICS'];
-  const statuses = ['PLANNED', 'IN_PROGRESS', 'DELIVERED', 'CANCELLED'] as const;
-  const responderNames = ['Team Alpha', 'Relief Unit B', 'Medical Team 1', 'Security Squad', 'Logistics Team'];
-  const entityNames = ['Camp Alpha', 'Community Beta', 'Settlement Gamma', 'Village Delta', 'Camp Epsilon'];
-  const deliveryItems = [
-    { item: 'Food Rations', quantity: 100 },
-    { item: 'Water Bottles', quantity: 250 },
-    { item: 'Emergency Blankets', quantity: 75 },
-    { item: 'Medical Supplies', quantity: 50 },
-    { item: 'Tents', quantity: 25 },
-    { item: 'Solar Chargers', quantity: 15 }
-  ];
+// Get real response data from database
+const getMapResponses = async () => {
+  // Query responses
+  const responses = await prisma.rapidResponse.findMany();
+
+  // Get affected entities for responses
+  const affectedEntityIds = responses
+    .map(r => r.affectedEntityId)
+    .filter((id): id is string => id !== null);
   
-  // Generate random coordinates within Borno State bounds
-  const generateCoordinates = () => ({
-    latitude: 11.5 + Math.random() * 2.5,
-    longitude: 13.0 + Math.random() * 2.0,
-    accuracy: Math.floor(Math.random() * 10) + 5,
-    timestamp: new Date(Date.now() - Math.random() * 86400000 * 7),
-    captureMethod: Math.random() > 0.7 ? 'GPS' : Math.random() > 0.5 ? 'MAP_SELECT' : 'MANUAL'
+  const affectedEntities = await prisma.affectedEntity.findMany({
+    where: {
+      id: {
+        in: affectedEntityIds
+      }
+    }
   });
 
-  const responses = Array.from({ length: Math.floor(Math.random() * 60) + 30 }, (_, i) => {
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const responseType = responseTypes[Math.floor(Math.random() * responseTypes.length)];
-    const coordinates = generateCoordinates();
-    const plannedDate = new Date(Date.now() + Math.random() * 86400000 * 7); // Next week
-    const deliveredDate = status === 'DELIVERED' ? 
-      new Date(Date.now() - Math.random() * 86400000 * 3) : undefined; // Last 3 days if delivered
+  // Create entity map for quick lookup
+  const entityMap = new Map(
+    affectedEntities.map(entity => [entity.id, entity])
+  );
+
+  // Transform responses to match the expected interface
+  const transformedResponses = responses.map(response => {
+    // Get the affected entity for this response
+    const affectedEntity = entityMap.get(response.affectedEntityId);
     
-    // Generate delivery items based on response type
-    const relevantItems = deliveryItems.filter(item => {
-      if (responseType.includes('FOOD')) return item.item.includes('Food');
-      if (responseType.includes('WATER')) return item.item.includes('Water');
-      if (responseType.includes('SHELTER')) return item.item.includes('Blankets') || item.item.includes('Tents');
-      if (responseType.includes('MEDICAL')) return item.item.includes('Medical');
-      return Math.random() > 0.5; // Random for other types
-    });
-    
-    const selectedItems = relevantItems.slice(0, Math.floor(Math.random() * 3) + 1);
+    // Extract delivery items from the JSON data field
+    let deliveryItems = [];
+    try {
+      if (response.data && typeof response.data === 'object') {
+        // Try to extract delivery items from the data field
+        const data = response.data as any;
+        if (data.deliveryItems && Array.isArray(data.deliveryItems)) {
+          deliveryItems = data.deliveryItems;
+        } else if (data.items && Array.isArray(data.items)) {
+          deliveryItems = data.items;
+        }
+      }
+      
+      // Also check otherItemsDelivered
+      if (response.otherItemsDelivered && Array.isArray(response.otherItemsDelivered)) {
+        deliveryItems = [...deliveryItems, ...response.otherItemsDelivered];
+      }
+    } catch (error) {
+      // If parsing fails, use empty array
+      deliveryItems = [];
+    }
+
+    // Generate coordinates data from affected entity
+    const coordinates = {
+      latitude: affectedEntity?.latitude ?? 12.0,
+      longitude: affectedEntity?.longitude ?? 14.0,
+      accuracy: 10, // Default accuracy
+      timestamp: response.updatedAt ?? new Date(),
+      captureMethod: 'GPS' as const,
+    };
 
     return {
-      id: `response-${i + 1}`,
-      responseType,
-      plannedDate,
-      deliveredDate,
-      responderName: responderNames[Math.floor(Math.random() * responderNames.length)],
+      id: response.id,
+      responseType: response.responseType,
+      plannedDate: response.plannedDate,
+      deliveredDate: response.deliveredDate,
+      responderName: response.responderName,
       coordinates,
-      entityName: entityNames[Math.floor(Math.random() * entityNames.length)],
-      status,
-      deliveryItems: selectedItems,
+      entityName: affectedEntity?.name || `${affectedEntity?.type || 'Unknown'} Entity`,
+      status: response.status,
+      deliveryItems: deliveryItems.map((item: any) => ({
+        item: item.item || item.name || 'Unknown Item',
+        quantity: item.quantity || 1,
+      })),
     };
   });
 
   // Calculate status breakdown and total delivery items
   const statusBreakdown = {
-    planned: responses.filter(r => r.status === 'PLANNED').length,
-    inProgress: responses.filter(r => r.status === 'IN_PROGRESS').length,
-    delivered: responses.filter(r => r.status === 'DELIVERED').length,
-    cancelled: responses.filter(r => r.status === 'CANCELLED').length,
+    planned: transformedResponses.filter(r => r.status === 'PLANNED').length,
+    inProgress: transformedResponses.filter(r => r.status === 'IN_PROGRESS').length,
+    delivered: transformedResponses.filter(r => r.status === 'DELIVERED').length,
+    cancelled: transformedResponses.filter(r => r.status === 'CANCELLED').length,
   };
 
-  const totalDeliveryItems = responses.reduce((total, response) => 
+  const totalDeliveryItems = transformedResponses.reduce((total, response) => 
     total + response.deliveryItems.reduce((sum, item) => sum + item.quantity, 0), 0
   );
 
   return {
-    responses,
+    responses: transformedResponses,
     statusBreakdown,
     totalDeliveryItems,
   };
@@ -80,10 +101,9 @@ const generateMapResponses = () => {
 // GET /api/v1/monitoring/map/responses - Get response activity with delivery status overlay
 export async function GET(request: NextRequest) {
   try {
-    const { responses, statusBreakdown, totalDeliveryItems } = generateMapResponses();
+    const { responses, statusBreakdown, totalDeliveryItems } = await getMapResponses();
     
-    const connectionStatus = Math.random() > 0.1 ? 'connected' : 
-                           Math.random() > 0.5 ? 'degraded' : 'offline';
+    const connectionStatus = 'connected'; // Since we're using real data
 
     const response = {
       success: true,
@@ -94,7 +114,7 @@ export async function GET(request: NextRequest) {
         lastUpdate: new Date(),
         refreshInterval: 25, // 25 seconds - consistent with Story 6.1
         connectionStatus,
-        dataSource: 'real-time',
+        dataSource: 'database',
       },
       message: 'Map responses retrieved successfully',
       timestamp: new Date().toISOString(),
@@ -106,8 +126,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      data: null,
-      errors: ['Failed to fetch map responses'],
+      error: 'Failed to fetch map responses',
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });

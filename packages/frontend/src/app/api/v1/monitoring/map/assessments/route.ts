@@ -1,66 +1,83 @@
 import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
-// Mock geographic data for assessments - would be replaced with actual database queries
-const generateMapAssessments = () => {
-  const assessmentTypes = ['HEALTH', 'WASH', 'SHELTER', 'FOOD', 'SECURITY', 'POPULATION'] as const;
-  const verificationStatuses = ['PENDING', 'VERIFIED', 'AUTO_VERIFIED', 'REJECTED'] as const;
-  const priorityLevels = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
-  const assessorNames = ['Dr. Smith', 'Nurse Johnson', 'Field Worker Ali', 'Coordinator Sarah', 'Supervisor Ahmed'];
-  const entityNames = ['Camp Alpha', 'Community Beta', 'Settlement Gamma', 'Village Delta', 'Camp Epsilon'];
-  
-  // Generate random coordinates within Borno State bounds
-  const generateCoordinates = () => ({
-    latitude: 11.5 + Math.random() * 2.5,
-    longitude: 13.0 + Math.random() * 2.0,
-    accuracy: Math.floor(Math.random() * 10) + 5,
-    timestamp: new Date(Date.now() - Math.random() * 86400000 * 7),
-    captureMethod: Math.random() > 0.7 ? 'GPS' : Math.random() > 0.5 ? 'MAP_SELECT' : 'MANUAL'
+// Get real assessment data from database
+const getMapAssessments = async () => {
+  // Query assessments with affected entity data
+  const assessments = await prisma.rapidAssessment.findMany({
+    include: {
+      affectedEntity: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          latitude: true,
+          longitude: true,
+        },
+      },
+    },
   });
 
-  const assessments = Array.from({ length: Math.floor(Math.random() * 100) + 50 }, (_, i) => {
-    const type = assessmentTypes[Math.floor(Math.random() * assessmentTypes.length)];
-    const verificationStatus = verificationStatuses[Math.floor(Math.random() * verificationStatuses.length)];
-    const coordinates = generateCoordinates();
+  // Transform assessments to match the expected interface
+  const transformedAssessments = assessments.map(assessment => {
+    // Determine verification status based on date
+    const isPending = new Date(assessment.rapidAssessmentDate) > new Date();
+    const verificationStatus = isPending ? 'PENDING' : 'VERIFIED';
     
-    // Priority based on type and verification status
-    const priorityWeight = type === 'HEALTH' || type === 'SECURITY' ? 0.7 : 
-                          type === 'FOOD' || type === 'WASH' ? 0.5 : 0.3;
-    const verificationWeight = verificationStatus === 'REJECTED' ? 0.9 : 
-                              verificationStatus === 'PENDING' ? 0.7 : 0.3;
-    const combinedWeight = (priorityWeight + verificationWeight) / 2;
-    
-    const priorityLevel = combinedWeight > 0.7 ? 'CRITICAL' :
-                         combinedWeight > 0.5 ? 'HIGH' :
-                         combinedWeight > 0.3 ? 'MEDIUM' : 'LOW';
+    // Determine priority level based on assessment type
+    const getPriorityLevel = (type: string) => {
+      switch (type) {
+        case 'HEALTH':
+        case 'SECURITY':
+          return 'CRITICAL';
+        case 'FOOD':
+        case 'WASH':
+          return 'HIGH';
+        case 'SHELTER':
+          return 'MEDIUM';
+        default:
+          return 'LOW';
+      }
+    };
+
+    // Generate coordinates data from affected entity
+    const coordinates = {
+      latitude: assessment.affectedEntity.latitude,
+      longitude: assessment.affectedEntity.longitude,
+      accuracy: 10, // Default accuracy
+      timestamp: assessment.updatedAt ?? new Date(),
+      captureMethod: 'GPS' as const,
+    };
 
     return {
-      id: `assessment-${i + 1}`,
-      type,
-      date: new Date(Date.now() - Math.random() * 86400000 * 14), // Within last 2 weeks
-      assessorName: assessorNames[Math.floor(Math.random() * assessorNames.length)],
+      id: assessment.id,
+      type: assessment.rapidAssessmentType,
+      date: assessment.rapidAssessmentDate,
+      assessorName: assessment.assessorName,
       coordinates,
-      entityName: entityNames[Math.floor(Math.random() * entityNames.length)],
+      entityName: assessment.affectedEntity.name || `${assessment.affectedEntity.type} Entity`,
       verificationStatus,
-      priorityLevel,
+      priorityLevel: getPriorityLevel(assessment.rapidAssessmentType),
     };
   });
 
   // Calculate status and type breakdowns
   const statusBreakdown = {
-    pending: assessments.filter(a => a.verificationStatus === 'PENDING').length,
-    verified: assessments.filter(a => a.verificationStatus === 'VERIFIED' || a.verificationStatus === 'AUTO_VERIFIED').length,
-    rejected: assessments.filter(a => a.verificationStatus === 'REJECTED').length,
+    pending: transformedAssessments.filter(a => a.verificationStatus === 'PENDING').length,
+    verified: transformedAssessments.filter(a => a.verificationStatus === 'VERIFIED').length,
+    rejected: 0, // No rejected assessments in current data model
   };
 
-  const typeBreakdown = assessmentTypes.reduce((acc, type) => {
-    acc[type] = assessments.filter(a => a.type === type).length;
+  const typeBreakdown = transformedAssessments.reduce((acc, assessment) => {
+    acc[assessment.type] = (acc[assessment.type] || 0) + 1;
     return acc;
-  }, {} as Record<typeof assessmentTypes[number], number>);
+  }, {} as Record<string, number>);
 
   return {
-    assessments,
+    assessments: transformedAssessments,
     statusBreakdown,
     typeBreakdown,
   };
@@ -69,10 +86,9 @@ const generateMapAssessments = () => {
 // GET /api/v1/monitoring/map/assessments - Get assessment locations with status indicators
 export async function GET(request: NextRequest) {
   try {
-    const { assessments, statusBreakdown, typeBreakdown } = generateMapAssessments();
+    const { assessments, statusBreakdown, typeBreakdown } = await getMapAssessments();
     
-    const connectionStatus = Math.random() > 0.1 ? 'connected' : 
-                           Math.random() > 0.5 ? 'degraded' : 'offline';
+    const connectionStatus = 'connected'; // Since we're using real data
 
     const response = {
       success: true,
@@ -83,7 +99,7 @@ export async function GET(request: NextRequest) {
         lastUpdate: new Date(),
         refreshInterval: 25, // 25 seconds - consistent with Story 6.1
         connectionStatus,
-        dataSource: 'real-time',
+        dataSource: 'database',
       },
       message: 'Map assessments retrieved successfully',
       timestamp: new Date().toISOString(),
@@ -95,8 +111,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      data: null,
-      errors: ['Failed to fetch map assessments'],
+      error: 'Failed to fetch map assessments',
       message: error instanceof Error ? error.message : 'Unknown error occurred',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
