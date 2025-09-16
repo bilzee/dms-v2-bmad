@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Map, Layers, Globe, MapPin, Activity, BarChart3 } from 'lucide-react';
+import { RefreshCw, Map, Globe, MapPin, Activity, BarChart3 } from 'lucide-react';
 import LeafletMap from '@/components/features/monitoring/LeafletMap';
 
 interface MapEntityData {
@@ -75,19 +75,12 @@ interface MapOverview {
   };
 }
 
-interface LayerVisibility {
-  entities: boolean;
-}
-
 export default function InteractiveMap() {
   const [mapData, setMapData] = useState<MapOverview | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'degraded' | 'offline'>('connected');
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [refreshInterval] = useState(25000); // 25 seconds - established pattern
-  const [layerVisibility, setLayerVisibility] = useState<LayerVisibility>({
-    entities: true,
-  });
 
   const fetchMapData = async () => {
     try {
@@ -149,13 +142,6 @@ export default function InteractiveMap() {
       case 'offline': return 'destructive';
       default: return 'outline';
     }
-  };
-
-  const toggleLayer = (layer: keyof LayerVisibility) => {
-    setLayerVisibility(prev => ({
-      ...prev,
-      [layer]: !prev[layer],
-    }));
   };
 
 
@@ -301,32 +287,6 @@ export default function InteractiveMap() {
         </Card>
       </div>
 
-      {/* Map Controls */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Layers className="h-5 w-5" />
-            Map Layer Controls
-          </CardTitle>
-          <CardDescription>
-            Toggle visibility of entity markers. Assessment and response counts are displayed as badges on entity markers.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={layerVisibility.entities ? "default" : "outline"}
-              size="sm"
-              onClick={() => toggleLayer('entities')}
-              className="flex items-center gap-2"
-            >
-              <MapPin className="h-4 w-4" />
-              Entity Markers ({mapData.totalEntities})
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Interactive Map */}
       <Card>
         <CardHeader>
@@ -339,7 +299,7 @@ export default function InteractiveMap() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <LeafletMap mapData={mapData} layerVisibility={layerVisibility} />
+          <LeafletMap mapData={mapData} />
         </CardContent>
       </Card>
 
@@ -355,7 +315,6 @@ export default function InteractiveMap() {
             '12.000, 14.000'}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span>Entity layer: {layerVisibility.entities ? 'active' : 'inactive'}</span>
           <Badge variant="outline" className="text-xs">
             Connection: {connectionStatus}
           </Badge>

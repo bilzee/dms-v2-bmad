@@ -79,16 +79,11 @@ interface MapOverview {
   };
 }
 
-interface LayerVisibility {
-  entities: boolean;
-}
-
 interface SimpleInteractiveMapProps {
   mapData: MapOverview;
-  layerVisibility: LayerVisibility;
 }
 
-export default function SimpleInteractiveMap({ mapData, layerVisibility }: SimpleInteractiveMapProps) {
+export default function SimpleInteractiveMap({ mapData }: SimpleInteractiveMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -122,8 +117,8 @@ export default function SimpleInteractiveMap({ mapData, layerVisibility }: Simpl
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Add entity markers if visible
-    if (layerVisibility.entities) {
+    // Always show entity markers
+    {
       mapData.entities.forEach(entity => {
         const customIcon = L.divIcon({
           className: 'custom-marker',
@@ -191,7 +186,7 @@ export default function SimpleInteractiveMap({ mapData, layerVisibility }: Simpl
         mapInstanceRef.current = null;
       }
     };
-  }, [mapData, layerVisibility]);
+  }, [mapData]);
 
   if (!mapData || !mapData.entities || mapData.entities.length === 0) {
     return (
