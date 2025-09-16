@@ -77,8 +77,6 @@ interface MapOverview {
 
 interface LayerVisibility {
   entities: boolean;
-  assessments: boolean;
-  responses: boolean;
 }
 
 export default function InteractiveMap() {
@@ -89,8 +87,6 @@ export default function InteractiveMap() {
   const [refreshInterval] = useState(25000); // 25 seconds - established pattern
   const [layerVisibility, setLayerVisibility] = useState<LayerVisibility>({
     entities: true,
-    assessments: true,
-    responses: true,
   });
 
   const fetchMapData = async () => {
@@ -327,24 +323,6 @@ export default function InteractiveMap() {
               <MapPin className="h-4 w-4" />
               Entity Markers ({mapData.totalEntities})
             </Button>
-            <Button
-              variant={layerVisibility.assessments ? "default" : "outline"}
-              size="sm"
-              onClick={() => toggleLayer('assessments')}
-              className="flex items-center gap-2"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Assessment Counts ({mapData.totalAssessments || 0})
-            </Button>
-            <Button
-              variant={layerVisibility.responses ? "default" : "outline"}
-              size="sm"
-              onClick={() => toggleLayer('responses')}
-              className="flex items-center gap-2"
-            >
-              <Activity className="h-4 w-4" />
-              Response Counts ({mapData.totalResponses || 0})
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -377,7 +355,7 @@ export default function InteractiveMap() {
             '12.000, 14.000'}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span>Layers active: {Object.values(layerVisibility).filter(Boolean).length}/3</span>
+          <span>Entity layer: {layerVisibility.entities ? 'active' : 'inactive'}</span>
           <Badge variant="outline" className="text-xs">
             Connection: {connectionStatus}
           </Badge>
