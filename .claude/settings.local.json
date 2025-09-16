@@ -130,7 +130,10 @@
       "Bash(pnpm --filter @dms/frontend test PerformanceMetrics.test.tsx UserActivityMonitor.test.tsx)",
       "Bash(netstat:*)",
       "Bash(ss:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(pg_isready:*)",
+      "mcp__playwright__browser_evaluate"
     ],
     "deny": [],
     "additionalDirectories": [

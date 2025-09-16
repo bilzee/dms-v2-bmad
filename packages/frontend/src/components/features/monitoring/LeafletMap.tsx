@@ -1,15 +1,6 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import { EntityMapLayer } from './EntityMapLayer';
-import { AssessmentMapLayer } from './AssessmentMapLayer';
-import { ResponseMapLayer } from './ResponseMapLayer';
-
-// Import Leaflet CSS and compatibility
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
-import 'leaflet-defaulticon-compatibility';
 
 interface LayerVisibility {
   entities: boolean;
@@ -29,8 +20,6 @@ interface LeafletMapProps {
 }
 
 export default function LeafletMap({ layerVisibility, mapData }: LeafletMapProps) {
-  const mapRef = useRef<any>(null);
-
   const getMapCenter = (): [number, number] => {
     if (!mapData) {
       return [12.0, 14.0]; // Default center for Borno State
@@ -44,23 +33,21 @@ export default function LeafletMap({ layerVisibility, mapData }: LeafletMapProps
   };
 
   return (
-    <div className="h-96 rounded-lg border overflow-hidden">
-      <MapContainer
-        center={getMapCenter()}
-        zoom={10}
-        className="h-full w-full"
-        ref={mapRef}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
-        {/* Map Layers */}
-        <EntityMapLayer visible={layerVisibility.entities} />
-        <AssessmentMapLayer visible={layerVisibility.assessments} />
-        <ResponseMapLayer visible={layerVisibility.responses} />
-      </MapContainer>
+    <div className="h-96 rounded-lg border overflow-hidden bg-gray-100 flex items-center justify-center">
+      <div className="text-center text-gray-600">
+        <h4 className="font-medium mb-2">Monitoring Map</h4>
+        <p className="text-sm">
+          Map functionality temporarily disabled during analytics dashboard migration.
+        </p>
+        <p className="text-xs mt-2">
+          Center: {getMapCenter()[0].toFixed(2)}, {getMapCenter()[1].toFixed(2)}
+        </p>
+        <div className="mt-2 text-xs">
+          <div>Entities: {layerVisibility.entities ? 'visible' : 'hidden'}</div>
+          <div>Assessments: {layerVisibility.assessments ? 'visible' : 'hidden'}</div>
+          <div>Responses: {layerVisibility.responses ? 'visible' : 'hidden'}</div>
+        </div>
+      </div>
     </div>
   );
 }
