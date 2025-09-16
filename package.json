@@ -28,6 +28,7 @@
     "csv-parse": "^6.1.0",
     "ioredis": "^5.7.0",
     "playwright": "^1.55.0",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "swr": "^2.3.6"
   }
 }

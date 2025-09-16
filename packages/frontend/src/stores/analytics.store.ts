@@ -40,19 +40,52 @@ interface IncidentSummary {
   };
 }
 
+interface EntityGap {
+  entityId: string;
+  entityName: string;
+  assessmentAreas: {
+    Health: 'red' | 'yellow' | 'green';
+    WASH: 'red' | 'yellow' | 'green';
+    Food: 'red' | 'yellow' | 'green';
+    Shelter: 'red' | 'yellow' | 'green';
+    Security: 'red' | 'yellow' | 'green';
+  };
+}
+
+interface QuickStatistics {
+  overallSeverity: {
+    Health: 'red' | 'yellow' | 'green';
+    WASH: 'red' | 'yellow' | 'green';
+    Food: 'red' | 'yellow' | 'green';
+    Shelter: 'red' | 'yellow' | 'green';
+    Security: 'red' | 'yellow' | 'green';
+  };
+  totalCriticalGaps: number;
+  totalModerateGaps: number;
+  totalMinimalGaps: number;
+}
+
+interface EntityGapsSummary {
+  entityGaps: EntityGap[];
+  quickStatistics: QuickStatistics;
+}
+
 interface AnalyticsState {
   selectedIncident: Incident | null;
   incidentSummary: IncidentSummary | null;
+  entityGapsSummary: EntityGapsSummary | null;
   incidents: Incident[];
   isLoading: boolean;
   isLoadingIncidents: boolean;
   isLoadingSummary: boolean;
+  isLoadingEntityGaps: boolean;
   error: string | null;
   lastRefresh: Date | null;
   
   fetchIncidents: () => Promise<void>;
   setSelectedIncident: (incident: Incident | null) => void;
   fetchIncidentSummary: (incidentId: string) => Promise<void>;
+  fetchEntityGapsSummary: (incidentId: string, entityIds?: string[]) => Promise<void>;
   refreshData: () => Promise<void>;
   reset: () => void;
 }
@@ -60,10 +93,12 @@ interface AnalyticsState {
 const initialState = {
   selectedIncident: null,
   incidentSummary: null,
+  entityGapsSummary: null,
   incidents: [],
   isLoading: false,
   isLoadingIncidents: false,
   isLoadingSummary: false,
+  isLoadingEntityGaps: false,
   error: null,
   lastRefresh: null,
 };
@@ -113,10 +148,11 @@ export const useAnalyticsStore = create<AnalyticsState>()(
     },
 
     setSelectedIncident: (incident: Incident | null) => {
-      set({ selectedIncident: incident, incidentSummary: null });
+      set({ selectedIncident: incident, incidentSummary: null, entityGapsSummary: null });
       
       if (incident) {
         get().fetchIncidentSummary(incident.id);
+        get().fetchEntityGapsSummary(incident.id);
       }
     },
 
@@ -150,6 +186,42 @@ export const useAnalyticsStore = create<AnalyticsState>()(
       }
     },
 
+    fetchEntityGapsSummary: async (incidentId: string, entityIds?: string[]) => {
+      set({ isLoadingEntityGaps: true, error: null });
+
+      try {
+        const url = new URL('/api/v1/monitoring/analytics/entities/gaps-summary', window.location.origin);
+        url.searchParams.set('incidentId', incidentId);
+        if (entityIds && entityIds.length > 0) {
+          url.searchParams.set('entityIds', entityIds.join(','));
+        }
+
+        const response = await fetch(url.toString());
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to fetch entity gaps summary');
+        }
+
+        set({
+          entityGapsSummary: data.data,
+          isLoadingEntityGaps: false,
+        });
+
+      } catch (error) {
+        console.error('Failed to fetch entity gaps summary:', error);
+        set({ 
+          isLoadingEntityGaps: false, 
+          error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        });
+      }
+    },
+
     refreshData: async () => {
       set({ isLoading: true });
       
@@ -157,6 +229,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
       
       if (get().selectedIncident) {
         promises.push(get().fetchIncidentSummary(get().selectedIncident!.id));
+        promises.push(get().fetchEntityGapsSummary(get().selectedIncident!.id));
       }
       
       await Promise.all(promises);
@@ -187,4 +260,10 @@ export const useAnalyticsRefresh = () => useAnalyticsStore((state) => ({
   refreshData: state.refreshData,
   error: state.error,
   isLoading: state.isLoading,
+}));
+
+export const useAnalyticsEntityGaps = () => useAnalyticsStore((state) => ({
+  entityGapsSummary: state.entityGapsSummary,
+  isLoadingEntityGaps: state.isLoadingEntityGaps,
+  fetchEntityGapsSummary: state.fetchEntityGapsSummary,
 }));

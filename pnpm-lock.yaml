@@ -26,10 +26,13 @@ importers:
       recharts:
         specifier: ^2.12.7
         version: 2.12.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      swr:
+        specifier: ^2.3.6
+        version: 2.3.6(react@18.3.1)
     devDependencies:
       next-test-api-route-handler:
         specifier: ^5.0.2
-        version: 5.0.2(next@14.2.5(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        version: 5.0.2(next@14.2.5(@babel/core@7.28.3)(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       turbo:
         specifier: ^1.10.0
         version: 1.13.4
@@ -217,6 +220,9 @@ importers:
       sonner:
         specifier: ^1.7.3
         version: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      swr:
+        specifier: ^2.2.4
+        version: 2.3.6(react@18.3.1)
       tailwind-merge:
         specifier: ^2.0.0
         version: 2.6.0
@@ -301,7 +307,7 @@ importers:
         version: 1.0.2(next@14.2.5(@babel/core@7.28.3)(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       next-test-api-route-handler:
         specifier: ^5.0.2
-        version: 5.0.2(next@14.2.5(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        version: 5.0.2(next@14.2.5(@babel/core@7.28.3)(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       playwright:
         specifier: ^1.55.0
         version: 1.55.0
@@ -5588,6 +5594,11 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  swr@2.3.6:
+    resolution: {integrity: sha512-wfHRmHWk/isGNMwlLGlZX5Gzz/uTgo0o2IRuTMcf4CPuPFJZlq0rDaKUx+ozB5nBOReNV1kiOyzMfj+MBMikLw==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
@@ -11642,7 +11653,7 @@ snapshots:
       next: 14.2.5(@babel/core@7.28.3)(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
 
-  next-test-api-route-handler@5.0.2(next@14.2.5(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
+  next-test-api-route-handler@5.0.2(next@14.2.5(@babel/core@7.28.3)(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
     dependencies:
       '@whatwg-node/server': 0.10.12
       cookie: 1.0.2
@@ -12502,6 +12513,12 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
+
+  swr@2.3.6(react@18.3.1):
+    dependencies:
+      dequal: 2.0.3
+      react: 18.3.1
+      use-sync-external-store: 1.5.0(react@18.3.1)
 
   symbol-tree@3.2.4: {}
 
