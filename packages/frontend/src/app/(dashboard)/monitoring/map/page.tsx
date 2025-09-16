@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Map, Layers, Globe, MapPin, Activity, BarChart3 } from 'lucide-react';
-import MapWrapper from '@/components/features/monitoring/MapWrapper';
+import LeafletMap from '@/components/features/monitoring/LeafletMap';
 
 interface MapEntityData {
   id: string;
@@ -31,9 +31,44 @@ interface MapEntityData {
   };
 }
 
+interface MapAssessmentData {
+  id: string;
+  entityName: string;
+  entityType: 'CAMP' | 'COMMUNITY';
+  coordinates: {
+    latitude: number;
+    longitude: number;
+    accuracy: number;
+    timestamp: Date;
+    captureMethod: 'GPS' | 'MANUAL' | 'MAP_SELECT';
+  };
+  assessmentCount: number;
+  totalAssessments: number;
+}
+
+interface MapResponseData {
+  id: string;
+  entityName: string;
+  entityType: 'CAMP' | 'COMMUNITY';
+  coordinates: {
+    latitude: number;
+    longitude: number;
+    accuracy: number;
+    timestamp: Date;
+    captureMethod: 'GPS' | 'MANUAL' | 'MAP_SELECT';
+  };
+  responseCount: number;
+  totalResponses: number;
+}
+
 interface MapOverview {
   entities: MapEntityData[];
+  assessments: MapAssessmentData[];
+  responses: MapResponseData[];
   totalEntities: number;
+  totalAssessments: number;
+  totalResponses: number;
+  activeResponses: number;
   boundingBox: {
     northEast: { latitude: number; longitude: number };
     southWest: { latitude: number; longitude: number };
@@ -60,16 +95,40 @@ export default function InteractiveMap() {
 
   const fetchMapData = async () => {
     try {
-      const response = await fetch('/api/v1/monitoring/map/entities');
-      const data = await response.json();
+      const [entitiesResponse, assessmentsResponse, responsesResponse] = await Promise.all([
+        fetch('/api/v1/monitoring/map/entities'),
+        fetch('/api/v1/monitoring/map/assessments'),
+        fetch('/api/v1/monitoring/map/responses')
+      ]);
       
-      if (data.success) {
+      const entitiesData = await entitiesResponse.json();
+      const assessmentsData = await assessmentsResponse.json();
+      const responsesData = await responsesResponse.json();
+      
+      if (entitiesData.success && assessmentsData.success && responsesData.success) {
+        // Use bounding box from entities data (since assessments and responses are now aggregated)
+        const boundingBox = entitiesData.meta.boundingBox;
+        
+        // Use actual counts from the API responses
+        const totalAssessments = assessmentsData.data.length; // 80 individual assessments
+        const totalResponses = responsesData.data.length; // 25 individual responses
+        
+        // Calculate active responses from the responses data
+        const activeResponses = responsesData.data.filter((r: any) => 
+          r.status === 'IN_PROGRESS' || r.status === 'PLANNED'
+        ).length;
+        
         setMapData({
-          entities: data.data,
-          totalEntities: data.meta.totalEntities,
-          boundingBox: data.meta.boundingBox,
+          entities: entitiesData.data,
+          assessments: assessmentsData.data,
+          responses: responsesData.data,
+          totalEntities: entitiesData.meta.totalEntities,
+          totalAssessments,
+          totalResponses,
+          activeResponses, // Add active responses count
+          boundingBox,
         });
-        setConnectionStatus(data.meta.connectionStatus);
+        setConnectionStatus(entitiesData.meta.connectionStatus);
         setLastUpdated(new Date());
       }
     } catch (error) {
@@ -162,7 +221,7 @@ export default function InteractiveMap() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Interactive Mapping</h2>
           <p className="text-muted-foreground">
-            Geographic visualization of affected entities, assessments, and responses
+            Geographic visualization of affected entities with aggregated assessment and response counts
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -204,25 +263,25 @@ export default function InteractiveMap() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {mapData.entities.reduce((sum, entity) => sum + entity.assessmentCount, 0)}
+              {mapData.totalAssessments || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Assessments across all mapped locations
+              Total assessments across all entities
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Responses</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Responses</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {mapData.entities.reduce((sum, entity) => sum + entity.statusSummary.activeResponses, 0)}
+              {mapData.totalResponses || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Ongoing response activities
+              Total responses across all entities
             </p>
           </CardContent>
         </Card>
@@ -254,7 +313,7 @@ export default function InteractiveMap() {
             Map Layer Controls
           </CardTitle>
           <CardDescription>
-            Toggle visibility of different data layers on the map
+            Toggle visibility of entity markers. Assessment and response counts are displayed as badges on entity markers.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -266,7 +325,7 @@ export default function InteractiveMap() {
               className="flex items-center gap-2"
             >
               <MapPin className="h-4 w-4" />
-              Entities ({mapData.totalEntities})
+              Entity Markers ({mapData.totalEntities})
             </Button>
             <Button
               variant={layerVisibility.assessments ? "default" : "outline"}
@@ -275,7 +334,7 @@ export default function InteractiveMap() {
               className="flex items-center gap-2"
             >
               <BarChart3 className="h-4 w-4" />
-              Assessments
+              Assessment Counts ({mapData.totalAssessments || 0})
             </Button>
             <Button
               variant={layerVisibility.responses ? "default" : "outline"}
@@ -284,7 +343,7 @@ export default function InteractiveMap() {
               className="flex items-center gap-2"
             >
               <Activity className="h-4 w-4" />
-              Responses
+              Response Counts ({mapData.totalResponses || 0})
             </Button>
           </div>
         </CardContent>
@@ -298,14 +357,11 @@ export default function InteractiveMap() {
             Geographic Visualization
           </CardTitle>
           <CardDescription>
-            Interactive map showing affected entities, assessments, and response activities
+            Interactive map showing affected entities with assessment and response counts displayed as badges
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <MapWrapper 
-            layerVisibility={layerVisibility}
-            mapData={mapData}
-          />
+          <LeafletMap mapData={mapData} layerVisibility={layerVisibility} />
         </CardContent>
       </Card>
 
