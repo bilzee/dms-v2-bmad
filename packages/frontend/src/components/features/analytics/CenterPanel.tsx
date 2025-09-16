@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { EntitySelector } from './EntitySelector';
 import { AssessmentAreaBreakdown } from './AssessmentAreaBreakdown';
 import { AreaSelectionManager } from './AreaSelectionManager';
+import { UpdateIndicator } from './UpdateIndicator';
+import { RealtimeConnection } from './realtime/RealtimeConnection';
 import dynamic from 'next/dynamic';
 import { useAnalyticsStore } from '@/stores/analytics.store';
 
@@ -91,13 +93,20 @@ export function CenterPanel({}: CenterPanelProps) {
   const hasSpaceConstraint = ALL_ASSESSMENT_AREAS.length > maxDisplayAreas;
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Assessment Area Breakdown</CardTitle>
-        <CardDescription>
-          Assessment areas with latest data and gap analysis for selected entities
-        </CardDescription>
-      </CardHeader>
+    <>
+      <RealtimeConnection autoConnect={true} />
+      <Card className="h-full">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Assessment Area Breakdown</CardTitle>
+              <CardDescription>
+                Assessment areas with latest data and gap analysis for selected entities
+              </CardDescription>
+            </div>
+            <UpdateIndicator showDetails={false} />
+          </div>
+        </CardHeader>
       <CardContent className="h-[calc(100%-120px)] overflow-y-auto">
         <div className="space-y-4">
           {/* Entity Selection */}
@@ -149,5 +158,6 @@ export function CenterPanel({}: CenterPanelProps) {
         </div>
       </CardContent>
     </Card>
+    </>
   );
 }
