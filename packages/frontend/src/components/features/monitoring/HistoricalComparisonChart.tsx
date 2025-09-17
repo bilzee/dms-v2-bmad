@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,10 +37,14 @@ export function HistoricalComparisonChart({
   const [trends, setTrends] = useState<TrendData[]>([]);
   const [analytics, setAnalytics] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
   const [chartType, setChartType] = useState<'line' | 'area'>('line');
+  const hasInitializedMetrics = useRef(false);
 
-  const fetchHistoricalData = async () => {
+  const fetchHistoricalData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const searchParams = new URLSearchParams();
       searchParams.append('timeRange', timeRange);
@@ -48,8 +52,17 @@ export function HistoricalComparisonChart({
         searchParams.append('metricTypes', metricTypes.join(','));
       }
       
+      console.log(`Fetching historical data for ${dataType} with params:`, searchParams.toString());
+      
       const response = await fetch(`/api/v1/monitoring/historical/${dataType}?${searchParams}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      
+      console.log(`Historical data response for ${dataType}:`, data);
       
       if (data.success) {
         const formattedHistorical = data.data.historical.map((item: any) => ({
@@ -66,22 +79,28 @@ export function HistoricalComparisonChart({
         setTrends(data.data.trends);
         setAnalytics(data.data.analytics);
         
-        // Auto-select first few metrics for display
-        if (formattedCurrent && selectedMetrics.length === 0) {
+        // Auto-select first few metrics for display (only once)
+        if (formattedCurrent && selectedMetrics.length === 0 && !hasInitializedMetrics.current) {
           const availableMetrics = Object.keys(formattedCurrent.metrics);
-          setSelectedMetrics(availableMetrics.slice(0, 3)); // Show first 3 metrics
+          if (availableMetrics.length > 0) {
+            setSelectedMetrics(availableMetrics.slice(0, Math.min(3, availableMetrics.length)));
+            hasInitializedMetrics.current = true;
+          }
         }
+      } else {
+        setError(data.message || 'Failed to fetch historical data');
       }
     } catch (error) {
       console.error('Failed to fetch historical data:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [dataType, timeRange, JSON.stringify(metricTypes)]);
 
   useEffect(() => {
     fetchHistoricalData();
-  }, [dataType, timeRange, metricTypes]);
+  }, [fetchHistoricalData]);
 
   const getTrendIcon = (direction: string) => {
     switch (direction) {
@@ -123,7 +142,7 @@ export function HistoricalComparisonChart({
 
   if (isLoading) {
     return (
-      <Card>
+      <Card data-testid="historical-comparison-loading">
         <CardHeader>
           <CardTitle>Historical Comparison</CardTitle>
           <CardDescription>Loading historical trend data...</CardDescription>
@@ -137,8 +156,28 @@ export function HistoricalComparisonChart({
     );
   }
 
+  if (error) {
+    return (
+      <Card data-testid="historical-comparison-error">
+        <CardHeader>
+          <CardTitle>Historical Comparison</CardTitle>
+          <CardDescription>Error loading data</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center p-4">
+            <p className="text-red-600 mb-2">Failed to load historical data</p>
+            <p className="text-sm text-gray-600 mb-4">{error}</p>
+            <Button variant="outline" onClick={fetchHistoricalData}>
+              Retry
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card>
+    <Card data-testid="historical-comparison-chart">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
