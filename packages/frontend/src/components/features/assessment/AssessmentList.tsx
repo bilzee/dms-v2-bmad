@@ -10,7 +10,7 @@ import { AssessmentCard } from './AssessmentCard';
 
 interface AssessmentListProps {
   onAssessmentSelect?: (assessment: RapidAssessment) => void;
-  onNewAssessment?: (type: AssessmentType) => void;
+  onNewAssessment?: (type: AssessmentType | null) => void;
   showDrafts?: boolean;
 }
 
@@ -112,14 +112,20 @@ export const AssessmentList: React.FC<AssessmentListProps> = ({
             <div className="relative">
               <select
                 onChange={(e) => {
-                  const type = e.target.value as AssessmentType;
-                  if (type) onNewAssessment(type);
+                  const value = e.target.value;
+                  if (value === 'SELECT_TYPE') {
+                    onNewAssessment(null);
+                  } else {
+                    const type = value as AssessmentType;
+                    if (type) onNewAssessment(type);
+                  }
                   e.target.value = '';
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-md bg-white"
                 defaultValue=""
               >
                 <option value="" disabled>New Assessment</option>
+                <option value="SELECT_TYPE">Select Assessment Type...</option>
                 <option value={AssessmentType.PRELIMINARY}>Preliminary (Emergency)</option>
                 <option value={AssessmentType.HEALTH}>Health</option>
                 <option value={AssessmentType.WASH}>WASH</option>
@@ -195,7 +201,7 @@ export const AssessmentList: React.FC<AssessmentListProps> = ({
             {showDrafts ? 'No draft assessments found' : 'No assessments found'}
           </div>
           {onNewAssessment && (
-            <Button onClick={() => onNewAssessment(AssessmentType.HEALTH)}>
+            <Button onClick={() => onNewAssessment(null as any)}>
               Create Your First Assessment
             </Button>
           )}
