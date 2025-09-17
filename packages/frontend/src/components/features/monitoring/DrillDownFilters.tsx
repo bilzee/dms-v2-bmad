@@ -48,24 +48,59 @@ export function DrillDownFilters({
     initialFilters.timeframe?.end ? new Date(initialFilters.timeframe.end) : undefined
   );
   const [isOpen, setIsOpen] = useState(false);
+  const [incidents, setIncidents] = useState<{ id: string; name: string }[]>([]);
+  const [entities, setEntities] = useState<{ id: string; name: string }[]>([]);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
-  // Mock options - would be fetched from APIs
-  const mockIncidents = [
-    { id: 'INC-001', name: 'Flood Incident 1' },
-    { id: 'INC-002', name: 'Fire Incident 2' },
-    { id: 'INC-003', name: 'Landslide Incident 3' },
-  ];
+  // Fetch incidents and entities for filter options
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      setIsLoadingOptions(true);
+      try {
+        // Fetch incidents
+        const incidentsResponse = await fetch('/api/v1/incidents');
+        if (incidentsResponse.ok) {
+          const incidentsData = await incidentsResponse.json();
+          if (incidentsData.success && incidentsData.data.incidents) {
+            setIncidents(incidentsData.data.incidents.map((incident: any) => ({
+              id: incident.id,
+              name: incident.name
+            })));
+          }
+        }
 
-  const mockEntities = [
-    { id: 'ENT-001', name: 'Camp 1' },
-    { id: 'ENT-002', name: 'Community 2' },
-    { id: 'ENT-003', name: 'Camp 3' },
-  ];
+        // Fetch entities from assessments data
+        const assessmentsResponse = await fetch('/api/v1/monitoring/drill-down/assessments');
+        if (assessmentsResponse.ok) {
+          const assessmentsData = await assessmentsResponse.json();
+          if (assessmentsData.success) {
+            // Extract unique entities from assessments
+            const uniqueEntities = assessmentsData.data.reduce((acc: any[], assessment: any) => {
+              if (!acc.find(e => e.name === assessment.entityName)) {
+                acc.push({
+                  id: assessment.entityName, // Use name as ID since we don't have entity IDs
+                  name: assessment.entityName
+                });
+              }
+              return acc;
+            }, []);
+            setEntities(uniqueEntities);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch filter options:', error);
+      } finally {
+        setIsLoadingOptions(false);
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
 
   const getDataTypeOptions = (type: string) => {
     switch (type) {
       case 'assessments':
-        return ['GENERAL', 'SHELTER', 'HEALTHCARE', 'EDUCATION', 'WASH', 'LIVELIHOOD'];
+        return ['POPULATION', 'SHELTER', 'HEALTH', 'WASH', 'FOOD', 'SECURITY'];
       case 'responses':
         return ['SUPPLIES', 'SHELTER', 'MEDICAL', 'EVACUATION', 'SECURITY', 'OTHER'];
       case 'incidents':
@@ -80,7 +115,7 @@ export function DrillDownFilters({
   const getStatusOptions = (type: string) => {
     switch (type) {
       case 'assessments':
-        return ['PENDING', 'VERIFIED', 'AUTO_VERIFIED', 'REJECTED'];
+        return []; // No verification status field in database currently
       case 'responses':
         return ['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
       case 'incidents':
@@ -196,7 +231,7 @@ export function DrillDownFilters({
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={clearAllFilters}>
+            <Button variant="outline" size="sm" onClick={clearAllFilters} data-testid="clear-all-filters">
               <RotateCcw className="h-4 w-4 mr-1" />
               Clear All
             </Button>
@@ -204,6 +239,7 @@ export function DrillDownFilters({
               variant="outline" 
               size="sm" 
               onClick={() => setIsOpen(!isOpen)}
+              data-testid="toggle-filters"
             >
               <Filter className="h-4 w-4 mr-1" />
               {isOpen ? 'Hide' : 'Show'} Filters
@@ -216,7 +252,8 @@ export function DrillDownFilters({
         <CardContent>
           <div className="space-y-6">
             {/* Incident Filter */}
-            <div className="space-y-2">
+            {/* Incident Filter */}
+            <div className="space-y-2" data-testid="incident-filter-container">
               <Label>Filter by Incident</Label>
               <Select 
                 value="" 
@@ -225,12 +262,13 @@ export function DrillDownFilters({
                     updateFilters({ incidentIds: [...filters.incidentIds, value] });
                   }
                 }}
+                disabled={isLoadingOptions}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select incidents..." />
+                <SelectTrigger data-testid="incident-filter">
+                  <SelectValue placeholder={isLoadingOptions ? "Loading..." : "Select incidents..."} />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockIncidents.map((incident) => (
+                  {incidents.map((incident) => (
                     <SelectItem key={incident.id} value={incident.id}>
                       {incident.name}
                     </SelectItem>
@@ -240,7 +278,7 @@ export function DrillDownFilters({
             </div>
 
             {/* Entity Filter */}
-            <div className="space-y-2">
+            <div className="space-y-2" data-testid="entity-filter-container">
               <Label>Filter by Entity</Label>
               <Select 
                 value="" 
@@ -249,12 +287,13 @@ export function DrillDownFilters({
                     updateFilters({ entityIds: [...filters.entityIds, value] });
                   }
                 }}
+                disabled={isLoadingOptions}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select entities..." />
+                <SelectTrigger data-testid="entity-filter">
+                  <SelectValue placeholder={isLoadingOptions ? "Loading..." : "Select entities..."} />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockEntities.map((entity) => (
+                  {entities.map((entity) => (
                     <SelectItem key={entity.id} value={entity.id}>
                       {entity.name}
                     </SelectItem>
@@ -264,12 +303,12 @@ export function DrillDownFilters({
             </div>
 
             {/* Date Range Filter */}
-            <div className="space-y-2">
+            <div className="space-y-2" data-testid="date-range-filter-container">
               <Label>Date Range</Label>
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" data-testid="date-start-button">
                       <CalendarIcon className="h-4 w-4 mr-2" />
                       {startDate ? format(startDate, 'MMM dd, yyyy') : 'Start date'}
                     </Button>
@@ -286,7 +325,7 @@ export function DrillDownFilters({
                 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" data-testid="date-end-button">
                       <CalendarIcon className="h-4 w-4 mr-2" />
                       {endDate ? format(endDate, 'MMM dd, yyyy') : 'End date'}
                     </Button>
@@ -311,6 +350,7 @@ export function DrillDownFilters({
                   <div key={type} className="flex items-center space-x-2">
                     <Checkbox
                       id={type}
+                      data-testid={`type-filter-${type}`}
                       checked={filters.dataTypes.includes(type)}
                       onCheckedChange={(checked) => {
                         if (checked) {
