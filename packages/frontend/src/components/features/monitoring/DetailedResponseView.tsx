@@ -22,6 +22,8 @@ interface DrillDownResponseData {
   deliveryItems: { item: string; quantity: number; unit: string }[];
   evidenceCount: number;
   verificationStatus: string;
+  incidentId?: string | null;
+  incidentName?: string | null;
 }
 
 interface DetailedResponseViewProps {
@@ -47,6 +49,38 @@ export function DetailedResponseView({
   const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [incidents, setIncidents] = useState<{ id: string; name: string }[]>([]);
+  const [entities, setEntities] = useState<{ id: string; name: string }[]>([]);
+
+  const fetchFilterOptions = async () => {
+    try {
+      // Fetch incidents
+      const incidentsResponse = await fetch('/api/v1/incidents');
+      if (incidentsResponse.ok) {
+        const incidentsData = await incidentsResponse.json();
+        if (incidentsData.success && incidentsData.data.incidents) {
+          setIncidents(incidentsData.data.incidents.map((incident: any) => ({
+            id: incident.id,
+            name: incident.name
+          })));
+        }
+      }
+
+      // Fetch entities 
+      const entitiesResponse = await fetch('/api/v1/entities');
+      if (entitiesResponse.ok) {
+        const entitiesData = await entitiesResponse.json();
+        if (entitiesData.success && entitiesData.data) {
+          setEntities(entitiesData.data.map((entity: any) => ({
+            id: entity.id,
+            name: entity.name
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch filter options:', error);
+    }
+  };
 
   const fetchDetailedResponses = async () => {
     try {
@@ -91,8 +125,19 @@ export function DetailedResponseView({
   };
 
   useEffect(() => {
+    fetchFilterOptions();
     fetchDetailedResponses();
   }, [filters, currentPage]);
+
+  const getIncidentNameById = (id: string) => {
+    const incident = incidents.find(inc => inc.id === id);
+    return incident?.name || id;
+  };
+
+  const getEntityNameById = (id: string) => {
+    const entity = entities.find(ent => ent.id === id);
+    return entity?.name || id;
+  };
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -242,6 +287,43 @@ export function DetailedResponseView({
       
       <CardContent>
         <div className="space-y-6">
+          {/* Active Filters Display */}
+          {Object.keys(filters).some(key => {
+            const value = filters[key as keyof typeof filters];
+            return Array.isArray(value) ? value.length > 0 : value;
+          }) && (
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <h4 className="font-medium text-sm text-green-800 mb-2">Active Filters Applied:</h4>
+              <div className="flex flex-wrap gap-2">
+                {filters.incidentIds?.map(id => (
+                  <Badge key={id} variant="secondary" className="text-xs bg-green-100 text-green-800">
+                    Incident: {getIncidentNameById(id)}
+                  </Badge>
+                ))}
+                {filters.entityIds?.map(id => (
+                  <Badge key={id} variant="secondary" className="text-xs bg-green-100 text-green-800">
+                    Entity: {getEntityNameById(id)}
+                  </Badge>
+                ))}
+                {filters.responseTypes?.map(type => (
+                  <Badge key={type} variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                    Type: {type}
+                  </Badge>
+                ))}
+                {filters.status?.map(status => (
+                  <Badge key={status} variant="secondary" className="text-xs bg-purple-100 text-purple-800">
+                    Status: {status}
+                  </Badge>
+                ))}
+                {filters.timeframe && (
+                  <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
+                    Date Range: {new Date(filters.timeframe.start).toLocaleDateString()} - {new Date(filters.timeframe.end).toLocaleDateString()}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Summary Statistics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-3 border rounded-lg bg-blue-50">
@@ -323,6 +405,13 @@ export function DetailedResponseView({
                           <Package className="h-4 w-4 text-muted-foreground" />
                           <span className="text-muted-foreground">Donor:</span>
                           <span className="font-medium">{response.donorName}</span>
+                        </div>
+                      )}
+                      {response.incidentName && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Incident:</span>
+                          <span className="font-medium">{response.incidentName}</span>
                         </div>
                       )}
                     </div>

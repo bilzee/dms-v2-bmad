@@ -185,11 +185,6 @@ const generateHistoricalComparison = async (type: string, filters: any = {}) => 
             select: {
               rapidAssessmentDate: true
             }
-          },
-          rapidResponses: {
-            select: {
-              plannedDate: true
-            }
           }
         }
       });
@@ -210,12 +205,7 @@ const generateHistoricalComparison = async (type: string, filters: any = {}) => 
           return assessmentDay >= startDate.toISOString().split('T')[0];
         });
         
-        const hasResponseActivity = entity.rapidResponses.some(response => {
-          const responseDay = response.plannedDate.toISOString().split('T')[0];
-          return responseDay >= startDate.toISOString().split('T')[0];
-        });
-        
-        if (hasAssessmentActivity || hasResponseActivity) {
+        if (hasAssessmentActivity) {
           dailyEntityData[creationDay].active++;
         }
       });

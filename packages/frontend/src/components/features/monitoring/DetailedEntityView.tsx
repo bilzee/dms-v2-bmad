@@ -49,6 +49,7 @@ interface DetailedEntityViewProps {
     entityIds?: string[];
     entityTypes?: string[];
     lgas?: string[];
+    incidentIds?: string[];
     activitySince?: string;
   };
   onDrillDown?: (entityId: string) => void;
@@ -66,6 +67,25 @@ export function DetailedEntityView({
   const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [incidents, setIncidents] = useState<{ id: string; name: string }[]>([]);
+
+  const fetchFilterOptions = async () => {
+    try {
+      // Fetch incidents
+      const incidentsResponse = await fetch('/api/v1/incidents');
+      if (incidentsResponse.ok) {
+        const incidentsData = await incidentsResponse.json();
+        if (incidentsData.success && incidentsData.data.incidents) {
+          setIncidents(incidentsData.data.incidents.map((incident: any) => ({
+            id: incident.id,
+            name: incident.name
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch filter options:', error);
+    }
+  };
 
   const fetchDetailedEntities = async () => {
     try {
@@ -79,6 +99,9 @@ export function DetailedEntityView({
       }
       if (filters.lgas?.length) {
         searchParams.append('lgas', filters.lgas.join(','));
+      }
+      if (filters.incidentIds?.length) {
+        searchParams.append('incidentIds', filters.incidentIds.join(','));
       }
       if (filters.activitySince) {
         searchParams.append('activitySince', filters.activitySince);
@@ -117,8 +140,14 @@ export function DetailedEntityView({
   };
 
   useEffect(() => {
+    fetchFilterOptions();
     fetchDetailedEntities();
   }, [filters, currentPage]);
+
+  const getIncidentNameById = (id: string) => {
+    const incident = incidents.find(inc => inc.id === id);
+    return incident?.name || id;
+  };
 
   const getVerificationRate = (entity: DrillDownEntityData) => {
     if (entity.activitySummary.totalAssessments === 0) return 0;
@@ -200,6 +229,43 @@ export function DetailedEntityView({
       
       <CardContent>
         <div className="space-y-6">
+          {/* Active Filters Display */}
+          {Object.keys(filters).some(key => {
+            const value = filters[key as keyof typeof filters];
+            return Array.isArray(value) ? value.length > 0 : value;
+          }) && (
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+              <h4 className="font-medium text-sm text-purple-800 mb-2">Active Filters Applied:</h4>
+              <div className="flex flex-wrap gap-2">
+                {filters.entityIds?.map(id => (
+                  <Badge key={id} variant="secondary" className="text-xs bg-purple-100 text-purple-800">
+                    Entity: {id}
+                  </Badge>
+                ))}
+                {filters.entityTypes?.map(type => (
+                  <Badge key={type} variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                    Type: {type}
+                  </Badge>
+                ))}
+                {filters.lgas?.map(lga => (
+                  <Badge key={lga} variant="secondary" className="text-xs bg-green-100 text-green-800">
+                    LGA: {lga}
+                  </Badge>
+                ))}
+                {filters.incidentIds?.map(id => (
+                  <Badge key={id} variant="secondary" className="text-xs bg-red-100 text-red-800">
+                    Incident: {getIncidentNameById(id)}
+                  </Badge>
+                ))}
+                {filters.activitySince && (
+                  <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
+                    Activity Since: {new Date(filters.activitySince).toLocaleDateString()}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Summary Statistics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-3 border rounded-lg bg-blue-50">
