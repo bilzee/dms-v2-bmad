@@ -1,99 +1,135 @@
 import { NextRequest, NextResponse } from 'next/server';
+import DatabaseService from '@/lib/services/DatabaseService';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
-const incidentTypes = ['FLOOD', 'FIRE', 'LANDSLIDE', 'CYCLONE', 'CONFLICT', 'EPIDEMIC', 'OTHER'] as const;
-const severityLevels = ['MINOR', 'MODERATE', 'SEVERE', 'CATASTROPHIC'] as const;
-const statusLevels = ['ACTIVE', 'CONTAINED', 'RESOLVED'] as const;
+// Helper function to build where clause for incidents
+function buildIncidentWhereClause(filters: any) {
+  const where: any = {};
 
-// Mock detailed incident data generator
-const generateDetailedIncidents = (filters: any = {}) => {
-  const incidents = [];
-  const count = Math.floor(Math.random() * 10) + 5; // 5-15 incidents
-  
-  for (let i = 0; i < count; i++) {
-    const type = incidentTypes[Math.floor(Math.random() * incidentTypes.length)];
-    const severity = severityLevels[Math.floor(Math.random() * severityLevels.length)];
-    const status = statusLevels[Math.floor(Math.random() * statusLevels.length)];
-    const startDate = new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000); // Last 60 days
-    
-    const assessmentCount = Math.floor(Math.random() * 50) + 10;
-    const responseCount = Math.floor(Math.random() * 40) + 5;
-    const affectedEntityCount = Math.floor(Math.random() * 20) + 3;
-    
-    // Generate historical timeline data (last 30 days)
-    const timelineData = [];
-    for (let day = 29; day >= 0; day--) {
-      const date = new Date(Date.now() - day * 24 * 60 * 60 * 1000);
-      timelineData.push({
-        date,
-        assessments: Math.floor(Math.random() * 5),
-        responses: Math.floor(Math.random() * 3),
-      });
-    }
-    
-    const incident = {
-      id: `INC-${String(i + 1).padStart(3, '0')}`,
-      name: `${type.charAt(0) + type.slice(1).toLowerCase()} Incident ${i + 1}`,
-      type,
-      severity,
-      status,
-      date: startDate,
-      assessmentCount,
-      responseCount,
-      affectedEntityCount,
-      verificationProgress: {
-        assessments: {
-          pending: Math.floor(assessmentCount * 0.2),
-          verified: Math.floor(assessmentCount * 0.7),
-          rejected: Math.floor(assessmentCount * 0.1),
-        },
-        responses: {
-          pending: Math.floor(responseCount * 0.15),
-          verified: Math.floor(responseCount * 0.8),
-          rejected: Math.floor(responseCount * 0.05),
-        },
-      },
-      timelineData,
+  if (filters.incidentIds && filters.incidentIds.length > 0) {
+    where.id = { in: filters.incidentIds };
+  }
+
+  if (filters.types && filters.types.length > 0) {
+    where.type = { in: filters.types };
+  }
+
+  if (filters.severities && filters.severities.length > 0) {
+    where.severity = { in: filters.severities };
+  }
+
+  if (filters.statuses && filters.statuses.length > 0) {
+    where.status = { in: filters.statuses };
+  }
+
+  if (filters.timeframe) {
+    where.date = {
+      gte: new Date(filters.timeframe.start),
+      lte: new Date(filters.timeframe.end)
     };
+  }
+
+  return where;
+}
+
+// Helper function to generate timeline data for an incident
+async function generateTimelineData(incidentId: string, days: number = 30) {
+  const timelineData = [];
+  
+  // Get affected entities for this incident
+  const affectedEntities = await DatabaseService.prisma.affectedEntity.findMany({
+    where: { incidentId },
+    select: { id: true }
+  });
+  
+  const affectedEntityIds = affectedEntities.map(e => e.id);
+  
+  for (let day = days - 1; day >= 0; day--) {
+    const date = new Date(Date.now() - day * 24 * 60 * 60 * 1000);
+    const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
     
-    // Apply filters
-    if (filters.incidentIds && filters.incidentIds.length > 0) {
-      if (!filters.incidentIds.includes(incident.id)) {
-        continue;
-      }
-    }
+    const [assessments, responses] = await Promise.all([
+      DatabaseService.prisma.rapidAssessment.count({
+        where: {
+          affectedEntityId: { in: affectedEntityIds },
+          rapidAssessmentDate: {
+            gte: date,
+            lt: nextDate
+          }
+        }
+      }),
+      DatabaseService.prisma.rapidResponse.count({
+        where: {
+          affectedEntityId: { in: affectedEntityIds },
+          plannedDate: {
+            gte: date,
+            lt: nextDate
+          }
+        }
+      })
+    ]);
     
-    if (filters.types && filters.types.length > 0) {
-      if (!filters.types.includes(incident.type)) {
-        continue;
-      }
-    }
-    
-    if (filters.severities && filters.severities.length > 0) {
-      if (!filters.severities.includes(incident.severity)) {
-        continue;
-      }
-    }
-    
-    if (filters.statuses && filters.statuses.length > 0) {
-      if (!filters.statuses.includes(incident.status)) {
-        continue;
-      }
-    }
-    
-    if (filters.timeframe) {
-      const incidentDate = new Date(incident.date);
-      if (incidentDate < new Date(filters.timeframe.start) || incidentDate > new Date(filters.timeframe.end)) {
-        continue;
-      }
-    }
-    
-    incidents.push(incident);
+    timelineData.push({
+      date,
+      assessments,
+      responses
+    });
   }
   
-  return incidents;
-};
+  return timelineData;
+}
+
+// Helper function to extract incident verification progress
+async function getVerificationProgress(incidentId: string) {
+  // Get affected entities for this incident
+  const affectedEntities = await DatabaseService.prisma.affectedEntity.findMany({
+    where: { incidentId },
+    select: { id: true }
+  });
+  
+  const affectedEntityIds = affectedEntities.map(e => e.id);
+
+  const [
+    assessmentStats,
+    responseStats
+  ] = await Promise.all([
+    // Assessment verification stats - note: assessments don't have verification status in schema
+    DatabaseService.prisma.rapidAssessment.count({
+      where: {
+        affectedEntityId: { in: affectedEntityIds }
+      }
+    }),
+    // Response verification stats
+    DatabaseService.prisma.rapidResponse.groupBy({
+      by: ['verificationStatus'],
+      where: {
+        affectedEntityId: { in: affectedEntityIds }
+      },
+      _count: { verificationStatus: true }
+    })
+  ]);
+
+  const responseVerification = responseStats.reduce((acc, stat) => {
+    acc[stat.verificationStatus.toLowerCase()] = stat._count.verificationStatus;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return {
+    assessments: {
+      total: assessmentStats,
+      // Assessments don't have verification status in current schema
+      pending: 0,
+      verified: assessmentStats,
+      rejected: 0,
+    },
+    responses: {
+      pending: responseVerification.pending || 0,
+      verified: (responseVerification.verified || 0) + (responseVerification.auto_verified || 0),
+      rejected: responseVerification.rejected || 0,
+    },
+  };
+}
 
 // GET /api/v1/monitoring/drill-down/incidents - Get incident drill-down data with historical trends
 export async function GET(request: NextRequest) {
@@ -121,41 +157,92 @@ export async function GET(request: NextRequest) {
       } : undefined,
     };
     
-    const allIncidents = generateDetailedIncidents(filters);
+    const where = buildIncidentWhereClause(filters);
     
-    // Pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedIncidents = allIncidents.slice(startIndex, endIndex);
+    // Get incidents with related data from database
+    const incidents = await DatabaseService.prisma.incident.findMany({
+      where,
+      include: {
+        affectedEntities: true
+      },
+      orderBy: {
+        date: 'desc'
+      },
+      skip: (page - 1) * limit,
+      take: limit
+    });
+
+    // Get total count for pagination
+    const totalRecords = await DatabaseService.prisma.incident.count({ where });
     
+    // Transform incidents to expected format with additional data
+    const transformedIncidents = await Promise.all(incidents.map(async (incident) => {
+      // Get real counts for this incident
+      const affectedEntityIds = incident.affectedEntities.map(e => e.id);
+      
+      const [assessmentCount, responseCount] = await Promise.all([
+        DatabaseService.prisma.rapidAssessment.count({
+          where: {
+            affectedEntityId: { in: affectedEntityIds }
+          }
+        }),
+        DatabaseService.prisma.rapidResponse.count({
+          where: {
+            affectedEntityId: { in: affectedEntityIds }
+          }
+        })
+      ]);
+      
+      // Get location from affected entities (average coordinates)
+      const entities = incident.affectedEntities;
+      let location = { latitude: 0, longitude: 0 };
+      
+      if (entities.length > 0) {
+        const validEntities = entities.filter(e => e.latitude !== null && e.longitude !== null);
+        if (validEntities.length > 0) {
+          location = {
+            latitude: validEntities.reduce((sum, e) => sum + e.latitude, 0) / validEntities.length,
+            longitude: validEntities.reduce((sum, e) => sum + e.longitude, 0) / validEntities.length
+          };
+        }
+      }
+      
+      const [timelineData, verificationProgress] = await Promise.all([
+        generateTimelineData(incident.id),
+        getVerificationProgress(incident.id)
+      ]);
+      
+      return {
+        id: incident.id,
+        name: incident.name,
+        type: incident.type,
+        severity: incident.severity,
+        status: incident.status,
+        date: incident.date,
+        assessmentCount,
+        responseCount,
+        affectedEntityCount: incident.affectedEntities.length,
+        verificationProgress,
+        timelineData,
+        location,
+        // Add additional fields from schema
+        subType: incident.subType,
+        source: incident.source,
+      };
+    }));
+
     // Generate aggregations
-    const aggregations = {
-      byType: incidentTypes.reduce((acc, type) => {
-        acc[type] = allIncidents.filter(i => i.type === type).length;
-        return acc;
-      }, {} as Record<string, number>),
-      bySeverity: severityLevels.reduce((acc, severity) => {
-        acc[severity] = allIncidents.filter(i => i.severity === severity).length;
-        return acc;
-      }, {} as Record<string, number>),
-      byStatus: statusLevels.reduce((acc, status) => {
-        acc[status] = allIncidents.filter(i => i.status === status).length;
-        return acc;
-      }, {} as Record<string, number>),
-      totalAssessments: allIncidents.reduce((sum, i) => sum + i.assessmentCount, 0),
-      totalResponses: allIncidents.reduce((sum, i) => sum + i.responseCount, 0),
-      totalEntities: allIncidents.reduce((sum, i) => sum + i.affectedEntityCount, 0),
-    };
+    const aggregations = await DatabaseService.getIncidentAggregations(where);
     
     const response = {
       success: true,
-      data: paginatedIncidents,
+      data: transformedIncidents,
       meta: {
         filters,
-        totalRecords: allIncidents.length,
+        totalRecords,
         page,
         limit,
-        totalPages: Math.ceil(allIncidents.length / limit),
+        totalPages: Math.ceil(totalRecords / limit),
         aggregations,
         exportToken: `export-incidents-${Date.now()}`,
         lastUpdate: new Date().toISOString(),

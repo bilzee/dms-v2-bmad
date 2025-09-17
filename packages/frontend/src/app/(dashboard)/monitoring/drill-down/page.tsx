@@ -128,7 +128,7 @@ export default function DrillDownPage() {
   };
 
   return (
-    <div className="flex-1 space-y-4 p-4 pt-6">
+    <div className="flex-1 space-y-4 p-4 pt-6" data-testid="drill-down-page">
       <div className="flex items-center justify-between space-y-2">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => router.back()}>
@@ -178,7 +178,7 @@ export default function DrillDownPage() {
           />
           <HistoricalComparisonChart 
             dataType="assessments"
-            timeRange="30d"
+            timeRange="3m"
             onMetricSelect={(metric) => console.log('Selected metric:', metric)}
           />
         </TabsContent>
@@ -191,7 +191,7 @@ export default function DrillDownPage() {
           />
           <HistoricalComparisonChart 
             dataType="responses"
-            timeRange="30d"
+            timeRange="3m"
             onMetricSelect={(metric) => console.log('Selected metric:', metric)}
           />
         </TabsContent>
@@ -212,7 +212,7 @@ export default function DrillDownPage() {
           />
           <HistoricalComparisonChart 
             dataType="entities"
-            timeRange="30d"
+            timeRange="3m"
             onMetricSelect={(metric) => console.log('Selected metric:', metric)}
           />
         </TabsContent>

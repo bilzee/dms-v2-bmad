@@ -28,6 +28,7 @@ export const authConfig = {
 
         // Development test users for all roles
         const testUsers = [
+          // Original test users
           {
             email: "admin@test.com",
             password: "admin123",
@@ -75,6 +76,57 @@ export const authConfig = {
             password: "superuser123",
             id: "superuser-user-id",
             name: "Super User (Multi-Role)",
+            role: "ADMIN", // Primary role
+            allRoles: ["ADMIN", "COORDINATOR", "ASSESSOR", "RESPONDER", "VERIFIER", "DONOR"]
+          },
+          // Alternative test users with -alt suffix (created in database)
+          {
+            email: "admin-alt@test.com",
+            password: "admin123",
+            id: "admin-user-id-alt",
+            name: "Test Admin (Alt)",
+            role: "ADMIN"
+          },
+          {
+            email: "assessor-alt@test.com", 
+            password: "assessor123",
+            id: "assessor-user-id-alt",
+            name: "Test Assessor (Alt)",
+            role: "ASSESSOR"
+          },
+          {
+            email: "responder-alt@test.com",
+            password: "responder123", 
+            id: "responder-user-id-alt",
+            name: "Test Responder (Alt)",
+            role: "RESPONDER"
+          },
+          {
+            email: "coordinator-alt@test.com",
+            password: "coordinator123",
+            id: "coordinator-user-id-alt", 
+            name: "Test Coordinator (Alt)",
+            role: "COORDINATOR"
+          },
+          {
+            email: "verifier-alt@test.com",
+            password: "verifier123",
+            id: "verifier-user-id-alt",
+            name: "Test Verifier (Alt)", 
+            role: "VERIFIER"
+          },
+          {
+            email: "donor-alt@test.com",
+            password: "donor123",
+            id: "donor-user-id-alt",
+            name: "Test Donor (Alt)",
+            role: "DONOR"
+          },
+          {
+            email: "superuser-alt@test.com", 
+            password: "superuser123",
+            id: "superuser-user-id-alt",
+            name: "Super User (Multi-Role) (Alt)",
             role: "ADMIN", // Primary role
             allRoles: ["ADMIN", "COORDINATOR", "ASSESSOR", "RESPONDER", "VERIFIER", "DONOR"]
           }

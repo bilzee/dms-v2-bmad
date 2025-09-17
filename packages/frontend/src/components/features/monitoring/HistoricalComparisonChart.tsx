@@ -21,14 +21,14 @@ interface TrendData {
 
 interface HistoricalComparisonChartProps {
   dataType: 'assessments' | 'responses' | 'incidents' | 'entities';
-  timeRange?: '7d' | '30d' | '90d';
+  timeRange?: '1w' | '3m' | '6m' | '9m' | '1y';
   metricTypes?: string[];
   onMetricSelect?: (metric: string) => void;
 }
 
 export function HistoricalComparisonChart({
   dataType,
-  timeRange = '30d',
+  timeRange = '3m',
   metricTypes = [],
   onMetricSelect,
 }: HistoricalComparisonChartProps) {
@@ -40,6 +40,7 @@ export function HistoricalComparisonChart({
   const [error, setError] = useState<string | null>(null);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>([]);
   const [chartType, setChartType] = useState<'line' | 'area'>('line');
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'1w' | '3m' | '6m' | '9m' | '1y'>(timeRange);
   const hasInitializedMetrics = useRef(false);
 
   const fetchHistoricalData = useCallback(async () => {
@@ -47,7 +48,7 @@ export function HistoricalComparisonChart({
     setError(null);
     try {
       const searchParams = new URLSearchParams();
-      searchParams.append('timeRange', timeRange);
+      searchParams.append('timeRange', selectedTimeRange);
       if (metricTypes.length > 0) {
         searchParams.append('metricTypes', metricTypes.join(','));
       }
@@ -96,11 +97,16 @@ export function HistoricalComparisonChart({
     } finally {
       setIsLoading(false);
     }
-  }, [dataType, timeRange, JSON.stringify(metricTypes)]);
+  }, [dataType, selectedTimeRange, JSON.stringify(metricTypes)]);
 
   useEffect(() => {
     fetchHistoricalData();
   }, [fetchHistoricalData]);
+
+  // Update selected time range when prop changes
+  useEffect(() => {
+    setSelectedTimeRange(timeRange);
+  }, [timeRange]);
 
   const getTrendIcon = (direction: string) => {
     switch (direction) {
@@ -190,6 +196,18 @@ export function HistoricalComparisonChart({
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            <Select value={selectedTimeRange} onValueChange={(value: '1w' | '3m' | '6m' | '9m' | '1y') => setSelectedTimeRange(value)}>
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1w">1w</SelectItem>
+                <SelectItem value="3m">3m</SelectItem>
+                <SelectItem value="6m">6m</SelectItem>
+                <SelectItem value="9m">9m</SelectItem>
+                <SelectItem value="1y">1y</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={chartType} onValueChange={(value: 'line' | 'area') => setChartType(value)}>
               <SelectTrigger className="w-24">
                 <SelectValue />

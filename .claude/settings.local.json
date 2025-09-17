@@ -130,7 +130,15 @@
       "Bash(pnpm --filter @dms/frontend test PerformanceMetrics.test.tsx UserActivityMonitor.test.tsx)",
       "Bash(netstat:*)",
       "Bash(ss:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(taskkill:*)",
+      "Bash(BASE_URL=http://localhost:3001 npx playwright test:*)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3001 npx playwright test src/e2e/__tests__/story-6.2-interactive-mapping.e2e.test.ts --headed)",
+      "Bash(sc query:*)",
+      "Bash(net start:*)",
+      "Bash(where:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "additionalDirectories": [

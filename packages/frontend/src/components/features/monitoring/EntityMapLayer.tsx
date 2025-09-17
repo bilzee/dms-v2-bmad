@@ -84,6 +84,14 @@ export function EntityMapLayer({
         const L = await import('leaflet');
         const iconMap = new Map();
         
+        // Fix default Leaflet icon issue
+        delete L.Icon.Default.prototype._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        });
+        
         entities.forEach(entity => {
           const totalActivity = entity.assessmentCount + entity.responseCount;
           const activeActivity = entity.statusSummary.pendingAssessments + entity.statusSummary.activeResponses;

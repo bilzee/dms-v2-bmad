@@ -20,7 +20,7 @@ export async function GET(
     const entity = await prisma.affectedEntity.findUnique({
       where: { id: params.id },
       include: {
-        assessments: true, // Include related assessments
+        rapidAssessments: true, // Include related assessments
       },
     });
 

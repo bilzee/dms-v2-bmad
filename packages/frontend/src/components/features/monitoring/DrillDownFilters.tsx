@@ -102,7 +102,7 @@ export function DrillDownFilters({
       case 'assessments':
         return ['POPULATION', 'SHELTER', 'HEALTH', 'WASH', 'FOOD', 'SECURITY'];
       case 'responses':
-        return ['SUPPLIES', 'SHELTER', 'MEDICAL', 'EVACUATION', 'SECURITY', 'OTHER'];
+        return ['POPULATION', 'SHELTER', 'HEALTH', 'WASH', 'FOOD', 'SECURITY'];
       case 'incidents':
         return ['FLOOD', 'FIRE', 'LANDSLIDE', 'CYCLONE', 'CONFLICT', 'EPIDEMIC', 'OTHER'];
       case 'entities':
@@ -115,9 +115,9 @@ export function DrillDownFilters({
   const getStatusOptions = (type: string) => {
     switch (type) {
       case 'assessments':
-        return []; // No verification status field in database currently
+        return ['VERIFIED', 'PENDING', 'REJECTED', 'AUTO_VERIFIED']; // Use verification status for assessments
       case 'responses':
-        return ['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+        return ['VERIFIED', 'PENDING', 'REJECTED', 'AUTO_VERIFIED']; // Use verification status for responses
       case 'incidents':
         return ['ACTIVE', 'CONTAINED', 'RESOLVED'];
       case 'entities':
@@ -277,30 +277,32 @@ export function DrillDownFilters({
               </Select>
             </div>
 
-            {/* Entity Filter */}
-            <div className="space-y-2" data-testid="entity-filter-container">
-              <Label>Filter by Entity</Label>
-              <Select 
-                value="" 
-                onValueChange={(value) => {
-                  if (value && !filters.entityIds.includes(value)) {
-                    updateFilters({ entityIds: [...filters.entityIds, value] });
-                  }
-                }}
-                disabled={isLoadingOptions}
-              >
-                <SelectTrigger data-testid="entity-filter">
-                  <SelectValue placeholder={isLoadingOptions ? "Loading..." : "Select entities..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {entities.map((entity) => (
-                    <SelectItem key={entity.id} value={entity.id}>
-                      {entity.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Entity Filter - Hide for incidents */}
+            {dataType !== 'incidents' && (
+              <div className="space-y-2" data-testid="entity-filter-container">
+                <Label>Filter by Entity</Label>
+                <Select 
+                  value="" 
+                  onValueChange={(value) => {
+                    if (value && !filters.entityIds.includes(value)) {
+                      updateFilters({ entityIds: [...filters.entityIds, value] });
+                    }
+                  }}
+                  disabled={isLoadingOptions}
+                >
+                  <SelectTrigger data-testid="entity-filter">
+                    <SelectValue placeholder={isLoadingOptions ? "Loading..." : "Select entities..."} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {entities.map((entity) => (
+                      <SelectItem key={entity.id} value={entity.id}>
+                        {entity.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Date Range Filter */}
             <div className="space-y-2" data-testid="date-range-filter-container">
@@ -404,24 +406,30 @@ export function DrillDownFilters({
           <div className="space-y-2">
             <Label className="text-xs">Active Filters:</Label>
             <div className="flex flex-wrap gap-2">
-              {filters.incidentIds.map((id) => (
-                <Badge key={id} variant="secondary" className="flex items-center gap-1">
-                  Incident: {id}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
-                    onClick={() => removeFilter('incidentIds', id)}
-                  />
-                </Badge>
-              ))}
-              {filters.entityIds.map((id) => (
-                <Badge key={id} variant="secondary" className="flex items-center gap-1">
-                  Entity: {id}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
-                    onClick={() => removeFilter('entityIds', id)}
-                  />
-                </Badge>
-              ))}
+              {filters.incidentIds.map((id) => {
+                const incident = incidents.find(inc => inc.id === id);
+                return (
+                  <Badge key={id} variant="secondary" className="flex items-center gap-1">
+                    Incident: {incident?.name || id}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => removeFilter('incidentIds', id)}
+                    />
+                  </Badge>
+                );
+              })}
+              {filters.entityIds.map((id) => {
+                const entity = entities.find(ent => ent.id === id);
+                return (
+                  <Badge key={id} variant="secondary" className="flex items-center gap-1">
+                    Entity: {entity?.name || id}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => removeFilter('entityIds', id)}
+                    />
+                  </Badge>
+                );
+              })}
               {filters.timeframe && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   Date: {format(new Date(filters.timeframe.start), 'MMM dd')} - {format(new Date(filters.timeframe.end), 'MMM dd')}

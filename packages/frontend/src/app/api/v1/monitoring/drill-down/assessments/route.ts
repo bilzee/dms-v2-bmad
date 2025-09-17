@@ -23,10 +23,8 @@ function buildAssessmentWhereClause(filters: any) {
   // Note: assessment type filtering will be done in JavaScript after fetching data
   // since the database doesn't have a single assessmentType field
 
-  if (filters.verificationStatus && filters.verificationStatus.length > 0) {
-    // Note: verificationStatus field doesn't exist in database schema
-    // This filter will be applied after data retrieval if needed
-  }
+  // Note: verificationStatus filtering will be done in JavaScript after fetching data
+  // since verificationStatus field might not be in the Prisma schema yet
 
   if (filters.timeframe) {
     where.rapidAssessmentDate = {
@@ -134,7 +132,7 @@ export async function GET(request: NextRequest) {
     const incidentIds = searchParams.get('incidentIds')?.split(',').filter(Boolean);
     const entityIds = searchParams.get('entityIds')?.split(',').filter(Boolean);
     const filterAssessmentTypes = searchParams.get('assessmentTypes')?.split(',').filter(Boolean);
-    const filterVerificationStatus = searchParams.get('verificationStatus')?.split(',').filter(Boolean);
+    const verificationStatus = searchParams.get('verificationStatus')?.split(',').filter(Boolean);
     const timeframeStart = searchParams.get('timeframeStart');
     const timeframeEnd = searchParams.get('timeframeEnd');
     const page = parseInt(searchParams.get('page') || '1');
@@ -144,7 +142,7 @@ export async function GET(request: NextRequest) {
       incidentIds,
       entityIds,
       assessmentTypes: filterAssessmentTypes,
-      verificationStatus: filterVerificationStatus,
+      verificationStatus,
       timeframe: timeframeStart && timeframeEnd ? {
         start: timeframeStart,
         end: timeframeEnd,
@@ -197,17 +195,24 @@ export async function GET(request: NextRequest) {
         } : { latitude: 0, longitude: 0 },
         incidentName: assessment.affectedEntity?.incident?.name,
         dataDetails: assessmentData,
-        mediaCount: assessment.mediaFiles?.length || 0,
-        syncStatus: assessment.syncStatus || 'SYNCED',
+        mediaCount: 0, // Media count not available in current schema
+        syncStatus: 'SYNCED', // Sync status not available in current schema
       };
     });
 
     // Apply assessment type filtering if specified
     if (filters.assessmentTypes && filters.assessmentTypes.length > 0) {
       transformedAssessments = transformedAssessments.filter(assessment => 
-        assessment.types && assessment.types.some(type => 
-          filters.assessmentTypes.includes(type)
+        assessment.types && assessment.types.some((type: string) => 
+          filters.assessmentTypes!.includes(type)
         )
+      );
+    }
+
+    // Apply verification status filtering if specified
+    if (filters.verificationStatus && filters.verificationStatus.length > 0) {
+      transformedAssessments = transformedAssessments.filter(assessment => 
+        assessment.verificationStatus && filters.verificationStatus!.includes(assessment.verificationStatus)
       );
     }
 

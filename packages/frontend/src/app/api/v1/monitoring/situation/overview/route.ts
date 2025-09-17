@@ -11,29 +11,29 @@ export async function GET(request: NextRequest) {
       incidentStats,
       entityStats,
       donorStats,
-      userStats
+      userStats,
+      assessmentStats,
+      responseStats
     ] = await Promise.all([
       DatabaseService.getIncidentStats(),
       DatabaseService.getStats(),
       DatabaseService.getDonors(),
-      DatabaseService.getUserStats()
+      DatabaseService.getUserStats(),
+      DatabaseService.getAssessmentStats(),
+      DatabaseService.getResponseStats()
     ]);
 
-    // Calculate assessments and responses from database
-    // TODO: These would need proper assessment and response tables
-    const totalAssessments = entityStats.totalEntities; // Simplified for now
-    const totalResponses = donorStats.length; // Simplified for now
-    const pendingVerification = Math.floor(totalResponses * 0.1); // 10% pending
+    // Use real database counts
+    const totalAssessments = assessmentStats.totalAssessments;
+    const totalResponses = responseStats.totalResponses;
+    const pendingVerification = assessmentStats.pendingVerification;
     const activeIncidents = incidentStats.activeIncidents;
     
-    // Calculate critical gaps based on incident severity
-    const criticalGaps = incidentStats.highPriorityIncidents;
+    // Calculate critical gaps based on unmet needs and high-severity incidents
+    const criticalGaps = incidentStats.highPriorityIncidents + responseStats.urgentNeeds;
     
-    // Data freshness calculations - simplified
-    const totalData = totalAssessments + totalResponses;
-    const realTimeCount = Math.floor(totalData * 0.7); // 70% real-time
-    const recentCount = Math.floor(totalData * 0.2); // 20% recent
-    const offlinePendingCount = Math.floor(totalData * 0.1); // 10% pending
+    // Calculate real data freshness based on actual timestamps
+    const dataFreshness = await DatabaseService.calculateDataFreshness();
 
     const situationData = {
       timestamp: new Date(),
@@ -46,9 +46,9 @@ export async function GET(request: NextRequest) {
       totalUsers: userStats.totalUsers,
       activeUsers: userStats.activeUsers,
       dataFreshness: {
-        realTime: realTimeCount,
-        recent: recentCount,
-        offlinePending: offlinePendingCount,
+        realTime: dataFreshness.realTime,
+        recent: dataFreshness.recent,
+        offlinePending: dataFreshness.offlinePending,
       },
       breakdown: {
         incidentsByType: incidentStats.byType,

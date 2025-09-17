@@ -73,7 +73,7 @@ export async function GET(
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
       })) || [],
-      preliminaryAssessmentIds: incidentDetails.preliminaryAssessmentIds || [],
+      preliminaryAssessmentIds: [], // TODO: Implement assessment relationship
       preliminaryAssessments: [], // TODO: Implement assessment relationship
       actionItems: [], // TODO: Implement action items table and relationship
       timeline: timeline,
@@ -153,7 +153,7 @@ export async function PATCH(
         incident: {
           ...updatedIncident,
           affectedEntityCount: 0, // TODO: Get from relationships
-          assessmentCount: existingIncident.preliminaryAssessmentIds?.length || 0,
+          assessmentCount: 0, // TODO: Get from relationships
           responseCount: 0, // TODO: Count from relationships
           lastUpdated: updatedIncident.updatedAt,
         },

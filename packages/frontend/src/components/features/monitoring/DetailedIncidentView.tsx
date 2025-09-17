@@ -184,6 +184,43 @@ export function DetailedIncidentView({
         
         <CardContent>
           <div className="space-y-6">
+            {/* Active Filters Display */}
+            {Object.keys(filters).some(key => {
+              const value = filters[key as keyof typeof filters];
+              return Array.isArray(value) ? value.length > 0 : value;
+            }) && (
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <h4 className="font-medium text-sm text-orange-800 mb-2">Active Filters Applied:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {filters.incidentIds?.map(id => (
+                    <Badge key={id} variant="secondary" className="text-xs bg-orange-100 text-orange-800">
+                      Incident: {id}
+                    </Badge>
+                  ))}
+                  {filters.types?.map(type => (
+                    <Badge key={type} variant="secondary" className="text-xs bg-red-100 text-red-800">
+                      Type: {type}
+                    </Badge>
+                  ))}
+                  {filters.severities?.map(severity => (
+                    <Badge key={severity} variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+                      Severity: {severity}
+                    </Badge>
+                  ))}
+                  {filters.statuses?.map(status => (
+                    <Badge key={status} variant="secondary" className="text-xs bg-purple-100 text-purple-800">
+                      Status: {status}
+                    </Badge>
+                  ))}
+                  {filters.timeframe && (
+                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                      Date Range: {new Date(filters.timeframe.start).toLocaleDateString()} - {new Date(filters.timeframe.end).toLocaleDateString()}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Summary Statistics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 border rounded-lg bg-blue-50">
@@ -368,7 +405,7 @@ export function DetailedIncidentView({
       {incidents.length > 0 && (
         <HistoricalComparisonChart 
           dataType="incidents"
-          timeRange="30d"
+          timeRange="3m"
           onMetricSelect={(metric) => console.log('Selected metric:', metric)}
         />
       )}

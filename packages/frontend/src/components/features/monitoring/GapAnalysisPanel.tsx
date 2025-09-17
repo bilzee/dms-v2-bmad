@@ -99,6 +99,7 @@ export function GapAnalysisPanel({
   };
 
   const formatAssessmentType = (type: string) => {
+    if (!type) return 'Unknown';
     return type.charAt(0) + type.slice(1).toLowerCase();
   };
 

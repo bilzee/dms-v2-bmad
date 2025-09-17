@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
           severity: incident.severity,
           status: incident.status,
           date: incident.date,
-          preliminaryAssessmentIds: incident.preliminaryAssessmentIds,
+          // preliminaryAssessmentIds field removed from schema
           createdAt: incident.createdAt,
           updatedAt: incident.updatedAt,
         },
