@@ -1,0 +1,1 @@
+echo "SELECT tablename FROM pg_tables WHERE schemaname = 'public';" | cd packages/frontend && npx pnpm exec prisma db execute --stdin --schema prisma/schema.prisma
