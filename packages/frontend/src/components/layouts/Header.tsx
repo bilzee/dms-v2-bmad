@@ -33,10 +33,10 @@ export function Header({ onSidebarToggle, sidebarOpen }: HeaderProps) {
             <Menu className="w-5 h-5" />
           </Button>
           
-          <div>
+          <Link href="/" className="flex flex-col hover:opacity-80 transition-opacity">
             <h1 className="text-xl font-bold text-gray-800">Disaster Management</h1>
             <p className="text-sm text-gray-500 hidden sm:block">Field Operations Dashboard</p>
-          </div>
+          </Link>
         </div>
 
         {/* Right Side - Status Indicators */}

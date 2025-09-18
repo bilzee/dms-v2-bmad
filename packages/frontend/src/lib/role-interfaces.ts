@@ -1,6 +1,8 @@
 /**
  * Unified Role Interface Mapping
  * 
+ * Comprehensive role-based access control system with specialized,
+ * non-overlapping access patterns for maximum efficiency and clear responsibility boundaries.
  * This file ensures identical interfaces regardless of authentication type
  * (superuser role-switched vs dedicated single-role users)
  */
@@ -15,9 +17,10 @@ export interface NavigationItem {
   label: string;
   href: string;
   badge?: number;
-  badgeKey?: string; // NEW: Key for dynamic badge lookup
+  badgeKey?: string; // Key for dynamic badge lookup
   badgeVariant?: 'default' | 'secondary' | 'destructive';
   requiredPermissions?: string[];
+  description?: string;
 }
 
 export interface FeatureCard {
@@ -28,7 +31,8 @@ export interface FeatureCard {
   stats: { 
     count: number; 
     label: string;
-    countKey?: string; // NEW: Key for dynamic count lookup
+    countKey?: string; // Key for dynamic count lookup
+    fallback?: number; // Fallback value when API unavailable
   };
   bgColor: string;
   borderColor: string;
@@ -51,652 +55,545 @@ export interface RoleInterface {
 import {
   ClipboardList, BarChart3, Building, UserCheck, Activity, 
   AlertTriangle, Heart, Award, CheckCircle, HandHeart, Droplet,
-  Home, Utensils, Shield, Users, Zap, Trophy, Settings, Archive
+  Home, Utensils, Shield, Users, Zap, Trophy, Settings, Archive, FileSearch
 } from "lucide-react";
 
 export const ROLE_INTERFACES: Record<string, RoleInterface> = {
-  COORDINATOR: {
+  ASSESSOR: {
     navigationSections: [
       {
-        title: 'Assessment Management',
+        title: 'Assessment Creation',
         items: [
           { 
-            icon: 'ClipboardList', 
-            label: 'All Assessments', 
-            href: '/assessments', 
+            icon: 'Heart', 
+            label: 'Health Assessment', 
+            href: '/assessments/new?type=HEALTH', 
+            badge: 3,
+            badgeKey: 'pendingHealthAssessments',
+            requiredPermissions: ['assessments:create'],
+            description: 'Create health facility and medical needs assessments'
+          },
+          { 
+            icon: 'Droplet', 
+            label: 'WASH Assessment', 
+            href: '/assessments/new?type=WASH', 
+            badge: 1,
+            badgeKey: 'pendingWashAssessments',
+            requiredPermissions: ['assessments:create'],
+            description: 'Water, sanitation, and hygiene assessments'
+          },
+          { 
+            icon: 'Home', 
+            label: 'Shelter Assessment', 
+            href: '/assessments/new?type=SHELTER', 
+            badge: 2,
+            badgeKey: 'pendingShelterAssessments',
+            requiredPermissions: ['assessments:create'],
+            description: 'Shelter and accommodation facility assessments'
+          },
+          { 
+            icon: 'Utensils', 
+            label: 'Food Assessment', 
+            href: '/assessments/new?type=FOOD', 
             badge: 0,
-            requiredPermissions: ['assessments:read']
+            badgeKey: 'pendingFoodAssessments',
+            requiredPermissions: ['assessments:create'],
+            description: 'Food security and nutrition assessments'
+          },
+          { 
+            icon: 'Shield', 
+            label: 'Security Assessment', 
+            href: '/assessments/new?type=SECURITY', 
+            badge: 1,
+            badgeKey: 'pendingSecurityAssessments',
+            requiredPermissions: ['assessments:create'],
+            description: 'Security and protection assessments'
+          },
+          { 
+            icon: 'Users', 
+            label: 'Population Assessment', 
+            href: '/assessments/new?type=POPULATION', 
+            badge: 4,
+            badgeKey: 'pendingPopulationAssessments',
+            requiredPermissions: ['assessments:create'],
+            description: 'Population demographics and vulnerability assessments'
           },
           { 
             icon: 'AlertTriangle', 
-            label: 'Emergency Reports', 
+            label: 'Emergency Report', 
             href: '/assessments/new?type=PRELIMINARY', 
-            badge: 0,
-            requiredPermissions: ['assessments:create']
+            requiredPermissions: ['assessments:create'],
+            description: 'Quick emergency situation reports'
+          }
+        ]
+      },
+      {
+        title: 'My Work',
+        items: [
+          { 
+            icon: 'ClipboardList', 
+            label: 'My Assessments', 
+            href: '/assessments?filter=mine', 
+            requiredPermissions: ['assessments:read'],
+            description: 'Personal assessment tracking and management'
           },
           { 
             icon: 'Archive', 
-            label: 'Assessment Status', 
-            href: '/assessments/status', 
-            badge: 0,
-            requiredPermissions: ['assessments:read']
+            label: 'All Assessments', 
+            href: '/assessments', 
+            requiredPermissions: ['assessments:read'],
+            description: 'View all assessments'
           },
           { 
             icon: 'Building', 
-            label: 'Affected Entities', 
+            label: 'Entities', 
             href: '/entities', 
-            badge: 0,
-            requiredPermissions: ['entities:read']
-          },
+            requiredPermissions: ['entities:read'],
+            description: 'Entity management'
+          }
+        ]
+      },
+      {
+        title: 'Field Operations',
+        items: [
           { 
-            icon: 'Archive', 
-            label: 'Sync Queue', 
+            icon: 'Zap', 
+            label: 'Queue Status', 
             href: '/queue', 
-            badge: 0,
-            requiredPermissions: ['queue:read']
-          }
-        ]
-      },
-      {
-        title: 'Verification Dashboard',
-        items: [
-          { 
-            icon: 'ClipboardList', 
-            label: 'Assessment Queue', 
-            href: '/verification/queue', 
-            badge: 5,  // fallback value
-            badgeKey: 'assessmentQueue', // NEW: dynamic key
-            requiredPermissions: ['verification:read']
-          },
-          { 
-            icon: 'BarChart3', 
-            label: 'Response Queue', 
-            href: '/verification/responses/queue', 
-            badge: 3,  // fallback value  
-            badgeKey: 'responseQueue', // NEW: dynamic key
-            requiredPermissions: ['verification:read']
-          },
-          { 
-            icon: 'AlertTriangle', 
-            label: 'Verification Dashboard', 
-            href: '/verification/dashboard', 
-            badge: 0,
-            requiredPermissions: ['verification:read']
-          }
-        ]
-      },
-      {
-        title: 'Review Management',
-        items: [
-          { 
-            icon: 'ClipboardList', 
-            label: 'Assessment Reviews', 
-            href: '/verification/assessments', 
             badge: 2,
-            badgeKey: 'assessmentReviews',
-            requiredPermissions: ['verification:approve']
+            badgeKey: 'queueItems',
+            requiredPermissions: ['queue:read'],
+            description: 'Field connectivity and sync monitoring'
           },
           { 
-            icon: 'BarChart3', 
-            label: 'Response Reviews', 
-            href: '/responses/status-review', 
-            badge: 1,
-            badgeKey: 'responseReviews',
-            requiredPermissions: ['responses:review']
-          },
-          { 
-            icon: 'AlertTriangle', 
-            label: 'All Responses', 
-            href: '/verification/responses', 
-            badge: 0,
-            requiredPermissions: ['responses:read']
+            icon: 'CheckCircle', 
+            label: 'Assessment Review', 
+            href: '/verification/assessments', 
+            badge: 5,
+            badgeKey: 'assessmentQueue',
+            requiredPermissions: ['verification:read'],
+            description: 'Assessment verification and review'
           }
         ]
+      }
+    ],
+    featureCards: [
+      {
+        title: 'My Assessments',
+        description: 'Track and manage your field assessments',
+        icon: 'ClipboardList',
+        bgColor: 'bg-blue-50',
+        borderColor: 'border-blue-200',
+        iconColor: 'text-blue-600',
+        actions: [
+          { label: 'View My Assessments', href: '/assessments?filter=mine' },
+          { label: 'Create New Assessment', href: '/assessments/new', variant: 'outline' },
+          { label: 'View All Assessments', href: '/assessments', variant: 'ghost' }
+        ],
+        stats: { count: 8, label: 'active assessments', countKey: 'myAssessments', fallback: 8 }
       },
       {
-        title: 'Incident Management',
+        title: 'Field Operations',
+        description: 'Queue management and assessment workflows',
+        icon: 'Zap',
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-200',
+        iconColor: 'text-green-600',
+        actions: [
+          { label: 'Queue Status', href: '/queue' },
+          { label: 'Assessment Review', href: '/verification/assessments', variant: 'outline' },
+          { label: 'View Entities', href: '/entities', variant: 'ghost' }
+        ],
+        stats: { count: 7, label: 'pending items', countKey: 'queueItems', fallback: 7 }
+      }
+    ],
+    permissions: [
+      'assessments:read', 'assessments:write', 'assessments:create',
+      'entities:read', 'entities:write',
+      'queue:read'
+    ]
+  },
+
+  COORDINATOR: {
+    navigationSections: [
+      {
+        title: 'Coordination Hub',
         items: [
           { 
             icon: 'AlertTriangle', 
             label: 'Incident Management', 
             href: '/coordinator/incidents', 
-            badge: 4, 
+            badge: 2,
+            badgeKey: 'activeIncidents',
             badgeVariant: 'destructive',
-            requiredPermissions: ['incidents:manage']
-          }
-        ]
-      },
-      {
-        title: 'Donor Coordination',
-        items: [
+            requiredPermissions: ['incidents:manage'],
+            description: 'Central incident management and coordination'
+          },
+          { 
+            icon: 'Building', 
+            label: 'Resource Coordination', 
+            href: '/coordinator/resources', 
+            requiredPermissions: ['resources:coordinate'],
+            description: 'Resource allocation and planning'
+          },
           { 
             icon: 'HandHeart', 
-            label: 'Donor Dashboard', 
+            label: 'Donor Coordination', 
             href: '/coordinator/donors', 
-            badge: 2,
-            requiredPermissions: ['donors:coordinate']
+            badge: 4,
+            badgeKey: 'pendingDonorActivities',
+            requiredPermissions: ['donors:coordinate'],
+            description: 'Donor activity coordination and management'
           },
           { 
-            icon: 'Users', 
-            label: 'Resource Planning', 
-            href: '/coordinator/donors?tab=resources', 
-            badge: 1,
-            requiredPermissions: ['resources:plan']
-          },
-          { 
-            icon: 'AlertTriangle', 
-            label: 'Coordination Workspace', 
-            href: '/coordinator/donors?tab=workspace', 
-            badge: 3, 
-            badgeVariant: 'destructive',
-            requiredPermissions: ['donors:coordinate']
-          }
-        ]
-      },
-      {
-        title: 'System Configuration',
-        items: [
-          { 
-            icon: 'Zap', 
-            label: 'Auto-Approval Config', 
+            icon: 'Settings', 
+            label: 'Auto-Approval Rules', 
             href: '/coordinator/auto-approval', 
-            badge: 0,
-            requiredPermissions: ['config:manage']
-          },
-          { 
-            icon: 'BarChart3', 
-            label: 'Priority Sync Config', 
-            href: '/coordinator/priority-sync', 
-            badge: 0,
-            requiredPermissions: ['sync:configure']
-          },
-          { 
-            icon: 'AlertTriangle', 
-            label: 'Conflict Resolution', 
-            href: '/coordinator/conflicts', 
-            badge: 3, 
-            badgeVariant: 'destructive',
-            requiredPermissions: ['conflicts:resolve']
+            requiredPermissions: ['config:manage'],
+            description: 'Automated approval configuration'
           }
         ]
       },
       {
-        title: 'Monitoring Tools',
+        title: 'Verification Oversight',
         items: [
           { 
-            icon: 'BarChart3', 
-            label: 'Situation Display', 
-            href: '/monitoring', 
-            badge: 0,
-            requiredPermissions: ['monitoring:read']
+            icon: 'CheckCircle', 
+            label: 'Approval Dashboard', 
+            href: '/coordinator/approvals', 
+            requiredPermissions: ['verification:oversee'],
+            description: 'High-level approval tracking'
           },
+          { 
+            icon: 'BarChart3', 
+            label: 'Verification Metrics', 
+            href: '/coordinator/verification-stats', 
+            requiredPermissions: ['verification:oversee'],
+            description: 'System-wide verification performance'
+          }
+        ]
+      },
+      {
+        title: 'Monitoring',
+        items: [
           { 
             icon: 'Activity', 
-            label: 'Analytics Dashboard', 
-            href: '/analytics-dashboard', 
-            badge: 0,
-            requiredPermissions: ['monitoring:read']
+            label: 'Situation Display', 
+            href: '/monitoring', 
+            requiredPermissions: ['monitoring:read'],
+            description: 'Real-time operational monitoring'
           },
           { 
-            icon: 'ClipboardList', 
+            icon: 'MapPin', 
             label: 'Interactive Map', 
             href: '/monitoring/map', 
-            badge: 0,
-            requiredPermissions: ['monitoring:read']
+            requiredPermissions: ['monitoring:read'],
+            description: 'Geographic visualization of entities, assessments, and responses'
+          },
+          { 
+            icon: 'BarChart3', 
+            label: 'Analytics Dashboard', 
+            href: '/analytics-dashboard', 
+            requiredPermissions: ['monitoring:read'],
+            description: 'Advanced analytics interface'
+          },
+          { 
+            icon: 'Search', 
+            label: 'Drill-Down Analysis', 
+            href: '/monitoring/drill-down', 
+            requiredPermissions: ['monitoring:read'],
+            description: 'Detailed data analysis and investigation'
+          },
+          { 
+            icon: 'Monitor', 
+            label: 'Coordinator Dashboard', 
+            href: '/coordinator/monitoring', 
+            requiredPermissions: ['monitoring:read'],
+            description: 'Coordinator-specific monitoring view'
+          }
+        ]
+      },
+      {
+        title: 'System Health',
+        items: [
+          { 
+            icon: 'Archive', 
+            label: 'Queue Overview', 
+            href: '/coordinator/queue-overview', 
+            requiredPermissions: ['queue:oversee'],
+            description: 'System-wide queue monitoring'
+          },
+          { 
+            icon: 'Zap', 
+            label: 'Sync Status', 
+            href: '/coordinator/sync-status', 
+            requiredPermissions: ['sync:monitor'],
+            description: 'Synchronization health monitoring'
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'System Alerts', 
+            href: '/coordinator/alerts', 
+            badge: 1,
+            badgeKey: 'systemAlerts',
+            badgeVariant: 'destructive',
+            requiredPermissions: ['system:alerts'],
+            description: 'System alerts and notifications'
+          },
+          { 
+            icon: 'BarChart3', 
+            label: 'Performance Summary', 
+            href: '/coordinator/performance', 
+            requiredPermissions: ['system:monitor'],
+            description: 'Operational performance overview'
           }
         ]
       }
     ],
     featureCards: [
       {
-        title: 'Assessments',
-        description: 'Create and manage rapid assessments for disaster situations',
-        icon: ClipboardList,
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        iconColor: 'text-blue-600',
-        actions: [
-          { label: 'View All Assessments', href: '/assessments' },
-          { label: 'Create New Assessment', href: '/assessments/new', variant: 'outline' },
-          { label: 'View Status Dashboard', href: '/assessments/status', variant: 'ghost' }
-        ],
-        stats: { count: 12, label: 'active', countKey: 'activeAssessments' }
-      },
-      {
-        title: 'Response Management',
-        description: 'Plan responses and track delivery progress',
-        icon: BarChart3,
-        bgColor: 'bg-green-50',
-        borderColor: 'border-green-200',
-        iconColor: 'text-green-600',
-        actions: [
-          { label: 'Plan New Response', href: '/responses/plan' },
-          { label: 'Track Deliveries', href: '/responses/tracking', variant: 'outline' },
-          { label: 'Planned to Actual', href: '/responses/conversion', variant: 'ghost' }
-        ],
-        stats: { count: 3, label: 'planned', countKey: 'plannedResponses' }
-      },
-      {
-        title: 'Entity Management',
-        description: 'Manage affected entities, camps, and communities',
-        icon: Building,
-        bgColor: 'bg-orange-50',
-        borderColor: 'border-orange-200',
-        iconColor: 'text-orange-600',
-        actions: [
-          { label: 'View All Entities', href: '/entities' }
-        ],
-        stats: { count: 28, label: 'locations', countKey: 'totalLocations' }
-      },
-      {
-        title: 'Coordinator Tools',
-        description: 'Verification dashboard and approval management',
-        icon: UserCheck,
-        bgColor: 'bg-purple-50',
-        borderColor: 'border-purple-200',
-        iconColor: 'text-purple-600',
-        actions: [
-          { label: 'Verification Dashboard', href: '/coordinator/dashboard' },
-          { label: 'Donor Coordination', href: '/coordinator/donors', variant: 'outline' },
-          { label: 'System Monitoring', href: '/coordinator/monitoring', variant: 'outline' },
-          { label: 'Assessment Approvals', href: '/coordinator/assessments/review', variant: 'ghost' },
-          { label: 'Response Approvals', href: '/coordinator/responses/review', variant: 'ghost' }
-        ],
-        stats: { count: 8, label: 'pending review' }
-      },
-      {
-        title: 'Monitoring Tools',
-        description: 'Real-time monitoring and geographic visualization',
-        icon: Activity,
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        iconColor: 'text-blue-600',
-        actions: [
-          { label: 'Situation Display', href: '/monitoring' },
-          { label: 'Interactive Map', href: '/monitoring/map', variant: 'outline' }
-        ],
-        stats: { count: 4, label: 'active alerts' }
-      },
-      {
-        title: 'Incident Management',
-        description: 'Manage and track disaster incidents and responses',
-        icon: AlertTriangle,
+        title: 'Incident Coordination',
+        description: 'Central incident management and coordination',
+        icon: 'AlertTriangle',
         bgColor: 'bg-red-50',
         borderColor: 'border-red-200',
         iconColor: 'text-red-600',
         actions: [
-          { label: 'Manage Incidents', href: '/coordinator/incidents' }
+          { label: 'Manage Incidents', href: '/coordinator/incidents' },
+          { label: 'Resource Coordination', href: '/coordinator/resources', variant: 'outline' },
+          { label: 'Donor Coordination', href: '/coordinator/donors', variant: 'ghost' }
         ],
-        stats: { count: 0, label: 'active incidents' }
+        stats: { count: 2, label: 'active incidents', countKey: 'activeIncidents', fallback: 2 }
       },
       {
-        title: 'System Configuration',
-        description: 'Configure system settings and automation rules',
-        icon: UserCheck,
-        bgColor: 'bg-gray-50',
-        borderColor: 'border-gray-200',
-        iconColor: 'text-gray-600',
+        title: 'Monitoring & Analytics',
+        description: 'Real-time monitoring and data analysis',
+        icon: 'Activity',
+        bgColor: 'bg-teal-50',
+        borderColor: 'border-teal-200',
+        iconColor: 'text-teal-600',
         actions: [
-          { label: 'Auto-Approval Config', href: '/coordinator/auto-approval' },
-          { label: 'Priority Sync Config', href: '/queue', variant: 'outline' },
-          { label: 'Conflict Resolution', href: '/coordinator/conflicts', variant: 'ghost' }
+          { label: 'Situation Display', href: '/monitoring' },
+          { label: 'Interactive Map', href: '/monitoring/map', variant: 'outline' },
+          { label: 'Analytics Dashboard', href: '/analytics-dashboard', variant: 'ghost' }
         ],
-        stats: { count: 3, label: 'configurations' }
-      }
-    ],
-    permissions: [
-      'assessments:read', 'assessments:write', 'assessments:approve',
-      'responses:read', 'responses:write', 'responses:approve', 
-      'entities:read', 'entities:write',
-      'verification:read', 'verification:approve',
-      'monitoring:read', 'incidents:manage', 'config:manage',
-      'donations:view', 'users:manage'
-    ]
-  },
-
-  DONOR: {
-    navigationSections: [
-      {
-        title: 'Contribution Tracking',
-        items: [
-          { 
-            icon: 'BarChart3', 
-            label: 'Donation Planning', 
-            href: '/donor?tab=new-commitment', 
-            badge: 0,
-            requiredPermissions: ['donations:plan']
-          },
-          { 
-            icon: 'ClipboardList', 
-            label: 'Commitments', 
-            href: '/donor?tab=commitments', 
-            badge: 1,
-            requiredPermissions: ['donations:commit']
-          },
-          { 
-            icon: 'Archive', 
-            label: 'Performance', 
-            href: '/donor/performance', 
-            badge: 0,
-            requiredPermissions: ['donations:track']
-          },
-          { 
-            icon: 'Award', 
-            label: 'Achievements', 
-            href: '/donor/achievements', 
-            badge: 0,
-            requiredPermissions: ['donations:track']
-          },
-          { 
-            icon: 'Trophy', 
-            label: 'Leaderboard', 
-            href: '/donor/leaderboard', 
-            badge: 0,
-            requiredPermissions: ['donations:track']
-          }
-        ]
-      }
-    ],
-    featureCards: [
-      {
-        title: 'Donation Planning',
-        description: 'Plan and manage your donation contributions',
-        icon: Heart,
-        bgColor: 'bg-pink-50',
-        borderColor: 'border-pink-200',
-        iconColor: 'text-pink-600',
-        actions: [
-          { label: 'Plan New Donation', href: '/donor?tab=new-commitment' },
-          { label: 'View Commitments', href: '/donor?tab=commitments', variant: 'outline' },
-          { label: 'Track Performance', href: '/donor/performance', variant: 'ghost' }
-        ],
-        stats: { count: 2, label: 'active commitments', countKey: 'activeCommitments' }
+        stats: { count: 94, label: '% monitoring score', countKey: 'monitoringScore', fallback: 94 }
       },
       {
-        title: 'Contribution Tracking',
-        description: 'Monitor your donation impact and achievements',
-        icon: Award,
-        bgColor: 'bg-yellow-50',
-        borderColor: 'border-yellow-200',
-        iconColor: 'text-yellow-600',
+        title: 'Resource Management',
+        description: 'Resource allocation and coordination oversight',
+        icon: 'Building',
+        bgColor: 'bg-purple-50',
+        borderColor: 'border-purple-200',
+        iconColor: 'text-purple-600',
         actions: [
-          { label: 'View Achievements', href: '/donor/achievements' },
-          { label: 'Leaderboard', href: '/donor/leaderboard', variant: 'outline' }
+          { label: 'Resource Coordination', href: '/coordinator/resources' },
+          { label: 'Resource Planning', href: '/coordinator/resource-planning', variant: 'outline' }
         ],
-        stats: { count: 5, label: 'achievements unlocked', countKey: 'achievementsUnlocked' }
+        stats: { count: 85, label: '% utilization', countKey: 'resourceUtilization', fallback: 85 }
       },
       {
-        title: 'Performance Metrics',
-        description: 'Track your donation delivery performance and impact',
-        icon: BarChart3,
+        title: 'System Health',
+        description: 'Operational system monitoring and health',
+        icon: 'Activity',
         bgColor: 'bg-blue-50',
         borderColor: 'border-blue-200',
         iconColor: 'text-blue-600',
         actions: [
-          { label: 'Performance Dashboard', href: '/donor/performance' },
-          { label: 'Impact Report', href: '/donor/performance', variant: 'outline' }
+          { label: 'System Health', href: '/coordinator/performance' },
+          { label: 'Queue Overview', href: '/coordinator/queue-overview', variant: 'outline' },
+          { label: 'System Alerts', href: '/coordinator/alerts', variant: 'ghost' }
         ],
-        stats: { count: 85, label: '% score', countKey: 'performanceScore' }
+        stats: { count: 98, label: '% system health', countKey: 'systemHealth', fallback: 98 }
       }
     ],
     permissions: [
-      'donations:plan', 'donations:commit', 'donations:track', 'donations:view',
-      'commitments:read', 'commitments:write',
-      'achievements:read', 'performance:read'
-    ]
-  },
-
-  ASSESSOR: {
-    navigationSections: [
-      {
-        title: 'Assessment Types',
-        items: [
-          { 
-            icon: 'Heart', 
-            label: 'Health', 
-            href: '/assessments/new?type=HEALTH', 
-            badge: 3,
-            requiredPermissions: ['assessments:create']
-          },
-          { 
-            icon: 'Droplet', 
-            label: 'WASH', 
-            href: '/assessments/new?type=WASH', 
-            badge: 1,
-            requiredPermissions: ['assessments:create']
-          },
-          { 
-            icon: 'Home', 
-            label: 'Shelter', 
-            href: '/assessments/new?type=SHELTER', 
-            badge: 2,
-            requiredPermissions: ['assessments:create']
-          },
-          { 
-            icon: 'Utensils', 
-            label: 'Food', 
-            href: '/assessments/new?type=FOOD', 
-            badge: 0,
-            requiredPermissions: ['assessments:create']
-          },
-          { 
-            icon: 'Shield', 
-            label: 'Security', 
-            href: '/assessments/new?type=SECURITY', 
-            badge: 1,
-            requiredPermissions: ['assessments:create']
-          },
-          { 
-            icon: 'Users', 
-            label: 'Population', 
-            href: '/assessments/new?type=POPULATION', 
-            badge: 4,
-            requiredPermissions: ['assessments:create']
-          }
-        ]
-      },
-      {
-        title: 'Assessment Management',
-        items: [
-          { 
-            icon: 'ClipboardList', 
-            label: 'All Assessments', 
-            href: '/assessments', 
-            badge: 0,
-            requiredPermissions: ['assessments:read']
-          },
-          { 
-            icon: 'AlertTriangle', 
-            label: 'Emergency Reports', 
-            href: '/assessments/new?type=PRELIMINARY', 
-            badge: 0,
-            requiredPermissions: ['assessments:create']
-          },
-          { 
-            icon: 'Archive', 
-            label: 'Assessment Status', 
-            href: '/assessments/status', 
-            badge: 0,
-            requiredPermissions: ['assessments:read']
-          },
-          { 
-            icon: 'Building', 
-            label: 'Affected Entities', 
-            href: '/entities', 
-            badge: 0,
-            requiredPermissions: ['entities:read']
-          },
-          { 
-            icon: 'Archive', 
-            label: 'Sync Queue', 
-            href: '/queue', 
-            badge: 0,
-            requiredPermissions: ['queue:read']
-          }
-        ]
-      }
-    ],
-    featureCards: [
-      {
-        title: 'Assessments',
-        description: 'Create and manage rapid assessments for disaster situations',
-        icon: ClipboardList,
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        iconColor: 'text-blue-600',
-        actions: [
-          { label: 'View All Assessments', href: '/assessments' },
-          { label: 'Create New Assessment', href: '/assessments/new', variant: 'outline' },
-          { label: 'View Status Dashboard', href: '/assessments/status', variant: 'ghost' }
-        ],
-        stats: { count: 12, label: 'active', countKey: 'totalAssessments' }
-      },
-      {
-        title: 'Entity Management',
-        description: 'Manage affected entities, camps, and communities',
-        icon: Building,
-        bgColor: 'bg-orange-50',
-        borderColor: 'border-orange-200',
-        iconColor: 'text-orange-600',
-        actions: [
-          { label: 'View All Entities', href: '/entities' }
-        ],
-        stats: { count: 28, label: 'locations', countKey: 'totalEntities' }
-      }
-    ],
-    permissions: [
-      'assessments:read', 'assessments:write',
-      'entities:read', 'entities:write'
+      'incidents:manage', 'resources:coordinate', 'donors:coordinate',
+      'verification:oversee', 'monitoring:read', 'queue:oversee',
+      'sync:monitor', 'system:alerts', 'system:monitor'
     ]
   },
 
   RESPONDER: {
     navigationSections: [
       {
-        title: 'Response Planning',
+        title: 'Response Operations',
         items: [
           { 
             icon: 'BarChart3', 
             label: 'Plan Response', 
-            href: '/responses/plan', 
-            badge: 0,
-            requiredPermissions: ['responses:plan']
+            href: '/responses', 
+            requiredPermissions: ['responses:plan'],
+            description: 'Response planning interface'
           },
           { 
             icon: 'ClipboardList', 
-            label: 'Status Review', 
-            href: '/responses/status-review', 
-            badge: 2,
-            requiredPermissions: ['responses:review']
+            label: 'My Responses', 
+            href: '/responses', 
+            requiredPermissions: ['responses:read'],
+            description: 'Personal response tracking'
+          },
+          { 
+            icon: 'Truck', 
+            label: 'Delivery Tracking', 
+            href: '/responses/tracking', 
+            requiredPermissions: ['responses:track'],
+            description: 'Track delivery progress'
           }
         ]
       },
       {
-        title: 'Delivery Management',
+        title: 'Workflow Management',
         items: [
           { 
-            icon: 'Archive', 
-            label: 'All Responses', 
-            href: '/responses/status-review', 
-            badge: 1,
-            requiredPermissions: ['responses:read']
+            icon: 'ClipboardList', 
+            label: 'Processing Queue', 
+            href: '/queue', 
+            badge: 2,
+            badgeKey: 'queueItems',
+            requiredPermissions: ['queue:read'],
+            description: 'Processing and sync queue'
           },
           { 
+            icon: 'CheckCircle', 
+            label: 'Response Verification', 
+            href: '/verification/responses', 
+            badge: 3,
+            badgeKey: 'responseQueue',
+            requiredPermissions: ['verification:read'],
+            description: 'Response verification queue'
+          }
+        ]
+      },
+      {
+        title: 'Situational Awareness',
+        items: [
+          { 
             icon: 'ClipboardList', 
-            label: 'Response Tracking', 
-            href: '/responses/status-review', 
-            badge: 0,
-            requiredPermissions: ['responses:track']
+            label: 'Assessment Overview', 
+            href: '/assessments', 
+            requiredPermissions: ['assessments:read'],
+            description: 'Summary view of relevant assessments'
+          },
+          { 
+            icon: 'AlertTriangle', 
+            label: 'Current Incidents', 
+            href: '/incidents', 
+            badge: 2,
+            badgeKey: 'activeIncidents',
+            requiredPermissions: ['incidents:read'],
+            description: 'Active incident monitoring'
           }
         ]
       }
     ],
     featureCards: [
       {
-        title: 'Response Management',
-        description: 'Plan responses and track delivery progress',
-        icon: BarChart3,
+        title: 'Response Operations',
+        description: 'Plan and execute response operations',
+        icon: 'BarChart3',
         bgColor: 'bg-green-50',
         borderColor: 'border-green-200',
         iconColor: 'text-green-600',
         actions: [
-          { label: 'Plan New Response', href: '/responses/plan' },
-          { label: 'Track Deliveries', href: '/responses/status-review', variant: 'outline' },
-          { label: 'Status Review', href: '/responses/status-review', variant: 'ghost' }
+          { label: 'Plan New Response', href: '/responses' },
+          { label: 'Track My Responses', href: '/responses', variant: 'outline' },
+          { label: 'Delivery Tracking', href: '/responses/tracking', variant: 'ghost' }
         ],
-        stats: { count: 3, label: 'planned', countKey: 'myResponses' }
+        stats: { count: 5, label: 'my active responses', countKey: 'myActiveResponses', fallback: 5 }
+      },
+      {
+        title: 'Workflow Management',
+        description: 'Processing queues and verification workflows',
+        icon: 'ClipboardList',
+        bgColor: 'bg-blue-50',
+        borderColor: 'border-blue-200',
+        iconColor: 'text-blue-600',
+        actions: [
+          { label: 'Processing Queue', href: '/queue' },
+          { label: 'Response Verification', href: '/verification/responses', variant: 'outline' }
+        ],
+        stats: { count: 5, label: 'pending items', countKey: 'queueItems', fallback: 5 }
+      },
+      {
+        title: 'Situational Awareness',
+        description: 'Incident monitoring and assessment overview',
+        icon: 'Activity',
+        bgColor: 'bg-purple-50',
+        borderColor: 'border-purple-200',
+        iconColor: 'text-purple-600',
+        actions: [
+          { label: 'Assessment Overview', href: '/assessments' },
+          { label: 'Current Incidents', href: '/incidents', variant: 'outline' }
+        ],
+        stats: { count: 2, label: 'active incidents', countKey: 'activeIncidents', fallback: 2 }
       }
     ],
     permissions: [
-      'responses:read', 'responses:write'
+      'responses:read', 'responses:write', 'responses:plan', 'responses:track',
+      'incidents:read', 'assessments:read', 'monitoring:read', 'resources:read'
     ]
   },
 
   VERIFIER: {
     navigationSections: [
       {
-        title: 'Verification Management',
+        title: 'Verification Tasks',
         items: [
           { 
             icon: 'CheckCircle', 
-            label: 'Verification Queue', 
-            href: '/verification/queue', 
-            badge: 3,
-            requiredPermissions: ['verification:review']
-          },
-          { 
-            icon: 'ClipboardList', 
             label: 'Assessment Verification', 
-            href: '/verification', 
-            badge: 2,
-            requiredPermissions: ['verification:approve']
+            href: '/verification/assessments', 
+            badge: 5,
+            badgeKey: 'assessmentQueue',
+            requiredPermissions: ['verification:review'],
+            description: 'Review and verify field assessments'
           },
           { 
             icon: 'BarChart3', 
             label: 'Response Verification', 
             href: '/verification/responses', 
-            badge: 1,
-            requiredPermissions: ['responses:verify']
+            badge: 3,
+            badgeKey: 'responseQueue',
+            requiredPermissions: ['verification:review'],
+            description: 'Review and verify response deliveries'
           },
           { 
-            icon: 'Archive', 
-            label: 'Verification Dashboard', 
-            href: '/verification', 
-            badge: 0,
-            requiredPermissions: ['verification:read']
+            icon: 'ClipboardList', 
+            label: 'Processing Queue', 
+            href: '/queue', 
+            badge: 2,
+            badgeKey: 'queueItems',
+            requiredPermissions: ['verification:review'],
+            description: 'Processing and sync queue management'
+          }
+        ]
+      },
+      {
+        title: 'Quality Control',
+        items: [
+          { 
+            icon: 'FileSearch', 
+            label: 'Quality Review', 
+            href: '/verification/quality', 
+            badge: 4,
+            badgeKey: 'qualityQueue',
+            requiredPermissions: ['verification:review'],
+            description: 'Data quality and completeness review'
+          },
+          { 
+            icon: 'Award', 
+            label: 'Verification Reports', 
+            href: '/verification/reports', 
+            badge: 2,
+            badgeKey: 'verificationReports',
+            requiredPermissions: ['verification:review'],
+            description: 'Review verification history and reports'
           }
         ]
       }
     ],
-    featureCards: [
-      {
-        title: 'Verification Management',
-        description: 'Review and verify assessments and responses',
-        icon: CheckCircle,
-        bgColor: 'bg-teal-50',
-        borderColor: 'border-teal-200',
-        iconColor: 'text-teal-600',
-        actions: [
-          { label: 'Verification Queue', href: '/verification/queue' },
-          { label: 'Assessment Review', href: '/verification', variant: 'outline' },
-          { label: 'Response Review', href: '/verification/responses', variant: 'ghost' }
-        ],
-        stats: { count: 6, label: 'pending verification', countKey: 'pendingVerifications' }
-      },
-      {
-        title: 'Verification Dashboard',
-        description: 'Verification metrics and approval tracking',
-        icon: BarChart3,
-        bgColor: 'bg-green-50',
-        borderColor: 'border-green-200',
-        iconColor: 'text-green-600',
-        actions: [
-          { label: 'Verification Dashboard', href: '/verification' },
-          { label: 'Approval History', href: '/verification', variant: 'outline' }
-        ],
-        stats: { count: 15, label: 'verified today', countKey: 'approvedToday' }
-      }
-    ],
+    featureCards: [],
     permissions: [
       'verification:read', 'verification:review', 'verification:approve', 'responses:verify'
     ]
@@ -705,125 +602,155 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
   ADMIN: {
     navigationSections: [
       {
-        title: 'System Administration',
+        title: 'System Overview',
         items: [
-          { 
-            icon: 'Settings', 
-            label: 'User Management', 
-            href: '/admin/users', 
-            badge: 0,
-            requiredPermissions: ['users:manage']
-          },
-          { 
-            icon: 'Shield', 
-            label: 'Role Management', 
-            href: '/admin/roles', 
-            badge: 0,
-            requiredPermissions: ['roles:manage']
-          },
           { 
             icon: 'BarChart3', 
             label: 'System Monitoring', 
-            href: '/admin/monitoring', 
-            badge: 0,
-            requiredPermissions: ['system:monitor']
+            href: '/monitoring', 
+            requiredPermissions: ['system:monitor'],
+            description: 'System monitoring and analytics'
           },
           { 
-            icon: 'Archive', 
-            label: 'Audit Logs', 
-            href: '/admin/audit', 
-            badge: 0,
-            requiredPermissions: ['audit:read']
+            icon: 'MapPin', 
+            label: 'Interactive Map', 
+            href: '/monitoring/map', 
+            requiredPermissions: ['monitoring:read'],
+            description: 'Geographic system overview'
           }
         ]
       },
       {
-        title: 'System Configuration',
+        title: 'Data Management',
         items: [
           { 
-            icon: 'Zap', 
-            label: 'Auto-Approval Config', 
-            href: '/coordinator/auto-approval', 
-            badge: 0,
-            requiredPermissions: ['config:manage']
+            icon: 'ClipboardList', 
+            label: 'All Assessments', 
+            href: '/assessments', 
+            requiredPermissions: ['assessments:read'],
+            description: 'System-wide assessment management'
           },
           { 
             icon: 'BarChart3', 
-            label: 'Priority Sync Config', 
-            href: '/coordinator/priority-sync', 
-            badge: 0,
-            requiredPermissions: ['sync:configure']
+            label: 'All Responses', 
+            href: '/responses', 
+            requiredPermissions: ['responses:read'],
+            description: 'System-wide response management'
+          },
+          { 
+            icon: 'MapPin', 
+            label: 'Entity Management', 
+            href: '/entities', 
+            requiredPermissions: ['entities:manage'],
+            description: 'Complete entity management'
           },
           { 
             icon: 'AlertTriangle', 
-            label: 'Conflict Resolution', 
-            href: '/coordinator/conflicts', 
-            badge: 3, 
-            badgeVariant: 'destructive',
-            requiredPermissions: ['conflicts:resolve']
+            label: 'Incident Management', 
+            href: '/incidents', 
+            requiredPermissions: ['incidents:manage'],
+            description: 'System-wide incident management'
           }
         ]
       },
       {
-        title: 'Monitoring Tools',
+        title: 'System Administration',
         items: [
           { 
-            icon: 'BarChart3', 
-            label: 'Situation Display', 
-            href: '/monitoring', 
-            badge: 0,
-            requiredPermissions: ['monitoring:read']
-          },
-          { 
-            icon: 'Activity', 
-            label: 'Analytics Dashboard', 
-            href: '/analytics-dashboard', 
-            badge: 0,
-            requiredPermissions: ['monitoring:read']
-          },
-          { 
             icon: 'ClipboardList', 
-            label: 'Interactive Map', 
-            href: '/monitoring/map', 
-            badge: 0,
-            requiredPermissions: ['monitoring:read']
+            label: 'Processing Queue', 
+            href: '/queue', 
+            requiredPermissions: ['queue:manage'],
+            description: 'System queue management'
           }
         ]
       }
     ],
     featureCards: [
       {
-        title: 'User Management',
-        description: 'Manage system users and access control',
-        icon: UserCheck,
+        title: 'System Overview',
+        description: 'Complete system monitoring and analytics',
+        icon: 'BarChart3',
         bgColor: 'bg-purple-50',
         borderColor: 'border-purple-200',
         iconColor: 'text-purple-600',
         actions: [
-          { label: 'Manage Users', href: '/admin/users' },
-          { label: 'Role Assignment', href: '/admin/roles', variant: 'outline' }
+          { label: 'System Monitoring', href: '/monitoring' },
+          { label: 'Interactive Map', href: '/monitoring/map', variant: 'outline' }
         ],
-        stats: { count: 45, label: 'active users', countKey: 'activeUsers' }
+        stats: { count: 156, label: 'active users', countKey: 'activeUsers', fallback: 156 }
       },
       {
-        title: 'System Monitoring',
-        description: 'Monitor system performance and health',
-        icon: Activity,
+        title: 'Data Management',
+        description: 'System-wide data administration',
+        icon: 'Database',
+        bgColor: 'bg-gray-50',
+        borderColor: 'border-gray-200',
+        iconColor: 'text-gray-600',
+        actions: [
+          { label: 'All Assessments', href: '/assessments' },
+          { label: 'All Responses', href: '/responses', variant: 'outline' },
+          { label: 'Entity Management', href: '/entities', variant: 'ghost' }
+        ],
+        stats: { count: 23, label: 'active entities', countKey: 'activeEntities', fallback: 23 }
+      },
+      {
+        title: 'System Administration',
+        description: 'Queue management and system operations',
+        icon: 'Settings',
         bgColor: 'bg-blue-50',
         borderColor: 'border-blue-200',
         iconColor: 'text-blue-600',
         actions: [
-          { label: 'System Dashboard', href: '/admin/monitoring' },
-          { label: 'Performance Metrics', href: '/admin/analytics', variant: 'outline' }
+          { label: 'Processing Queue', href: '/queue' },
+          { label: 'Incident Management', href: '/incidents', variant: 'outline' }
         ],
-        stats: { count: 99, label: '% uptime', countKey: 'systemHealth' }
+        stats: { count: 99.8, label: '% uptime', countKey: 'systemUptime', fallback: 99.8 }
       }
     ],
     permissions: [
-      'admin:read', 'admin:write', 'users:manage', 'roles:manage',
-      'system:configure', 'monitoring:admin'
+      'users:manage', 'roles:manage', 'permissions:manage',
+      'system:configure', 'config:manage', 'sync:configure',
+      'system:monitor', 'audit:read', 'security:monitor', 'system:maintain'
+    ]
+  },
+
+  DONOR: {
+    navigationSections: [
+      {
+        title: 'My Contributions',
+        items: [
+          { 
+            icon: 'BarChart3', 
+            label: 'Donor Dashboard', 
+            href: '/donor', 
+            requiredPermissions: ['donations:plan'],
+            description: 'Donation planning and commitment management'
+          }
+        ]
+      }
+    ],
+    featureCards: [
+      {
+        title: 'Donation Management',
+        description: 'Plan, track and manage donation commitments',
+        icon: 'Heart',
+        bgColor: 'bg-pink-50',
+        borderColor: 'border-pink-200',
+        iconColor: 'text-pink-600',
+        actions: [
+          { label: 'Donor Dashboard', href: '/donor' }
+        ],
+        stats: { count: 4, label: 'active commitments', countKey: 'activeCommitments', fallback: 4 }
+      }
+    ],
+    permissions: [
+      'donations:plan', 'donations:commit', 'donations:track',
+      'impact:view', 'needs:view', 'opportunities:view',
+      'achievements:read', 'performance:read', 'community:read'
     ]
   }
+
 };
 
 /**
