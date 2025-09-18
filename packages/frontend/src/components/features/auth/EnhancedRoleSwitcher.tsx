@@ -229,7 +229,7 @@ export function useRoleSwitcher() {
       if (!session?.user?.id) return;
 
       try {
-        const response = await fetch(`/api/v1/admin/users/${session.user.id}/active-role`);
+        const response = await fetch(`/api/v1/session/role`);
         if (!response.ok) throw new Error('Failed to fetch user roles');
 
         const data = await response.json();
@@ -254,30 +254,30 @@ export function useRoleSwitcher() {
       throw new Error('User session not found');
     }
 
-    const response = await fetch(`/api/v1/admin/users/${session.user.id}/active-role`, {
+    const response = await fetch(`/api/v1/session/role`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        roleId,
-        reason: 'User switched active role'
+        roleId
       })
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to switch roles');
+      throw new Error(error.error || 'Failed to switch roles');
     }
 
     const data = await response.json();
     if (!data.success) {
-      throw new Error(data.message || 'Role switch failed');
+      throw new Error(data.error || 'Role switch failed');
     }
 
     // Update local state
     if (userSession) {
       setUserSession({
         ...userSession,
-        activeRole: data.data.activeRole
+        activeRole: data.data.activeRole,
+        availableRoles: data.data.availableRoles
       });
     }
 

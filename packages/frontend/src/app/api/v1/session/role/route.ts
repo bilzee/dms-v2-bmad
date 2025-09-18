@@ -147,9 +147,7 @@ export async function PUT(request: NextRequest) {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: { 
-        activeRole: {
-          connect: { id: roleId }
-        }
+        activeRoleId: roleId
       },
       include: { 
         roles: {

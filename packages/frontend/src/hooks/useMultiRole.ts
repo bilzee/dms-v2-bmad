@@ -293,7 +293,7 @@ export const useMultiRole = (): UseMultiRoleReturn => {
   }, [assignedRoles]);
 
   return {
-    assignedRoles,
+    assignedRoles: roleContext?.availableRoles || assignedRoles,
     activeRole: roleContext?.activeRole || activeRole,
     availableRoles: roleContext?.availableRoles || assignedRoles,
     permissions: roleContext?.permissions || [],
@@ -304,7 +304,7 @@ export const useMultiRole = (): UseMultiRoleReturn => {
     },
     canSwitchRoles: roleContext?.canSwitchRoles ?? isMultiRole,
     lastRoleSwitch: roleContext?.lastRoleSwitch,
-    isMultiRole,
+    isMultiRole: (roleContext?.availableRoles || assignedRoles).length > 1,
     switchRole,
     hasRole,
     isLoading,

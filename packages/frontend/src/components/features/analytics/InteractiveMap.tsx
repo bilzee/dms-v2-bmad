@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import Map, { Marker, Popup, Source, Layer } from 'react-map-gl/mapbox';
-import type { MapboxGeoJSONFeature } from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { useAnalyticsStore } from '@/stores/analytics.store';
+import { Map, Marker, Popup, Source, Layer } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 interface MapEntity {
   id: string;
@@ -34,6 +33,7 @@ function InteractiveMap({ selectedEntityId, className = "" }: InteractiveMapProp
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedEntity, setSelectedEntity] = useState<MapEntity | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   // Default center for Borno State
   const defaultCenter = { longitude: 13.1511, latitude: 11.8311 };
@@ -61,12 +61,23 @@ function InteractiveMap({ selectedEntityId, className = "" }: InteractiveMapProp
 
       // Transform API response to MapEntity format
       const mapEntities: MapEntity[] = data.data.entities
-        .filter((entity: any) => entity.coordinates)
+        .filter((entity: any) => {
+          // Ensure coordinates exist and are valid
+          return entity.coordinates && 
+                 Array.isArray(entity.coordinates) && 
+                 entity.coordinates.length >= 2 &&
+                 typeof entity.coordinates[0] === 'number' &&
+                 typeof entity.coordinates[1] === 'number' &&
+                 !isNaN(entity.coordinates[0]) &&
+                 !isNaN(entity.coordinates[1]) &&
+                 Math.abs(entity.coordinates[0]) <= 90 && // Valid latitude range
+                 Math.abs(entity.coordinates[1]) <= 180; // Valid longitude range
+        })
         .map((entity: any) => ({
           id: entity.id,
           name: entity.name,
           type: entity.type,
-          coordinates: [entity.coordinates[0], entity.coordinates[1]], // lat, lng
+          coordinates: [Number(entity.coordinates[0]), Number(entity.coordinates[1])], // lat, lng
           assessmentData: entity.assessmentData || { total: 0, pending: 0, completed: 0 },
           responseData: entity.responseData || { total: 0, active: 0, completed: 0 }
         }));
@@ -98,16 +109,39 @@ function InteractiveMap({ selectedEntityId, className = "" }: InteractiveMapProp
     // If specific entity is selected, center on that entity
     if (selectedEntityId && selectedEntityId !== 'all') {
       const selectedEntity = entities.find(e => e.id === selectedEntityId);
-      if (selectedEntity) {
-        return { longitude: selectedEntity.coordinates[1], latitude: selectedEntity.coordinates[0] };
+      if (selectedEntity && selectedEntity.coordinates && selectedEntity.coordinates.length >= 2) {
+        const lat = Number(selectedEntity.coordinates[0]);
+        const lng = Number(selectedEntity.coordinates[1]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return { longitude: lng, latitude: lat };
+        }
       }
     }
 
     // For "all" entities or fallback, calculate center of all entities
-    const latSum = entities.reduce((sum, entity) => sum + entity.coordinates[0], 0);
-    const lngSum = entities.reduce((sum, entity) => sum + entity.coordinates[1], 0);
+    const validEntities = entities.filter(entity => 
+      entity.coordinates && 
+      entity.coordinates.length >= 2 && 
+      !isNaN(Number(entity.coordinates[0])) && 
+      !isNaN(Number(entity.coordinates[1]))
+    );
     
-    return { longitude: lngSum / entities.length, latitude: latSum / entities.length };
+    if (validEntities.length === 0) {
+      return defaultCenter;
+    }
+    
+    const latSum = validEntities.reduce((sum, entity) => sum + Number(entity.coordinates[0]), 0);
+    const lngSum = validEntities.reduce((sum, entity) => sum + Number(entity.coordinates[1]), 0);
+    
+    const centerLat = latSum / validEntities.length;
+    const centerLng = lngSum / validEntities.length;
+    
+    // Validate calculated center
+    if (isNaN(centerLat) || isNaN(centerLng)) {
+      return defaultCenter;
+    }
+    
+    return { longitude: centerLng, latitude: centerLat };
   }, [entities, selectedEntityId]);
 
   const filteredEntities = useMemo(() => {
@@ -141,18 +175,28 @@ function InteractiveMap({ selectedEntityId, className = "" }: InteractiveMapProp
   // Create assessment coverage circles as GeoJSON
   const assessmentCirclesGeoJSON = useMemo(() => {
     const features = filteredEntities
-      .filter(entity => entity.assessmentData && entity.assessmentData.total > 0)
+      .filter(entity => 
+        entity.assessmentData && 
+        entity.assessmentData.total > 0 &&
+        entity.coordinates && 
+        entity.coordinates.length >= 2 && 
+        !isNaN(Number(entity.coordinates[0])) && 
+        !isNaN(Number(entity.coordinates[1]))
+      )
       .map(entity => {
         const assessmentData = entity.assessmentData!;
         const baseRadius = 500; // meters
         const maxRadius = 2000; // meters
         const radius = Math.min(maxRadius, baseRadius + (assessmentData.total * 100));
         
+        const lat = Number(entity.coordinates[0]);
+        const lng = Number(entity.coordinates[1]);
+        
         return {
           type: 'Feature' as const,
           geometry: {
             type: 'Point' as const,
-            coordinates: [entity.coordinates[1], entity.coordinates[0]] // lng, lat for GeoJSON
+            coordinates: [lng, lat] // lng, lat for GeoJSON
           },
           properties: {
             radius: radius,
@@ -181,12 +225,38 @@ function InteractiveMap({ selectedEntityId, className = "" }: InteractiveMapProp
     );
   }
 
-  if (error) {
+  // Check for MapBox access token
+  const mapboxAccessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+  if (!mapboxAccessToken || mapboxAccessToken === 'your-mapbox-access-token-here') {
+    return (
+      <div className={`h-72 rounded-lg border border-yellow-300 bg-yellow-50 flex items-center justify-center ${className}`}>
+        <div className="text-center text-yellow-800">
+          <h4 className="font-medium mb-2">MapBox Configuration Required</h4>
+          <p className="text-sm mb-2">
+            To display the interactive map, please configure a valid MapBox access token.
+          </p>
+          <p className="text-xs text-yellow-600">
+            Set NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN in your environment file.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || mapError) {
     return (
       <div className={`h-72 rounded-lg border border-red-300 bg-red-50 flex items-center justify-center ${className}`}>
         <div className="text-center text-red-600">
           <h4 className="font-medium mb-2">Map Error</h4>
-          <p className="text-sm">{error}</p>
+          <p className="text-sm">{error || mapError}</p>
+          {mapError && (
+            <button 
+              onClick={() => setMapError(null)} 
+              className="mt-2 text-xs underline hover:no-underline"
+            >
+              Try again
+            </button>
+          )}
         </div>
       </div>
     );
@@ -204,95 +274,104 @@ function InteractiveMap({ selectedEntityId, className = "" }: InteractiveMapProp
       )}
       
       <Map
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
         initialViewState={{
           longitude: mapCenter.longitude,
           latitude: mapCenter.latitude,
           zoom: mapZoom
         }}
         style={{ width: '100%', height: '100%' }}
-        mapStyle="mapbox://styles/mapbox/streets-v12"
-        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+        mapStyle="mapbox://styles/mapbox/light-v10"
+        onError={(event) => {
+          console.error('MapBox GL error:', event);
+          setMapError('Map rendering error occurred');
+          // Prevent error propagation
+          event.preventDefault?.();
+        }}
+        interactiveLayerIds={[]}
       >
-        {/* Entity Markers */}
-        {filteredEntities.map((entity) => (
-          <Marker
-            key={entity.id}
-            longitude={entity.coordinates[1]}
-            latitude={entity.coordinates[0]}
-            color={getMarkerColor(entity)}
-            onClick={() => setSelectedEntity(entity)}
-          />
-        ))}
+        {/* Assessment coverage circles */}
+        {assessmentCirclesGeoJSON.features.length > 0 && (
+          <Source id="assessment-circles" type="geojson" data={assessmentCirclesGeoJSON}>
+            <Layer
+              id="assessment-circles-layer"
+              type="circle"
+              paint={{
+                'circle-radius': ['get', 'radius'],
+                'circle-color': '#3b82f6',
+                'circle-opacity': 0.2,
+                'circle-stroke-color': '#1d4ed8',
+                'circle-stroke-width': 1,
+                'circle-stroke-opacity': 0.4
+              }}
+            />
+          </Source>
+        )}
 
-        {/* Assessment Coverage Circles */}
-        <Source id="assessment-circles" type="geojson" data={assessmentCirclesGeoJSON}>
-          <Layer
-            id="assessment-circles-layer"
-            type="circle"
-            paint={{
-              'circle-radius': ['get', 'radius'],
-              'circle-color': '#3b82f6',
-              'circle-opacity': 0.6,
-              'circle-stroke-width': 2,
-              'circle-stroke-color': '#1d4ed8'
-            }}
-          />
-        </Source>
+        {/* Entity markers */}
+        {filteredEntities
+          .filter(entity => 
+            entity.coordinates && 
+            entity.coordinates.length >= 2 && 
+            !isNaN(Number(entity.coordinates[0])) && 
+            !isNaN(Number(entity.coordinates[1]))
+          )
+          .map((entity) => {
+            const lat = Number(entity.coordinates[0]);
+            const lng = Number(entity.coordinates[1]);
+            
+            return (
+              <Marker
+                key={entity.id}
+                longitude={lng}
+                latitude={lat}
+                onClick={() => setSelectedEntity(entity)}
+              >
+                <div
+                  className="w-6 h-6 rounded-full border-2 border-white shadow-lg cursor-pointer hover:scale-110 transition-transform"
+                  style={{ backgroundColor: getMarkerColor(entity) }}
+                />
+              </Marker>
+            );
+          })}
 
-        {/* Entity Popup */}
-        {selectedEntity && (
+        {/* Popup for selected entity */}
+        {selectedEntity && 
+         selectedEntity.coordinates && 
+         selectedEntity.coordinates.length >= 2 && 
+         !isNaN(Number(selectedEntity.coordinates[0])) && 
+         !isNaN(Number(selectedEntity.coordinates[1])) && (
           <Popup
-            longitude={selectedEntity.coordinates[1]}
-            latitude={selectedEntity.coordinates[0]}
+            longitude={Number(selectedEntity.coordinates[1])}
+            latitude={Number(selectedEntity.coordinates[0])}
             onClose={() => setSelectedEntity(null)}
             closeButton={true}
             closeOnClick={false}
+            anchor="bottom"
           >
-            <div className="p-3 min-w-[250px]">
-              <div className="mb-3">
-                <h3 className="font-semibold text-base mb-1">{selectedEntity.name}</h3>
-                <p className="text-xs text-gray-600">
-                  Type: {selectedEntity.type} | Coordinates: {selectedEntity.coordinates[0].toFixed(4)}, {selectedEntity.coordinates[1].toFixed(4)}
-                </p>
-              </div>
+            <div className="p-2 min-w-48">
+              <h4 className="font-semibold text-sm mb-1">{selectedEntity.name}</h4>
+              <p className="text-xs text-gray-600 mb-2">{selectedEntity.type}</p>
               
-              {/* Assessment Data */}
-              <div className="mb-3">
-                <h4 className="font-medium text-sm mb-2 text-blue-700">Assessment Status</h4>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center p-2 bg-blue-50 rounded">
-                    <div className="font-semibold text-lg">{selectedEntity.assessmentData?.total || 0}</div>
-                    <div className="text-gray-600">Total</div>
-                  </div>
-                  <div className="text-center p-2 bg-yellow-50 rounded">
-                    <div className="font-semibold text-lg">{selectedEntity.assessmentData?.pending || 0}</div>
-                    <div className="text-gray-600">Pending</div>
-                  </div>
-                  <div className="text-center p-2 bg-green-50 rounded">
-                    <div className="font-semibold text-lg">{selectedEntity.assessmentData?.completed || 0}</div>
-                    <div className="text-gray-600">Completed</div>
-                  </div>
+              {selectedEntity.assessmentData && (
+                <div className="mb-2">
+                  <p className="text-xs font-medium">Assessments:</p>
+                  <p className="text-xs">
+                    Total: {selectedEntity.assessmentData.total}, 
+                    Pending: {selectedEntity.assessmentData.pending}
+                  </p>
                 </div>
-              </div>
-
-              {/* Response Data */}
-              <div className="mb-2">
-                <h4 className="font-medium text-sm mb-2 text-green-700">Response Status</h4>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center p-2 bg-green-50 rounded">
-                    <div className="font-semibold text-lg">{selectedEntity.responseData?.total || 0}</div>
-                    <div className="text-gray-600">Total</div>
-                  </div>
-                  <div className="text-center p-2 bg-orange-50 rounded">
-                    <div className="font-semibold text-lg">{selectedEntity.responseData?.active || 0}</div>
-                    <div className="text-gray-600">Active</div>
-                  </div>
-                  <div className="text-center p-2 bg-gray-50 rounded">
-                    <div className="font-semibold text-lg">{selectedEntity.responseData?.completed || 0}</div>
-                    <div className="text-gray-600">Completed</div>
-                  </div>
+              )}
+              
+              {selectedEntity.responseData && (
+                <div>
+                  <p className="text-xs font-medium">Responses:</p>
+                  <p className="text-xs">
+                    Total: {selectedEntity.responseData.total}, 
+                    Active: {selectedEntity.responseData.active}
+                  </p>
                 </div>
-              </div>
+              )}
             </div>
           </Popup>
         )}
