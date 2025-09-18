@@ -138,7 +138,10 @@
       "Bash(net start:*)",
       "Bash(where:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(pkill:*)",
+      "Bash(pg_isready:*)",
+      "mcp__playwright__browser_evaluate"
     ],
     "deny": [],
     "additionalDirectories": [

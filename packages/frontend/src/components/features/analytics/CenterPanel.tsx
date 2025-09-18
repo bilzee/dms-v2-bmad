@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EntitySelector } from './EntitySelector';
 import { AssessmentAreaBreakdown } from './AssessmentAreaBreakdown';
 import { AreaSelectionManager } from './AreaSelectionManager';
+import { UpdateIndicator } from './UpdateIndicator';
+import { RealtimeConnection } from './realtime/RealtimeConnection';
+import dynamic from 'next/dynamic';
 import { useAnalyticsStore } from '@/stores/analytics.store';
 
 interface CenterPanelProps {}
@@ -17,6 +20,22 @@ export function CenterPanel({}: CenterPanelProps) {
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
   const [selectedAreas, setSelectedAreas] = useState<string[]>(ALL_ASSESSMENT_AREAS.slice(0, DEFAULT_MAX_AREAS));
   const [maxDisplayAreas, setMaxDisplayAreas] = useState(DEFAULT_MAX_AREAS);
+
+  // Dynamic import InteractiveMap with proper component reference
+  const InteractiveMap = useMemo(() => dynamic(
+    () => import('./InteractiveMap'),
+    {
+      loading: () => (
+        <div className="h-72 rounded-lg border border-gray-300 bg-gray-50 flex items-center justify-center">
+          <div className="text-center text-gray-500">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-sm">Loading interactive map...</p>
+          </div>
+        </div>
+      ),
+      ssr: false
+    }
+  ), []);
 
   // Calculate space constraints based on available viewport height
   useEffect(() => {
@@ -74,13 +93,20 @@ export function CenterPanel({}: CenterPanelProps) {
   const hasSpaceConstraint = ALL_ASSESSMENT_AREAS.length > maxDisplayAreas;
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Assessment Area Breakdown</CardTitle>
-        <CardDescription>
-          Assessment areas with latest data and gap analysis for selected entities
-        </CardDescription>
-      </CardHeader>
+    <>
+      <RealtimeConnection autoConnect={true} />
+      <Card className="h-full">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Assessment Area Breakdown</CardTitle>
+              <CardDescription>
+                Assessment areas with latest data and gap analysis for selected entities
+              </CardDescription>
+            </div>
+            <UpdateIndicator showDetails={false} />
+          </div>
+        </CardHeader>
       <CardContent className="h-[calc(100%-120px)] overflow-y-auto">
         <div className="space-y-4">
           {/* Entity Selection */}
@@ -122,17 +148,16 @@ export function CenterPanel({}: CenterPanelProps) {
             )}
           </div>
 
-          {/* Interactive Map Placeholder */}
-          <div className="mt-8 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-            <div className="text-center text-gray-500">
-              <h4 className="font-medium mb-2">Interactive Map</h4>
-              <p className="text-sm">
-                Entity locations and assessment data visualization will be displayed here
-              </p>
-            </div>
+          {/* Interactive Map */}
+          <div className="mt-8">
+            <InteractiveMap 
+              selectedEntityId={selectedEntityId}
+              className="w-full"
+            />
           </div>
         </div>
       </CardContent>
     </Card>
+    </>
   );
 }

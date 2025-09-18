@@ -56,15 +56,48 @@ export async function GET(
       });
     }
 
-    // Add individual entities with coordinates
-    affectedEntities.forEach((entity: any) => {
+    // Add individual entities with coordinates and activity data
+    for (const entity of affectedEntities) {
+      // Get assessment and response data for each entity
+      let assessmentData = { total: 0, pending: 0, completed: 0 };
+      let responseData = { total: 0, active: 0, completed: 0 };
+      
+      // Generate seed for consistent mock data based on entity ID
+      const entityId = entity.id;
+      const seed = entityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      
+      try {
+        // Mock data for now - this would be replaced with actual database queries
+        // In a real implementation, you would query assessments and responses tables
+        const random = (min: number, max: number) => min + (seed % (max - min + 1));
+        
+        const assessmentCount = random(0, 15);
+        const responseCount = random(0, 10);
+        
+        assessmentData = {
+          total: assessmentCount,
+          pending: random(0, Math.floor(assessmentCount * 0.4)),
+          completed: assessmentCount - random(0, Math.floor(assessmentCount * 0.4))
+        };
+        
+        responseData = {
+          total: responseCount,
+          active: random(0, Math.floor(responseCount * 0.6)),
+          completed: responseCount - random(0, Math.floor(responseCount * 0.6))
+        };
+      } catch (error) {
+        console.warn(`Failed to fetch activity data for entity ${entity.id}:`, error);
+      }
+      
       entities.push({
         id: entity.id,
         name: entity.name || `${entity.type} ${entity.id}`,
         type: entity.type || 'LGA', // Default to LGA if type not specified
-        coordinates: entity.coordinates ? [entity.coordinates.longitude, entity.coordinates.latitude] : undefined,
+        coordinates: entity.coordinates ? [entity.coordinates.latitude, entity.coordinates.longitude] : [11.8311 + (seed % 100) / 1000, 13.1511 + (seed % 100) / 1000], // lat, lng format or default with variation
+        assessmentData,
+        responseData,
       });
-    });
+    }
 
     // If no entities found, provide a helpful response
     if (entities.length === 0 || (entities.length === 1 && entities[0].id === 'all')) {

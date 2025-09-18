@@ -33,7 +33,7 @@ const customJestConfig = {
       '<rootDir>/__mocks__/fileMock.js',
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!(.*\\.mjs$))',
+    '/node_modules/(?!(react-leaflet|leaflet|.*\\.mjs$))',
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',

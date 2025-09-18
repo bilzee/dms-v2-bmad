@@ -12,8 +12,12 @@ export default function AssessmentsPage() {
     router.push(`/assessments/${assessment.id}`);
   };
 
-  const handleNewAssessment = (type: AssessmentType) => {
-    router.push(`/assessments/new?type=${type}`);
+  const handleNewAssessment = (type: AssessmentType | null) => {
+    if (type) {
+      router.push(`/assessments/new?type=${type}`);
+    } else {
+      router.push('/assessments/new');
+    }
   };
 
   return (
