@@ -24,7 +24,7 @@ export function RoleBasedRedirect() {
         'DONOR': '/donor'
       }
       
-      const dashboardPath = roleRoutes[userRole] || '/assessor'
+      const dashboardPath = (userRole && roleRoutes[userRole]) || '/assessor'
       router.push(dashboardPath)
     }
   }, [session, status, router, pathname])

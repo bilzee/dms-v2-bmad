@@ -23,6 +23,11 @@ model Incident {
   preliminaryAssessments PreliminaryAssessment[]
   affectedEntities       AffectedEntity[]
 
+  // Enhanced indexes for common query patterns identified from DatabaseService analysis
+  @@index([status, severity, date])          // Common filter combination for incidents
+  @@index([type, status, date])             // Type-based filtering with time ranges
+  @@index([createdAt, status])              // Recent incidents by status
+  @@index([status, date, severity])          // Priority-based incident queries
   @@map("incidents")
 }
 
@@ -146,6 +151,11 @@ model AffectedEntity {
   rapidAssessments       RapidAssessment[]
   incident               Incident?         @relation(fields: [incidentId], references: [id])
 
+  // Enhanced indexes for geographic and entity-based queries
+  @@index([incidentId, type])               // Fast entity lookup by incident and type
+  @@index([type, lga, ward])                // Geographic filtering combinations
+  @@index([lga, ward, createdAt])           // Geographic queries with time filtering
+  @@index([type, createdAt])                // Entity type filtering by time
   @@map("affected_entities")
 }
 
@@ -193,6 +203,11 @@ model RapidAssessment {
   shelterAssessment     ShelterAssessment?
   securityAssessment    SecurityAssessment?
 
+  // Enhanced indexes for assessment queries
+  @@index([rapidAssessmentType, rapidAssessmentDate, affectedEntityId]) // Complex filtering for assessments
+  @@index([affectedEntityId, rapidAssessmentDate])                    // Entity assessment history
+  @@index([createdAt, rapidAssessmentType])                           // Recent assessments by type
+  @@index([rapidAssessmentDate, rapidAssessmentType])                 // Time-based assessment queries
   @@map("rapid_assessments")
 }
 
@@ -296,6 +311,11 @@ model Donor {
   commitments      DonorCommitment[]
   rapidResponses   RapidResponse[]
 
+  // Enhanced indexes for donor performance and management
+  @@index([isActive, performanceScore])          // Active donor ranking
+  @@index([organization, isActive])             // Organization-based filtering
+  @@index([createdAt, isActive])                // Donor registration tracking
+  @@index([performanceScore, isActive])         // Performance-based queries
   @@map("donors")
 }
 
@@ -318,6 +338,14 @@ model DonorCommitment {
   donor            Donor          @relation(fields: [donorId], references: [id])
   rapidResponse    RapidResponse? @relation(fields: [rapidResponseId], references: [id])
 
+  // Enhanced indexes for donor commitment tracking
+  @@index([donorId, status, targetDate])              // Donor commitment timeline
+  @@index([responseType, status, targetDate])          // Commitment scheduling
+  @@index([incidentId, responseType, status])          // Incident response planning
+  @@index([affectedEntityId, responseType, status])   // Entity-specific commitments
+  @@index([rapidResponseId, status])                  // Response commitment mapping
+  @@index([targetDate, status])                        // Upcoming deliverables
+  @@index([createdAt, status])                        // Recent commitment tracking
   @@map("donor_commitments")
 }
 
@@ -375,6 +403,15 @@ model RapidResponse {
   donorCommitments      DonorCommitment[]
   donor                 Donor?            @relation(fields: [donorId], references: [id])
 
+  // Enhanced indexes for response tracking and verification
+  @@index([responseType, status, verificationStatus])    // Response filtering with verification
+  @@index([affectedEntityId, responseType, status])      // Entity response tracking
+  @@index([assessmentId, status])                        // Assessment response relationships
+  @@index([donorId, status, verificationStatus])         // Donor performance tracking
+  @@index([responderId, plannedDate])                    // Responder scheduling
+  @@index([plannedDate, status])                        // Response timeline management
+  @@index([syncStatus, verificationStatus])             // Offline sync monitoring
+  @@index([createdAt, status])                          // Recent response tracking
   @@map("rapid_responses")
 }
 
@@ -479,10 +516,10 @@ model SecurityEvent {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
-  @@index([eventType, severity])
-  @@index([requiresInvestigation, investigationStatus])
-  @@index([timestamp])
-  @@index([ipAddress])
+  @@index([eventType, severity, timestamp])               // Security event analysis
+  @@index([requiresInvestigation, investigationStatus])  // Investigation tracking
+  @@index([timestamp, eventType])                         // Time-based security analysis
+  @@index([ipAddress, timestamp])                         // IP-based security tracking
   @@map("security_events")
 }
 
@@ -532,8 +569,8 @@ model SystemMetrics {
   
   createdAt            DateTime @default(now())
 
-  @@index([metricType, timestamp])
-  @@index([timestamp])
+  @@index([metricType, timestamp])                          // Metric type time series
+  @@index([timestamp, metricType])                         // Time-based performance analysis
   @@map("system_metrics")
 }
 

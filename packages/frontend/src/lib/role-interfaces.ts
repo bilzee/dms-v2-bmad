@@ -593,7 +593,50 @@ export const ROLE_INTERFACES: Record<string, RoleInterface> = {
         ]
       }
     ],
-    featureCards: [],
+    featureCards: [
+      {
+        title: 'Assessment Verification',
+        description: 'Review and verify assessment submissions for quality and accuracy',
+        icon: 'CheckCircle',
+        bgColor: 'bg-blue-50',
+        borderColor: 'border-blue-200',
+        iconColor: 'text-blue-600',
+        actions: [
+          { label: 'Review Queue', href: '/verification/assessments' },
+          { label: 'Verification History', href: '/verification/history', variant: 'outline' },
+          { label: 'Quality Reports', href: '/verification/reports', variant: 'ghost' }
+        ],
+        stats: { count: 5, label: 'pending verifications', countKey: 'verificationQueue', fallback: 5 }
+      },
+      {
+        title: 'Response Verification',
+        description: 'Verify response deliveries and confirm resource distribution',
+        icon: 'ClipboardList',
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-200',
+        iconColor: 'text-green-600',
+        actions: [
+          { label: 'Response Queue', href: '/verification/responses' },
+          { label: 'Delivery Confirmations', href: '/verification/deliveries', variant: 'outline' },
+          { label: 'Verification Dashboard', href: '/verification/dashboard', variant: 'ghost' }
+        ],
+        stats: { count: 3, label: 'responses pending', countKey: 'responseVerificationCount', fallback: 3 }
+      },
+      {
+        title: 'Quality Review',
+        description: 'Comprehensive quality assurance and process monitoring',
+        icon: 'Award',
+        bgColor: 'bg-purple-50',
+        borderColor: 'border-purple-200',
+        iconColor: 'text-purple-600',
+        actions: [
+          { label: 'Processing Queue', href: '/queue' },
+          { label: 'Quality Metrics', href: '/verification/metrics', variant: 'outline' },
+          { label: 'Audit Trail', href: '/verification/audit', variant: 'ghost' }
+        ],
+        stats: { count: 98, label: '% quality score', countKey: 'qualityScore', fallback: 98 }
+      }
+    ],
     permissions: [
       'verification:read', 'verification:review', 'verification:approve', 'responses:verify'
     ]

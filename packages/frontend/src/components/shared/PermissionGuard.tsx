@@ -7,7 +7,7 @@ import { useRoleInterface } from '@/hooks/useRoleInterface';
 interface PermissionGuardProps {
   children: ReactNode;
   requiredPermissions?: string[];
-  allowedRoles?: Array<'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN'>;
+  allowedRoles?: Array<'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER'>;
   requireAll?: boolean;
   fallback?: ReactNode;
   featureId?: string;

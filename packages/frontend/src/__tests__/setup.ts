@@ -1,6 +1,18 @@
 import { beforeAll, beforeEach, afterAll } from '@jest/globals'
 import '@testing-library/jest-dom'
 
+// Import Redis mock
+import '@/lib/__mocks__/redis'
+
+// Clear mock data between tests
+beforeEach(() => {
+  // Clear Redis mock data
+  const redisMock = require('@/lib/__mocks__/redis')
+  if (redisMock.clearMockData) {
+    redisMock.clearMockData()
+  }
+})
+
 // Mock next/navigation for tests
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({

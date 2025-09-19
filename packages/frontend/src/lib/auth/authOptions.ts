@@ -128,3 +128,6 @@ export const authOptions = {
     error: '/auth/error',
   },
 };
+
+// Export the auth function for NextAuth v5 compatibility
+export const { auth, handlers, signIn, signOut } = NextAuth(authOptions);

@@ -6,7 +6,7 @@ import { useRoleNavigation } from '@/hooks/useRoleNavigation';
 
 interface RoleRestrictedProps {
   children: ReactNode;
-  allowedRoles: Array<'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN'>;
+  allowedRoles: Array<'ASSESSOR' | 'RESPONDER' | 'COORDINATOR' | 'DONOR' | 'ADMIN' | 'VERIFIER'>;
   fallback?: ReactNode;
 }
 

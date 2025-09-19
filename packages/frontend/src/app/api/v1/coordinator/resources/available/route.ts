@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth/authOptions';
+import { prisma } from '@/lib/prisma';
 import { 
   ResponseType,
   ResourceAvailability,
@@ -7,181 +9,130 @@ import {
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
-// Mock resource availability data - would be calculated from database
-const mockResourceAvailability: ResourceAvailability[] = [
-  {
-    responseType: ResponseType.FOOD,
-    totalCommitted: 1200,
-    totalAllocated: 800,
-    totalAvailable: 400,
-    unit: 'kg',
-    commitments: [
-      {
-        donorId: '1',
-        donorName: 'ActionAid Nigeria',
-        quantity: 500,
-        targetDate: new Date('2024-09-15'),
-        status: 'PLANNED' as any,
-        incidentId: '1',
-      },
-      {
-        donorId: '5',
-        donorName: 'World Food Programme',
-        quantity: 700,
-        targetDate: new Date('2024-09-12'),
-        status: 'PLANNED' as any,
-        incidentId: '1',
+// Helper function to calculate resource availability from database
+async function getResourceAvailabilityFromDB(incidentId?: string): Promise<ResourceAvailability[]> {
+  // Get all donor commitments with filtering
+  const commitments = await prisma.donorCommitment.findMany({
+    where: incidentId ? { incidentId } : {},
+    include: {
+      donor: true,
+      rapidResponse: true
+    },
+    orderBy: { targetDate: 'asc' }
+  });
+
+  // Get responses to understand allocations
+  const responses = await prisma.rapidResponse.findMany({
+    where: incidentId ? {
+      donorCommitments: {
+        some: { incidentId }
       }
-    ],
-    allocations: [
-      {
-        affectedEntityId: 'entity-1',
-        affectedEntityName: 'Maiduguri IDP Camp',
-        quantity: 300,
-        priority: 'HIGH',
-        targetDate: new Date('2024-09-10'),
-      },
-      {
-        affectedEntityId: 'entity-2', 
-        affectedEntityName: 'Bama Community Center',
-        quantity: 500,
-        priority: 'MEDIUM',
-        targetDate: new Date('2024-09-15'),
+    } : {},
+    include: {
+      donorCommitments: true
+    }
+  });
+
+  // Get affected entities for allocation mapping
+  const affectedEntities = await prisma.affectedEntity.findMany({
+    where: incidentId ? { incidentId } : {},
+    select: {
+      id: true,
+      name: true,
+      type: true
+    }
+  });
+
+  // Group by response type
+  const responseTypes = Object.values(ResponseType);
+  const resourceAvailability: ResourceAvailability[] = [];
+
+  for (const responseType of responseTypes) {
+    const typeCommitments = commitments.filter(c => c.responseType === responseType);
+    const typeResponses = responses.filter(r => r.responseType === responseType);
+    
+    // Calculate totals
+    const totalCommitted = typeCommitments.reduce((sum, c) => sum + c.quantity, 0);
+    const totalAllocated = typeResponses.reduce((sum, r) => {
+      const responseData = r.data as any;
+      return sum + (responseData?.quantity || 0);
+    }, 0);
+    const totalAvailable = Math.max(0, totalCommitted - totalAllocated);
+    
+    // Map commitments
+    const mappedCommitments = typeCommitments.map(c => ({
+      donorId: c.donorId,
+      donorName: c.donor.name,
+      quantity: c.quantity,
+      targetDate: c.targetDate,
+      status: c.status as any,
+      incidentId: c.incidentId || ''
+    }));
+
+    // Map allocations from responses
+    const mappedAllocations = typeResponses.map(r => {
+      const responseData = r.data as any;
+      const entity = affectedEntities.find(e => e.id === r.affectedEntityId);
+      return {
+        affectedEntityId: r.affectedEntityId,
+        affectedEntityName: entity?.name || 'Unknown Entity',
+        quantity: responseData?.quantity || 0,
+        priority: responseData?.priority || 'MEDIUM',
+        targetDate: r.plannedDate
+      };
+    });
+
+    // Calculate shortfall
+    const totalNeeded = mappedAllocations.reduce((sum, a) => sum + a.quantity, 0);
+    const projectedShortfall = Math.max(0, totalNeeded - totalCommitted);
+
+    // Find earliest available date
+    const earliestAvailable = typeCommitments.length > 0 
+      ? new Date(Math.min(...typeCommitments.map(c => c.targetDate.getTime())))
+      : new Date();
+
+    // Determine unit based on response type
+    const getUnit = (type: ResponseType): string => {
+      switch (type) {
+        case ResponseType.FOOD: return 'kg';
+        case ResponseType.WASH: return 'units';
+        case ResponseType.HEALTH: return 'kits';
+        case ResponseType.SHELTER: return 'tarpaulins';
+        case ResponseType.SECURITY: return 'units';
+        case ResponseType.POPULATION: return 'persons';
+        default: return 'units';
       }
-    ],
-    projectedShortfall: 0,
-    earliestAvailable: new Date('2024-09-12'),
-    lastUpdated: new Date('2024-08-25'),
-  },
-  {
-    responseType: ResponseType.WASH,
-    totalCommitted: 400,
-    totalAllocated: 350,
-    totalAvailable: 50,
-    unit: 'units',
-    commitments: [
-      {
-        donorId: '2',
-        donorName: 'Oxfam International',
-        quantity: 200,
-        targetDate: new Date('2024-09-10'),
-        status: 'PLANNED' as any,
-        incidentId: '1',
-      },
-      {
-        donorId: '1',
-        donorName: 'ActionAid Nigeria',
-        quantity: 200,
-        targetDate: new Date('2024-09-25'),
-        status: 'IN_PROGRESS',
-        incidentId: '1',
-      }
-    ],
-    allocations: [
-      {
-        affectedEntityId: 'entity-1',
-        affectedEntityName: 'Maiduguri IDP Camp',
-        quantity: 200,
-        priority: 'HIGH',
-        targetDate: new Date('2024-09-08'),
-      },
-      {
-        affectedEntityId: 'entity-3',
-        affectedEntityName: 'Gubio Village',
-        quantity: 150,
-        priority: 'MEDIUM', 
-        targetDate: new Date('2024-09-12'),
-      }
-    ],
-    projectedShortfall: 100,
-    earliestAvailable: new Date('2024-09-10'),
-    lastUpdated: new Date('2024-08-25'),
-  },
-  {
-    responseType: ResponseType.HEALTH,
-    totalCommitted: 150,
-    totalAllocated: 120,
-    totalAvailable: 30,
-    unit: 'kits',
-    commitments: [
-      {
-        donorId: '3',
-        donorName: 'Save the Children',
-        quantity: 100,
-        targetDate: new Date('2024-09-20'),
-        status: 'DELIVERED',
-        incidentId: '1',
-      },
-      {
-        donorId: '4',
-        donorName: 'UNICEF Nigeria',
-        quantity: 50,
-        targetDate: new Date('2024-09-18'),
-        status: 'PLANNED' as any,
-        incidentId: '1',
-      }
-    ],
-    allocations: [
-      {
-        affectedEntityId: 'entity-2',
-        affectedEntityName: 'Bama Community Center',
-        quantity: 70,
-        priority: 'HIGH',
-        targetDate: new Date('2024-09-15'),
-      },
-      {
-        affectedEntityId: 'entity-4',
-        affectedEntityName: 'Konduga Health Center',
-        quantity: 50,
-        priority: 'MEDIUM',
-        targetDate: new Date('2024-09-18'),
-      }
-    ],
-    projectedShortfall: 0,
-    earliestAvailable: new Date('2024-09-18'),
-    lastUpdated: new Date('2024-08-25'),
-  },
-  {
-    responseType: ResponseType.SHELTER,
-    totalCommitted: 300,
-    totalAllocated: 250,
-    totalAvailable: 50,
-    unit: 'tarpaulins',
-    commitments: [
-      {
-        donorId: '4',
-        donorName: 'UNICEF Nigeria',
-        quantity: 300,
-        targetDate: new Date('2024-09-12'),
-        status: 'PLANNED' as any,
-        incidentId: '1',
-      }
-    ],
-    allocations: [
-      {
-        affectedEntityId: 'entity-1',
-        affectedEntityName: 'Maiduguri IDP Camp',
-        quantity: 150,
-        priority: 'HIGH',
-        targetDate: new Date('2024-09-10'),
-      },
-      {
-        affectedEntityId: 'entity-5',
-        affectedEntityName: 'Monguno Settlement',
-        quantity: 100,
-        priority: 'MEDIUM',
-        targetDate: new Date('2024-09-12'),
-      }
-    ],
-    projectedShortfall: 50,
-    earliestAvailable: new Date('2024-09-12'),
-    lastUpdated: new Date('2024-08-25'),
+    };
+
+    resourceAvailability.push({
+      responseType,
+      totalCommitted,
+      totalAllocated,
+      totalAvailable,
+      unit: getUnit(responseType),
+      commitments: mappedCommitments,
+      allocations: mappedAllocations,
+      projectedShortfall,
+      earliestAvailable,
+      lastUpdated: new Date()
+    });
   }
-];
+
+  return resourceAvailability.filter(r => r.totalCommitted > 0 || r.totalAllocated > 0);
+}
 
 // GET /api/v1/coordinator/resources/available - Get resource availability overview
 export async function GET(request: NextRequest) {
   try {
+    // Authentication check
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, errors: ['Unauthorized'] },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     
     // Parse query parameters
@@ -191,7 +142,8 @@ export async function GET(request: NextRequest) {
     const showShortfalls = searchParams.get('showShortfalls') === 'true';
     const minQuantity = parseInt(searchParams.get('minQuantity') || '0');
     
-    let filteredResources = [...mockResourceAvailability];
+    // Get real resource availability from database
+    let filteredResources = await getResourceAvailabilityFromDB(incidentId || undefined);
     
     // Filter by response types if specified
     if (responseTypes && responseTypes.length > 0) {

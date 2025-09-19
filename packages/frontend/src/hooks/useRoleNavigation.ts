@@ -32,8 +32,12 @@ export const useRoleNavigation = (): UseRoleNavigationReturn => {
   const { data: session } = useSession();
   const { badges, loading: badgesLoading } = useDashboardBadges(); // NEW
   
-  // Use same role resolution as feature cards for consistency
-  const currentRole = activeRole?.name || session?.user?.role || session?.user?.activeRole?.name || 'ASSESSOR';
+  // Improved role resolution logic - check all possible sources including assigned roles
+  const currentRole = activeRole?.name || 
+                      session?.user?.activeRole?.name || 
+                      session?.user?.role ||
+                      (session?.user?.roles?.find((r: any) => r.isActive)?.name) ||
+                      (session?.user?.allRoles?.includes('VERIFIER') ? 'VERIFIER' : 'ASSESSOR');
 
   // Get navigation from unified role interface system
   const roleInterface = getRoleInterface(currentRole);

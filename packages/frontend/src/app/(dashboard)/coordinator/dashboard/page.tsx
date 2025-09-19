@@ -5,11 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { AlertTriangle, Eye, Plus, Settings, Zap, Clock, TrendingUp, RefreshCw } from 'lucide-react'
+import { AlertTriangle, Eye, Plus, Settings, Zap, Clock, TrendingUp, RefreshCw, Package, Users, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { AssessmentVerificationQueue } from '@/components/features/verification/AssessmentVerificationQueue'
 import { ResponseVerificationQueue } from '@/components/features/verification/ResponseVerificationQueue'
 import { QuickViewModal } from '@/components/features/verification/QuickViewModal'
+import { ResourceCoordinationPanel } from '@/components/features/coordinator/ResourceCoordinationPanel'
+import { TeamAssignmentPanel } from '@/components/features/coordinator/TeamAssignmentPanel'
+import { CommunicationFeedPanel } from '@/components/features/coordinator/CommunicationFeedPanel'
 import { useQueueManagement } from '@/hooks/useQueueManagement'
 import { useVerificationActions } from '@/hooks/useVerificationActions'
 import { useDashboardBadges } from '@/hooks/useDashboardBadges'
@@ -272,13 +275,16 @@ export default function CoordinatorDashboard() {
         responseMetrics={responseMetrics} 
       />
 
-      {/* Queue Management Tabs */}
+      {/* Coordinator Management Tabs */}
       <Tabs defaultValue="combined" className="space-y-4">
         <div className="flex items-center justify-between">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="combined">Combined View</TabsTrigger>
+          <TabsList className="grid w-full max-w-2xl grid-cols-6">
+            <TabsTrigger value="combined">Queue View</TabsTrigger>
             <TabsTrigger value="assessments">Assessments</TabsTrigger>
             <TabsTrigger value="responses">Responses</TabsTrigger>
+            <TabsTrigger value="resources">Resources</TabsTrigger>
+            <TabsTrigger value="teams">Teams</TabsTrigger>
+            <TabsTrigger value="communications">Messages</TabsTrigger>
           </TabsList>
           
           {/* Quick Actions */}
@@ -340,6 +346,18 @@ export default function CoordinatorDashboard() {
           <ResponseVerificationQueue 
             onPreviewResponse={handlePreviewResponse}
           />
+        </TabsContent>
+
+        <TabsContent value="resources">
+          <ResourceCoordinationPanel />
+        </TabsContent>
+
+        <TabsContent value="teams">
+          <TeamAssignmentPanel />
+        </TabsContent>
+
+        <TabsContent value="communications">
+          <CommunicationFeedPanel />
         </TabsContent>
       </Tabs>
 

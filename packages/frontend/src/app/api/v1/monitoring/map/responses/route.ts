@@ -88,7 +88,7 @@ const getMapResponses = async () => {
   };
 
   const totalDeliveryItems = transformedResponses.reduce((total, response) => 
-    total + response.deliveryItems.reduce((sum, item) => sum + item.quantity, 0), 0
+    total + response.deliveryItems.reduce((sum: number, item: any) => sum + item.quantity, 0), 0
   );
 
   return {

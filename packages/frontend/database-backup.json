@@ -1,0 +1,3251 @@
+{
+  "incidents": [
+    {
+      "id": "cmfkzyikw0000laqp8ca4c2am",
+      "name": "Northern District Flooding",
+      "type": "FLOOD",
+      "subType": null,
+      "source": "LEMC",
+      "severity": "HIGH",
+      "status": "ACTIVE",
+      "date": "2024-01-15T00:00:00.000Z",
+      "createdAt": "2025-09-15T10:44:25.616Z",
+      "updatedAt": "2025-09-15T10:44:25.616Z"
+    },
+    {
+      "id": "cmfkzyil40001laqpqlidnnu9",
+      "name": "Central Market Fire",
+      "type": "FIRE",
+      "subType": null,
+      "source": "FIRE_DEPT",
+      "severity": "MEDIUM",
+      "status": "CONTAINED",
+      "date": "2024-02-20T00:00:00.000Z",
+      "createdAt": "2025-09-15T10:44:25.625Z",
+      "updatedAt": "2025-09-15T10:44:25.625Z"
+    },
+    {
+      "id": "cmfkzyila0002laqp2lwnt1ph",
+      "name": "Eastern Region Drought",
+      "type": "DROUGHT",
+      "subType": null,
+      "source": "WEATHER_SERVICE",
+      "severity": "HIGH",
+      "status": "ACTIVE",
+      "date": "2024-03-10T00:00:00.000Z",
+      "createdAt": "2025-09-15T10:44:25.630Z",
+      "updatedAt": "2025-09-15T10:44:25.630Z"
+    }
+  ],
+  "affectedEntities": [
+    {
+      "id": "cmflmn4jz0000lak5rxh550ol",
+      "type": "COMMUNITY",
+      "name": "Northern Ward 1",
+      "lga": "Northern LGA",
+      "ward": "Ward 1",
+      "longitude": 8.67580637326913,
+      "latitude": 9.081519917085824,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 2630,
+      "communityName": null,
+      "contactPersonName": "Contact Person 1",
+      "contactPersonPhone": "+234-8033489975",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 329,
+      "incidentId": "cmfkzyikw0000laqp8ca4c2am",
+      "createdAt": "2025-09-15T21:19:25.391Z",
+      "updatedAt": "2025-09-15T21:35:31.371Z"
+    },
+    {
+      "id": "cmflmn4k60001lak5iqbygeoz",
+      "type": "COMMUNITY",
+      "name": "Northern Community 2",
+      "lga": "Northern LGA",
+      "ward": "Ward 2",
+      "longitude": 8.679831568425215,
+      "latitude": 9.08370314982626,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 1292,
+      "communityName": null,
+      "contactPersonName": "Contact Person 2",
+      "contactPersonPhone": "+234-8056142218",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 277,
+      "incidentId": "cmfkzyikw0000laqp8ca4c2am",
+      "createdAt": "2025-09-15T21:19:25.398Z",
+      "updatedAt": "2025-09-15T21:35:31.371Z"
+    },
+    {
+      "id": "cmflmn4kb0002lak5397kyowk",
+      "type": "COMMUNITY",
+      "name": "Northern Village 3",
+      "lga": "Northern LGA",
+      "ward": "Ward 3",
+      "longitude": 8.67895550476321,
+      "latitude": 9.086717067793682,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 2232,
+      "communityName": null,
+      "contactPersonName": "Contact Person 3",
+      "contactPersonPhone": "+234-8067915172",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 550,
+      "incidentId": "cmfkzyikw0000laqp8ca4c2am",
+      "createdAt": "2025-09-15T21:19:25.403Z",
+      "updatedAt": "2025-09-15T21:35:31.371Z"
+    },
+    {
+      "id": "cmflmn4kh0003lak5l8rcgrk8",
+      "type": "COMMERCIAL",
+      "name": "Market Sector 1",
+      "lga": "Central LGA",
+      "ward": "Ward 1",
+      "longitude": 8.67640496973641,
+      "latitude": 9.086569246473083,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 1527,
+      "communityName": null,
+      "contactPersonName": "Contact Person 1",
+      "contactPersonPhone": "+234-8056420269",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 451,
+      "incidentId": "cmfkzyil40001laqpqlidnnu9",
+      "createdAt": "2025-09-15T21:19:25.409Z",
+      "updatedAt": "2025-09-15T21:35:31.383Z"
+    },
+    {
+      "id": "cmflmn4km0004lak5j1tm2gcc",
+      "type": "COMMERCIAL",
+      "name": "Commercial District 2",
+      "lga": "Central LGA",
+      "ward": "Ward 2",
+      "longitude": 8.676264037057473,
+      "latitude": 9.08672977882838,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 2956,
+      "communityName": null,
+      "contactPersonName": "Contact Person 2",
+      "contactPersonPhone": "+234-8066418728",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 449,
+      "incidentId": "cmfkzyil40001laqpqlidnnu9",
+      "createdAt": "2025-09-15T21:19:25.414Z",
+      "updatedAt": "2025-09-15T21:35:31.383Z"
+    },
+    {
+      "id": "cmflmn4kq0005lak5lheh86v8",
+      "type": "COMMERCIAL",
+      "name": "Residential Area 3",
+      "lga": "Central LGA",
+      "ward": "Ward 3",
+      "longitude": 8.674068669575114,
+      "latitude": 9.086247216150152,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 3302,
+      "communityName": null,
+      "contactPersonName": "Contact Person 3",
+      "contactPersonPhone": "+234-8082980569",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 468,
+      "incidentId": "cmfkzyil40001laqpqlidnnu9",
+      "createdAt": "2025-09-15T21:19:25.419Z",
+      "updatedAt": "2025-09-15T21:35:31.383Z"
+    },
+    {
+      "id": "cmflmn4kv0006lak577f4vf0j",
+      "type": "RURAL",
+      "name": "Agricultural Zone 1",
+      "lga": "Eastern LGA",
+      "ward": "Ward 1",
+      "longitude": 8.673837898463175,
+      "latitude": 9.084531240551394,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 5479,
+      "communityName": null,
+      "contactPersonName": "Contact Person 1",
+      "contactPersonPhone": "+234-8061848910",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 632,
+      "incidentId": "cmfkzyila0002laqp2lwnt1ph",
+      "createdAt": "2025-09-15T21:19:25.424Z",
+      "updatedAt": "2025-09-15T21:35:31.390Z"
+    },
+    {
+      "id": "cmflmn4l10007lak5s3oqtb3e",
+      "type": "RURAL",
+      "name": "Pastoral Community 2",
+      "lga": "Eastern LGA",
+      "ward": "Ward 2",
+      "longitude": 8.672201870232266,
+      "latitude": 9.084567728723231,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 4131,
+      "communityName": null,
+      "contactPersonName": "Contact Person 2",
+      "contactPersonPhone": "+234-8083640457",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 385,
+      "incidentId": "cmfkzyila0002laqp2lwnt1ph",
+      "createdAt": "2025-09-15T21:19:25.429Z",
+      "updatedAt": "2025-09-15T21:35:31.390Z"
+    },
+    {
+      "id": "cmflmn4l60008lak5ubfontad",
+      "type": "RURAL",
+      "name": "Rural Settlement 3",
+      "lga": "Eastern LGA",
+      "ward": "Ward 3",
+      "longitude": 8.674956441834965,
+      "latitude": 9.078390840605204,
+      "campName": null,
+      "campStatus": null,
+      "campCoordinatorName": null,
+      "campCoordinatorPhone": null,
+      "superviserName": null,
+      "superviserOrganization": null,
+      "estimatedPopulation": 1192,
+      "communityName": null,
+      "contactPersonName": "Contact Person 3",
+      "contactPersonPhone": "+234-8033272343",
+      "contactPersonRole": "Community Leader",
+      "estimatedHouseholds": 757,
+      "incidentId": "cmfkzyila0002laqp2lwnt1ph",
+      "createdAt": "2025-09-15T21:19:25.434Z",
+      "updatedAt": "2025-09-15T21:35:31.390Z"
+    }
+  ],
+  "preliminaryAssessments": [
+    {
+      "id": "cmflgl53u0005lanpuwwwrnqe",
+      "reportingDate": "2024-01-16T00:00:00.000Z",
+      "reportingLatitude": 11.8311,
+      "reportingLongitude": 13.0843,
+      "reportingLGA": "Maiduguri",
+      "reportingWard": "Gwange",
+      "numberLivesLost": 12,
+      "numberInjured": 45,
+      "numberDisplaced": 800,
+      "numberHousesAffected": 150,
+      "schoolsAffected": null,
+      "medicalFacilitiesAffected": null,
+      "estimatedAgriculturalLandsAffected": null,
+      "reportingAgent": "LEMC Field Officer",
+      "additionalDetails": {},
+      "incidentId": "cmfkzyikw0000laqp8ca4c2am",
+      "createdAt": "2025-09-15T18:29:55.098Z",
+      "updatedAt": "2025-09-15T18:29:55.098Z"
+    },
+    {
+      "id": "cmflgl5410007lanpixykhahq",
+      "reportingDate": "2024-01-17T00:00:00.000Z",
+      "reportingLatitude": 11.5204,
+      "reportingLongitude": 13.686,
+      "reportingLGA": "Bama",
+      "reportingWard": "Central",
+      "numberLivesLost": 8,
+      "numberInjured": 32,
+      "numberDisplaced": 1200,
+      "numberHousesAffected": 200,
+      "schoolsAffected": null,
+      "medicalFacilitiesAffected": null,
+      "estimatedAgriculturalLandsAffected": null,
+      "reportingAgent": "LEMC Assessment Team",
+      "additionalDetails": {},
+      "incidentId": "cmfkzyikw0000laqp8ca4c2am",
+      "createdAt": "2025-09-15T18:29:55.105Z",
+      "updatedAt": "2025-09-15T18:29:55.105Z"
+    },
+    {
+      "id": "cmflhrfhg0005la2fxei2omz0",
+      "reportingDate": "2024-03-12T00:00:00.000Z",
+      "reportingLatitude": 11.7471,
+      "reportingLongitude": 11.7471,
+      "reportingLGA": "Damaturu",
+      "reportingWard": "Sabon Gari",
+      "numberLivesLost": 15,
+      "numberInjured": 25,
+      "numberDisplaced": 1500,
+      "numberHousesAffected": 80,
+      "schoolsAffected": null,
+      "medicalFacilitiesAffected": null,
+      "estimatedAgriculturalLandsAffected": null,
+      "reportingAgent": "NEMA Assessment Team",
+      "additionalDetails": {},
+      "incidentId": "cmfkzyila0002laqp2lwnt1ph",
+      "createdAt": "2025-09-15T19:02:48.101Z",
+      "updatedAt": "2025-09-15T19:02:48.101Z"
+    },
+    {
+      "id": "cmflhrfhm0007la2fb0e60e5f",
+      "reportingDate": "2024-03-14T00:00:00.000Z",
+      "reportingLatitude": 11.7108,
+      "reportingLongitude": 11.7108,
+      "reportingLGA": "Potiskum",
+      "reportingWard": "Dogo Tebo",
+      "numberLivesLost": 8,
+      "numberInjured": 18,
+      "numberDisplaced": 1200,
+      "numberHousesAffected": 60,
+      "schoolsAffected": null,
+      "medicalFacilitiesAffected": null,
+      "estimatedAgriculturalLandsAffected": null,
+      "reportingAgent": "Local Emergency Team",
+      "additionalDetails": {},
+      "incidentId": "cmfkzyila0002laqp2lwnt1ph",
+      "createdAt": "2025-09-15T19:02:48.106Z",
+      "updatedAt": "2025-09-15T19:02:48.106Z"
+    },
+    {
+      "id": "cmflhrfim000hla2f4tdt3imr",
+      "reportingDate": "2024-02-21T00:00:00.000Z",
+      "reportingLatitude": 11.8469,
+      "reportingLongitude": 13.1571,
+      "reportingLGA": "Maiduguri",
+      "reportingWard": "Bolori",
+      "numberLivesLost": 3,
+      "numberInjured": 28,
+      "numberDisplaced": 450,
+      "numberHousesAffected": 85,
+      "schoolsAffected": null,
+      "medicalFacilitiesAffected": null,
+      "estimatedAgriculturalLandsAffected": null,
+      "reportingAgent": "Fire Service Assessment",
+      "additionalDetails": {},
+      "incidentId": "cmfkzyil40001laqpqlidnnu9",
+      "createdAt": "2025-09-15T19:02:48.142Z",
+      "updatedAt": "2025-09-15T19:02:48.142Z"
+    },
+    {
+      "id": "cmflhrfis000jla2fhg9lad0n",
+      "reportingDate": "2024-02-22T00:00:00.000Z",
+      "reportingLatitude": 11.85,
+      "reportingLongitude": 13.16,
+      "reportingLGA": "Maiduguri",
+      "reportingWard": "Gwange",
+      "numberLivesLost": 1,
+      "numberInjured": 15,
+      "numberDisplaced": 300,
+      "numberHousesAffected": 45,
+      "schoolsAffected": null,
+      "medicalFacilitiesAffected": null,
+      "estimatedAgriculturalLandsAffected": null,
+      "reportingAgent": "LEMC Fire Response Team",
+      "additionalDetails": {},
+      "incidentId": "cmfkzyil40001laqpqlidnnu9",
+      "createdAt": "2025-09-15T19:02:48.148Z",
+      "updatedAt": "2025-09-15T19:02:48.148Z"
+    }
+  ],
+  "rapidAssessments": [
+    {
+      "id": "cmflmn4lb000alak57hdr7ig6",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-08-25T21:19:25.438Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:25.440Z",
+      "updatedAt": "2025-09-15T21:19:25.440Z"
+    },
+    {
+      "id": "cmflmn4lo000clak5iva2fv9f",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-08-29T21:19:25.438Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessorName": "Assessor 5",
+      "createdAt": "2025-09-15T21:19:25.453Z",
+      "updatedAt": "2025-09-15T21:19:25.453Z"
+    },
+    {
+      "id": "cmflmn4lz000elak5d5gjuju9",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-08-21T21:19:25.462Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessorName": "Assessor 8",
+      "createdAt": "2025-09-15T21:19:25.464Z",
+      "updatedAt": "2025-09-15T21:19:25.464Z"
+    },
+    {
+      "id": "cmflmn4ma000glak5r1obxhf4",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-08-22T21:19:25.473Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessorName": "Assessor 4",
+      "createdAt": "2025-09-15T21:19:25.474Z",
+      "updatedAt": "2025-09-15T21:19:25.474Z"
+    },
+    {
+      "id": "cmflmn4mn000ilak5e4ivv10l",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-08-28T21:19:25.486Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessorName": "Assessor 2",
+      "createdAt": "2025-09-15T21:19:25.487Z",
+      "updatedAt": "2025-09-15T21:19:25.487Z"
+    },
+    {
+      "id": "cmflmn4mx000klak5l1b2t4w6",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-04T21:19:25.496Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessorName": "Assessor 4",
+      "createdAt": "2025-09-15T21:19:25.498Z",
+      "updatedAt": "2025-09-15T21:19:25.498Z"
+    },
+    {
+      "id": "cmflmn4n8000mlak5odngzrsj",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-09T21:19:25.496Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessorName": "Assessor 5",
+      "createdAt": "2025-09-15T21:19:25.509Z",
+      "updatedAt": "2025-09-15T21:19:25.509Z"
+    },
+    {
+      "id": "cmflmn4nk000olak58p9oulbf",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-09-04T21:19:25.519Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessorName": "Assessor 3",
+      "createdAt": "2025-09-15T21:19:25.520Z",
+      "updatedAt": "2025-09-15T21:19:25.520Z"
+    },
+    {
+      "id": "cmflmn4o3000rlak5bqnie8pr",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-09-12T21:19:25.539Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:25.540Z",
+      "updatedAt": "2025-09-15T21:19:25.540Z"
+    },
+    {
+      "id": "cmflmn4oc000tlak5mq5qpwc8",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-09-18T21:19:25.539Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 1",
+      "createdAt": "2025-09-15T21:19:25.549Z",
+      "updatedAt": "2025-09-15T21:19:25.549Z"
+    },
+    {
+      "id": "cmflmn4om000vlak5cvmq3uax",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-03T21:19:25.557Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 8",
+      "createdAt": "2025-09-15T21:19:25.558Z",
+      "updatedAt": "2025-09-15T21:19:25.558Z"
+    },
+    {
+      "id": "cmflmn4ov000xlak5pm3p7yx5",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-03T21:19:25.557Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 3",
+      "createdAt": "2025-09-15T21:19:25.567Z",
+      "updatedAt": "2025-09-15T21:19:25.567Z"
+    },
+    {
+      "id": "cmflmn4p5000zlak5ev9mv3lv",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-08-20T21:19:25.576Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 9",
+      "createdAt": "2025-09-15T21:19:25.577Z",
+      "updatedAt": "2025-09-15T21:19:25.577Z"
+    },
+    {
+      "id": "cmflmn4pe0011lak5mgmwfj1t",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-02T21:19:25.585Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:25.586Z",
+      "updatedAt": "2025-09-15T21:19:25.586Z"
+    },
+    {
+      "id": "cmflmn4po0013lak525xkwwiw",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-09T21:19:25.595Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 1",
+      "createdAt": "2025-09-15T21:19:25.596Z",
+      "updatedAt": "2025-09-15T21:19:25.596Z"
+    },
+    {
+      "id": "cmflmn4pw0015lak5buhjlbsw",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-17T21:19:25.595Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 9",
+      "createdAt": "2025-09-15T21:19:25.605Z",
+      "updatedAt": "2025-09-15T21:19:25.605Z"
+    },
+    {
+      "id": "cmflmn4q50017lak51ckuj1tu",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-09-12T21:19:25.612Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessorName": "Assessor 3",
+      "createdAt": "2025-09-15T21:19:25.613Z",
+      "updatedAt": "2025-09-15T21:19:25.613Z"
+    },
+    {
+      "id": "cmflmn4qm001blak5li9ybcju",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-09-09T21:19:25.630Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessorName": "Assessor 6",
+      "createdAt": "2025-09-15T21:19:25.631Z",
+      "updatedAt": "2025-09-15T21:19:25.631Z"
+    },
+    {
+      "id": "cmflmn4qv001dlak5hbiocqzi",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-08-29T21:19:25.639Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessorName": "Assessor 9",
+      "createdAt": "2025-09-15T21:19:25.640Z",
+      "updatedAt": "2025-09-15T21:19:25.640Z"
+    },
+    {
+      "id": "cmflmn4r4001flak5tngvlsh0",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-09-14T21:19:25.647Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessorName": "Assessor 3",
+      "createdAt": "2025-09-15T21:19:25.648Z",
+      "updatedAt": "2025-09-15T21:19:25.648Z"
+    },
+    {
+      "id": "cmflmn4rd001hlak53naqhr3e",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-09-15T21:19:25.647Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:25.657Z",
+      "updatedAt": "2025-09-15T21:19:25.657Z"
+    },
+    {
+      "id": "cmflmn4rm001jlak5w8vf33qo",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-08-22T21:19:25.665Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessorName": "Assessor 3",
+      "createdAt": "2025-09-15T21:19:25.666Z",
+      "updatedAt": "2025-09-15T21:19:25.666Z"
+    },
+    {
+      "id": "cmflmn4rv001llak5lrc2hu4h",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-08T21:19:25.674Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessorName": "Assessor 4",
+      "createdAt": "2025-09-15T21:19:25.675Z",
+      "updatedAt": "2025-09-15T21:19:25.675Z"
+    },
+    {
+      "id": "cmflmn4s3001nlak5pbbbv2wu",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-12T21:19:25.674Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:25.684Z",
+      "updatedAt": "2025-09-15T21:19:25.684Z"
+    },
+    {
+      "id": "cmflmn4sc001plak5byehd6h1",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-09-13T21:19:25.691Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:25.692Z",
+      "updatedAt": "2025-09-15T21:19:25.692Z"
+    },
+    {
+      "id": "cmflmn4sw001tlak5xv3mwlup",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-08-20T21:19:25.711Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 5",
+      "createdAt": "2025-09-15T21:19:25.712Z",
+      "updatedAt": "2025-09-15T21:19:25.712Z"
+    },
+    {
+      "id": "cmflmn4t5001vlak5mw1cqve7",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-08-29T21:19:25.711Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 1",
+      "createdAt": "2025-09-15T21:19:25.721Z",
+      "updatedAt": "2025-09-15T21:19:25.721Z"
+    },
+    {
+      "id": "cmflmn4td001xlak5ciot6qbp",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-14T21:19:25.729Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 8",
+      "createdAt": "2025-09-15T21:19:25.730Z",
+      "updatedAt": "2025-09-15T21:19:25.730Z"
+    },
+    {
+      "id": "cmflmn4tm001zlak5juhq2dxx",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-14T21:19:25.729Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 1",
+      "createdAt": "2025-09-15T21:19:25.739Z",
+      "updatedAt": "2025-09-15T21:19:25.739Z"
+    },
+    {
+      "id": "cmflmn4tv0021lak5inb9r42g",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-09-02T21:19:25.746Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 4",
+      "createdAt": "2025-09-15T21:19:25.747Z",
+      "updatedAt": "2025-09-15T21:19:25.747Z"
+    },
+    {
+      "id": "cmflmn4u40023lak50jx2ugrh",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-14T21:19:25.756Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:25.757Z",
+      "updatedAt": "2025-09-15T21:19:25.757Z"
+    },
+    {
+      "id": "cmflmn4ue0025lak5l1qtdw0i",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-17T21:19:25.756Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 3",
+      "createdAt": "2025-09-15T21:19:25.766Z",
+      "updatedAt": "2025-09-15T21:19:25.766Z"
+    },
+    {
+      "id": "cmflmn4uo0027lak5hur3qrjr",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-08-18T21:19:25.775Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 6",
+      "createdAt": "2025-09-15T21:19:25.777Z",
+      "updatedAt": "2025-09-15T21:19:25.777Z"
+    },
+    {
+      "id": "cmflmn4uy0029lak5tr82bmuq",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-08-29T21:19:25.785Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:25.786Z",
+      "updatedAt": "2025-09-15T21:19:25.786Z"
+    },
+    {
+      "id": "cmflmn4vh002dlak557w94s2g",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-08-24T21:19:25.804Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:25.805Z",
+      "updatedAt": "2025-09-15T21:19:25.805Z"
+    },
+    {
+      "id": "cmflmn4vp002flak5yx3g6nfz",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-10T21:19:25.813Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessorName": "Assessor 3",
+      "createdAt": "2025-09-15T21:19:25.814Z",
+      "updatedAt": "2025-09-15T21:19:25.814Z"
+    },
+    {
+      "id": "cmflmn4vy002hlak5hq9xx5pq",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-09-01T21:19:25.821Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessorName": "Assessor 3",
+      "createdAt": "2025-09-15T21:19:25.822Z",
+      "updatedAt": "2025-09-15T21:19:25.822Z"
+    },
+    {
+      "id": "cmflmn4w8002jlak5kys3yazn",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-01T21:19:25.832Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessorName": "Assessor 1",
+      "createdAt": "2025-09-15T21:19:25.832Z",
+      "updatedAt": "2025-09-15T21:19:25.832Z"
+    },
+    {
+      "id": "cmflmn4wg002llak5rqa3vd0d",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-01T21:19:25.832Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessorName": "Assessor 2",
+      "createdAt": "2025-09-15T21:19:25.841Z",
+      "updatedAt": "2025-09-15T21:19:25.841Z"
+    },
+    {
+      "id": "cmflmn4wr002nlak5hnn4ot8n",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-09T21:19:25.850Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:25.851Z",
+      "updatedAt": "2025-09-15T21:19:25.851Z"
+    },
+    {
+      "id": "cmflmn4wz002plak57ef4aqo1",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-08-19T21:19:25.859Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessorName": "Assessor 1",
+      "createdAt": "2025-09-15T21:19:25.860Z",
+      "updatedAt": "2025-09-15T21:19:25.860Z"
+    },
+    {
+      "id": "cmflmn4x9002rlak5il5ujolk",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-08-24T21:19:25.859Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessorName": "Assessor 9",
+      "createdAt": "2025-09-15T21:19:25.869Z",
+      "updatedAt": "2025-09-15T21:19:25.869Z"
+    },
+    {
+      "id": "cmflmn4xy002wlak5blknjftd",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-08-23T21:19:25.893Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 2",
+      "createdAt": "2025-09-15T21:19:25.894Z",
+      "updatedAt": "2025-09-15T21:19:25.894Z"
+    },
+    {
+      "id": "cmflmn4y8002ylak5avt7zbmo",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-08-28T21:19:25.893Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 6",
+      "createdAt": "2025-09-15T21:19:25.904Z",
+      "updatedAt": "2025-09-15T21:19:25.904Z"
+    },
+    {
+      "id": "cmflmn4yg0030lak5f4qw0v0n",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-12T21:19:25.911Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:25.912Z",
+      "updatedAt": "2025-09-15T21:19:25.912Z"
+    },
+    {
+      "id": "cmflmn4yp0032lak5pj1x63v0",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-08-29T21:19:25.920Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 6",
+      "createdAt": "2025-09-15T21:19:25.921Z",
+      "updatedAt": "2025-09-15T21:19:25.921Z"
+    },
+    {
+      "id": "cmflmn4yy0034lak52lljyon7",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-09-02T21:19:25.920Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:25.930Z",
+      "updatedAt": "2025-09-15T21:19:25.930Z"
+    },
+    {
+      "id": "cmflmn4z70036lak54mqrvm4t",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-02T21:19:25.938Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 1",
+      "createdAt": "2025-09-15T21:19:25.939Z",
+      "updatedAt": "2025-09-15T21:19:25.939Z"
+    },
+    {
+      "id": "cmflmn4zf0038lak5xfpp99hz",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-11T21:19:25.938Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 6",
+      "createdAt": "2025-09-15T21:19:25.948Z",
+      "updatedAt": "2025-09-15T21:19:25.948Z"
+    },
+    {
+      "id": "cmflmn4zo003alak5jhqq7lam",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-08-30T21:19:25.956Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 9",
+      "createdAt": "2025-09-15T21:19:25.956Z",
+      "updatedAt": "2025-09-15T21:19:25.956Z"
+    },
+    {
+      "id": "cmflmn4zx003clak5oyunhbzy",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-09-04T21:19:25.964Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:25.965Z",
+      "updatedAt": "2025-09-15T21:19:25.965Z"
+    },
+    {
+      "id": "cmflmn508003elak5hau7sn7t",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-09-11T21:19:25.964Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessorName": "Assessor 2",
+      "createdAt": "2025-09-15T21:19:25.976Z",
+      "updatedAt": "2025-09-15T21:19:25.976Z"
+    },
+    {
+      "id": "cmflmn512003klak5da6pp1p6",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-09-09T21:19:26.005Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessorName": "Assessor 9",
+      "createdAt": "2025-09-15T21:19:26.007Z",
+      "updatedAt": "2025-09-15T21:19:26.007Z"
+    },
+    {
+      "id": "cmflmn51e003mlak5bb9f4tfc",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-09-13T21:19:26.005Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:26.018Z",
+      "updatedAt": "2025-09-15T21:19:26.018Z"
+    },
+    {
+      "id": "cmflmn51n003olak53ornj7e6",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-08-29T21:19:26.026Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessorName": "Assessor 1",
+      "createdAt": "2025-09-15T21:19:26.027Z",
+      "updatedAt": "2025-09-15T21:19:26.027Z"
+    },
+    {
+      "id": "cmflmn51v003qlak55d5sm7hw",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-09-06T21:19:26.035Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessorName": "Assessor 4",
+      "createdAt": "2025-09-15T21:19:26.035Z",
+      "updatedAt": "2025-09-15T21:19:26.035Z"
+    },
+    {
+      "id": "cmflmn523003slak51hyhls94",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-08-19T21:19:26.042Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessorName": "Assessor 5",
+      "createdAt": "2025-09-15T21:19:26.043Z",
+      "updatedAt": "2025-09-15T21:19:26.043Z"
+    },
+    {
+      "id": "cmflmn52c003ulak5xgf8ibf0",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-15T21:19:26.051Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessorName": "Assessor 6",
+      "createdAt": "2025-09-15T21:19:26.052Z",
+      "updatedAt": "2025-09-15T21:19:26.052Z"
+    },
+    {
+      "id": "cmflmn52j003wlak59xtgmqy9",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-19T21:19:26.051Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessorName": "Assessor 8",
+      "createdAt": "2025-09-15T21:19:26.059Z",
+      "updatedAt": "2025-09-15T21:19:26.059Z"
+    },
+    {
+      "id": "cmflmn52s003ylak5ab9o9ult",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-08-24T21:19:26.067Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:26.068Z",
+      "updatedAt": "2025-09-15T21:19:26.068Z"
+    },
+    {
+      "id": "cmflmn53n0044lak5oorimo2w",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-08-28T21:19:26.098Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 8",
+      "createdAt": "2025-09-15T21:19:26.099Z",
+      "updatedAt": "2025-09-15T21:19:26.099Z"
+    },
+    {
+      "id": "cmflmn53w0046lak5q76na6qm",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-01T21:19:26.107Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:26.108Z",
+      "updatedAt": "2025-09-15T21:19:26.108Z"
+    },
+    {
+      "id": "cmflmn5440048lak5uxshpwx5",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-04T21:19:26.107Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:26.116Z",
+      "updatedAt": "2025-09-15T21:19:26.116Z"
+    },
+    {
+      "id": "cmflmn54e004alak5g9dyyg3a",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-08-20T21:19:26.125Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 4",
+      "createdAt": "2025-09-15T21:19:26.126Z",
+      "updatedAt": "2025-09-15T21:19:26.126Z"
+    },
+    {
+      "id": "cmflmn54m004clak54z8l5qca",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-08-18T21:19:26.134Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 6",
+      "createdAt": "2025-09-15T21:19:26.135Z",
+      "updatedAt": "2025-09-15T21:19:26.135Z"
+    },
+    {
+      "id": "cmflmn54v004elak5jtjld34l",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-08-27T21:19:26.134Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 2",
+      "createdAt": "2025-09-15T21:19:26.143Z",
+      "updatedAt": "2025-09-15T21:19:26.143Z"
+    },
+    {
+      "id": "cmflmn554004glak53t1ryqz5",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-15T21:19:26.151Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:26.152Z",
+      "updatedAt": "2025-09-15T21:19:26.152Z"
+    },
+    {
+      "id": "cmflmn55b004ilak5gm5ny0zi",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-08-27T21:19:26.159Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 8",
+      "createdAt": "2025-09-15T21:19:26.160Z",
+      "updatedAt": "2025-09-15T21:19:26.160Z"
+    },
+    {
+      "id": "cmflmn55k004klak5cemleswr",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-09-03T21:19:26.159Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessorName": "Assessor 9",
+      "createdAt": "2025-09-15T21:19:26.168Z",
+      "updatedAt": "2025-09-15T21:19:26.168Z"
+    },
+    {
+      "id": "cmflmn56d004qlak51wivk6b3",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-09-06T21:19:26.196Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 5",
+      "createdAt": "2025-09-15T21:19:26.198Z",
+      "updatedAt": "2025-09-15T21:19:26.198Z"
+    },
+    {
+      "id": "cmflmn56m004slak58tnr69sf",
+      "rapidAssessmentType": "Health",
+      "rapidAssessmentDate": "2025-09-06T21:19:26.196Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:26.206Z",
+      "updatedAt": "2025-09-15T21:19:26.206Z"
+    },
+    {
+      "id": "cmflmn56v004ulak5zbmdcc6u",
+      "rapidAssessmentType": "WASH",
+      "rapidAssessmentDate": "2025-09-03T21:19:26.215Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 2",
+      "createdAt": "2025-09-15T21:19:26.216Z",
+      "updatedAt": "2025-09-15T21:19:26.216Z"
+    },
+    {
+      "id": "cmflmn575004wlak5am6xmzjh",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-08-29T21:19:26.224Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 9",
+      "createdAt": "2025-09-15T21:19:26.225Z",
+      "updatedAt": "2025-09-15T21:19:26.225Z"
+    },
+    {
+      "id": "cmflmn57f004ylak5g3h9xemx",
+      "rapidAssessmentType": "Food",
+      "rapidAssessmentDate": "2025-09-05T21:19:26.224Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 6",
+      "createdAt": "2025-09-15T21:19:26.235Z",
+      "updatedAt": "2025-09-15T21:19:26.235Z"
+    },
+    {
+      "id": "cmflmn57n0050lak5hrdwx63z",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-01T21:19:26.243Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 5",
+      "createdAt": "2025-09-15T21:19:26.244Z",
+      "updatedAt": "2025-09-15T21:19:26.244Z"
+    },
+    {
+      "id": "cmflmn57x0052lak5focmefcs",
+      "rapidAssessmentType": "Shelter",
+      "rapidAssessmentDate": "2025-09-09T21:19:26.243Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 10",
+      "createdAt": "2025-09-15T21:19:26.253Z",
+      "updatedAt": "2025-09-15T21:19:26.253Z"
+    },
+    {
+      "id": "cmflmn5850054lak57b7jm6sc",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-08-30T21:19:26.260Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 5",
+      "createdAt": "2025-09-15T21:19:26.261Z",
+      "updatedAt": "2025-09-15T21:19:26.261Z"
+    },
+    {
+      "id": "cmflmn58f0056lak5w2zr7vj8",
+      "rapidAssessmentType": "Security",
+      "rapidAssessmentDate": "2025-09-07T21:19:26.260Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 8",
+      "createdAt": "2025-09-15T21:19:26.271Z",
+      "updatedAt": "2025-09-15T21:19:26.271Z"
+    },
+    {
+      "id": "cmflmn58n0058lak5wtt1s9hd",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-09-13T21:19:26.279Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:26.280Z",
+      "updatedAt": "2025-09-15T21:19:26.280Z"
+    },
+    {
+      "id": "cmflmn58y005alak51swb3fvx",
+      "rapidAssessmentType": "Population",
+      "rapidAssessmentDate": "2025-09-19T21:19:26.279Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessorName": "Assessor 7",
+      "createdAt": "2025-09-15T21:19:26.290Z",
+      "updatedAt": "2025-09-15T21:19:26.290Z"
+    }
+  ],
+  "healthAssessments": [
+    {
+      "rapidAssessmentId": "cmflmn4lb000alak57hdr7ig6",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 3,
+      "healthFacilityType": "Health Post",
+      "qualifiedHealthWorkers": 8,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": false,
+      "hasMaternalChildServices": true,
+      "commonHealthIssues": [
+        "Malaria",
+        "Diarrhea",
+        "Malnutrition"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Northern Ward 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4lo000clak5iva2fv9f",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 4,
+      "healthFacilityType": "Primary Care",
+      "qualifiedHealthWorkers": 10,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Diarrhea",
+        "Malaria",
+        "Respiratory"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Northern Ward 1",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4o3000rlak5bqnie8pr",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 5,
+      "healthFacilityType": "Hospital",
+      "qualifiedHealthWorkers": 3,
+      "hasMedicineSupply": false,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Malaria",
+        "Diarrhea"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Northern Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4oc000tlak5mq5qpwc8",
+      "hasFunctionalClinic": false,
+      "numberHealthFacilities": 1,
+      "healthFacilityType": "Health Post",
+      "qualifiedHealthWorkers": 3,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": true,
+      "commonHealthIssues": [
+        "Diarrhea",
+        "Malaria"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Northern Community 2",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4qm001blak5li9ybcju",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 1,
+      "healthFacilityType": "Hospital",
+      "qualifiedHealthWorkers": 8,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": true,
+      "commonHealthIssues": [
+        "Diarrhea"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Northern Village 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4sw001tlak5xv3mwlup",
+      "hasFunctionalClinic": false,
+      "numberHealthFacilities": 2,
+      "healthFacilityType": "Clinic",
+      "qualifiedHealthWorkers": 8,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Respiratory",
+        "Malnutrition"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Market Sector 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4t5001vlak5mw1cqve7",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 2,
+      "healthFacilityType": "Hospital",
+      "qualifiedHealthWorkers": 5,
+      "hasMedicineSupply": false,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Respiratory",
+        "Malaria",
+        "Diarrhea"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Market Sector 1",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4vh002dlak557w94s2g",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 1,
+      "healthFacilityType": "Primary Care",
+      "qualifiedHealthWorkers": 2,
+      "hasMedicineSupply": false,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Respiratory"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Commercial District 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4xy002wlak5blknjftd",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 1,
+      "healthFacilityType": "Clinic",
+      "qualifiedHealthWorkers": 9,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Malaria"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Residential Area 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4y8002ylak5avt7zbmo",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 1,
+      "healthFacilityType": "Primary Care",
+      "qualifiedHealthWorkers": 7,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": false,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Malaria",
+        "Malnutrition"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Residential Area 3",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn512003klak5da6pp1p6",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 1,
+      "healthFacilityType": "Hospital",
+      "qualifiedHealthWorkers": 11,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": true,
+      "commonHealthIssues": [
+        "Diarrhea",
+        "Malaria"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Agricultural Zone 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn51e003mlak5bb9f4tfc",
+      "hasFunctionalClinic": false,
+      "numberHealthFacilities": 4,
+      "healthFacilityType": "Clinic",
+      "qualifiedHealthWorkers": 2,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": true,
+      "commonHealthIssues": [
+        "Malnutrition",
+        "Diarrhea",
+        "Malaria"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Agricultural Zone 1",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn53n0044lak5oorimo2w",
+      "hasFunctionalClinic": true,
+      "numberHealthFacilities": 1,
+      "healthFacilityType": "Clinic",
+      "qualifiedHealthWorkers": 8,
+      "hasMedicineSupply": true,
+      "hasMedicalSupplies": false,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Malnutrition"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Pastoral Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn56d004qlak51wivk6b3",
+      "hasFunctionalClinic": false,
+      "numberHealthFacilities": 5,
+      "healthFacilityType": "Hospital",
+      "qualifiedHealthWorkers": 12,
+      "hasMedicineSupply": false,
+      "hasMedicalSupplies": true,
+      "hasMaternalChildServices": true,
+      "commonHealthIssues": [
+        "Diarrhea"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Rural Settlement 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn56m004slak58tnr69sf",
+      "hasFunctionalClinic": false,
+      "numberHealthFacilities": 3,
+      "healthFacilityType": "Clinic",
+      "qualifiedHealthWorkers": 14,
+      "hasMedicineSupply": false,
+      "hasMedicalSupplies": false,
+      "hasMaternalChildServices": false,
+      "commonHealthIssues": [
+        "Malaria",
+        "Respiratory"
+      ],
+      "additionalHealthDetails": {
+        "notes": "Health assessment for Rural Settlement 3",
+        "status": "SUBMITTED"
+      }
+    }
+  ],
+  "populationAssessments": [
+    {
+      "rapidAssessmentId": "cmflmn4nk000olak58p9oulbf",
+      "totalHouseholds": 638,
+      "totalPopulation": 4507,
+      "populationMale": 2328,
+      "populationFemale": 263,
+      "populationUnder5": 150,
+      "pregnantWomen": 11,
+      "lactatingMothers": 59,
+      "personWithDisability": 44,
+      "elderlyPersons": 89,
+      "separatedChildren": 11,
+      "numberLivesLost": 5,
+      "numberInjured": 1,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Northern Ward 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4q50017lak51ckuj1tu",
+      "totalHouseholds": 179,
+      "totalPopulation": 3412,
+      "populationMale": 1851,
+      "populationFemale": 2270,
+      "populationUnder5": 426,
+      "pregnantWomen": 68,
+      "lactatingMothers": 51,
+      "personWithDisability": 49,
+      "elderlyPersons": 95,
+      "separatedChildren": 3,
+      "numberLivesLost": 8,
+      "numberInjured": 3,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Northern Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4sc001plak5byehd6h1",
+      "totalHouseholds": 484,
+      "totalPopulation": 4237,
+      "populationMale": 2393,
+      "populationFemale": 1893,
+      "populationUnder5": 518,
+      "pregnantWomen": 79,
+      "lactatingMothers": 25,
+      "personWithDisability": 26,
+      "elderlyPersons": 69,
+      "separatedChildren": 11,
+      "numberLivesLost": 3,
+      "numberInjured": 31,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Northern Village 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4uy0029lak5tr82bmuq",
+      "totalHouseholds": 813,
+      "totalPopulation": 3614,
+      "populationMale": 1052,
+      "populationFemale": 1672,
+      "populationUnder5": 72,
+      "pregnantWomen": 44,
+      "lactatingMothers": 9,
+      "personWithDisability": 1,
+      "elderlyPersons": 105,
+      "separatedChildren": 5,
+      "numberLivesLost": 9,
+      "numberInjured": 11,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Market Sector 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4wz002plak57ef4aqo1",
+      "totalHouseholds": 807,
+      "totalPopulation": 2950,
+      "populationMale": 2485,
+      "populationFemale": 1642,
+      "populationUnder5": 199,
+      "pregnantWomen": 60,
+      "lactatingMothers": 57,
+      "personWithDisability": 2,
+      "elderlyPersons": 59,
+      "separatedChildren": 14,
+      "numberLivesLost": 0,
+      "numberInjured": 47,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Commercial District 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4x9002rlak5il5ujolk",
+      "totalHouseholds": 210,
+      "totalPopulation": 3665,
+      "populationMale": 2041,
+      "populationFemale": 866,
+      "populationUnder5": 362,
+      "pregnantWomen": 67,
+      "lactatingMothers": 12,
+      "personWithDisability": 1,
+      "elderlyPersons": 11,
+      "separatedChildren": 5,
+      "numberLivesLost": 1,
+      "numberInjured": 45,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Commercial District 2",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4zx003clak5oyunhbzy",
+      "totalHouseholds": 881,
+      "totalPopulation": 4336,
+      "populationMale": 407,
+      "populationFemale": 2268,
+      "populationUnder5": 520,
+      "pregnantWomen": 23,
+      "lactatingMothers": 46,
+      "personWithDisability": 40,
+      "elderlyPersons": 106,
+      "separatedChildren": 1,
+      "numberLivesLost": 2,
+      "numberInjured": 12,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Residential Area 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn508003elak5hau7sn7t",
+      "totalHouseholds": 470,
+      "totalPopulation": 2289,
+      "populationMale": 1288,
+      "populationFemale": 1156,
+      "populationUnder5": 296,
+      "pregnantWomen": 32,
+      "lactatingMothers": 19,
+      "personWithDisability": 38,
+      "elderlyPersons": 38,
+      "separatedChildren": 0,
+      "numberLivesLost": 0,
+      "numberInjured": 8,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Residential Area 3",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn52s003ylak5ab9o9ult",
+      "totalHouseholds": 869,
+      "totalPopulation": 3609,
+      "populationMale": 1284,
+      "populationFemale": 2272,
+      "populationUnder5": 450,
+      "pregnantWomen": 101,
+      "lactatingMothers": 67,
+      "personWithDisability": 3,
+      "elderlyPersons": 24,
+      "separatedChildren": 11,
+      "numberLivesLost": 5,
+      "numberInjured": 36,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Agricultural Zone 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn55b004ilak5gm5ny0zi",
+      "totalHouseholds": 562,
+      "totalPopulation": 3179,
+      "populationMale": 607,
+      "populationFemale": 1599,
+      "populationUnder5": 285,
+      "pregnantWomen": 61,
+      "lactatingMothers": 72,
+      "personWithDisability": 21,
+      "elderlyPersons": 103,
+      "separatedChildren": 7,
+      "numberLivesLost": 0,
+      "numberInjured": 46,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Pastoral Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn55k004klak5cemleswr",
+      "totalHouseholds": 218,
+      "totalPopulation": 811,
+      "populationMale": 1197,
+      "populationFemale": 2528,
+      "populationUnder5": 198,
+      "pregnantWomen": 84,
+      "lactatingMothers": 83,
+      "personWithDisability": 17,
+      "elderlyPersons": 73,
+      "separatedChildren": 16,
+      "numberLivesLost": 1,
+      "numberInjured": 5,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Pastoral Community 2",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn58n0058lak5wtt1s9hd",
+      "totalHouseholds": 840,
+      "totalPopulation": 4724,
+      "populationMale": 1534,
+      "populationFemale": 2187,
+      "populationUnder5": 339,
+      "pregnantWomen": 47,
+      "lactatingMothers": 59,
+      "personWithDisability": 16,
+      "elderlyPersons": 97,
+      "separatedChildren": 14,
+      "numberLivesLost": 6,
+      "numberInjured": 23,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Rural Settlement 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn58y005alak51swb3fvx",
+      "totalHouseholds": 539,
+      "totalPopulation": 760,
+      "populationMale": 1586,
+      "populationFemale": 2119,
+      "populationUnder5": 154,
+      "pregnantWomen": 48,
+      "lactatingMothers": 63,
+      "personWithDisability": 35,
+      "elderlyPersons": 18,
+      "separatedChildren": 6,
+      "numberLivesLost": 4,
+      "numberInjured": 17,
+      "additionalPopulationDetails": {
+        "notes": "Population assessment for Rural Settlement 3",
+        "status": "SUBMITTED"
+      }
+    }
+  ],
+  "foodAssessments": [
+    {
+      "rapidAssessmentId": "cmflmn4ma000glak5r1obxhf4",
+      "foodSource": [
+        "Hunting/Fishing"
+      ],
+      "availableFoodDurationDays": 36,
+      "additionalFoodRequiredPersons": 292,
+      "additionalFoodRequiredHouseholds": 86,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Northern Ward 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4p5000zlak5ev9mv3lv",
+      "foodSource": [
+        "Market",
+        "Hunting/Fishing"
+      ],
+      "availableFoodDurationDays": 39,
+      "additionalFoodRequiredPersons": 285,
+      "additionalFoodRequiredHouseholds": 83,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Northern Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4r4001flak5tngvlsh0",
+      "foodSource": [
+        "Assistance",
+        "Home Production"
+      ],
+      "availableFoodDurationDays": 28,
+      "additionalFoodRequiredPersons": 310,
+      "additionalFoodRequiredHouseholds": 48,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Northern Village 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4rd001hlak53naqhr3e",
+      "foodSource": [
+        "Market",
+        "Home Production"
+      ],
+      "availableFoodDurationDays": 27,
+      "additionalFoodRequiredPersons": 102,
+      "additionalFoodRequiredHouseholds": 30,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Northern Village 3",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4tv0021lak5inb9r42g",
+      "foodSource": [
+        "Home Production"
+      ],
+      "availableFoodDurationDays": 55,
+      "additionalFoodRequiredPersons": 168,
+      "additionalFoodRequiredHouseholds": 42,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Market Sector 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4vy002hlak5hq9xx5pq",
+      "foodSource": [
+        "Hunting/Fishing",
+        "Market"
+      ],
+      "availableFoodDurationDays": 33,
+      "additionalFoodRequiredPersons": 481,
+      "additionalFoodRequiredHouseholds": 54,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Commercial District 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4yp0032lak5pj1x63v0",
+      "foodSource": [
+        "Hunting/Fishing",
+        "Assistance"
+      ],
+      "availableFoodDurationDays": 3,
+      "additionalFoodRequiredPersons": 159,
+      "additionalFoodRequiredHouseholds": 49,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Residential Area 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4yy0034lak52lljyon7",
+      "foodSource": [
+        "Hunting/Fishing"
+      ],
+      "availableFoodDurationDays": 43,
+      "additionalFoodRequiredPersons": 480,
+      "additionalFoodRequiredHouseholds": 48,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Residential Area 3",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn51v003qlak55d5sm7hw",
+      "foodSource": [
+        "Assistance",
+        "Home Production"
+      ],
+      "availableFoodDurationDays": 21,
+      "additionalFoodRequiredPersons": 2,
+      "additionalFoodRequiredHouseholds": 23,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Agricultural Zone 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn54e004alak5g9dyyg3a",
+      "foodSource": [
+        "Hunting/Fishing",
+        "Assistance"
+      ],
+      "availableFoodDurationDays": 47,
+      "additionalFoodRequiredPersons": 245,
+      "additionalFoodRequiredHouseholds": 68,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Pastoral Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn575004wlak5am6xmzjh",
+      "foodSource": [
+        "Market"
+      ],
+      "availableFoodDurationDays": 8,
+      "additionalFoodRequiredPersons": 266,
+      "additionalFoodRequiredHouseholds": 61,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Rural Settlement 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn57f004ylak5g3h9xemx",
+      "foodSource": [
+        "Market"
+      ],
+      "availableFoodDurationDays": 45,
+      "additionalFoodRequiredPersons": 467,
+      "additionalFoodRequiredHouseholds": 68,
+      "additionalFoodDetails": {
+        "notes": "Food assessment for Rural Settlement 3",
+        "status": "SUBMITTED"
+      }
+    }
+  ],
+  "shelterAssessments": [
+    {
+      "rapidAssessmentId": "cmflmn4mn000ilak5e4ivv10l",
+      "areSheltersSufficient": false,
+      "shelterTypes": [
+        "Communal structure"
+      ],
+      "requiredShelterType": [
+        "Open space"
+      ],
+      "numberSheltersRequired": 91,
+      "areOvercrowded": false,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Northern Ward 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4pe0011lak5mgmwfj1t",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Communal structure",
+        "Local materials"
+      ],
+      "requiredShelterType": [
+        "Trampoline"
+      ],
+      "numberSheltersRequired": 89,
+      "areOvercrowded": false,
+      "provideWeatherProtection": false,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Northern Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4rm001jlak5w8vf33qo",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Trampoline"
+      ],
+      "requiredShelterType": [
+        "Open space"
+      ],
+      "numberSheltersRequired": 64,
+      "areOvercrowded": true,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Northern Village 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4u40023lak50jx2ugrh",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Local materials",
+        "Communal structure"
+      ],
+      "requiredShelterType": [
+        "Communal structure",
+        "Trampoline"
+      ],
+      "numberSheltersRequired": 53,
+      "areOvercrowded": false,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Market Sector 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4ue0025lak5l1qtdw0i",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Trampoline"
+      ],
+      "requiredShelterType": [
+        "Trampoline",
+        "Communal structure"
+      ],
+      "numberSheltersRequired": 10,
+      "areOvercrowded": true,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Market Sector 1",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4w8002jlak5kys3yazn",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Trampoline"
+      ],
+      "requiredShelterType": [
+        "Communal structure",
+        "Local materials"
+      ],
+      "numberSheltersRequired": 54,
+      "areOvercrowded": false,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Commercial District 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4wg002llak5rqa3vd0d",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Communal structure"
+      ],
+      "requiredShelterType": [
+        "Open space"
+      ],
+      "numberSheltersRequired": 48,
+      "areOvercrowded": false,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Commercial District 2",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4z70036lak54mqrvm4t",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Communal structure",
+        "Trampoline"
+      ],
+      "requiredShelterType": [
+        "Trampoline",
+        "Communal structure"
+      ],
+      "numberSheltersRequired": 87,
+      "areOvercrowded": false,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Residential Area 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4zf0038lak5xfpp99hz",
+      "areSheltersSufficient": false,
+      "shelterTypes": [
+        "Trampoline"
+      ],
+      "requiredShelterType": [
+        "Trampoline",
+        "Open space"
+      ],
+      "numberSheltersRequired": 46,
+      "areOvercrowded": false,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Residential Area 3",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn523003slak51hyhls94",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Local materials"
+      ],
+      "requiredShelterType": [
+        "Trampoline"
+      ],
+      "numberSheltersRequired": 25,
+      "areOvercrowded": false,
+      "provideWeatherProtection": false,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Agricultural Zone 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn54m004clak54z8l5qca",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Trampoline"
+      ],
+      "requiredShelterType": [
+        "Trampoline",
+        "Open space"
+      ],
+      "numberSheltersRequired": 71,
+      "areOvercrowded": true,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Pastoral Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn54v004elak5jtjld34l",
+      "areSheltersSufficient": false,
+      "shelterTypes": [
+        "Communal structure",
+        "Local materials"
+      ],
+      "requiredShelterType": [
+        "Trampoline"
+      ],
+      "numberSheltersRequired": 64,
+      "areOvercrowded": false,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Pastoral Community 2",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn57n0050lak5hrdwx63z",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Trampoline",
+        "Open space"
+      ],
+      "requiredShelterType": [
+        "Trampoline",
+        "Open space"
+      ],
+      "numberSheltersRequired": 89,
+      "areOvercrowded": false,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Rural Settlement 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn57x0052lak5focmefcs",
+      "areSheltersSufficient": true,
+      "shelterTypes": [
+        "Trampoline"
+      ],
+      "requiredShelterType": [
+        "Trampoline"
+      ],
+      "numberSheltersRequired": 47,
+      "areOvercrowded": true,
+      "provideWeatherProtection": true,
+      "additionalShelterDetails": {
+        "notes": "Shelter assessment for Rural Settlement 3",
+        "status": "SUBMITTED"
+      }
+    }
+  ],
+  "securityAssessments": [
+    {
+      "rapidAssessmentId": "cmflmn4mx000klak5l1b2t4w6",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": false,
+      "vulnerableGroupsHaveAccess": false,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Northern Ward 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4n8000mlak5odngzrsj",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": true,
+      "vulnerableGroupsHaveAccess": false,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Northern Ward 1",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4po0013lak525xkwwiw",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": false,
+      "vulnerableGroupsHaveAccess": true,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Northern Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4pw0015lak5buhjlbsw",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": true,
+      "vulnerableGroupsHaveAccess": false,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Northern Community 2",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4rv001llak5lrc2hu4h",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": false,
+      "vulnerableGroupsHaveAccess": true,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Northern Village 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4s3001nlak5pbbbv2wu",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": false,
+      "vulnerableGroupsHaveAccess": false,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Northern Village 3",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4uo0027lak5hur3qrjr",
+      "gbvCasesReported": true,
+      "hasProtectionReportingMechanism": true,
+      "vulnerableGroupsHaveAccess": true,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Market Sector 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4wr002nlak5hnn4ot8n",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": false,
+      "vulnerableGroupsHaveAccess": false,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Commercial District 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn4zo003alak5jhqq7lam",
+      "gbvCasesReported": true,
+      "hasProtectionReportingMechanism": false,
+      "vulnerableGroupsHaveAccess": true,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Residential Area 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn52c003ulak5xgf8ibf0",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": true,
+      "vulnerableGroupsHaveAccess": true,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Agricultural Zone 1",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn52j003wlak59xtgmqy9",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": true,
+      "vulnerableGroupsHaveAccess": false,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Agricultural Zone 1",
+        "status": "SUBMITTED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn554004glak53t1ryqz5",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": true,
+      "vulnerableGroupsHaveAccess": true,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Pastoral Community 2",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn5850054lak57b7jm6sc",
+      "gbvCasesReported": true,
+      "hasProtectionReportingMechanism": true,
+      "vulnerableGroupsHaveAccess": false,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Rural Settlement 3",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "rapidAssessmentId": "cmflmn58f0056lak5w2zr7vj8",
+      "gbvCasesReported": false,
+      "hasProtectionReportingMechanism": false,
+      "vulnerableGroupsHaveAccess": true,
+      "additionalSecurityDetails": {
+        "notes": "Security assessment for Rural Settlement 3",
+        "status": "SUBMITTED"
+      }
+    }
+  ],
+  "rapidResponses": [
+    {
+      "id": "cmflmn4nu000plak5ern7ynzu",
+      "responseType": "Population",
+      "status": "DELIVERED",
+      "plannedDate": "2025-08-24T21:19:25.529Z",
+      "deliveredDate": "2025-08-30T21:19:25.529Z",
+      "affectedEntityId": "cmflmn4jz0000lak5rxh550ol",
+      "assessmentId": null,
+      "responderId": "responder_7",
+      "responderName": "Response Team 5",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Population response provided to Northern Ward 1",
+        "magnitude": "MODERATE",
+        "responseType": "Population",
+        "resourcesDeployed": [
+          "Registration materials"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.531Z",
+      "updatedAt": "2025-09-15T21:19:25.531Z"
+    },
+    {
+      "id": "cmflmn4qe0018lak5lqlpwn7e",
+      "responseType": "WASH",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-09T21:19:25.621Z",
+      "deliveredDate": "2025-09-11T21:19:25.621Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessmentId": null,
+      "responderId": "responder_7",
+      "responderName": "Response Team 2",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "WASH response provided to Northern Community 2",
+        "magnitude": "PARTIAL",
+        "responseType": "WASH",
+        "resourcesDeployed": [
+          "Water purification tablets",
+          "Portable toilets"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.622Z",
+      "updatedAt": "2025-09-15T21:19:25.622Z"
+    },
+    {
+      "id": "cmflmn4qi0019lak55wpoa1q9",
+      "responseType": "Security",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-01T21:19:25.626Z",
+      "deliveredDate": "2025-09-04T21:19:25.626Z",
+      "affectedEntityId": "cmflmn4k60001lak5iqbygeoz",
+      "assessmentId": null,
+      "responderId": "responder_2",
+      "responderName": "Response Team 2",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Security response provided to Northern Community 2",
+        "magnitude": "FULL",
+        "responseType": "Security",
+        "resourcesDeployed": [
+          "Transport"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.627Z",
+      "updatedAt": "2025-09-15T21:19:25.627Z"
+    },
+    {
+      "id": "cmflmn4sm001qlak55dzihs6x",
+      "responseType": "Health",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-08T21:19:25.701Z",
+      "deliveredDate": "2025-09-12T21:19:25.701Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessmentId": null,
+      "responderId": "responder_5",
+      "responderName": "Response Team 4",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Health response provided to Northern Village 3",
+        "magnitude": "PARTIAL",
+        "responseType": "Health",
+        "resourcesDeployed": [
+          "Mobile clinic",
+          "Healthcare workers",
+          "Ambulance"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.703Z",
+      "updatedAt": "2025-09-15T21:19:25.703Z"
+    },
+    {
+      "id": "cmflmn4ss001rlak5stj851ya",
+      "responseType": "Security",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-03T21:19:25.707Z",
+      "deliveredDate": "2025-09-09T21:19:25.707Z",
+      "affectedEntityId": "cmflmn4kb0002lak5397kyowk",
+      "assessmentId": null,
+      "responderId": "responder_3",
+      "responderName": "Response Team 1",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Security response provided to Northern Village 3",
+        "magnitude": "PARTIAL",
+        "responseType": "Security",
+        "resourcesDeployed": [
+          "Communication equipment",
+          "Safe spaces",
+          "Transport"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.708Z",
+      "updatedAt": "2025-09-15T21:19:25.708Z"
+    },
+    {
+      "id": "cmflmn4v8002alak58rzvwiby",
+      "responseType": "Food",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-01T21:19:25.795Z",
+      "deliveredDate": "2025-09-01T21:19:25.795Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessmentId": null,
+      "responderId": "responder_5",
+      "responderName": "Response Team 3",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Food response provided to Market Sector 1",
+        "magnitude": "MODERATE",
+        "responseType": "Food",
+        "resourcesDeployed": [
+          "Storage facilities",
+          "Cooking equipment",
+          "Nutritional supplements"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.796Z",
+      "updatedAt": "2025-09-15T21:19:25.796Z"
+    },
+    {
+      "id": "cmflmn4vc002blak5qzavaqup",
+      "responseType": "Security",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-10T21:19:25.799Z",
+      "deliveredDate": "2025-09-12T21:19:25.799Z",
+      "affectedEntityId": "cmflmn4kh0003lak5l8rcgrk8",
+      "assessmentId": null,
+      "responderId": "responder_5",
+      "responderName": "Response Team 1",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Security response provided to Market Sector 1",
+        "magnitude": "FULL",
+        "responseType": "Security",
+        "resourcesDeployed": [
+          "Transport",
+          "Security personnel"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.800Z",
+      "updatedAt": "2025-09-15T21:19:25.800Z"
+    },
+    {
+      "id": "cmflmn4xi002slak5b59pb6n7",
+      "responseType": "Health",
+      "status": "DELIVERED",
+      "plannedDate": "2025-08-30T21:19:25.877Z",
+      "deliveredDate": "2025-09-03T21:19:25.877Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessmentId": null,
+      "responderId": "responder_10",
+      "responderName": "Response Team 3",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Health response provided to Commercial District 2",
+        "magnitude": "PARTIAL",
+        "responseType": "Health",
+        "resourcesDeployed": [
+          "Healthcare workers"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.879Z",
+      "updatedAt": "2025-09-15T21:19:25.879Z"
+    },
+    {
+      "id": "cmflmn4xn002tlak5huyz2czb",
+      "responseType": "WASH",
+      "status": "DELIVERED",
+      "plannedDate": "2025-08-24T21:19:25.882Z",
+      "deliveredDate": "2025-08-29T21:19:25.882Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessmentId": null,
+      "responderId": "responder_10",
+      "responderName": "Response Team 3",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "WASH response provided to Commercial District 2",
+        "magnitude": "MODERATE",
+        "responseType": "WASH",
+        "resourcesDeployed": [
+          "Water purification tablets",
+          "Hygiene kits"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.884Z",
+      "updatedAt": "2025-09-15T21:19:25.884Z"
+    },
+    {
+      "id": "cmflmn4xs002ulak57agfvm4p",
+      "responseType": "Shelter",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-06T21:19:25.888Z",
+      "deliveredDate": "2025-09-10T21:19:25.888Z",
+      "affectedEntityId": "cmflmn4km0004lak5j1tm2gcc",
+      "assessmentId": null,
+      "responderId": "responder_7",
+      "responderName": "Response Team 2",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Shelter response provided to Commercial District 2",
+        "magnitude": "PARTIAL",
+        "responseType": "Shelter",
+        "resourcesDeployed": [
+          "Tarpaulins"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.888Z",
+      "updatedAt": "2025-09-15T21:19:25.888Z"
+    },
+    {
+      "id": "cmflmn50h003flak54gijdwcz",
+      "responseType": "WASH",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-11T21:19:25.984Z",
+      "deliveredDate": "2025-09-13T21:19:25.984Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessmentId": null,
+      "responderId": "responder_6",
+      "responderName": "Response Team 5",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "WASH response provided to Residential Area 3",
+        "magnitude": "MODERATE",
+        "responseType": "WASH",
+        "resourcesDeployed": [
+          "Portable toilets",
+          "Water purification tablets",
+          "Water containers"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.986Z",
+      "updatedAt": "2025-09-15T21:19:25.986Z"
+    },
+    {
+      "id": "cmflmn50n003glak51v9l4ow8",
+      "responseType": "Food",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-04T21:19:25.990Z",
+      "deliveredDate": "2025-09-09T21:19:25.990Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessmentId": null,
+      "responderId": "responder_5",
+      "responderName": "Response Team 4",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Food response provided to Residential Area 3",
+        "magnitude": "MODERATE",
+        "responseType": "Food",
+        "resourcesDeployed": [
+          "Emergency food rations"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.991Z",
+      "updatedAt": "2025-09-15T21:19:25.991Z"
+    },
+    {
+      "id": "cmflmn50s003hlak5apai5wbs",
+      "responseType": "Shelter",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-08T21:19:25.995Z",
+      "deliveredDate": "2025-09-12T21:19:25.995Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessmentId": null,
+      "responderId": "responder_4",
+      "responderName": "Response Team 4",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Shelter response provided to Residential Area 3",
+        "magnitude": "PARTIAL",
+        "responseType": "Shelter",
+        "resourcesDeployed": [
+          "Construction materials"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:25.996Z",
+      "updatedAt": "2025-09-15T21:19:25.996Z"
+    },
+    {
+      "id": "cmflmn50w003ilak5ljwulral",
+      "responseType": "Population",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-04T21:19:25.999Z",
+      "deliveredDate": "2025-09-08T21:19:25.999Z",
+      "affectedEntityId": "cmflmn4kq0005lak5lheh86v8",
+      "assessmentId": null,
+      "responderId": "responder_7",
+      "responderName": "Response Team 1",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Population response provided to Residential Area 3",
+        "magnitude": "MODERATE",
+        "responseType": "Population",
+        "resourcesDeployed": [
+          "Data collection tools",
+          "Census equipment"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.000Z",
+      "updatedAt": "2025-09-15T21:19:26.000Z"
+    },
+    {
+      "id": "cmflmn532003zlak5b9me36mx",
+      "responseType": "Health",
+      "status": "DELIVERED",
+      "plannedDate": "2025-08-26T21:19:26.078Z",
+      "deliveredDate": "2025-08-27T21:19:26.078Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessmentId": null,
+      "responderId": "responder_2",
+      "responderName": "Response Team 3",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Health response provided to Agricultural Zone 1",
+        "magnitude": "PARTIAL",
+        "responseType": "Health",
+        "resourcesDeployed": [
+          "Healthcare workers",
+          "Mobile clinic",
+          "Medical supplies"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.079Z",
+      "updatedAt": "2025-09-15T21:19:26.079Z"
+    },
+    {
+      "id": "cmflmn5370040lak5qsjrqz37",
+      "responseType": "WASH",
+      "status": "DELIVERED",
+      "plannedDate": "2025-08-23T21:19:26.082Z",
+      "deliveredDate": "2025-08-27T21:19:26.082Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessmentId": null,
+      "responderId": "responder_1",
+      "responderName": "Response Team 5",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "WASH response provided to Agricultural Zone 1",
+        "magnitude": "MODERATE",
+        "responseType": "WASH",
+        "resourcesDeployed": [
+          "Water containers",
+          "Portable toilets"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.083Z",
+      "updatedAt": "2025-09-15T21:19:26.083Z"
+    },
+    {
+      "id": "cmflmn53c0041lak5hcr8nooq",
+      "responseType": "Shelter",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-04T21:19:26.088Z",
+      "deliveredDate": "2025-09-06T21:19:26.088Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessmentId": null,
+      "responderId": "responder_7",
+      "responderName": "Response Team 2",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Shelter response provided to Agricultural Zone 1",
+        "magnitude": "FULL",
+        "responseType": "Shelter",
+        "resourcesDeployed": [
+          "Bedding",
+          "Tents"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.089Z",
+      "updatedAt": "2025-09-15T21:19:26.089Z"
+    },
+    {
+      "id": "cmflmn53h0042lak5gek8jcab",
+      "responseType": "Security",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-09T21:19:26.092Z",
+      "deliveredDate": "2025-09-15T21:19:26.092Z",
+      "affectedEntityId": "cmflmn4kv0006lak577f4vf0j",
+      "assessmentId": null,
+      "responderId": "responder_4",
+      "responderName": "Response Team 5",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Security response provided to Agricultural Zone 1",
+        "magnitude": "PARTIAL",
+        "responseType": "Security",
+        "resourcesDeployed": [
+          "Transport",
+          "Communication equipment",
+          "Safe spaces"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.094Z",
+      "updatedAt": "2025-09-15T21:19:26.094Z"
+    },
+    {
+      "id": "cmflmn55s004llak5soe1p6y3",
+      "responseType": "Health",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-08T21:19:26.176Z",
+      "deliveredDate": "2025-09-11T21:19:26.176Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessmentId": null,
+      "responderId": "responder_2",
+      "responderName": "Response Team 5",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Health response provided to Pastoral Community 2",
+        "magnitude": "FULL",
+        "responseType": "Health",
+        "resourcesDeployed": [
+          "Mobile clinic"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.177Z",
+      "updatedAt": "2025-09-15T21:19:26.177Z"
+    },
+    {
+      "id": "cmflmn55y004mlak56fq46mbk",
+      "responseType": "WASH",
+      "status": "DELIVERED",
+      "plannedDate": "2025-08-27T21:19:26.181Z",
+      "deliveredDate": "2025-08-31T21:19:26.181Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessmentId": null,
+      "responderId": "responder_7",
+      "responderName": "Response Team 5",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "WASH response provided to Pastoral Community 2",
+        "magnitude": "PARTIAL",
+        "responseType": "WASH",
+        "resourcesDeployed": [
+          "Hygiene kits",
+          "Water purification tablets",
+          "Water containers"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.182Z",
+      "updatedAt": "2025-09-15T21:19:26.182Z"
+    },
+    {
+      "id": "cmflmn562004nlak5znt6js79",
+      "responseType": "Shelter",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-09T21:19:26.185Z",
+      "deliveredDate": "2025-09-10T21:19:26.185Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessmentId": null,
+      "responderId": "responder_1",
+      "responderName": "Response Team 2",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Shelter response provided to Pastoral Community 2",
+        "magnitude": "MODERATE",
+        "responseType": "Shelter",
+        "resourcesDeployed": [
+          "Tents"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.186Z",
+      "updatedAt": "2025-09-15T21:19:26.186Z"
+    },
+    {
+      "id": "cmflmn567004olak58e4mz781",
+      "responseType": "Security",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-02T21:19:26.190Z",
+      "deliveredDate": "2025-09-04T21:19:26.190Z",
+      "affectedEntityId": "cmflmn4l10007lak5s3oqtb3e",
+      "assessmentId": null,
+      "responderId": "responder_10",
+      "responderName": "Response Team 5",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Security response provided to Pastoral Community 2",
+        "magnitude": "FULL",
+        "responseType": "Security",
+        "resourcesDeployed": [
+          "Transport",
+          "Communication equipment",
+          "Safe spaces"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.191Z",
+      "updatedAt": "2025-09-15T21:19:26.191Z"
+    },
+    {
+      "id": "cmflmn596005blak53u2eihtz",
+      "responseType": "Food",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-04T21:19:26.298Z",
+      "deliveredDate": "2025-09-07T21:19:26.298Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessmentId": null,
+      "responderId": "responder_7",
+      "responderName": "Response Team 2",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Food response provided to Rural Settlement 3",
+        "magnitude": "PARTIAL",
+        "responseType": "Food",
+        "resourcesDeployed": [
+          "Emergency food rations",
+          "Nutritional supplements",
+          "Storage facilities"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.299Z",
+      "updatedAt": "2025-09-15T21:19:26.299Z"
+    },
+    {
+      "id": "cmflmn59b005clak5tkpqeqju",
+      "responseType": "Shelter",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-14T21:19:26.303Z",
+      "deliveredDate": "2025-09-14T21:19:26.303Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessmentId": null,
+      "responderId": "responder_5",
+      "responderName": "Response Team 3",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Shelter response provided to Rural Settlement 3",
+        "magnitude": "MODERATE",
+        "responseType": "Shelter",
+        "resourcesDeployed": [
+          "Tents",
+          "Tarpaulins",
+          "Construction materials"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.304Z",
+      "updatedAt": "2025-09-15T21:19:26.304Z"
+    },
+    {
+      "id": "cmflmn59f005dlak5epht5mb2",
+      "responseType": "Security",
+      "status": "DELIVERED",
+      "plannedDate": "2025-09-12T21:19:26.307Z",
+      "deliveredDate": "2025-09-14T21:19:26.307Z",
+      "affectedEntityId": "cmflmn4l60008lak5ubfontad",
+      "assessmentId": null,
+      "responderId": "responder_2",
+      "responderName": "Response Team 4",
+      "donorId": null,
+      "donorName": null,
+      "verificationStatus": "VERIFIED",
+      "syncStatus": "PENDING",
+      "offlineId": null,
+      "data": {
+        "details": "Security response provided to Rural Settlement 3",
+        "magnitude": "FULL",
+        "responseType": "Security",
+        "resourcesDeployed": [
+          "Transport",
+          "Communication equipment",
+          "Safe spaces"
+        ]
+      },
+      "otherItemsDelivered": [],
+      "deliveryEvidence": [],
+      "partialDeliveryData": null,
+      "deliveryDocumentation": null,
+      "feedbackCount": 0,
+      "lastFeedbackAt": null,
+      "requiresAttention": false,
+      "createdAt": "2025-09-15T21:19:26.307Z",
+      "updatedAt": "2025-09-15T21:19:26.307Z"
+    }
+  ],
+  "donors": [],
+  "donorCommitments": [],
+  "donorAchievements": [],
+  "users": [
+    {
+      "id": "cmflsufzb0002nyfwoil2senq",
+      "name": "System Administrator",
+      "email": "admin@test.com",
+      "emailVerified": null,
+      "image": null,
+      "phone": null,
+      "organization": null,
+      "activeRoleId": "cmflsufyl0000nyfw5vtsk49i",
+      "isActive": true,
+      "lastSync": null,
+      "resetToken": null,
+      "resetTokenExpiry": null,
+      "requirePasswordReset": false,
+      "createdAt": "2025-09-16T00:13:04.488Z",
+      "updatedAt": "2025-09-16T00:13:04.488Z"
+    },
+    {
+      "id": "admin-user-id-alt",
+      "name": "Test Admin (Alt)",
+      "email": "admin-alt@test.com",
+      "emailVerified": null,
+      "image": null,
+      "phone": null,
+      "organization": null,
+      "activeRoleId": null,
+      "isActive": true,
+      "lastSync": null,
+      "resetToken": null,
+      "resetTokenExpiry": null,
+      "requirePasswordReset": false,
+      "createdAt": "2025-09-16T00:28:42.081Z",
+      "updatedAt": "2025-09-16T00:28:42.081Z"
+    },
+    {
+      "id": "assessor-user-id-alt",
+      "name": "Test Assessor (Alt)",
+      "email": "assessor-alt@test.com",
+      "emailVerified": null,
+      "image": null,
+      "phone": null,
+      "organization": null,
+      "activeRoleId": null,
+      "isActive": true,
+      "lastSync": null,
+      "resetToken": null,
+      "resetTokenExpiry": null,
+      "requirePasswordReset": false,
+      "createdAt": "2025-09-16T00:28:42.081Z",
+      "updatedAt": "2025-09-16T00:28:42.081Z"
+    },
+    {
+      "id": "responder-user-id-alt",
+      "name": "Test Responder (Alt)",
+      "email": "responder-alt@test.com",
+      "emailVerified": null,
+      "image": null,
+      "phone": null,
+      "organization": null,
+      "activeRoleId": null,
+      "isActive": true,
+      "lastSync": null,
+      "resetToken": null,
+      "resetTokenExpiry": null,
+      "requirePasswordReset": false,
+      "createdAt": "2025-09-16T00:28:42.081Z",
+      "updatedAt": "2025-09-16T00:28:42.081Z"
+    },
+    {
+      "id": "coordinator-user-id-alt",
+      "name": "Test Coordinator (Alt)",
+      "email": "coordinator-alt@test.com",
+      "emailVerified": null,
+      "image": null,
+      "phone": null,
+      "organization": null,
+      "activeRoleId": null,
+      "isActive": true,
+      "lastSync": null,
+      "resetToken": null,
+      "resetTokenExpiry": null,
+      "requirePasswordReset": false,
+      "createdAt": "2025-09-16T00:28:42.081Z",
+      "updatedAt": "2025-09-16T00:28:42.081Z"
+    },
+    {
+      "id": "verifier-user-id-alt",
+      "name": "Test Verifier (Alt)",
+      "email": "verifier-alt@test.com",
+      "emailVerified": null,
+      "image": null,
+      "phone": null,
+      "organization": null,
+      "activeRoleId": null,
+      "isActive": true,
+      "lastSync": null,
+      "resetToken": null,
+      "resetTokenExpiry": null,
+      "requirePasswordReset": false,
+      "createdAt": "2025-09-16T00:28:42.081Z",
+      "updatedAt": "2025-09-16T00:28:42.081Z"
+    },
+    {
+      "id": "donor-user-id-alt",
+      "name": "Test Donor (Alt)",
+      "email": "donor-alt@test.com",
+      "emailVerified": null,
+      "image": null,
+      "phone": null,
+      "organization": null,
+      "activeRoleId": null,
+      "isActive": true,
+      "lastSync": null,
+      "resetToken": null,
+      "resetTokenExpiry": null,
+      "requirePasswordReset": false,
+      "createdAt": "2025-09-16T00:28:42.081Z",
+      "updatedAt": "2025-09-16T00:28:42.081Z"
+    },
+    {
+      "id": "superuser-user-id-alt",
+      "name": "Super User (Multi-Role) (Alt)",
+      "email": "superuser-alt@test.com",
+      "emailVerified": null,
+      "image": null,
+      "phone": null,
+      "organization": null,
+      "activeRoleId": "cmfoqyrsj0001nyx0c01htasr",
+      "isActive": true,
+      "lastSync": null,
+      "resetToken": null,
+      "resetTokenExpiry": null,
+      "requirePasswordReset": false,
+      "createdAt": "2025-09-16T00:28:42.081Z",
+      "updatedAt": "2025-09-18T15:15:48.852Z"
+    }
+  ],
+  "roles": [
+    {
+      "id": "cmfoqyrs60000nyx0emehbbpx",
+      "name": "ASSESSOR",
+      "isActive": true,
+      "createdAt": "2025-09-18T01:43:45.703Z",
+      "updatedAt": "2025-09-18T01:43:45.703Z"
+    },
+    {
+      "id": "cmfoqyrsj0001nyx0c01htasr",
+      "name": "RESPONDER",
+      "isActive": true,
+      "createdAt": "2025-09-18T01:43:45.715Z",
+      "updatedAt": "2025-09-18T01:43:45.715Z"
+    },
+    {
+      "id": "cmfoqyrso0002nyx0a0h1rgsb",
+      "name": "COORDINATOR",
+      "isActive": true,
+      "createdAt": "2025-09-18T01:43:45.720Z",
+      "updatedAt": "2025-09-18T01:43:45.720Z"
+    },
+    {
+      "id": "cmfoqyrss0003nyx0kjprqvak",
+      "name": "DONOR",
+      "isActive": true,
+      "createdAt": "2025-09-18T01:43:45.725Z",
+      "updatedAt": "2025-09-18T01:43:45.725Z"
+    },
+    {
+      "id": "cmfoqyrsy0004nyx0w2rvd36q",
+      "name": "VERIFIER",
+      "isActive": true,
+      "createdAt": "2025-09-18T01:43:45.730Z",
+      "updatedAt": "2025-09-18T01:43:45.730Z"
+    },
+    {
+      "id": "cmflsufyl0000nyfw5vtsk49i",
+      "name": "ADMIN",
+      "isActive": true,
+      "createdAt": "2025-09-16T00:13:04.437Z",
+      "updatedAt": "2025-09-18T01:43:45.734Z"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "cmflsufzi0004nyfw4hd8trwp",
+      "userId": "cmflsufzb0002nyfwoil2senq",
+      "type": "credentials",
+      "provider": "credentials",
+      "providerAccountId": "cmflsufzb0002nyfwoil2senq",
+      "refresh_token": null,
+      "access_token": null,
+      "expires_at": null,
+      "token_type": null,
+      "scope": null,
+      "id_token": null,
+      "session_state": null
+    }
+  ],
+  "sessions": [],
+  "permissions": [],
+  "rolePermissions": [],
+  "notifications": [],
+  "auditLogs": [],
+  "userActivities": [],
+  "securityEvents": [],
+  "systemMetrics": [],
+  "systemAlerts": [],
+  "auditExports": [],
+  "achievementRules": [],
+  "roleHistory": [],
+  "bulkImports": [],
+  "verificationTokens": []
+}

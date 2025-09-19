@@ -12,7 +12,7 @@ export function RoleSwitcher() {
   const [isLoading, setIsLoading] = useState(false)
   
   // Only show if user has multiple roles
-  if (!session?.user?.allRoles || session.user.allRoles.length <= 1) {
+  if (!session?.user?.roles || session.user.roles.length <= 1) {
     return null
   }
 
@@ -66,11 +66,11 @@ export function RoleSwitcher() {
           <SelectValue placeholder="Select role" />
         </SelectTrigger>
         <SelectContent>
-          {session.user.allRoles.map((role: string) => (
-            <SelectItem key={role} value={role}>
+          {session.user.roles.map((role: any) => (
+            <SelectItem key={role.name} value={role.name}>
               <div className="flex items-center gap-2">
-                <span>{role}</span>
-                {role === session.user.role && (
+                <span>{role.name}</span>
+                {role.name === session.user.role && (
                   <Badge variant="secondary" className="text-xs">
                     Active
                   </Badge>

@@ -11,13 +11,24 @@ import {
   FileText,
   TrendingUp,
   AlertTriangle,
-  Settings
+  Settings,
+  RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
 import { useDashboardBadges } from '@/hooks/useDashboardBadges';
+import { useAdminData } from '@/hooks/useAdminData';
+import { useSystemHealth } from '@/hooks/useSystemHealth';
 
 export default function AdminDashboardPage() {
-  const { badges, loading, error } = useDashboardBadges();
+  const { badges, loading, error, refetch: refetchBadges } = useDashboardBadges();
+  const { userActivity, systemMetrics, loading: adminLoading } = useAdminData();
+  const { health: systemHealth, loading: healthLoading, refetch: refetchHealth } = useSystemHealth();
+  
+  const handleRefresh = () => {
+    refetchBadges();
+    refetchHealth();
+    window.location.reload(); // Full refresh for admin data
+  };
   
   const adminModules = [
     {
@@ -45,6 +56,14 @@ export default function AdminDashboardPage() {
       bgColor: 'bg-purple-50'
     },
     {
+      title: 'Role Management',
+      description: 'Configure user roles, permissions, and access control',
+      icon: <Settings className="h-6 w-6" />,
+      href: '/admin/roles',
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50'
+    },
+    {
       title: 'Database Management',
       description: 'Database maintenance, backups, and data integrity checks',
       icon: <Database className="h-6 w-6" />,
@@ -70,46 +89,90 @@ export default function AdminDashboardPage() {
     }
   ];
 
-  // Create dynamic quick stats from badges data
-  const quickStats = badges ? [
+  // Create dynamic quick stats from real-time data
+  const quickStats = [
     {
       label: 'System Health',
-      value: `${badges.systemHealth || 98}%`,
+      value: healthLoading ? '...' : `${systemHealth?.overall.score || badges?.systemHealth || 95}%`,
       icon: <TrendingUp className="h-4 w-4" />,
-      color: (badges.systemHealth || 98) >= 95 ? 'text-green-600' : 'text-yellow-600'
+      color: healthLoading ? 'text-gray-600' : 
+              (systemHealth?.overall.score || badges?.systemHealth || 95) >= 95 ? 'text-green-600' : 
+              (systemHealth?.overall.score || badges?.systemHealth || 95) >= 80 ? 'text-yellow-600' : 'text-red-600'
     },
     {
       label: 'Active Users',
-      value: String(badges.activeUsers || 0),
+      value: String(badges?.activeUsers || 0),
       icon: <Users className="h-4 w-4" />,
       color: 'text-blue-600'
     },
     {
       label: 'Security Alerts',
-      value: String(badges.securityAlerts || 0),
+      value: String(systemHealth?.security.recentEvents || badges?.securityAlerts || 0),
       icon: <AlertTriangle className="h-4 w-4" />,
-      color: (badges.securityAlerts || 0) === 0 ? 'text-green-600' : 'text-red-600'
+      color: (systemHealth?.security.recentEvents || badges?.securityAlerts || 0) === 0 ? 'text-green-600' : 'text-red-600'
     },
     {
-      label: 'Conflict Resolution',
-      value: String(badges.conflictResolution || 0),
+      label: 'API Response Time',
+      value: healthLoading ? '...' : `${systemHealth?.api.avgResponseTime || 0}ms`,
       icon: <Activity className="h-4 w-4" />,
-      color: 'text-purple-600'
+      color: healthLoading ? 'text-gray-600' :
+              (systemHealth?.api.avgResponseTime || 0) < 500 ? 'text-green-600' :
+              (systemHealth?.api.avgResponseTime || 0) < 1000 ? 'text-yellow-600' : 'text-red-600'
     }
-  ] : [];
+  ];
   
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (quickStats.length === 0) return <div>No data available</div>;
+  if (loading && !badges) {
+    return (
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-2/3 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-gray-200 rounded h-20"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="container mx-auto py-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h2 className="text-red-800 font-semibold mb-2">Error Loading Dashboard</h2>
+          <p className="text-red-600">Unable to load dashboard data: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-3 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
-          System administration and monitoring for the disaster management system
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="text-muted-foreground">
+            System administration and monitoring for the disaster management system
+          </p>
+        </div>
+        <Button 
+          onClick={handleRefresh}
+          variant="outline" 
+          size="sm"
+          disabled={loading || healthLoading}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading || healthLoading ? 'animate-spin' : ''}`} />
+          Refresh Data
+        </Button>
       </div>
 
       {/* Quick Stats */}
@@ -181,6 +244,12 @@ export default function AdminDashboardPage() {
                 Manage Users
               </Button>
             </Link>
+            <Link href="/admin/roles">
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Manage Roles
+              </Button>
+            </Link>
             <Link href="/admin/reports">
               <Button variant="outline" size="sm">
                 <FileText className="h-4 w-4 mr-2" />
@@ -191,41 +260,129 @@ export default function AdminDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Recent Activity */}
+      {/* System Health Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle>System Health Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {healthLoading ? (
+            <div className="text-center py-4">Loading health status...</div>
+          ) : systemHealth ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Overall Status</span>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${
+                    systemHealth.overall.status === 'HEALTHY' ? 'bg-green-500' :
+                    systemHealth.overall.status === 'WARNING' ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}></div>
+                  <span className={`text-sm font-medium ${
+                    systemHealth.overall.status === 'HEALTHY' ? 'text-green-600' :
+                    systemHealth.overall.status === 'WARNING' ? 'text-yellow-600' : 'text-red-600'
+                  }`}>
+                    {systemHealth.overall.status}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-xs text-muted-foreground">CPU Usage</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${
+                          systemHealth.system.cpuUsage > 90 ? 'bg-red-500' :
+                          systemHealth.system.cpuUsage > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                        }`}
+                        style={{ width: `${systemHealth.system.cpuUsage}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs">{systemHealth.system.cpuUsage}%</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <span className="text-xs text-muted-foreground">Memory Usage</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${
+                          systemHealth.system.memoryUsage > 90 ? 'bg-red-500' :
+                          systemHealth.system.memoryUsage > 80 ? 'bg-yellow-500' : 'bg-green-500'
+                        }`}
+                        style={{ width: `${systemHealth.system.memoryUsage}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs">{systemHealth.system.memoryUsage}%</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <span className="text-xs text-muted-foreground">API Response</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium">{systemHealth.api.avgResponseTime}ms</span>
+                    <div className={`w-2 h-2 rounded-full ${
+                      systemHealth.api.status === 'GOOD' ? 'bg-green-500' :
+                      systemHealth.api.status === 'WARNING' ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <span className="text-xs text-muted-foreground">Security Events</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium">{systemHealth.security.recentEvents}</span>
+                    <div className={`w-2 h-2 rounded-full ${
+                      systemHealth.security.status === 'GOOD' ? 'bg-green-500' : 'bg-yellow-500'
+                    }`}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4 text-muted-foreground">No health data available</div>
+          )}
+          <div className="mt-4">
+            <Link href="/admin/monitoring" className="w-full">
+              <Button variant="ghost" size="sm" className="w-full">
+                View Detailed Metrics →
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Activity - Real Data */}
       <Card>
         <CardHeader>
           <CardTitle>Recent System Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm">System backup completed successfully</span>
-              </div>
-              <span className="text-xs text-muted-foreground">2 minutes ago</span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm">New user registration: john.doe@example.com</span>
-              </div>
-              <span className="text-xs text-muted-foreground">15 minutes ago</span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <span className="text-sm">Performance alert resolved: High CPU usage</span>
-              </div>
-              <span className="text-xs text-muted-foreground">1 hour ago</span>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span className="text-sm">Data export completed: Activity logs (CSV)</span>
-              </div>
-              <span className="text-xs text-muted-foreground">3 hours ago</span>
-            </div>
+            {adminLoading ? (
+              <div className="text-center py-4">Loading activity...</div>
+            ) : userActivity && userActivity.length > 0 ? (
+              userActivity.slice(0, 4).map((activity, index) => (
+                <div key={index} className="flex items-center justify-between py-2 border-b">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${
+                      activity.eventType === 'SECURITY_EVENT' ? 'bg-red-500' :
+                      activity.eventType === 'USER_ACTION' ? 'bg-blue-500' :
+                      activity.eventType === 'SYSTEM_EVENT' ? 'bg-green-500' :
+                      'bg-gray-500'
+                    }`}></div>
+                    <span className="text-sm">{activity.description}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(activity.timestamp).toLocaleTimeString()}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">No recent activity</div>
+            )}
           </div>
           <div className="mt-4">
             <Link href="/admin/audit" className="w-full">

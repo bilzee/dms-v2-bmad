@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  // Note: Connection pooling is handled by the database connection string or connection pool settings
+  // at the database level, not in Prisma client constructor
 });
 
 // Types for service operations

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Marker, Popup } from 'react-leaflet';
 import { Truck, Package, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 interface GPSCoordinates {
@@ -89,73 +88,16 @@ export function ResponseMapLayer({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'DELIVERED':
-        return '#22c55e'; // Green
+        return 'text-green-600 bg-green-100';
       case 'CANCELLED':
-        return '#ef4444'; // Red
+        return 'text-red-600 bg-red-100';
       case 'IN_PROGRESS':
-        return '#3b82f6'; // Blue
+        return 'text-blue-600 bg-blue-100';
       case 'PLANNED':
-        return '#eab308'; // Yellow
+        return 'text-yellow-600 bg-yellow-100';
       default:
-        return '#9ca3af'; // Gray
+        return 'text-gray-600 bg-gray-100';
     }
-  };
-
-  const [leafletIcons, setLeafletIcons] = useState<Map<string, any>>(new Map());
-
-  useEffect(() => {
-    const loadIcons = async () => {
-      if (typeof window !== 'undefined') {
-        const L = await import('leaflet');
-        const iconMap = new Map();
-        
-        responses.forEach(response => {
-          const statusColor = getStatusColor(response.status);
-          const itemCount = response.deliveryItems.reduce((sum, item) => sum + item.quantity, 0);
-          
-          const iconHtml = `
-            <div style="
-              background-color: ${statusColor}; 
-              width: 22px; 
-              height: 22px; 
-              display: flex; 
-              align-items: center; 
-              justify-content: center; 
-              color: white; 
-              font-weight: bold; 
-              font-size: 10px;
-              border: 2px solid white; 
-              box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-              clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-            ">
-              R
-            </div>
-            ${itemCount > 0 ? `<div style="position: absolute; top: -2px; right: -2px; background: #7c3aed; color: white; border-radius: 50%; width: 12px; height: 12px; font-size: 8px; display: flex; align-items: center; justify-content: center;">${itemCount}</div>` : ''}
-          `;
-
-          const icon = L.divIcon({
-            html: iconHtml,
-            className: 'response-marker',
-            iconSize: [22, 22],
-            iconAnchor: [11, 22],
-          });
-          
-          iconMap.set(response.id, icon);
-        });
-        
-        setLeafletIcons(iconMap);
-      }
-    };
-    
-    if (responses.length > 0) {
-      loadIcons();
-    }
-  }, [responses]);
-
-  const getResponseTypeIcon = (type: string) => {
-    if (type.includes('MEDICAL')) return AlertCircle;
-    if (type.includes('FOOD') || type.includes('WATER')) return Package;
-    return Truck;
   };
 
   const handleResponseClick = (response: MapResponseData) => {
@@ -166,99 +108,113 @@ export function ResponseMapLayer({
   if (!visible) return null;
 
   return (
-    <>
-      {/* Response Markers */}
-      {responses.map((response) => (
-        <Marker
-          key={response.id}
-          position={[response.coordinates.latitude, response.coordinates.longitude]}
-          icon={leafletIcons.get(response.id)}
-          eventHandlers={{
-            click: () => handleResponseClick(response),
-          }}
-        >
-          <Popup>
-            <div className="p-3 min-w-[250px]">
-              <div className="flex items-center gap-2 mb-3">
-                <Truck className="h-4 w-4 text-blue-600" />
-                <h3 className="font-semibold text-sm">Response Details</h3>
-              </div>
-              
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="font-medium">Type:</span>
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    {response.responseType.replace('_', ' ')}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Status:</span>
-                  <div className="flex items-center gap-1">
-                    {(() => {
-                      const StatusIcon = getStatusIcon(response.status);
-                      return <StatusIcon className="h-3 w-3" />;
-                    })()}
-                    <span className="capitalize">{response.status.toLowerCase().replace('_', ' ')}</span>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="font-medium">Location:</span>
-                  <span className="text-right max-w-[120px] truncate">{response.entityName}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="font-medium">Responder:</span>
-                  <span className="text-right max-w-[120px] truncate">{response.responderName}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="font-medium">Planned:</span>
-                  <span>{response.plannedDate.toLocaleDateString()}</span>
-                </div>
-                
-                {response.deliveredDate && (
-                  <div className="flex justify-between">
-                    <span className="font-medium">Delivered:</span>
-                    <span>{response.deliveredDate.toLocaleDateString()}</span>
-                  </div>
-                )}
-                
-                {response.deliveryItems.length > 0 && (
-                  <div className="border-t pt-2 mt-2">
-                    <div className="font-medium mb-1">Items ({response.deliveryItems.reduce((sum, item) => sum + item.quantity, 0)}):</div>
-                    <div className="max-h-20 overflow-y-auto space-y-1">
-                      {response.deliveryItems.map((item, index) => (
-                        <div key={index} className="flex justify-between text-xs bg-gray-50 p-1 rounded">
-                          <span className="truncate">{item.item}</span>
-                          <span className="font-medium ml-1">{item.quantity}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="border-t pt-2 mt-2 text-gray-600">
-                  <div>GPS: ±{response.coordinates.accuracy}m</div>
-                  <div>Coords: {response.coordinates.latitude.toFixed(4)}, {response.coordinates.longitude.toFixed(4)}</div>
-                </div>
-              </div>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+    <div className="relative h-full w-full bg-gray-50 rounded-lg border">
+      {/* Simplified Response List View - Placeholder for map */}
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Truck className="h-5 w-5 text-blue-600" />
+          <h3 className="text-lg font-semibold">Response Locations</h3>
+          <span className="text-sm text-gray-500">({responses.length} responses)</span>
+        </div>
 
-      
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center pointer-events-auto z-[1000]">
-          <div className="flex items-center gap-2">
+        {isLoading ? (
+          <div className="flex items-center gap-2 justify-center py-8">
             <Truck className="h-4 w-4 animate-spin" />
             <span className="text-sm">Loading responses...</span>
           </div>
+        ) : (
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {responses.map((response) => {
+              const StatusIcon = getStatusIcon(response.status);
+              const statusColors = getStatusColor(response.status);
+              
+              return (
+                <div
+                  key={response.id}
+                  className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleResponseClick(response)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <StatusIcon className="h-4 w-4 text-blue-600" />
+                      <div>
+                        <div className="font-medium text-sm">{response.responseType.replace('_', ' ')}</div>
+                        <div className="text-xs text-gray-500">
+                          {response.entityName} • {response.responderName}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {response.coordinates.latitude.toFixed(4)}, {response.coordinates.longitude.toFixed(4)}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-right text-xs">
+                      <div className={`px-2 py-1 rounded text-xs font-medium ${statusColors}`}>
+                        {response.status.replace('_', ' ')}
+                      </div>
+                      <div className="mt-1 text-gray-500">
+                        {response.deliveryItems.reduce((sum, item) => sum + item.quantity, 0)} items
+                      </div>
+                      <div className="text-gray-500">
+                        {response.plannedDate.toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            
+            {responses.length === 0 && !isLoading && (
+              <div className="text-center py-8 text-gray-500">
+                <Truck className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                <p>No responses found</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Selected Response Details */}
+      {selectedResponse && (
+        <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg border shadow-lg max-w-xs">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-semibold text-sm">{selectedResponse.responseType.replace('_', ' ')}</h4>
+            <button
+              onClick={() => setSelectedResponse(null)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ×
+            </button>
+          </div>
+          
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between">
+              <span>Status:</span>
+              <span className="font-medium">{selectedResponse.status.replace('_', ' ')}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Location:</span>
+              <span className="font-medium">{selectedResponse.entityName}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Responder:</span>
+              <span className="font-medium">{selectedResponse.responderName}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Items:</span>
+              <span className="font-medium">
+                {selectedResponse.deliveryItems.reduce((sum, item) => sum + item.quantity, 0)}
+              </span>
+            </div>
+            {selectedResponse.deliveredDate && (
+              <div className="flex justify-between">
+                <span>Delivered:</span>
+                <span className="font-medium">{selectedResponse.deliveredDate.toLocaleDateString()}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

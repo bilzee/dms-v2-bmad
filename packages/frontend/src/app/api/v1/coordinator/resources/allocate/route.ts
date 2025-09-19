@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth/authOptions';
+import { prisma } from '@/lib/prisma';
 import { 
   ResponseType,
   ResourceAllocation,
@@ -8,31 +10,144 @@ import {
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
-// Mock allocation tracking - would be replaced with database
-const mockAllocations: ResourceAllocation[] = [
-  {
-    id: 'alloc-1',
-    responseType: ResponseType.FOOD,
-    quantity: 300,
-    unit: 'kg',
-    affectedEntityId: 'entity-1',
-    affectedEntityName: 'Maiduguri IDP Camp',
-    donorCommitmentId: 'c1',
-    donorName: 'ActionAid Nigeria',
-    priority: 'HIGH',
-    targetDate: new Date('2024-09-10'),
-    status: 'PENDING',
-    coordinatorId: 'coord-1',
-    coordinatorName: 'John Coordinator',
-    notes: 'Urgent need for flood victims',
-    createdAt: new Date('2024-08-25'),
-    updatedAt: new Date('2024-08-25'),
-  },
-];
+// Helper function to get allocations from database
+async function getAllocationsFromDB(filters: any = {}): Promise<ResourceAllocation[]> {
+  const responses = await prisma.rapidResponse.findMany({
+    where: {
+      ...filters,
+      donorCommitments: {
+        some: {}
+      }
+    },
+    include: {
+      donorCommitments: {
+        include: {
+          donor: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  return responses.map(r => {
+    const responseData = r.data as any;
+    const commitment = r.donorCommitments[0]; // Primary commitment
+    
+    return {
+      id: r.id,
+      responseType: r.responseType as ResponseType,
+      quantity: responseData?.quantity || 0,
+      unit: responseData?.unit || 'units',
+      affectedEntityId: r.affectedEntityId,
+      affectedEntityName: responseData?.affectedEntityName || 'Unknown Entity',
+      donorCommitmentId: commitment?.id,
+      donorName: commitment?.donor?.name,
+      priority: responseData?.priority || 'MEDIUM',
+      targetDate: r.plannedDate,
+      status: r.status as any,
+      coordinatorId: r.responderId, // Using responderId as coordinator for now
+      coordinatorName: r.responderName,
+      notes: responseData?.notes,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt
+    };
+  });
+}
+
+// Helper function to create allocation in database
+async function createAllocationInDB(request: ResourceAllocationRequest, coordinatorId: string): Promise<ResourceAllocation> {
+  // Get user info for coordinator details
+  const coordinator = await prisma.user.findUnique({
+    where: { id: coordinatorId }
+  });
+
+  // Get affected entity
+  const affectedEntity = await prisma.affectedEntity.findUnique({
+    where: { id: request.affectedEntityId }
+  });
+
+  // Create rapid response record for the allocation
+  const rapidResponse = await prisma.rapidResponse.create({
+    data: {
+      responseType: request.responseType,
+      status: 'PLANNED',
+      plannedDate: request.targetDate ? new Date(request.targetDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      affectedEntityId: request.affectedEntityId,
+      responderId: coordinatorId,
+      responderName: coordinator?.name || 'Coordinator',
+      donorId: request.preferredDonorId,
+      donorName: request.preferredDonorName,
+      verificationStatus: 'PENDING',
+      data: {
+        quantity: request.quantity,
+        unit: request.unit || 'units',
+        priority: request.priority,
+        notes: request.notes,
+        affectedEntityName: affectedEntity?.name || request.affectedEntityName || 'Unknown Entity',
+        coordinatorId,
+        coordinatorName: coordinator?.name || 'Coordinator'
+      }
+    },
+    include: {
+      donorCommitments: {
+        include: {
+          donor: true
+        }
+      }
+    }
+  });
+
+  // If preferred donor specified, create commitment link
+  if (request.preferredDonorId) {
+    await prisma.donorCommitment.create({
+      data: {
+        donorId: request.preferredDonorId,
+        responseType: request.responseType,
+        quantity: request.quantity,
+        unit: request.unit || 'units',
+        targetDate: request.targetDate ? new Date(request.targetDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        status: 'PLANNED',
+        affectedEntityId: request.affectedEntityId,
+        rapidResponseId: rapidResponse.id,
+        notes: request.notes
+      }
+    });
+  }
+
+  const responseData = rapidResponse.data as any;
+  
+  return {
+    id: rapidResponse.id,
+    responseType: rapidResponse.responseType as ResponseType,
+    quantity: responseData.quantity,
+    unit: responseData.unit,
+    affectedEntityId: rapidResponse.affectedEntityId,
+    affectedEntityName: responseData.affectedEntityName,
+    donorCommitmentId: undefined,
+    donorName: rapidResponse.donorName || undefined,
+    priority: responseData.priority,
+    targetDate: rapidResponse.plannedDate,
+    status: rapidResponse.status as any,
+    coordinatorId: responseData.coordinatorId,
+    coordinatorName: responseData.coordinatorName,
+    notes: responseData.notes,
+    createdAt: rapidResponse.createdAt,
+    updatedAt: rapidResponse.updatedAt
+  };
+}
 
 // POST /api/v1/coordinator/resources/allocate - Create new resource allocation
 export async function POST(request: NextRequest) {
   try {
+    // Authentication check
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, errors: ['Unauthorized'] },
+        { status: 401 }
+      );
+    }
+
     const body: ResourceAllocationRequest = await request.json();
 
     // Validate required fields
@@ -68,24 +183,15 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // In a real implementation, this would:
-    // 1. Check resource availability against commitments
-    // 2. Validate affected entity exists
-    // 3. Check for allocation conflicts
-    // 4. Calculate optimal donor matching
-    // 5. Create coordination workspace entries
-    // 6. Send notifications to donors and responders
-    // 7. Update resource tracking
-
-    // Mock conflict detection
+    // Real conflict detection using database
     const conflicts: AllocationConflict[] = [];
     
     // Check for timing conflicts
-    const existingAllocations = mockAllocations.filter(
-      a => a.affectedEntityId === body.affectedEntityId && 
-           a.responseType === body.responseType &&
-           a.status !== 'CANCELLED'
-    );
+    const existingAllocations = await getAllocationsFromDB({
+      affectedEntityId: body.affectedEntityId,
+      responseType: body.responseType,
+      status: { not: 'CANCELLED' }
+    });
     
     if (existingAllocations.length > 0 && body.targetDate) {
       const requestDate = new Date(body.targetDate);
@@ -106,13 +212,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check for quantity availability (simplified check)
+    // Check for quantity availability using real commitments
+    const commitments = await prisma.donorCommitment.findMany({
+      where: { responseType: body.responseType },
+      select: { quantity: true }
+    });
+    
+    const totalCommitted = commitments.reduce((sum, c) => sum + c.quantity, 0);
     const totalAllocated = existingAllocations
       .filter(a => a.responseType === body.responseType)
       .reduce((sum, a) => sum + a.quantity, 0);
     
-    const mockCommittedQuantity = 1000; // Would come from actual commitments
-    const availableQuantity = mockCommittedQuantity - totalAllocated;
+    const availableQuantity = totalCommitted - totalAllocated;
     
     if (body.quantity > availableQuantity) {
       conflicts.push({
@@ -136,50 +247,56 @@ export async function POST(request: NextRequest) {
       }, { status: 409 });
     }
 
-    // Create the allocation
-    const newAllocation: ResourceAllocation = {
-      id: `alloc-${Date.now()}`,
-      responseType: body.responseType,
-      quantity: body.quantity,
-      unit: body.unit || 'units',
-      affectedEntityId: body.affectedEntityId,
-      affectedEntityName: body.affectedEntityName || 'Unknown Entity',
-      donorCommitmentId: body.preferredDonorId ? `c_${body.preferredDonorId}` : undefined,
-      donorName: body.preferredDonorName,
-      priority: body.priority,
-      targetDate: body.targetDate ? new Date(body.targetDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      status: 'PENDING',
-      coordinatorId: 'current-coordinator-id', // Would come from auth
-      coordinatorName: 'Current Coordinator', // Would come from auth
-      notes: body.notes,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    // Create the allocation in database
+    const newAllocation = await createAllocationInDB(body, session.user.id);
 
-    // Add to mock storage
-    mockAllocations.push(newAllocation);
-
-    // Mock optimal donor matching suggestions
-    const donorSuggestions = [
-      {
-        donorId: '1',
-        donorName: 'ActionAid Nigeria',
-        availableQuantity: 500,
-        deliveryTimeframe: '3-5 days',
-        performanceScore: 95,
-        matchScore: 92,
-        reasons: ['High performance score', 'Quick delivery', 'Sufficient quantity']
+    // Get real donor suggestions based on performance and availability
+    const donorSuggestions = await prisma.donor.findMany({
+      where: {
+        isActive: true,
+        commitments: {
+          some: {
+            responseType: body.responseType,
+            status: { in: ['PLANNED', 'IN_PROGRESS'] }
+          }
+        }
       },
-      {
-        donorId: '5',
-        donorName: 'World Food Programme',
-        availableQuantity: 700,
-        deliveryTimeframe: '5-7 days',
-        performanceScore: 94,
-        matchScore: 88,
-        reasons: ['Large quantity available', 'Excellent track record', 'Relevant expertise']
-      }
-    ];
+      select: {
+        id: true,
+        name: true,
+        performanceScore: true,
+        commitments: {
+          where: {
+            responseType: body.responseType,
+            status: { in: ['PLANNED', 'IN_PROGRESS'] }
+          },
+          select: {
+            quantity: true,
+            targetDate: true
+          }
+        }
+      },
+      orderBy: { performanceScore: 'desc' },
+      take: 3
+    }).then(donors => donors.map(donor => {
+      const availableQuantity = donor.commitments.reduce((sum, c) => sum + c.quantity, 0);
+      const avgDeliveryDays = donor.commitments.length > 0 ? 
+        donor.commitments.reduce((sum, c) => sum + Math.ceil((c.targetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)), 0) / donor.commitments.length : 7;
+      
+      return {
+        donorId: donor.id,
+        donorName: donor.name,
+        availableQuantity,
+        deliveryTimeframe: `${Math.max(1, Math.floor(avgDeliveryDays))}-${Math.ceil(avgDeliveryDays + 2)} days`,
+        performanceScore: Math.round(donor.performanceScore),
+        matchScore: Math.round(donor.performanceScore * 0.9 + (availableQuantity >= body.quantity ? 10 : 0)),
+        reasons: [
+          ...(donor.performanceScore > 90 ? ['High performance score'] : []),
+          ...(avgDeliveryDays <= 5 ? ['Quick delivery'] : []),
+          ...(availableQuantity >= body.quantity ? ['Sufficient quantity'] : [])
+        ]
+      };
+    }));
 
     return NextResponse.json({
       success: true,
@@ -229,6 +346,15 @@ export async function POST(request: NextRequest) {
 // GET /api/v1/coordinator/resources/allocate - Get existing allocations
 export async function GET(request: NextRequest) {
   try {
+    // Authentication check
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, errors: ['Unauthorized'] },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     
     const affectedEntityId = searchParams.get('affectedEntityId');
@@ -237,27 +363,18 @@ export async function GET(request: NextRequest) {
     const priority = searchParams.get('priority') as 'HIGH' | 'MEDIUM' | 'LOW';
     const coordinatorId = searchParams.get('coordinatorId');
     
-    let filteredAllocations = [...mockAllocations];
+    // Build filters for database query
+    const filters: any = {};
+    if (affectedEntityId) filters.affectedEntityId = affectedEntityId;
+    if (responseType) filters.responseType = responseType;
+    if (status) filters.status = status;
+    if (coordinatorId) filters.responderId = coordinatorId;
     
-    // Apply filters
-    if (affectedEntityId) {
-      filteredAllocations = filteredAllocations.filter(a => a.affectedEntityId === affectedEntityId);
-    }
+    let filteredAllocations = await getAllocationsFromDB(filters);
     
-    if (responseType) {
-      filteredAllocations = filteredAllocations.filter(a => a.responseType === responseType);
-    }
-    
-    if (status) {
-      filteredAllocations = filteredAllocations.filter(a => a.status === status);
-    }
-    
+    // Apply priority filter (not included in main query)
     if (priority) {
       filteredAllocations = filteredAllocations.filter(a => a.priority === priority);
-    }
-    
-    if (coordinatorId) {
-      filteredAllocations = filteredAllocations.filter(a => a.coordinatorId === coordinatorId);
     }
 
     // Calculate summary statistics

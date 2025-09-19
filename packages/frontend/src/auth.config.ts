@@ -373,6 +373,12 @@ async function ensureTestUserExists(authUser: any) {
       name: "Super User (Multi-Role)", 
       email: "superuser@test.com",
       roles: ["ADMIN", "COORDINATOR", "ASSESSOR", "RESPONDER", "VERIFIER", "DONOR"]
+    },
+    {
+      id: "superuser-user-id-alt",
+      name: "Super User (Multi-Role) (Alt)", 
+      email: "superuser-alt@test.com",
+      roles: ["ADMIN", "COORDINATOR", "ASSESSOR", "RESPONDER", "VERIFIER", "DONOR"]
     }
   ];
 
@@ -453,6 +459,79 @@ async function ensureTestUserExists(authUser: any) {
       console.log(`✅ Test user created in database: ${testUser.email}`);
     } else {
       console.log('Test user already exists in database:', testUser.email);
+      
+      // Check if user has all the required roles, and add missing ones
+      const existingUserWithRoles = await prisma.user.findUnique({
+        where: { id: testUser.id },
+        include: { roles: true }
+      });
+      
+      const existingRoleNames = existingUserWithRoles?.roles.map(role => role.name) || [];
+      const missingRoles = testUser.roles.filter(roleName => !existingRoleNames.includes(roleName));
+      
+      if (missingRoles.length > 0) {
+        console.log(`Adding missing roles for ${testUser.email}:`, missingRoles);
+        
+        await prisma.$transaction(async (tx) => {
+          const userRoles = [];
+          
+          for (const roleName of missingRoles) {
+            const roleId = `${roleName.toLowerCase()}-role`;
+            
+            // Find role by name first (since name has unique constraint)
+            let role = await tx.role.findFirst({
+              where: { name: roleName },
+              include: {
+                permissions: true
+              }
+            });
+            
+            if (!role) {
+              // Create role if it doesn't exist
+              role = await tx.role.create({
+                data: {
+                  id: roleId,
+                  name: roleName,
+                  isActive: true,
+                  permissions: {
+                    create: [] // Empty permissions for now
+                  }
+                },
+                include: {
+                  permissions: true
+                }
+              });
+              console.log(`Created new role: ${roleName} with id: ${role.id}`);
+            } else {
+              console.log(`Found existing role: ${roleName} with id: ${role.id}`);
+            }
+            
+            // Connect user to role (regardless of whether role was just created or already existed)
+            await tx.role.update({
+              where: { id: role.id },
+              data: {
+                users: {
+                  connect: { id: testUser.id }
+                }
+              }
+            });
+            
+            userRoles.push(role);
+          }
+          
+          // Set first role as active if user doesn't have an active role
+          if (!existingUserWithRoles?.activeRoleId && userRoles.length > 0) {
+            await tx.user.update({
+              where: { id: testUser.id },
+              data: { activeRoleId: userRoles[0].id }
+            });
+          }
+        });
+        
+        console.log(`✅ Added missing roles for existing user: ${testUser.email}`);
+      } else {
+        console.log(`User ${testUser.email} already has all required roles`);
+      }
     }
   }
 }

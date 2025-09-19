@@ -141,7 +141,9 @@
       "Bash(git push:*)",
       "Bash(pkill:*)",
       "Bash(pg_isready:*)",
-      "mcp__playwright__browser_evaluate"
+      "mcp__playwright__browser_evaluate",
+      "Bash(PORT=3001 npm run dev)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "additionalDirectories": [

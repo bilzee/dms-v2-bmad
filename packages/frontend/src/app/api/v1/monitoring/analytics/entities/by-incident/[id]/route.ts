@@ -64,7 +64,7 @@ export async function GET(
       
       // Generate seed for consistent mock data based on entity ID
       const entityId = entity.id;
-      const seed = entityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const seed = entityId.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
       
       try {
         // Mock data for now - this would be replaced with actual database queries

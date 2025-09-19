@@ -126,7 +126,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                       {isOpen && (
                         <>
                           <span className="flex-1">{item.label}</span>
-                          {(item.badge > 0 || item.badgeKey) && (
+                          {((item.badge && item.badge > 0) || item.badgeKey) && (
                             <SkeletonBadge 
                               loading={badgesLoading}
                               error={badgesError}

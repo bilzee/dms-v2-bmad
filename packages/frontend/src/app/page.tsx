@@ -76,7 +76,12 @@ export default function HomePage() {
     );
   }
   
-  const currentRole = activeRole?.name || session?.user?.role || session?.user?.activeRole?.name || 'ASSESSOR';
+  // Improved role resolution logic - check all possible sources including assigned roles
+  const currentRole = activeRole?.name || 
+                      session?.user?.activeRole?.name || 
+                      session?.user?.role ||
+                      (session?.user?.roles?.find((r: any) => r.isActive)?.name) ||
+                      (session?.user?.roles?.some((r: any) => r.name === 'VERIFIER') ? 'VERIFIER' : 'ASSESSOR');
   
   // Use unified role interface system - ensures identical functionality regardless of authentication type
   const roleInterface = getRoleInterface(currentRole);
@@ -88,7 +93,7 @@ export default function HomePage() {
     bgColor: card.bgColor,
     actions: card.actions,
     stats: {
-      count: badges?.[card.stats.countKey] ?? card.stats.count,
+      count: (badges && card.stats.countKey) ? badges[card.stats.countKey as keyof typeof badges] ?? card.stats.count : card.stats.count,
       label: card.stats.label
     }
   })) || []

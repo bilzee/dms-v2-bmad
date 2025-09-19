@@ -8,12 +8,38 @@ import {
   IncidentFilters
 } from '@dms/shared';
 import DatabaseService from '@/lib/services/DatabaseService';
+import { createRoleBasedFilterMiddleware, hasResourceAccess } from '@/lib/middleware/role-based-filter';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 
 // GET /api/v1/incidents - List incidents with filtering and pagination
 export async function GET(request: NextRequest) {
   try {
+    // Apply role-based filtering
+    const roleFilterMiddleware = createRoleBasedFilterMiddleware();
+    const { userContext, filters: roleBasedFilters } = await roleFilterMiddleware(request);
+
+    if (!userContext) {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        errors: ['Authentication required'],
+        message: 'Please authenticate to access incidents',
+        timestamp: new Date().toISOString(),
+      }, { status: 401 });
+    }
+
+    // Check if user has access to incidents
+    if (!hasResourceAccess(userContext, 'incident')) {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        errors: ['Access denied'],
+        message: 'You do not have permission to access incidents',
+        timestamp: new Date().toISOString(),
+      }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     
     // Parse query parameters
@@ -22,25 +48,13 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'date';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     const searchTerm = searchParams.get('searchTerm') || '';
-    
-    let filters: IncidentFilters = {};
-    try {
-      const filtersParam = searchParams.get('filters');
-      if (filtersParam) {
-        filters = JSON.parse(filtersParam);
-      }
-    } catch (error) {
-      console.warn('Failed to parse filters:', error);
-    }
 
-    // Build database filters
+    // Build database filters with role-based restrictions
     const dbFilters = {
-      status: filters.status?.[0],
-      severity: filters.severity?.[0], 
-      type: filters.type?.[0],
-      dateRange: filters.dateRange ? {
-        start: new Date(filters.dateRange.start),
-        end: new Date(filters.dateRange.end)
+      ...roleBasedFilters,
+      dateRange: roleBasedFilters.dateRange ? {
+        start: new Date(roleBasedFilters.dateRange.start),
+        end: new Date(roleBasedFilters.dateRange.end)
       } : undefined,
       limit: pageSize,
       offset: (page - 1) * pageSize

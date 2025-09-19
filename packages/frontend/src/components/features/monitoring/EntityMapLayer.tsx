@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Marker, Popup } from 'react-leaflet';
 import { MapPin, Users, Home, Activity, BarChart3 } from 'lucide-react';
 
 interface GPSCoordinates {
@@ -76,56 +75,6 @@ export function EntityMapLayer({
     }
   }, [visible, refreshInterval]);
 
-  const [leafletIcons, setLeafletIcons] = useState<Map<string, any>>(new Map());
-
-  useEffect(() => {
-    const loadIcons = async () => {
-      if (typeof window !== 'undefined') {
-        const L = await import('leaflet');
-        const iconMap = new Map();
-        
-        // Fix default Leaflet icon issue
-        delete L.Icon.Default.prototype._getIconUrl;
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-        });
-        
-        entities.forEach(entity => {
-          const totalActivity = entity.assessmentCount + entity.responseCount;
-          const activeActivity = entity.statusSummary.pendingAssessments + entity.statusSummary.activeResponses;
-          
-          const getMarkerColor = () => {
-            if (activeActivity > 5) return '#ef4444';
-            if (activeActivity > 2) return '#eab308';
-            if (totalActivity > 0) return '#22c55e';
-            return '#9ca3af';
-          };
-
-          const iconHtml = entity.type === 'CAMP' 
-            ? `<div style="background-color: ${getMarkerColor()}; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">C</div>`
-            : `<div style="background-color: ${getMarkerColor()}; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">H</div>`;
-
-          const icon = L.divIcon({
-            html: iconHtml,
-            className: 'custom-div-icon',
-            iconSize: [25, 25],
-            iconAnchor: [12, 12],
-          });
-          
-          iconMap.set(entity.id, icon);
-        });
-        
-        setLeafletIcons(iconMap);
-      }
-    };
-    
-    if (entities.length > 0) {
-      loadIcons();
-    }
-  }, [entities]);
-
   const handleEntityClick = (entity: MapEntityData) => {
     setSelectedEntity(entity);
     onEntitySelect?.(entity);
@@ -134,62 +83,99 @@ export function EntityMapLayer({
   if (!visible) return null;
 
   return (
-    <>
-      {/* Entity Markers */}
-      {entities.map((entity) => (
-        <Marker
-          key={entity.id}
-          position={[entity.latitude, entity.longitude]}
-          icon={leafletIcons.get(entity.id)}
-          eventHandlers={{
-            click: () => handleEntityClick(entity),
-          }}
-        >
-          <Popup>
-            <div className="p-2 min-w-[200px]">
-              <h3 className="font-semibold text-sm mb-2">{entity.name}</h3>
-              <p className="text-xs text-gray-600 mb-2">
-                Type: {entity.type} | Coordinates: {entity.latitude.toFixed(4)}, {entity.longitude.toFixed(4)}
-              </p>
-              
-              <div className="grid grid-cols-2 gap-2 text-xs mb-2">
-                <div className="text-center p-1 bg-blue-50 rounded">
-                  <div className="font-semibold">{entity.assessmentCount}</div>
-                  <div className="text-gray-600">Assessments</div>
-                </div>
-                <div className="text-center p-1 bg-green-50 rounded">
-                  <div className="font-semibold">{entity.responseCount}</div>
-                  <div className="text-gray-600">Responses</div>
-                </div>
-              </div>
-              
-              <div className="border-t pt-2 text-xs">
-                <div className="flex justify-between">
-                  <span>Pending Assessments:</span>
-                  <span className="font-medium">{entity.statusSummary.pendingAssessments}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Active Responses:</span>
-                  <span className="font-medium">{entity.statusSummary.activeResponses}</span>
-                </div>
-                <div className="mt-1 text-gray-500">
-                  Last activity: {new Date(entity.lastActivity).toLocaleDateString()}
-                </div>
-              </div>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-      
-      {/* Loading Overlay - only shows when loading */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center pointer-events-auto z-[1000]">
-          <div className="flex items-center gap-2">
+    <div className="relative h-full w-full bg-gray-50 rounded-lg border">
+      {/* Simplified Entity List View - Placeholder for map */}
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <MapPin className="h-5 w-5 text-blue-600" />
+          <h3 className="text-lg font-semibold">Entity Locations</h3>
+          <span className="text-sm text-gray-500">({entities.length} entities)</span>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center gap-2 justify-center py-8">
             <Activity className="h-4 w-4 animate-spin" />
             <span className="text-sm">Loading entities...</span>
           </div>
+        ) : (
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {entities.map((entity) => (
+              <div
+                key={entity.id}
+                className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleEntityClick(entity)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {entity.type === 'CAMP' ? (
+                      <Home className="h-4 w-4 text-blue-600" />
+                    ) : (
+                      <Users className="h-4 w-4 text-green-600" />
+                    )}
+                    <div>
+                      <div className="font-medium text-sm">{entity.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {entity.latitude.toFixed(4)}, {entity.longitude.toFixed(4)}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right text-xs">
+                    <div className="flex gap-2">
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        {entity.assessmentCount} assessments
+                      </span>
+                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                        {entity.responseCount} responses
+                      </span>
+                    </div>
+                    <div className="mt-1 text-gray-500">
+                      Active: {entity.statusSummary.activeResponses + entity.statusSummary.pendingAssessments}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {entities.length === 0 && !isLoading && (
+              <div className="text-center py-8 text-gray-500">
+                <MapPin className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                <p>No entities found</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Selected Entity Details */}
+      {selectedEntity && (
+        <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg border shadow-lg max-w-xs">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-semibold text-sm">{selectedEntity.name}</h4>
+            <button
+              onClick={() => setSelectedEntity(null)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ×
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2 text-xs mb-2">
+            <div className="text-center p-1 bg-blue-50 rounded">
+              <div className="font-semibold">{selectedEntity.statusSummary.pendingAssessments}</div>
+              <div className="text-gray-600">Pending</div>
+            </div>
+            <div className="text-center p-1 bg-green-50 rounded">
+              <div className="font-semibold">{selectedEntity.statusSummary.activeResponses}</div>
+              <div className="text-gray-600">Active</div>
+            </div>
+          </div>
+          
+          <div className="text-xs text-gray-500">
+            Last activity: {new Date(selectedEntity.lastActivity).toLocaleDateString()}
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
