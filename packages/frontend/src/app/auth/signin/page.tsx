@@ -8,9 +8,10 @@ export default async function SignInPage({
 }) {
   const session = await auth();
   
-  // Redirect if already authenticated
-  if (session) {
-    redirect(searchParams.callbackUrl || '/');
+  // Only redirect if explicitly accessing sign-in page (not when redirected due to auth error)
+  const isDirectAccess = !searchParams.error && !searchParams.callbackUrl;
+  if (session && isDirectAccess) {
+    redirect('/');
   }
 
   return (
@@ -130,6 +131,7 @@ export default async function SignInPage({
                 <p><strong>Verifier:</strong> verifier@test.com / verifier123</p>
                 <p><strong>Donor:</strong> donor@test.com / donor123</p>
                 <p><strong>Super User (All Roles):</strong> superuser@test.com / superuser123</p>
+                <p><strong>Super User (Alt):</strong> supertest-alt@test.com / superuser123</p>
               </div>
             </div>
           </form>

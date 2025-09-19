@@ -123,6 +123,14 @@ export const authConfig = {
             role: "DONOR"
           },
           {
+            email: "supertest-alt@test.com", 
+            password: "superuser123",
+            id: "supertest-user-id-alt",
+            name: "Super User (Multi-Role) (Alt)",
+            role: "ADMIN", // Primary role
+            allRoles: ["ADMIN", "COORDINATOR", "ASSESSOR", "RESPONDER", "VERIFIER", "DONOR"]
+          },
+          {
             email: "superuser-alt@test.com", 
             password: "superuser123",
             id: "superuser-user-id-alt",
@@ -375,6 +383,12 @@ async function ensureTestUserExists(authUser: any) {
       roles: ["ADMIN", "COORDINATOR", "ASSESSOR", "RESPONDER", "VERIFIER", "DONOR"]
     },
     {
+      id: "supertest-user-id-alt",
+      name: "Super User (Multi-Role) (Alt)", 
+      email: "supertest-alt@test.com",
+      roles: ["ADMIN", "COORDINATOR", "ASSESSOR", "RESPONDER", "VERIFIER", "DONOR"]
+    },
+    {
       id: "superuser-user-id-alt",
       name: "Super User (Multi-Role) (Alt)", 
       email: "superuser-alt@test.com",
@@ -412,31 +426,43 @@ async function ensureTestUserExists(authUser: any) {
         for (const roleName of testUser.roles) {
           const roleId = `${roleName.toLowerCase()}-role`; // Consistent with auth.config.ts
           
-          // Try to find existing role first
-          let role = await tx.role.findUnique({
-            where: { id: roleId }
+          // First try to find existing role by name (to avoid unique constraint violations)
+          let role = await tx.role.findFirst({
+            where: { name: roleName }
           });
           
           if (!role) {
-            // Create role if it doesn't exist
-            role = await tx.role.create({
-              data: {
-                id: roleId,
-                name: roleName,
-                isActive: true,
-                permissions: {
-                  create: [] // Empty permissions for now - can be populated later
+            // If no role with this name exists, create it with the expected ID
+            try {
+              role = await tx.role.create({
+                data: {
+                  id: roleId,
+                  name: roleName,
+                  isActive: true,
+                  permissions: {
+                    create: [] // Empty permissions for now - can be populated later
+                  }
                 }
+              });
+              console.log(`Created new role: ${roleName} with ID: ${roleId}`);
+            } catch (createError) {
+              // If creation fails due to unique constraint, find the existing role
+              console.log(`Role creation failed for ${roleName}, finding existing role...`);
+              role = await tx.role.findFirst({
+                where: { name: roleName }
+              });
+              if (!role) {
+                throw new Error(`Failed to create or find role: ${roleName}`);
               }
-            });
-            console.log(`Created new role: ${roleName}`);
+              console.log(`Found existing role: ${roleName} with ID: ${role.id}`);
+            }
           } else {
-            console.log(`Found existing role: ${roleName}`);
+            console.log(`Found existing role: ${roleName} with ID: ${role.id}`);
           }
           
-          // Connect user to role
+          // Connect user to role using the actual role ID (which might be different from expected)
           await tx.role.update({
-            where: { id: roleId },
+            where: { id: role.id },
             data: {
               users: {
                 connect: { id: createdUser.id }

@@ -107,9 +107,40 @@ jest.mock('@/auth', () => ({
 
 // Mock Prisma Client to avoid browser environment issues
 jest.mock('@prisma/client', () => {
-  const { createMockPrisma } = require('./src/__tests__/utils/mockPrisma');
+  // Only load mock utilities in test environment
+  if (process.env.NODE_ENV === 'test') {
+    try {
+      const { createMockPrisma } = require('./src/__tests__/utils/mockPrisma');
+      return {
+        PrismaClient: jest.fn(() => createMockPrisma()),
+        __esModule: true,
+      };
+    } catch (error) {
+      // Fallback to simple mock if mock utilities fail to load
+      console.warn('Failed to load Prisma mock utilities, using fallback mock');
+      return {
+        PrismaClient: jest.fn(() => ({
+          $connect: jest.fn(),
+          $disconnect: jest.fn(),
+          $transaction: jest.fn(),
+          user: {},
+          userActivity: {},
+          securityEvent: {},
+          systemMetrics: {},
+          performanceMetrics: {},
+        })),
+        __esModule: true,
+      };
+    }
+  }
+  
+  // For non-test environments, return a basic mock
   return {
-    PrismaClient: jest.fn(() => createMockPrisma()),
+    PrismaClient: jest.fn(() => ({
+      $connect: jest.fn(),
+      $disconnect: jest.fn(),
+      $transaction: jest.fn(),
+    })),
     __esModule: true,
   };
 })
