@@ -53,7 +53,17 @@ export default auth((req) => {
 
   // Check role-based access for page routes only
   const userRole = req.auth.user.role;
-  const userRoles = req.auth.user.roles?.map((r: UserRole) => r.name) || [userRole];
+  const userRoles = req.auth.user.roles?.map((r: any) => r.name) || [userRole] || [];
+  
+  // Also check allRoles and activeRole as fallbacks
+  const allRoles = (req.auth.user as any)?.allRoles || [];
+  const activeRoleName = (req.auth.user as any)?.activeRole?.name;
+  
+  // Combine all possible role sources
+  const allUserRoles = [...userRoles, ...allRoles];
+  if (activeRoleName && !allUserRoles.includes(activeRoleName)) {
+    allUserRoles.push(activeRoleName);
+  }
 
   // Find matching route permission (excluding API routes)
   const matchedRoute = Object.keys(ROUTE_PERMISSIONS).find(route => 
@@ -62,11 +72,11 @@ export default auth((req) => {
 
   if (matchedRoute) {
     const allowedRoles = ROUTE_PERMISSIONS[matchedRoute as keyof typeof ROUTE_PERMISSIONS];
-    const hasAccess = userRoles.some((role: string) => allowedRoles.includes(role));
+    const hasAccess = allUserRoles.some((role: string) => allowedRoles.includes(role));
 
     if (!hasAccess) {
       // Redirect to unauthorized page or dashboard based on their role
-      const dashboardUrl = new URL('/dashboard', req.url);
+      const dashboardUrl = new URL('/dashboard?error=access-denied', req.url);
       return NextResponse.redirect(dashboardUrl);
     }
   }

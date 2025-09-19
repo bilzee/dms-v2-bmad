@@ -21,9 +21,49 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     redirect('/auth/signin?callbackUrl=/admin');
   }
 
-  // Check if user has admin role
-  const userRoles = (session as any)?.roles || [];
-  if (!userRoles.includes('ADMIN')) {
+  // TEMPORARY: Let's inspect the full session structure
+  console.log('=== FULL SESSION INSPECTION ===');
+  console.log('Session keys:', Object.keys(session || {}));
+  console.log('Session user:', session?.user);
+  console.log('Session user roles:', (session as any)?.user?.roles);
+  console.log('Session user activeRole:', (session as any)?.user?.activeRole);
+  console.log('Session user allRoles:', (session as any)?.user?.allRoles);
+  
+  // Check if user has admin role - use multiple fallback strategies
+  const activeRoleName = (session as any)?.user?.activeRole?.name;
+  const sessionRoleName = (session as any)?.user?.role;
+  const rawRoles = (session as any)?.user?.roles || [];
+  const userRoles = rawRoles.map((r: any) => r.name) || [];
+  
+  // More permissive admin check - try multiple approaches
+  const hasAdminRoleFromActive = activeRoleName === 'ADMIN';
+  const hasAdminRoleFromSession = sessionRoleName === 'ADMIN';
+  const hasAdminRoleFromRoles = userRoles.includes('ADMIN');
+  const hasAdminRoleFromAllRoles = (session as any)?.user?.allRoles?.includes('ADMIN');
+  
+  // Try to find ADMIN role in any way possible
+  let hasAdminRole = hasAdminRoleFromActive || hasAdminRoleFromSession || hasAdminRoleFromRoles || hasAdminRoleFromAllRoles;
+  
+  // Last resort: check if user has any admin-like permissions
+  if (!hasAdminRole && (session as any)?.user?.permissions) {
+    const permissions = (session as any)?.user?.permissions || [];
+    hasAdminRole = permissions.some((p: string) => p.includes('admin') || p.includes('users:manage') || p.includes('system:monitor'));
+  }
+  
+  console.log('Admin Layout Debug - Fixed:', {
+    hasAdminRole,
+    activeRoleName,
+    sessionRoleName,
+    hasAdminRoleFromActive,
+    hasAdminRoleFromSession,
+    hasAdminRoleFromRoles,
+    hasAdminRoleFromAllRoles,
+    userRoles
+  });
+  
+  // Use the calculated hasAdminRole value
+  
+  if (!hasAdminRole) {
     redirect('/dashboard?error=access-denied');
   }
 

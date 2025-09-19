@@ -282,10 +282,20 @@ export const authConfig = {
       // Persist role information in JWT for new logins
       if (user) {
         token.id = user.id;
-        token.roles = (user as any).roles || [];
-        token.activeRole = (user as any).activeRole || null;
+        // Simplify role objects to just essential data for JWT serialization
+        token.roles = ((user as any).roles || []).map((role: any) => ({
+          id: role.id,
+          name: role.name,
+          isActive: role.isActive
+        }));
+        token.activeRole = (user as any).activeRole ? {
+          id: (user as any).activeRole.id,
+          name: (user as any).activeRole.name,
+          isActive: (user as any).activeRole.isActive
+        } : null;
         token.permissions = (user as any).permissions || [];
         token.allRoles = (user as any).allRoles || [];
+        token.role = (user as any).role || ((user as any).activeRole?.name);
       }
       return token;
     },
