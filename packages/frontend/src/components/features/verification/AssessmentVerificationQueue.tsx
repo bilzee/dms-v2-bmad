@@ -53,13 +53,15 @@ export const AssessmentVerificationQueue: React.FC<AssessmentVerificationQueuePr
   const debouncedSearch = React.useMemo(
     () => debounce((term: string) => {
       // In a real implementation, this would filter by assessor name, entity name, etc.
-      console.log('Searching for:', term);
+      // Removed console.log to prevent spam
     }, 300),
     []
   );
 
   React.useEffect(() => {
-    debouncedSearch(searchTerm);
+    if (searchTerm !== '') {
+      debouncedSearch(searchTerm);
+    }
   }, [searchTerm, debouncedSearch]);
 
   const handleSort = (column: 'priority' | 'date' | 'type' | 'assessor') => {

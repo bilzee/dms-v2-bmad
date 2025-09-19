@@ -122,6 +122,15 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
   const [showFilters, setShowFilters] = React.useState(false);
 
   const { responseQueue, responseQueueStats, pagination, isLoading, error } = useResponseQueueData();
+  
+  // Provide fallback values to prevent undefined errors
+  const safeResponseQueue = responseQueue || [];
+  const safeResponseQueueStats = responseQueueStats || {
+    totalPending: 0,
+    highPriority: 0,
+    requiresAttention: 0,
+    byResponseType: {}
+  };
   const { filters, sortBy, sortOrder, setFilters, setSorting } = useResponseQueueFilters();
   const { selectedResponseIds, toggleResponseSelection, selectAllVisible, clearResponseSelection, getSelectedCount } = useResponseQueueSelection();
   const { fetchResponseQueue, setResponsePage, openResponsePreview } = useVerificationStore();
@@ -135,13 +144,15 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
   const debouncedSearch = React.useMemo(
     () => debounce((term: string) => {
       // In a real implementation, this would filter by responder name, entity name, etc.
-      console.log('Searching for:', term);
+      // Removed console.log to prevent spam
     }, 300),
     []
   );
 
   React.useEffect(() => {
-    debouncedSearch(searchTerm);
+    if (searchTerm !== '') {
+      debouncedSearch(searchTerm);
+    }
   }, [searchTerm, debouncedSearch]);
 
   const handleSort = (column: 'priority' | 'date' | 'type' | 'responder') => {
@@ -150,7 +161,7 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
   };
 
   const handleSelectAll = () => {
-    if (selectedResponseIds.length === responseQueue.length) {
+    if (selectedResponseIds.length === safeResponseQueue.length) {
       clearResponseSelection();
     } else {
       selectAllVisible();
@@ -158,7 +169,7 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
   };
 
   const handlePreview = (responseId: string) => {
-    const response = responseQueue.find(item => item.response.id === responseId)?.response;
+    const response = safeResponseQueue.find(item => item.response.id === responseId)?.response;
     if (response) {
       openResponsePreview(response);
       onPreviewResponse?.(responseId);
@@ -192,9 +203,9 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-bold">Response Verification Queue</h2>
           <div className="flex items-center gap-2">
-            <NotificationCounter count={responseQueueStats.totalPending} type="pending" />
-            <NotificationCounter count={responseQueueStats.requiresAttention} type="attention" />
-            <NotificationCounter count={responseQueueStats.highPriority} type="high-priority" />
+            <NotificationCounter count={safeResponseQueueStats.totalPending} type="pending" />
+            <NotificationCounter count={safeResponseQueueStats.requiresAttention} type="attention" />
+            <NotificationCounter count={safeResponseQueueStats.highPriority} type="high-priority" />
           </div>
         </div>
         <Button variant="outline" onClick={() => fetchResponseQueue()} disabled={isLoading}>
@@ -340,7 +351,7 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
                 onClick={handleSelectAll}
                 className="text-xs"
               >
-                {selectedResponseIds.length === responseQueue.length ? (
+                {selectedResponseIds.length === safeResponseQueue.length ? (
                   <>
                     <Square className="h-3 w-3 mr-1" />
                     Deselect All
@@ -369,7 +380,7 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
                 </div>
               ))}
             </div>
-          ) : responseQueue.length === 0 ? (
+          ) : safeResponseQueue.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No responses in verification queue</p>
             </div>
@@ -380,7 +391,7 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
                   <tr>
                     <th className="text-left p-4 w-12">
                       <Checkbox
-                        checked={selectedResponseIds.length === responseQueue.length}
+                        checked={selectedResponseIds.length === safeResponseQueue.length}
                         onCheckedChange={handleSelectAll}
                       />
                     </th>
@@ -422,7 +433,7 @@ export const ResponseVerificationQueue: React.FC<ResponseVerificationQueueProps>
                   </tr>
                 </thead>
                 <tbody>
-                  {responseQueue.map((item) => (
+                  {safeResponseQueue.map((item) => (
                     <tr
                       key={item.response.id}
                       className="border-b hover:bg-muted/30 transition-colors"

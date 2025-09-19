@@ -189,10 +189,22 @@ export default function CoordinatorDashboard() {
     }
   };
 
-  const loading = badgesLoading || isLoading;
+  // Only wait for badges to load, let queues load independently
+  const loading = badgesLoading;
   const allError = badgesError || error;
   
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="text-lg font-medium">Loading Dashboard...</div>
+            <div className="text-sm text-muted-foreground mt-2">Fetching coordination data</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (allError) return <div>Error: {allError}</div>;
   if (!metrics) return <div>No data available</div>;
 

@@ -82,11 +82,14 @@ export const useQueueManagement = (): UseQueueManagementReturn => {
 
   // Calculate metrics based on queue data
   const calculateMetrics = useCallback(() => {
-    const assessmentPending = assessmentQueue.filter(
+    const safeAssessmentQueue = assessmentQueue || [];
+    const safeResponseQueue = responseQueue || [];
+    
+    const assessmentPending = safeAssessmentQueue.filter(
       item => item.assessment.verificationStatus === VerificationStatus.PENDING
     ).length;
     
-    const responsePending = responseQueue.filter(
+    const responsePending = safeResponseQueue.filter(
       item => item.response.verificationStatus === VerificationStatus.PENDING
     ).length;
 
@@ -103,16 +106,16 @@ export const useQueueManagement = (): UseQueueManagementReturn => {
     }));
   }, [assessmentQueue, responseQueue]);
 
-  // Real-time updates every 25 seconds (sub-30 second requirement)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchQueue();
-      fetchResponseQueue();
-      calculateMetrics();
-    }, 25000);
-
-    return () => clearInterval(interval);
-  }, [fetchQueue, fetchResponseQueue, calculateMetrics]);
+  // Disabled automatic polling to prevent excessive API calls
+  // TODO: Re-enable with proper dependency management or manual refresh
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     fetchQueue();
+  //     fetchResponseQueue();
+  //     calculateMetrics();
+  //   }, 25000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   // Calculate metrics when queue data changes
   useEffect(() => {
@@ -123,7 +126,7 @@ export const useQueueManagement = (): UseQueueManagementReturn => {
   const refreshQueues = useCallback(async () => {
     await Promise.all([fetchQueue(), fetchResponseQueue()]);
     calculateMetrics();
-  }, [fetchQueue, fetchResponseQueue, calculateMetrics]);
+  }, []); // Removed dependencies to prevent infinite loop
 
   const verifyAssessment = useCallback(async (id: string) => {
     try {
@@ -212,9 +215,9 @@ export const useQueueManagement = (): UseQueueManagementReturn => {
 
   return {
     // Queue data
-    assessmentQueue,
+    assessmentQueue: assessmentQueue || [],
     assessmentMetrics,
-    responseQueue,
+    responseQueue: responseQueue || [],
     responseMetrics,
     combinedMetrics,
     

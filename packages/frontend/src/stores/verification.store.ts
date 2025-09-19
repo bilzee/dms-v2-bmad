@@ -45,6 +45,8 @@ interface VerificationState {
   };
 
   // UI State
+  isLoadingAssessments: boolean;
+  isLoadingResponses: boolean;
   isLoading: boolean;
   error: string | null;
   selectedAssessmentIds: string[];
@@ -182,6 +184,8 @@ const initialState = {
     totalPages: 0,
     totalCount: 0,
   },
+  isLoadingAssessments: false,
+  isLoadingResponses: false,
   isLoading: false,
   error: null,
   selectedAssessmentIds: [],
@@ -225,7 +229,7 @@ export const useVerificationStore = create<VerificationState>()(
 
     fetchQueue: async (request?: Partial<VerificationQueueRequest>) => {
       const state = get();
-      set({ isLoading: true, error: null });
+      set({ isLoadingAssessments: true, error: null });
 
       try {
         const params = new URLSearchParams();
@@ -261,20 +265,22 @@ export const useVerificationStore = create<VerificationState>()(
           throw new Error(data.error || 'Failed to fetch verification queue');
         }
 
-        set({
+        set((state) => ({
           queue: data.data.queue,
           queueStats: data.data.queueStats,
           pagination: data.data.pagination,
-          isLoading: false,
+          isLoadingAssessments: false,
+          isLoading: !state.isLoadingResponses,
           error: null,
-        });
+        }));
 
       } catch (error) {
         console.error('Failed to fetch verification queue:', error);
-        set({ 
-          isLoading: false, 
+        set((state) => ({ 
+          isLoadingAssessments: false,
+          isLoading: !state.isLoadingResponses, 
           error: error instanceof Error ? error.message : 'Unknown error occurred' 
-        });
+        }));
       }
     },
 
@@ -584,7 +590,7 @@ export const useVerificationStore = create<VerificationState>()(
     // Response Queue Actions
     fetchResponseQueue: async (request?: Partial<ResponseVerificationQueueRequest>) => {
       const state = get();
-      set({ isLoading: true, error: null });
+      set({ isLoadingResponses: true, error: null });
 
       try {
         const params = new URLSearchParams();
@@ -620,20 +626,22 @@ export const useVerificationStore = create<VerificationState>()(
           throw new Error(data.error || 'Failed to fetch response verification queue');
         }
 
-        set({
+        set((state) => ({
           responseQueue: data.data.queue,
           responseQueueStats: data.data.queueStats,
           pagination: data.data.pagination,
-          isLoading: false,
+          isLoadingResponses: false,
+          isLoading: !state.isLoadingAssessments,
           error: null,
-        });
+        }));
 
       } catch (error) {
         console.error('Failed to fetch response verification queue:', error);
-        set({ 
-          isLoading: false, 
+        set((state) => ({ 
+          isLoadingResponses: false,
+          isLoading: !state.isLoadingAssessments, 
           error: error instanceof Error ? error.message : 'Unknown error occurred' 
-        });
+        }));
       }
     },
 

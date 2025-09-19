@@ -21,7 +21,7 @@ export const useDashboardBadges = (refreshInterval = 300000): UseDashboardBadges
   // 5 minutes instead of 15 seconds - reduces API calls by 95%
   const { activeRole } = useRoleContext();
   const roleName = activeRole?.name?.toLowerCase();
-
+  
   const { data, error, mutate } = useSWR(
     roleName ? `/api/v1/dashboard/badges/${roleName}` : null,
     fetcher,
