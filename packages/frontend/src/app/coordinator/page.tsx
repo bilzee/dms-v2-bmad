@@ -3,12 +3,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ClipboardList, BarChart3, Users, AlertTriangle, Eye, Settings, HandHeart } from "lucide-react"
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import { useDashboardBadges } from '@/hooks/useDashboardBadges'
+import { useEffect, useState } from 'react'
 
 export default function CoordinatorDashboard() {
   const { data: session } = useSession()
+  const { badges, loading: badgesLoading, error: badgesError } = useDashboardBadges()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const coordinatorFeatures = [
     {
@@ -16,44 +25,58 @@ export default function CoordinatorDashboard() {
       description: 'Review and approve assessments and responses',
       icon: <ClipboardList className="w-6 h-6" />,
       href: '/coordinator/dashboard',
-      badge: 13
+      badge: mounted ? (badges?.pendingReview || 0) : 0
     },
     {
       title: 'Incident Management',
       description: 'Manage active incidents and emergency situations',
       icon: <AlertTriangle className="w-6 h-6" />,
       href: '/coordinator/incidents',
-      badge: 4
+      badge: mounted ? (badges?.activeIncidents || 0) : 0
     },
     {
       title: 'Donor Coordination',
       description: 'Coordinate with donors and manage resources',
       icon: <HandHeart className="w-6 h-6" />,
       href: '/coordinator/donors',
-      badge: 7
+      badge: mounted ? (badges?.donorDashboard || 0) : 0
     },
     {
       title: 'System Monitoring',
       description: 'Monitor system performance and queue status',
       icon: <BarChart3 className="w-6 h-6" />,
       href: '/coordinator/monitoring',
-      badge: 0
+      badge: mounted ? (badges?.activeAlerts || 0) : 0
     },
     {
       title: 'Auto-Approval Config',
       description: 'Configure automatic approval rules',
       icon: <Settings className="w-6 h-6" />,
       href: '/coordinator/auto-approval',
-      badge: 0
+      badge: mounted ? (badges?.configurations || 0) : 0
     },
     {
       title: 'Conflict Resolution',
       description: 'Resolve data conflicts and synchronization issues',
       icon: <Eye className="w-6 h-6" />,
       href: '/coordinator/conflicts',
-      badge: 3
+      badge: mounted ? (badges?.conflictResolution || 0) : 0
     }
   ]
+
+  // Show error state if badges failed to load
+  if (badgesError) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center py-8">
+          <p className="text-red-600">Failed to load dashboard data: {badgesError}</p>
+          <Button variant="outline" onClick={() => window.location.reload()} className="mt-4">
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-8">
@@ -84,8 +107,14 @@ export default function CoordinatorDashboard() {
             <CardTitle className="text-sm font-medium text-gray-600">Pending Reviews</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">13</div>
-            <p className="text-xs text-orange-600 mt-1">8 assessments, 5 responses</p>
+            {!mounted || badgesLoading ? (
+              <Skeleton className="h-8 w-16 mb-2" />
+            ) : (
+              <div className="text-2xl font-bold">{badges?.pendingReview || 0}</div>
+            )}
+            <p className="text-xs text-orange-600 mt-1">
+              {mounted ? (badges?.assessmentQueue || 0) : 0} assessments, {mounted ? (badges?.responseQueue || 0) : 0} responses
+            </p>
           </CardContent>
         </Card>
 
@@ -94,28 +123,40 @@ export default function CoordinatorDashboard() {
             <CardTitle className="text-sm font-medium text-gray-600">Active Incidents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">4</div>
-            <p className="text-xs text-red-600 mt-1">2 high priority</p>
+            {!mounted || badgesLoading ? (
+              <Skeleton className="h-8 w-16 mb-2" />
+            ) : (
+              <div className="text-2xl font-bold text-red-600">{badges?.activeIncidents || 0}</div>
+            )}
+            <p className="text-xs text-red-600 mt-1">High priority incidents</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Donor Coordination</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Active Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">7</div>
-            <p className="text-xs text-gray-500 mt-1">Active donors</p>
+            {!mounted || badgesLoading ? (
+              <Skeleton className="h-8 w-16 mb-2" />
+            ) : (
+              <div className="text-2xl font-bold">{badges?.activeUsers || 0}</div>
+            )}
+            <p className="text-xs text-gray-500 mt-1">Currently active</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">Conflicts</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Locations</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">3</div>
-            <p className="text-xs text-orange-600 mt-1">Need resolution</p>
+            {!mounted || badgesLoading ? (
+              <Skeleton className="h-8 w-16 mb-2" />
+            ) : (
+              <div className="text-2xl font-bold text-blue-600">{badges?.totalLocations || 0}</div>
+            )}
+            <p className="text-xs text-blue-600 mt-1">Covered areas</p>
           </CardContent>
         </Card>
       </div>
