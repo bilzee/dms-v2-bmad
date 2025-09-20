@@ -11,6 +11,7 @@ import {
   IncidentTimelineEvent,
   IncidentActionItem
 } from '@dms/shared';
+import { authFetch } from '@/lib/auth/api-utils';
 
 interface IncidentListItem {
   id: string;
@@ -230,7 +231,7 @@ export const useIncidentStore = create<IncidentState>()(
           }
         });
 
-        const response = await fetch(`/api/v1/incidents?${params}`);
+        const response = await authFetch(`/api/v1/incidents?${params}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -263,7 +264,7 @@ export const useIncidentStore = create<IncidentState>()(
       set({ isLoadingDetail: true, detailError: null });
 
       try {
-        const response = await fetch(`/api/v1/incidents/${incidentId}`);
+        const response = await authFetch(`/api/v1/incidents/${incidentId}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -300,7 +301,7 @@ export const useIncidentStore = create<IncidentState>()(
 
     fetchIncidentTimeline: async (incidentId: string) => {
       try {
-        const response = await fetch(`/api/v1/incidents/${incidentId}/timeline`);
+        const response = await authFetch(`/api/v1/incidents/${incidentId}/timeline`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -333,7 +334,7 @@ export const useIncidentStore = create<IncidentState>()(
 
     refreshStats: async () => {
       try {
-        const response = await fetch('/api/v1/incidents/stats');
+        const response = await authFetch('/api/v1/incidents/stats');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -356,7 +357,7 @@ export const useIncidentStore = create<IncidentState>()(
       set({ isCreating: true, error: null });
 
       try {
-        const response = await fetch('/api/v1/incidents', {
+        const response = await authFetch('/api/v1/incidents', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -397,7 +398,7 @@ export const useIncidentStore = create<IncidentState>()(
       set({ isUpdatingStatus: true, error: null });
 
       try {
-        const response = await fetch(`/api/v1/incidents/${statusUpdate.incidentId}/status`, {
+        const response = await authFetch(`/api/v1/incidents/${statusUpdate.incidentId}/status`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -437,7 +438,7 @@ export const useIncidentStore = create<IncidentState>()(
 
     linkEntitiesToIncident: async (incidentId: string, entityIds: string[]) => {
       try {
-        const response = await fetch(`/api/v1/incidents/${incidentId}/entities`, {
+        const response = await authFetch(`/api/v1/incidents/${incidentId}/entities`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -470,7 +471,7 @@ export const useIncidentStore = create<IncidentState>()(
 
     unlinkEntityFromIncident: async (incidentId: string, entityId: string) => {
       try {
-        const response = await fetch(`/api/v1/incidents/${incidentId}/entities/${entityId}`, {
+        const response = await authFetch(`/api/v1/incidents/${incidentId}/entities/${entityId}`, {
           method: 'DELETE',
         });
 
@@ -497,7 +498,10 @@ export const useIncidentStore = create<IncidentState>()(
 
     addActionItem: async (incidentId: string, actionItem: Omit<IncidentActionItem, 'id'>) => {
       try {
-        const response = await fetch(`/api/v1/incidents/${incidentId}/action-items`, {
+        console.log('Store: Adding action item to incident:', incidentId);
+        console.log('Store: Action item data:', actionItem);
+        
+        const response = await authFetch(`/api/v1/incidents/${incidentId}/action-items`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -505,11 +509,17 @@ export const useIncidentStore = create<IncidentState>()(
           body: JSON.stringify(actionItem),
         });
 
+        console.log('Store: API response status:', response.status);
+
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Store: API error response:', errorText);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const result = await response.json();
+        
+        console.log('Store: API response result:', result);
         
         if (!result.success) {
           throw new Error(result.error || 'Failed to add action item');
@@ -537,7 +547,7 @@ export const useIncidentStore = create<IncidentState>()(
 
     updateActionItem: async (incidentId: string, actionItemId: string, updates: Partial<IncidentActionItem>) => {
       try {
-        const response = await fetch(`/api/v1/incidents/${incidentId}/action-items/${actionItemId}`, {
+        const response = await authFetch(`/api/v1/incidents/${incidentId}/action-items/${actionItemId}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -570,6 +580,39 @@ export const useIncidentStore = create<IncidentState>()(
 
       } catch (error) {
         console.error('Failed to update action item:', error);
+        throw error;
+      }
+    },
+
+    deleteActionItem: async (incidentId: string, actionItemId: string) => {
+      try {
+        const response = await authFetch(`/api/v1/incidents/${incidentId}/action-items/${actionItemId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to delete action item');
+        }
+
+        // Update local state by removing the deleted action item
+        set((state) => ({
+          incidentDetails: {
+            ...state.incidentDetails,
+            [incidentId]: {
+              ...state.incidentDetails[incidentId],
+              actionItems: state.incidentDetails[incidentId]?.actionItems.filter(item => item.id !== actionItemId) || [],
+            } as IncidentDetail,
+          },
+        }));
+
+      } catch (error) {
+        console.error('Failed to delete action item:', error);
         throw error;
       }
     },
@@ -624,10 +667,17 @@ export const useIncidentStore = create<IncidentState>()(
 
     openPreview: async (incidentId: string) => {
       try {
+        console.log('Opening preview for incident:', incidentId);
         const incident = await get().fetchIncidentDetail(incidentId);
+        console.log('Fetched incident for preview:', incident);
         set({ previewIncident: incident, isPreviewOpen: true });
       } catch (error) {
         console.error('Failed to open incident preview:', error);
+        // Set error state to show in UI
+        set({ 
+          detailError: error instanceof Error ? error.message : 'Failed to load incident details',
+          isLoadingDetail: false 
+        });
       }
     },
 
@@ -759,6 +809,7 @@ export const useIncidentActions = () => useIncidentStore((state) => ({
   unlinkEntityFromIncident: state.unlinkEntityFromIncident,
   addActionItem: state.addActionItem,
   updateActionItem: state.updateActionItem,
+  deleteActionItem: state.deleteActionItem,
   fetchIncidentDetail: state.fetchIncidentDetail,
   fetchIncidentTimeline: state.fetchIncidentTimeline,
 }));

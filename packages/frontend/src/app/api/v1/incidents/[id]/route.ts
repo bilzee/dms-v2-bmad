@@ -73,9 +73,18 @@ export async function GET(
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
       })) || [],
-      preliminaryAssessmentIds: [], // TODO: Implement assessment relationship
-      preliminaryAssessments: [], // TODO: Implement assessment relationship
-      actionItems: [], // TODO: Implement action items table and relationship
+      preliminaryAssessmentIds: (incidentDetails as any).preliminaryAssessments?.map((a: any) => a.id) || [],
+      preliminaryAssessments: (incidentDetails as any).preliminaryAssessments || [],
+      actionItems: (incidentDetails as any).actionItems?.map((item: any) => ({
+        id: item.id,
+        description: item.description,
+        assignedTo: item.assignedTo || undefined,
+        dueDate: item.dueDate?.toISOString() || undefined,
+        status: item.status,
+        priority: item.priority,
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+      })) || [],
       timeline: timeline,
       createdAt: incidentDetails.createdAt,
       updatedAt: incidentDetails.updatedAt,

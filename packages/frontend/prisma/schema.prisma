@@ -1,10 +1,10 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
 }
 
 model Incident {
@@ -22,6 +22,7 @@ model Incident {
   // Relationships
   preliminaryAssessments PreliminaryAssessment[]
   affectedEntities       AffectedEntity[]
+  actionItems            IncidentActionItem[]
 
   // Enhanced indexes for common query patterns identified from DatabaseService analysis
   @@index([status, severity, date])          // Common filter combination for incidents
@@ -29,6 +30,45 @@ model Incident {
   @@index([createdAt, status])              // Recent incidents by status
   @@index([status, date, severity])          // Priority-based incident queries
   @@map("incidents")
+}
+
+model IncidentActionItem {
+  id          String   @id @default(cuid())
+  incidentId  String
+  description String
+  assignedTo  String?
+  dueDate     DateTime?
+  status      String   @default("PENDING")  // PENDING, IN_PROGRESS, COMPLETED
+  priority    String   @default("MEDIUM")    // LOW, MEDIUM, HIGH
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation(fields: [createdById], references: [id])
+
+  // Indexes for performance
+  @@index([incidentId, status])
+  @@index([priority, dueDate])
+  @@index([createdById])
+  @@map("incident_action_items")
+}
+
+model ResourceType {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  unit        String   @default("units")  // e.g., kg, kits, units, persons
+  isActive    Boolean  @default(true)
+  category    String?  // Optional categorization
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Indexes for performance
+  @@index([isActive, name])
+  @@index([category])
+  @@map("resource_types")
 }
 
 model User {
@@ -51,6 +91,7 @@ model User {
   sessions             Session[]
   activeRole           Role?     @relation("ActiveRole", fields: [activeRoleId], references: [id])
   roles                Role[]    @relation("RoleToUser")
+  createdActionItems   IncidentActionItem[]
 
   @@map("users")
 }

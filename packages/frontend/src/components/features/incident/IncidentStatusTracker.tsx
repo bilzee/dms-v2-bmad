@@ -92,9 +92,15 @@ export default function IncidentStatusTracker({
   className,
 }: IncidentStatusTrackerProps) {
   const [selectedIncidentId, setSelectedIncidentId] = React.useState<string>('');
+  
+  // Debug selected incident ID changes
+  React.useEffect(() => {
+    console.log('selectedIncidentId changed to:', selectedIncidentId);
+  }, [selectedIncidentId]);
   const [showStatusUpdateDialog, setShowStatusUpdateDialog] = React.useState(false);
   const [showActionItemDialog, setShowActionItemDialog] = React.useState(false);
   const [editingActionItem, setEditingActionItem] = React.useState<IncidentActionItem | null>(null);
+  const [incidentDetails, setIncidentDetails] = React.useState<any>(null);
 
   const { incidents, incidentStats } = useIncidentData();
   const { statusUpdateForm, isUpdatingStatus } = useIncidentForms();
@@ -102,11 +108,30 @@ export default function IncidentStatusTracker({
     updateIncidentStatus, 
     addActionItem, 
     updateActionItem,
+    deleteActionItem,
     fetchIncidentDetail,
     fetchIncidentTimeline 
   } = useIncidentActions();
 
   const selectedIncident = incidents.find(i => i.id === selectedIncidentId);
+
+  // Fetch incident details when incident is selected
+  React.useEffect(() => {
+    const loadIncidentDetails = async () => {
+      if (selectedIncidentId) {
+        try {
+          const details = await fetchIncidentDetail(selectedIncidentId);
+          setIncidentDetails(details);
+        } catch (error) {
+          console.error('Failed to fetch incident details:', error);
+        }
+      } else {
+        setIncidentDetails(null);
+      }
+    };
+
+    loadIncidentDetails();
+  }, [selectedIncidentId, fetchIncidentDetail]);
 
   const {
     register: registerStatus,
@@ -126,6 +151,8 @@ export default function IncidentStatusTracker({
   const {
     register: registerActionItem,
     handleSubmit: handleActionItemSubmit,
+    watch: watchActionItem,
+    setValue: setActionItemValue,
     reset: resetActionItem,
     formState: { errors: actionItemErrors, isValid: isActionItemValid }
   } = useForm<ActionItemFormData>({
@@ -178,7 +205,13 @@ export default function IncidentStatusTracker({
   };
 
   const onActionItemSubmit = async (data: ActionItemFormData) => {
-    if (!selectedIncidentId) return;
+    console.log('onActionItemSubmit called with data:', data);
+    console.log('selectedIncidentId:', selectedIncidentId);
+    
+    if (!selectedIncidentId) {
+      console.error('No selected incident ID');
+      return;
+    }
 
     try {
       const actionItem: Omit<IncidentActionItem, 'id'> = {
@@ -189,17 +222,37 @@ export default function IncidentStatusTracker({
         priority: data.priority,
       };
 
+      console.log('Creating action item:', actionItem);
+
       if (editingActionItem) {
+        console.log('Updating existing action item:', editingActionItem.id);
         await updateActionItem(selectedIncidentId, editingActionItem.id, actionItem);
       } else {
+        console.log('Adding new action item to incident:', selectedIncidentId);
         await addActionItem(selectedIncidentId, actionItem);
       }
       
       setShowActionItemDialog(false);
       setEditingActionItem(null);
-      resetActionItem();
+      resetActionItem({
+        description: '',
+        assignedTo: '',
+        dueDate: '',
+        priority: 'MEDIUM'
+      });
     } catch (error) {
       console.error('Failed to save action item:', error);
+      console.error('Error details:', error);
+    }
+  };
+
+  const handleDeleteActionItem = async (actionItemId: string) => {
+    if (!selectedIncidentId) return;
+
+    try {
+      await deleteActionItem(selectedIncidentId, actionItemId);
+    } catch (error) {
+      console.error('Failed to delete action item:', error);
     }
   };
 
@@ -214,7 +267,12 @@ export default function IncidentStatusTracker({
       });
     } else {
       setEditingActionItem(null);
-      resetActionItem();
+      resetActionItem({
+        description: '',
+        assignedTo: '',
+        dueDate: '',
+        priority: 'MEDIUM'
+      });
     }
     setShowActionItemDialog(true);
   };
@@ -399,65 +457,72 @@ export default function IncidentStatusTracker({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Mock action items - would come from incident details */}
-              <div className="space-y-3">
-                <div className="border rounded p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Checkbox defaultChecked={false} />
-                      <span className="font-medium">Coordinate evacuation teams</span>
-                      <Badge variant="outline" className="bg-red-100 text-red-800">
-                        HIGH
-                      </Badge>
+              {incidentDetails?.actionItems && incidentDetails.actionItems.length > 0 ? (
+                <div className="space-y-3">
+                  {incidentDetails.actionItems.map((actionItem: IncidentActionItem) => (
+                    <div key={actionItem.id} className="border rounded p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Checkbox 
+                            checked={actionItem.status === 'COMPLETED'} 
+                            disabled
+                          />
+                          <span className={`font-medium ${actionItem.status === 'COMPLETED' ? 'line-through' : ''}`}>
+                            {actionItem.description}
+                          </span>
+                          <Badge 
+                            variant="outline" 
+                            className={
+                              actionItem.priority === 'HIGH' ? 'bg-red-100 text-red-800' :
+                              actionItem.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-green-100 text-green-800'
+                            }
+                          >
+                            {actionItem.priority}
+                          </Badge>
+                          {actionItem.status === 'COMPLETED' && (
+                            <Badge variant="outline" className="bg-green-100 text-green-800">
+                              COMPLETED
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => openActionItemDialog(actionItem)}
+                          >
+                            <Edit3 className="h-3 w-3" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDeleteActionItem(actionItem.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="text-sm text-muted-foreground ml-6">
+                        {actionItem.assignedTo && (
+                          <span>Assigned to: {actionItem.assignedTo} • </span>
+                        )}
+                        {actionItem.dueDate && (
+                          <span>Due: {format(new Date(actionItem.dueDate), 'MMM dd, yyyy')} • </span>
+                        )}
+                        {actionItem.createdAt && (
+                          <span>Created: {format(new Date(actionItem.createdAt), 'MMM dd, yyyy')}</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openActionItemDialog()}>
-                        <Edit3 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground ml-6">
-                    Assigned to: Relief Team Alpha • Due: {format(new Date(Date.now() + 86400000), 'MMM dd, yyyy')}
-                  </div>
+                  ))}
                 </div>
-
-                <div className="border rounded p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Checkbox defaultChecked={true} />
-                      <span className="font-medium line-through">Set up emergency shelters</span>
-                      <Badge variant="outline" className="bg-green-100 text-green-800">
-                        COMPLETED
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground ml-6">
-                    Completed {formatDistanceToNow(new Date(Date.now() - 3600000), { addSuffix: true })}
-                  </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No action items yet. Click "Add Action Item" to create one.</p>
                 </div>
-
-                <div className="border rounded p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Checkbox defaultChecked={false} />
-                      <span className="font-medium">Medical supplies distribution</span>
-                      <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
-                        MEDIUM
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openActionItemDialog()}>
-                        <Edit3 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground ml-6">
-                    Assigned to: Medical Team • Due: {format(new Date(Date.now() + 172800000), 'MMM dd, yyyy')}
-                  </div>
-                </div>
-              </div>
-
-              {/* Empty state would show here if no action items */}
+              )}
             </CardContent>
           </Card>
         </>
@@ -575,7 +640,10 @@ export default function IncidentStatusTracker({
               </div>
               <div>
                 <Label htmlFor="priority">Priority</Label>
-                <Select onValueChange={(value) => registerActionItem('priority').onChange({ target: { value } })}>
+                <Select 
+                  value={watchActionItem('priority')} 
+                  onValueChange={(value) => setActionItemValue('priority', value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select priority..." />
                   </SelectTrigger>
@@ -585,6 +653,7 @@ export default function IncidentStatusTracker({
                     <SelectItem value="LOW">Low Priority</SelectItem>
                   </SelectContent>
                 </Select>
+                <input type="hidden" {...registerActionItem('priority')} />
               </div>
             </div>
 

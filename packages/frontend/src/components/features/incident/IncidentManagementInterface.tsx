@@ -22,7 +22,9 @@ import {
   Activity,
   Zap,
   CheckCircle2,
-  Clock
+  Clock,
+  Link,
+  Unlink
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { 
@@ -113,6 +115,13 @@ export const IncidentManagementInterface: React.FC<IncidentManagementInterfacePr
   const [activeTab, setActiveTab] = React.useState('dashboard');
   const [debouncedSearch, setDebouncedSearch] = React.useState('');
   
+  // Assessment linking state
+  const [availableAssessments, setAvailableAssessments] = React.useState<any[]>([]);
+  const [showAssessmentSelector, setShowAssessmentSelector] = React.useState(false);
+  const [isLoadingAssessments, setIsLoadingAssessments] = React.useState(false);
+  const [assessmentSearchTerm, setAssessmentSearchTerm] = React.useState('');
+  const [selectedAssessmentsForLinking, setSelectedAssessmentsForLinking] = React.useState<string[]>([]);
+  
   const { incidents, incidentStats, pagination, isLoading, error } = useIncidentData();
   const { 
     filters, 
@@ -135,7 +144,8 @@ export const IncidentManagementInterface: React.FC<IncidentManagementInterfacePr
     previewIncident, 
     openPreview, 
     closePreview,
-    isLoadingDetail 
+    isLoadingDetail,
+    detailError 
   } = useIncidentPreview();
   const { 
     creationForm,
@@ -183,6 +193,74 @@ export const IncidentManagementInterface: React.FC<IncidentManagementInterfacePr
   const getSortIcon = (column: string) => {
     if (sortBy !== column) return '↕️';
     return sortOrder === 'desc' ? '↓' : '↑';
+  };
+
+  // Assessment linking functions
+  const fetchAvailableAssessments = async () => {
+    setIsLoadingAssessments(true);
+    try {
+      const response = await fetch('/api/v1/assessments?type=PRELIMINARY&linked=false&limit=50');
+      const result = await response.json();
+      if (result.success) {
+        setAvailableAssessments(result.data.assessments || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch assessments:', error);
+      setAvailableAssessments([]);
+    } finally {
+      setIsLoadingAssessments(false);
+    }
+  };
+
+  const handleLinkAssessments = async (incidentId: string, assessmentIds: string[]) => {
+    try {
+      const responses = await Promise.all(
+        assessmentIds.map(assessmentId => 
+          fetch(`/api/v1/incidents/${incidentId}/assessments`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ assessmentId }),
+          })
+        )
+      );
+      
+      if (responses.every(response => response.ok)) {
+        // Refresh the incident preview and close selector
+        await openPreview(incidentId);
+        setShowAssessmentSelector(false);
+        setSelectedAssessmentsForLinking([]);
+        setAvailableAssessments([]);
+      }
+    } catch (error) {
+      console.error('Failed to link assessments:', error);
+    }
+  };
+
+  const handleLinkAssessment = async (incidentId: string, assessmentId: string) => {
+    await handleLinkAssessments(incidentId, [assessmentId]);
+  };
+
+  const handleUnlinkAssessment = async (incidentId: string, assessmentId: string) => {
+    try {
+      const response = await fetch(`/api/v1/incidents/${incidentId}/assessments/${assessmentId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        // Refresh the incident preview
+        await openPreview(incidentId);
+      }
+    } catch (error) {
+      console.error('Failed to unlink assessment:', error);
+    }
+  };
+
+  const openAssessmentSelector = async () => {
+    await fetchAvailableAssessments();
+    setSelectedAssessmentsForLinking([]);
+    setShowAssessmentSelector(true);
   };
 
   if (error) {
@@ -542,6 +620,15 @@ export const IncidentManagementInterface: React.FC<IncidentManagementInterfacePr
               <Skeleton className="h-20 w-full" />
               <Skeleton className="h-40 w-full" />
             </div>
+          ) : detailError ? (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-destructive mb-2">Error Loading Incident</h3>
+              <p className="text-muted-foreground mb-4">{detailError}</p>
+              <Button onClick={() => closePreview()} variant="outline">
+                Close
+              </Button>
+            </div>
           ) : previewIncident ? (
             <div className="space-y-6">
               <div className="flex items-start gap-4">
@@ -582,6 +669,51 @@ export const IncidentManagementInterface: React.FC<IncidentManagementInterfacePr
                 </div>
               )}
 
+              {/* Linked Assessments Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium">Linked Assessments</h4>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => openAssessmentSelector()}
+                  >
+                    <Link className="h-4 w-4 mr-2" />
+                    Link Assessment
+                  </Button>
+                </div>
+                
+                {previewIncident.preliminaryAssessments && previewIncident.preliminaryAssessments.length > 0 ? (
+                  <div className="space-y-2">
+                    {previewIncident.preliminaryAssessments.map((assessment: any) => (
+                      <div key={assessment.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium">{assessment.rapidAssessmentType || assessment.type || 'Assessment'}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {assessment.assessmentTeam || 'Unknown Team'} • {formatDistanceToNow(new Date(assessment.rapidAssessmentDate || assessment.date), { addSuffix: true })}
+                          </div>
+                          {assessment.affectedEntity && (
+                            <div className="text-sm text-muted-foreground">
+                              Entity: {assessment.affectedEntity.name}
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUnlinkAssessment(previewIncident.id, assessment.id)}
+                        >
+                          <Unlink className="h-4 w-4 mr-2" />
+                          Unlink
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No assessments linked to this incident.</p>
+                )}
+              </div>
+
               {/* Timeline would go here */}
               {previewIncident.timeline && previewIncident.timeline.length > 0 && (
                 <div>
@@ -599,7 +731,151 @@ export const IncidentManagementInterface: React.FC<IncidentManagementInterfacePr
                 </div>
               )}
             </div>
-          ) : null}
+          ) : (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No Incident Data</h3>
+              <p className="text-muted-foreground mb-4">Unable to load incident details.</p>
+              <Button onClick={() => closePreview()} variant="outline">
+                Close
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Assessment Selector Dialog */}
+      <Dialog open={showAssessmentSelector} onOpenChange={setShowAssessmentSelector}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Link Assessment to Incident</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search assessments by type, team, or entity..."
+                value={assessmentSearchTerm}
+                onChange={(e) => setAssessmentSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            {/* Assessment List */}
+            {isLoadingAssessments ? (
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="p-3 border rounded-lg">
+                    <Skeleton className="h-5 w-1/2 mb-2" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                ))}
+              </div>
+            ) : availableAssessments.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-muted-foreground">No unlinked assessments available.</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {availableAssessments
+                  .filter(assessment => 
+                    assessmentSearchTerm === '' || 
+                    (assessment.rapidAssessmentType || assessment.type || '').toLowerCase().includes(assessmentSearchTerm.toLowerCase()) ||
+                    (assessment.assessorName || assessment.assessmentTeam || '').toLowerCase().includes(assessmentSearchTerm.toLowerCase()) ||
+                    (assessment.affectedEntity?.name || '').toLowerCase().includes(assessmentSearchTerm.toLowerCase())
+                  )
+                  .map((assessment) => (
+                  <div 
+                    key={assessment.id} 
+                    className={`flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors ${
+                      selectedAssessmentsForLinking.includes(assessment.id) 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (selectedAssessmentsForLinking.includes(assessment.id)) {
+                        setSelectedAssessmentsForLinking(prev => prev.filter(id => id !== assessment.id));
+                      } else {
+                        setSelectedAssessmentsForLinking(prev => [...prev, assessment.id]);
+                      }
+                    }}
+                  >
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center mt-0.5 ${
+                        selectedAssessmentsForLinking.includes(assessment.id) 
+                          ? 'bg-blue-500 border-blue-500 text-white' 
+                          : 'border-gray-300'
+                      }`}>
+                        {selectedAssessmentsForLinking.includes(assessment.id) && (
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">{assessment.rapidAssessmentType || assessment.type || 'Assessment'}</div>
+                        <div className="text-sm text-muted-foreground">
+                          👤 {assessment.assessorName || assessment.assessmentTeam || 'Unknown Assessor'}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          📅 {assessment.rapidAssessmentDate || assessment.date 
+                            ? format(new Date(assessment.rapidAssessmentDate || assessment.date), 'MMM dd, yyyy')
+                            : 'Unknown date'
+                          }
+                        </div>
+                        {assessment.affectedEntity && (
+                          <div className="text-sm text-muted-foreground">
+                            📍 {assessment.affectedEntity.name}
+                          </div>
+                        )}
+                        {assessment.summary && (
+                          <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                            {assessment.summary}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLinkAssessment(previewIncident?.id || '', assessment.id);
+                      }}
+                    >
+                      <Link className="h-4 w-4 mr-2" />
+                      Link
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Dialog Footer */}
+          {selectedAssessmentsForLinking.length > 0 && (
+            <div className="flex justify-between items-center pt-4 border-t">
+              <div className="text-sm text-muted-foreground">
+                {selectedAssessmentsForLinking.length} assessment{selectedAssessmentsForLinking.length !== 1 ? 's' : ''} selected
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setSelectedAssessmentsForLinking([])}
+                >
+                  Clear Selection
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={() => handleLinkAssessments(previewIncident?.id || '', selectedAssessmentsForLinking)}
+                >
+                  <Link className="h-4 w-4 mr-2" />
+                  Link {selectedAssessmentsForLinking.length} Assessment{selectedAssessmentsForLinking.length !== 1 ? 's' : ''}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
